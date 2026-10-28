@@ -121,10 +121,13 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
     scroll.add(row);
   });
   listPane.add(scroll);
-  if (model.filtering || model.filter) {
+  if (model.filtering || model.filter || model.agentFilter.size > 0) {
+    const parts: string[] = [];
+    if (model.filter) parts.push(`filter: ${model.filter}${model.filtering ? "▌" : ""}`);
+    if (model.agentFilter.size > 0) parts.push(`agents: ${[...model.agentFilter].sort().join(", ")}`);
     listPane.add(
       new TextRenderable(renderer, {
-        content: `filter: ${model.filter}${model.filtering ? "▌" : ""}`,
+        content: parts.join(" · "),
         fg: t.primary,
       })
     );
@@ -243,7 +246,7 @@ export function buildFooter(renderer: CliRenderer, model: TuiModel): BoxRenderab
   const legend =
     model.tab === "installed" && (model.filtering || model.filter)
       ? "u update · d delete checked · HOME/END · SPACE toggle · ESC clear filter"
-      : "i installed · / search · f filter · g|p scope · x settings · ? help · q quit";
+      : "i installed · / search · f agents · g|p scope · x settings · ? help · q quit";
   footer.add(new TextRenderable(renderer, { content: legend, fg: t.textMuted }));
   const status = model.toast
     ? model.toast.text
@@ -282,6 +285,50 @@ export function buildConfirmOverlay(renderer: CliRenderer, model: TuiModel): Box
   return overlay;
 }
 
+export function buildAgentSelectOverlay(renderer: CliRenderer, model: TuiModel): BoxRenderable | null {
+  if (!model.agentSelect) return null;
+  const t = tokensFor(model.prefs.theme);
+  const sel = model.agentSelect;
+  const overlay = new BoxRenderable(renderer, {
+    position: "absolute",
+    zIndex: 12,
+    top: "15%",
+    left: "25%",
+    width: "50%",
+    flexDirection: "column",
+    gap: 0,
+    padding: 1,
+    border: true,
+    borderStyle: "rounded",
+    borderColor: t.border,
+    backgroundColor: t.surface,
+    title: " filter by agent ",
+  });
+  for (const [i, agent] of sel.agents.entries()) {
+    const cursor = i === sel.index;
+    const staged = sel.staged.has(agent);
+    const row = new BoxRenderable(renderer, { flexDirection: "row", gap: 2 });
+    row.add(
+      new TextRenderable(renderer, {
+        content: `${staged ? CHECK : " "} ${cursor ? ARROW : " "}`,
+        fg: cursor ? t.selectionText : staged ? t.success : t.textMuted,
+      })
+    );
+    row.add(
+      new TextRenderable(renderer, {
+        content: agent,
+        fg: cursor ? t.selectionText : t.text,
+        attributes: cursor ? TextAttributes.BOLD : TextAttributes.NONE,
+      })
+    );
+    overlay.add(row);
+  }
+  overlay.add(
+    new TextRenderable(renderer, { content: "space toggle · enter apply · esc cancel", fg: t.textMuted })
+  );
+  return overlay;
+}
+
 export function buildHelpOverlay(renderer: CliRenderer, model: TuiModel): BoxRenderable | null {
   if (!model.help) return null;
   const t = tokensFor(model.prefs.theme);
@@ -303,7 +350,7 @@ export function buildHelpOverlay(renderer: CliRenderer, model: TuiModel): BoxRen
   const keys: Array<[string, string]> = [
     ["i / x", "installed / settings tabs"],
     ["/", "search tab"],
-    ["f", "filter installed"],
+    ["f", "agent filter (typing filters)"],
     ["s", "sort checked first"],
     ["c", "check for updates"],
     ["A | I", "check all / invert"],

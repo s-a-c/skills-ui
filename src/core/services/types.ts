@@ -11,6 +11,8 @@ export interface InstalledSkill {
   source: string | null;
   sourceUrl: string | null;
   sourceType: string | null;
+  /** Frontmatter description, enriched by callers that want it (TUI filter, API). */
+  description?: string;
 }
 
 /** One registry search hit (skills.sh). */

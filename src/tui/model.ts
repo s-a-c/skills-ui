@@ -27,6 +27,8 @@ export interface TuiModel {
   updatesAvailable: Set<string>;
   filter: string;
   filtering: boolean;
+  agentFilter: Set<string>;
+  agentSelect: { agents: string[]; staged: Set<string>; index: number } | null;
   sortCheckedFirst: boolean;
   // search
   query: string;
@@ -54,6 +56,8 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     filter: "",
     filtering: false,
     sortCheckedFirst: true,
+    agentFilter: new Set(),
+    agentSelect: null,
     query: "",
     searching: false,
     results: [],
@@ -80,19 +84,26 @@ export function applySeed(model: TuiModel, seed: UiSeed | undefined): void {
   }
 }
 
-/** Visible installed skills under the current filter (matches repo too).
- * Checked-first then A→Z when sortCheckedFirst (the fork's selection UX);
- * load order otherwise. Returns a sorted copy — never mutates the model. */
+/** Visible installed skills under the current filters: text (name, source,
+ * agents — description as a secondary match) intersected with the agent
+ * multi-select. Checked-first then A→Z when sortCheckedFirst (the fork's
+ * selection UX); load order otherwise. Returns a sorted copy — never
+ * mutates the model. */
 export function visibleSkills(model: TuiModel): InstalledSkill[] {
   const q = model.filter.trim().toLowerCase();
-  const visible = q
+  const byText = q
     ? model.skills.filter(
         (s) =>
           s.name.toLowerCase().includes(q) ||
           s.source?.toLowerCase().includes(q) ||
-          s.agents.some((a) => a.toLowerCase().includes(q))
+          s.agents.some((a) => a.toLowerCase().includes(q)) ||
+          (s.description?.toLowerCase().includes(q) ?? false)
       )
     : model.skills;
+  const visible =
+    model.agentFilter.size > 0
+      ? byText.filter((s) => s.agents.some((a) => model.agentFilter.has(a)))
+      : byText;
   if (!model.sortCheckedFirst) return visible;
   return [...visible].sort((a, b) => {
     const ca = model.checked.has(a.name) ? 0 : 1;
@@ -122,6 +133,11 @@ export type Action =
   | { type: "clear-checks" }
   | { type: "filter"; text: string }
   | { type: "filtering"; on: boolean }
+  | { type: "agent-select-open" }
+  | { type: "agent-select-move"; delta: number }
+  | { type: "agent-select-toggle" }
+  | { type: "agent-select-apply" }
+  | { type: "agent-select-cancel" }
   | { type: "query"; text: string }
   | { type: "searching"; on: boolean }
   | { type: "results"; results: SearchSkill[] }
@@ -139,6 +155,10 @@ export function update(model: TuiModel, action: Action): TuiModel {
     ...model,
     checked: new Set(model.checked),
     updatesAvailable: new Set(model.updatesAvailable),
+    agentFilter: new Set(model.agentFilter),
+    agentSelect: model.agentSelect
+      ? { ...model.agentSelect, staged: new Set(model.agentSelect.staged) }
+      : null,
     queue: new Map(model.queue),
   };
   switch (action.type) {
@@ -211,6 +231,37 @@ export function update(model: TuiModel, action: Action): TuiModel {
       break;
     case "filtering":
       next.filtering = action.on;
+      break;
+    case "agent-select-open": {
+      const agents = new Set<string>();
+      for (const skill of next.skills) for (const a of skill.agents) agents.add(a);
+      next.agentSelect = { agents: [...agents].sort(), staged: new Set(next.agentFilter), index: 0 };
+      break;
+    }
+    case "agent-select-move":
+      if (next.agentSelect) {
+        const count = next.agentSelect.agents.length;
+        next.agentSelect.index = Math.max(0, Math.min(count - 1, next.agentSelect.index + action.delta));
+      }
+      break;
+    case "agent-select-toggle":
+      if (next.agentSelect) {
+        const agent = next.agentSelect.agents[next.agentSelect.index];
+        if (agent !== undefined) {
+          if (next.agentSelect.staged.has(agent)) next.agentSelect.staged.delete(agent);
+          else next.agentSelect.staged.add(agent);
+        }
+      }
+      break;
+    case "agent-select-apply":
+      if (next.agentSelect) {
+        next.agentFilter = new Set(next.agentSelect.staged);
+        next.agentSelect = null;
+        clamp(next);
+      }
+      break;
+    case "agent-select-cancel":
+      next.agentSelect = null;
       break;
     case "query":
       next.query = action.text;

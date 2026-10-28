@@ -282,6 +282,34 @@ describe("tui model (pure)", () => {
     expect(visibleSkills(m).map((s) => s.name)).toEqual(["b-skill", "a-skill", "c-skill"]); // load order
     expect(m.skills.map((s) => s.name)).toEqual(["b-skill", "a-skill", "c-skill"]); // still untouched
   });
+  test("agent filter: overlay stages and applies; description is a secondary text match", () => {
+    let m = update(base(), {
+      type: "skills-loaded",
+      skills: [{ ...SKILLS[0]!, description: "red-green-refactor loops" }, SKILLS[1]!],
+    });
+    m = update(m, { type: "filter", text: "refactor" }); // description-only match
+    expect(visibleSkills(m).map((s) => s.name)).toEqual(["tdd"]);
+    m = update(m, { type: "filter", text: "" });
+
+    m = update(m, { type: "agent-select-open" });
+    expect(m.agentSelect?.agents).toEqual(["Claude Code", "Cursor"]);
+    m = update(m, { type: "agent-select-toggle" }); // stage Claude Code
+    m = update(m, { type: "agent-select-move", delta: 1 });
+    m = update(m, { type: "agent-select-toggle" }); // stage Cursor too
+    m = update(m, { type: "agent-select-apply" });
+    expect(visibleSkills(m)).toHaveLength(2);
+
+    m = update(m, { type: "agent-select-open" });
+    m = update(m, { type: "agent-select-move", delta: 1 });
+    m = update(m, { type: "agent-select-toggle" }); // unstage Cursor
+    m = update(m, { type: "agent-select-apply" });
+    expect(visibleSkills(m).map((s) => s.name)).toEqual(["tdd"]); // only Claude Code
+
+    m = update(m, { type: "agent-select-open" });
+    m = update(m, { type: "agent-select-toggle" }); // would unstage Claude Code
+    m = update(m, { type: "agent-select-cancel" }); // discard staging
+    expect([...m.agentFilter]).toEqual(["Claude Code"]);
+  });
 });
 
 describe("0.2.x B1 (S-69): list ops", () => {
@@ -361,5 +389,47 @@ describe("0.2.x B1 (S-69): list ops", () => {
     await s.flush();
     expect(saved).toHaveLength(1); // , toggles sound
     expect(s.captureCharFrame()).toContain(",  sound");
+  });
+
+  test("f opens the agent overlay; apply filters, cancel keeps; typing starts the text filter", async () => {
+    const s = setup!;
+    await runTuiOn(s.renderer, undefined, fakeDeps());
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+
+    await s.mockInput.pressKey("f");
+    await s.flush();
+    let frame = s.captureCharFrame();
+    expect(frame).toContain("filter by agent");
+    expect(frame).toContain("Claude Code");
+    expect(frame).toContain("Cursor");
+    await s.mockInput.pressKey(" "); // stage Claude Code (index 0)
+    await s.flush();
+    await s.mockInput.pressKey("\r"); // apply
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    frame = s.captureCharFrame();
+    expect(frame).not.toContain("filter by agent"); // overlay closed
+    expect(frame).toContain("agents: Claude Code"); // applied filter shown
+
+    await s.mockInput.pressKey("f");
+    await s.flush();
+    await s.mockInput.pressEscape(); // cancel keeps the applied filter
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(s.captureCharFrame()).toContain("agents: Claude Code");
+
+    await s.mockInput.pressKey("f"); // reopen, unstage, apply → filter cleared
+    await s.flush();
+    await s.mockInput.pressKey(" ");
+    await s.flush();
+    await s.mockInput.pressKey("\r");
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    expect(s.captureCharFrame()).not.toContain("agents:");
+
+    await s.mockInput.typeText("ev"); // typing unbound letters starts the text filter
+    await s.flush();
+    expect(s.captureCharFrame()).toContain("filter: ev");
   });
 });
