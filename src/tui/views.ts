@@ -178,6 +178,14 @@ export function buildSearchBody(renderer: CliRenderer, model: TuiModel): BoxRend
       fg: t.primary,
     })
   );
+  if (model.adjustedQuery && model.query) {
+    body.add(
+      new TextRenderable(renderer, {
+        content: `no exact matches — showing results for "${model.adjustedQuery}"`,
+        fg: t.danger,
+      })
+    );
+  }
 
   // Results and Selected panes share one scroll column: the active pane's
   // header carries the cursor arrow; panes are visually stacked like the fork.

@@ -30,6 +30,64 @@ export { buildSpikeScreen, SPIKE_MARKDOWN, spikeSyntaxTokens } from "./spike.ts"
 /** Rows per PgUp/PgDn press — the fork's fast-scroll step. */
 const PAGE = 10;
 
+/**
+ * Fork-style crash guard: trap exit signals and fatal errors so the shipped
+ * binary always restores the terminal. Cleanup is idempotent and best-effort
+ * — the guard itself must never throw. Injectable `exit`/`process` for tests.
+ */
+export interface CrashGuard {
+  dispose(): void;
+}
+
+export function installCrashGuard(opts: {
+  cleanup: () => void;
+  exit: (code: number) => void;
+  process?: { on(...args: never[]): unknown; off(...args: never[]): unknown };
+}): CrashGuard {
+  const p = (opts.process ?? process) as unknown as {
+    on(event: string, listener: (...args: never[]) => void): unknown;
+    off(event: string, listener: (...args: never[]) => void): unknown;
+  };
+  let closed = false;
+  const run = (code: number): void => {
+    if (closed) return;
+    closed = true;
+    try {
+      opts.cleanup();
+    } catch {
+      // best-effort by contract
+    }
+    opts.exit(code);
+  };
+  const listeners: Array<[string, (...args: never[]) => void]> = [];
+  const bind = (event: string, listener: (...args: never[]) => void): void => {
+    p.on(event, listener);
+    listeners.push([event, listener]);
+  };
+  for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) {
+    bind(signal, () => run(0));
+  }
+  bind("uncaughtException", (error: unknown) => {
+    console.error("skills-ui: fatal:", error);
+    run(1);
+  });
+  bind("exit", () => {
+    if (!closed) {
+      closed = true;
+      try {
+        opts.cleanup();
+      } catch {
+        // best-effort by contract
+      }
+    }
+  });
+  return {
+    dispose(): void {
+      for (const [event, listener] of listeners) p.off(event, listener);
+    },
+  };
+}
+
 function descriptionOf(path: string): string {
   const doc = readSkillDoc(path);
   return doc?.match(/^description:\s*(.+)$/m)?.[1]?.trim() ?? "";
@@ -89,9 +147,21 @@ export async function runTui(seed?: UiSeed, deps: TuiDeps = realDeps): Promise<v
     return;
   }
   const renderer = await createCliRenderer({ exitOnCtrlC: true });
+  const guard = installCrashGuard({
+    cleanup: () => {
+      try {
+        renderer.destroy();
+      } catch {
+        // renderer may already be gone
+      }
+      void disposeAudio();
+    },
+    exit: (code) => process.exit(code),
+  });
   try {
     await runTuiOn(renderer, seed, deps);
   } finally {
+    guard.dispose();
     await disposeAudio();
   }
 }
@@ -173,8 +243,8 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     searchTimer = setTimeout(async () => {
       dispatch({ type: "busy", label: `searching "${query}"` });
       try {
-        const { results } = await deps.search(query);
-        dispatch({ type: "results", results });
+        const { results, adjustedQuery } = await deps.search(query);
+        dispatch({ type: "results", results, adjustedQuery });
       } catch {
         toast("search failed — check your connection", "error");
       } finally {

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { EventEmitter } from "node:events";
 import { createTestRenderer } from "@opentui/core/testing";
-import { runTuiOn, type TuiDeps } from "../src/tui/app.ts";
+import { installCrashGuard, runTuiOn, type TuiDeps } from "../src/tui/app.ts";
 import { createTuiModel, update, visibleSkills, type TuiModel } from "../src/tui/model.ts";
 import { DEFAULT_UI_PREFERENCES } from "../src/core/prefs.ts";
 import type { InstalledSkill, SearchSkill } from "../src/core/services/types.ts";
@@ -309,6 +310,49 @@ describe("tui model (pure)", () => {
     m = update(m, { type: "agent-select-toggle" }); // would unstage Claude Code
     m = update(m, { type: "agent-select-cancel" }); // discard staging
     expect([...m.agentFilter]).toEqual(["Claude Code"]);
+  });
+
+  test("crash guard: signals run cleanup once and exit; dispose unbinds; fatal errors exit 1", () => {
+    const events: string[] = [];
+    const exits: number[] = [];
+    const fakeProcess = new EventEmitter();
+    const guard = installCrashGuard({
+      cleanup: () => events.push("cleanup"),
+      exit: (code) => exits.push(code),
+      process: fakeProcess as never,
+    });
+    fakeProcess.emit("SIGTERM");
+    expect(events).toEqual(["cleanup"]);
+    expect(exits).toEqual([0]);
+    fakeProcess.emit("SIGTERM"); // idempotent — no double cleanup/exit
+    expect(exits).toEqual([0]);
+    guard.dispose();
+    fakeProcess.emit("SIGINT");
+    expect(exits).toEqual([0]); // unbound after dispose
+
+    const exits2: number[] = [];
+    const guard2 = installCrashGuard({
+      cleanup: () => events.push("cleanup2"),
+      exit: (code) => exits2.push(code),
+      process: fakeProcess as never,
+    });
+    fakeProcess.emit("uncaughtException", new Error("boom"));
+    expect(events).toContain("cleanup2");
+    expect(exits2).toEqual([1]);
+    guard2.dispose();
+  });
+
+  test("adjustedQuery notice renders when the search fell back", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    deps.search = async () => ({ results: RESULTS, adjustedQuery: "cli-ansi" });
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await s.mockInput.typeText("/");
+    await s.mockInput.typeText("zz");
+    await new Promise((r) => setTimeout(r, 500));
+    await s.flush();
+    expect(s.captureCharFrame()).toContain('no exact matches — showing results for "cli-ansi"');
   });
 
   test("queue sub-view: pane flip, cursor clamps, delete-at", () => {

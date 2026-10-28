@@ -34,6 +34,7 @@ export interface TuiModel {
   query: string;
   searching: boolean;
   results: SearchSkill[];
+  adjustedQuery: string | null;
   searchSelected: number;
   searchPane: "results" | "selected";
   selectedCursor: number;
@@ -63,6 +64,7 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     query: "",
     searching: false,
     results: [],
+    adjustedQuery: null,
     searchSelected: 0,
     searchPane: "results",
     selectedCursor: 0,
@@ -148,7 +150,7 @@ export type Action =
   | { type: "agent-select-cancel" }
   | { type: "query"; text: string }
   | { type: "searching"; on: boolean }
-  | { type: "results"; results: SearchSkill[] }
+  | { type: "results"; results: SearchSkill[]; adjustedQuery?: string | null }
   | { type: "search-pane"; pane: "results" | "selected" }
   | { type: "queue-toggle"; skill: SearchSkill }
   | { type: "queue-delete-at"; key: string }
@@ -279,12 +281,14 @@ export function update(model: TuiModel, action: Action): TuiModel {
       break;
     case "query":
       next.query = action.text;
+      next.adjustedQuery = null; // stale until the next results arrive
       break;
     case "searching":
       next.searching = action.on;
       break;
     case "results":
       next.results = action.results;
+      next.adjustedQuery = action.adjustedQuery ?? null;
       next.searchSelected = 0;
       break;
     case "search-pane":
