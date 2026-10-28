@@ -8,8 +8,7 @@ import {
   type CliRenderer,
 } from "@opentui/core";
 import { syntaxTokensFor, THEME_TOKENS, CATPPUCCIN_MOCHA, CATPPUCCIN_LATTE, type ThemeName } from "../core/theme.ts";
-import type { InstalledSkill } from "../core/services/types.ts";
-import type { TuiModel } from "./model.ts";
+import { visibleSkills, type TuiModel } from "./model.ts";
 
 /**
  * View builders — pure renderable construction from the model. The app
@@ -75,7 +74,7 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
     width: "42%",
     flexDirection: "column",
   });
-  const visible = visibleSorted(model);
+  const visible = visibleSkills(model);
   const scroll = new ScrollBoxRenderable(renderer, {
     width: "100%",
     flexGrow: 1,
@@ -163,25 +162,6 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
   return body;
 }
 
-/** Checked-first, then A→Z — the fork's selection UX contract. */
-function visibleSorted(model: TuiModel): InstalledSkill[] {
-  const visible = (() => {
-    const q = model.filter.trim().toLowerCase();
-    if (!q) return model.skills;
-    return model.skills.filter(
-      (s) =>
-        s.name.toLowerCase().includes(q) ||
-        s.source?.toLowerCase().includes(q) ||
-        s.agents.some((a) => a.toLowerCase().includes(q))
-    );
-  })();
-  return visible.sort((a, b) => {
-    const ca = model.checked.has(a.name) ? 0 : 1;
-    const cb = model.checked.has(b.name) ? 0 : 1;
-    return ca !== cb ? ca - cb : a.name.localeCompare(b.name);
-  });
-}
-
 export function buildSearchBody(renderer: CliRenderer, model: TuiModel): BoxRenderable {
   const t = tokensFor(model.prefs.theme);
   const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexDirection: "column", paddingLeft: 1, paddingRight: 1 });
@@ -238,7 +218,7 @@ export function buildSettingsBody(renderer: CliRenderer, model: TuiModel): BoxRe
   const motion = model.prefs.reduceMotion === "auto" ? "auto (explicit toggle is authoritative in terminals)" : String(model.prefs.reduceMotion);
   const rows: Array<[string, string]> = [
     ["t  theme", `${model.prefs.theme}${model.prefs.theme === "mocha" ? " → latte" : " → mocha"}`],
-    ["s  sound", model.prefs.sound ? "on → off" : "off → on"],
+    [",  sound", model.prefs.sound ? "on → off" : "off → on"],
     ["m  motion", motion],
     ["", ""],
     ["theme/sound/motion persist to ~/.config/skills-ui/prefs.json", ""],
@@ -320,9 +300,12 @@ export function buildHelpOverlay(renderer: CliRenderer, model: TuiModel): BoxRen
     ["i / x", "installed / settings tabs"],
     ["/", "search tab"],
     ["f", "filter installed"],
+    ["s", "sort checked first"],
+    ["A | I", "check all / invert"],
     ["g | p", "global / project scope"],
     ["space", "toggle check"],
     ["u / d", "update / delete checked"],
+    ["PgUp/PgDn", "page up / down"],
     ["HOME/END", "top / bottom"],
     ["?", "this help"],
     ["q", "quit"],

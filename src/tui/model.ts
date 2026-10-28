@@ -26,6 +26,7 @@ export interface TuiModel {
   checked: Set<string>;
   filter: string;
   filtering: boolean;
+  sortCheckedFirst: boolean;
   // search
   query: string;
   searching: boolean;
@@ -50,6 +51,7 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     checked: new Set(),
     filter: "",
     filtering: false,
+    sortCheckedFirst: true,
     query: "",
     searching: false,
     results: [],
@@ -76,16 +78,25 @@ export function applySeed(model: TuiModel, seed: UiSeed | undefined): void {
   }
 }
 
-/** Visible installed skills under the current filter (matches repo too). */
+/** Visible installed skills under the current filter (matches repo too).
+ * Checked-first then A→Z when sortCheckedFirst (the fork's selection UX);
+ * load order otherwise. Returns a sorted copy — never mutates the model. */
 export function visibleSkills(model: TuiModel): InstalledSkill[] {
   const q = model.filter.trim().toLowerCase();
-  if (!q) return model.skills;
-  return model.skills.filter(
-    (s) =>
-      s.name.toLowerCase().includes(q) ||
-      s.source?.toLowerCase().includes(q) ||
-      s.agents.some((a) => a.toLowerCase().includes(q))
-  );
+  const visible = q
+    ? model.skills.filter(
+        (s) =>
+          s.name.toLowerCase().includes(q) ||
+          s.source?.toLowerCase().includes(q) ||
+          s.agents.some((a) => a.toLowerCase().includes(q))
+      )
+    : model.skills;
+  if (!model.sortCheckedFirst) return visible;
+  return [...visible].sort((a, b) => {
+    const ca = model.checked.has(a.name) ? 0 : 1;
+    const cb = model.checked.has(b.name) ? 0 : 1;
+    return ca !== cb ? ca - cb : a.name.localeCompare(b.name);
+  });
 }
 
 function clamp(model: TuiModel): void {
@@ -102,6 +113,9 @@ export type Action =
   | { type: "end" }
   | { type: "toggle-check" }
   | { type: "check-all" }
+  | { type: "toggle-all-checks" }
+  | { type: "invert-checks" }
+  | { type: "sort-toggle" }
   | { type: "clear-checks" }
   | { type: "filter"; text: string }
   | { type: "filtering"; on: boolean }
@@ -163,6 +177,23 @@ export function update(model: TuiModel, action: Action): TuiModel {
     }
     case "check-all":
       for (const s of visibleSkills(next)) next.checked.add(s.name);
+      break;
+    case "toggle-all-checks": {
+      const list = visibleSkills(next);
+      const all = list.length > 0 && list.every((s) => next.checked.has(s.name));
+      if (all) for (const s of list) next.checked.delete(s.name);
+      else for (const s of list) next.checked.add(s.name);
+      break;
+    }
+    case "invert-checks":
+      for (const s of visibleSkills(next)) {
+        if (next.checked.has(s.name)) next.checked.delete(s.name);
+        else next.checked.add(s.name);
+      }
+      break;
+    case "sort-toggle":
+      next.sortCheckedFirst = !next.sortCheckedFirst;
+      clamp(next);
       break;
     case "clear-checks":
       next.checked.clear();

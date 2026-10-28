@@ -180,4 +180,118 @@ describe("tui model (pure)", () => {
     m = update(m, { type: "filter", text: "zzz" });
     expect(m.selected).toBe(0);
   });
+
+  test("invert-checks and toggle-all-checks follow fork semantics", () => {
+    let m = update(base(), { type: "skills-loaded", skills: SKILLS });
+    m = update(m, { type: "toggle-check" }); // checks first visible (code-review, A→Z)
+    expect([...m.checked]).toEqual(["code-review"]);
+    m = update(m, { type: "invert-checks" }); // flips every visible check
+    expect([...m.checked]).toEqual(["tdd"]);
+    m = update(m, { type: "toggle-all-checks" }); // partial → check all
+    expect(m.checked.size).toBe(2);
+    m = update(m, { type: "toggle-all-checks" }); // all → clear
+    expect(m.checked.size).toBe(0);
+  });
+
+  test("sort-toggle: checked-first on, load order off; no in-place mutation", () => {
+    const loaded: InstalledSkill[] = ["b-skill", "a-skill", "c-skill"].map((name) => ({
+      name,
+      path: `/x/${name}`,
+      scope: "project",
+      agents: ["Claude Code"],
+      source: null,
+      sourceUrl: null,
+      sourceType: null,
+    }));
+    let m = update(base(), { type: "skills-loaded", skills: loaded });
+    expect(visibleSkills(m).map((s) => s.name)).toEqual(["a-skill", "b-skill", "c-skill"]); // A→Z
+    expect(m.skills.map((s) => s.name)).toEqual(["b-skill", "a-skill", "c-skill"]); // untouched
+    m = update(m, { type: "toggle-check" }); // checks a-skill
+    m = update(m, { type: "move", delta: 2 }); // to c-skill in [a, c, b]
+    m = update(m, { type: "toggle-check" }); // checks c-skill
+    expect(visibleSkills(m).map((s) => s.name)).toEqual(["a-skill", "c-skill", "b-skill"]); // checked first
+    m = update(m, { type: "sort-toggle" });
+    expect(visibleSkills(m).map((s) => s.name)).toEqual(["b-skill", "a-skill", "c-skill"]); // load order
+    expect(m.skills.map((s) => s.name)).toEqual(["b-skill", "a-skill", "c-skill"]); // still untouched
+  });
+});
+
+describe("0.2.x B1 (S-69): list ops", () => {
+  const manySkills: InstalledSkill[] = Array.from({ length: 12 }, (_, i) => ({
+    name: `s${String(i + 1).padStart(2, "0")}`,
+    path: `/x/s${i}`,
+    scope: "project",
+    agents: ["Claude Code"],
+    source: null,
+    sourceUrl: null,
+    sourceType: null,
+  }));
+
+  test("A toggles all checks, I inverts (shifted batch keys)", async () => {
+    const s = setup!;
+    await runTuiOn(s.renderer, undefined, fakeDeps());
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    const checks = (): number => (s.captureCharFrame().match(/✔/g) ?? []).length;
+    await s.mockInput.typeText("A");
+    await s.flush();
+    expect(checks()).toBe(2); // all checked
+    await s.mockInput.typeText("I");
+    await s.flush();
+    expect(checks()).toBe(0); // inverted to none
+    await s.mockInput.typeText("A");
+    await s.flush();
+    expect(checks()).toBe(2);
+  });
+
+  test("PgUp/PgDn page-scroll the list", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    deps.listInstalled = async () => manySkills;
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    let frame = s.captureCharFrame();
+    expect(frame).toContain("─ s01 ─"); // detail border title of selection 0
+    await s.mockInput.pressKey("\x1B[6~"); // PgDn as a terminal sends it
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    frame = s.captureCharFrame();
+    expect(frame).toContain("─ s11 ─"); // 0 + PAGE clamped to 11
+    await s.mockInput.pressKey("\x1B[5~"); // PgUp
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    frame = s.captureCharFrame();
+    expect(frame).toContain("─ s01 ─"); // back to top
+  });
+
+  test("keymap contract: s sorts on installed (no prefs write), , toggles sound in settings", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    const saved: boolean[] = [];
+    deps.savePrefs = (prefs) => {
+      saved.push(prefs.sound);
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+
+    await s.mockInput.pressKey("s"); // installed tab: sort toggle, not prefs
+    await s.flush();
+    expect(saved).toHaveLength(0);
+    await s.mockInput.pressKey("?"); // new keys documented in help
+    await s.flush();
+    expect(s.captureCharFrame()).toContain("sort checked first");
+    expect(s.captureCharFrame()).toContain("check all / invert");
+    await s.mockInput.pressEscape();
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 50)); // let the parser close the bare ESC before x
+
+    await s.mockInput.pressKey("x"); // settings tab
+    await s.flush();
+    await s.mockInput.typeText(",");
+    await s.flush();
+    expect(saved).toHaveLength(1); // , toggles sound
+    expect(s.captureCharFrame()).toContain(",  sound");
+  });
 });

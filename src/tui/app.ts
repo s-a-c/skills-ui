@@ -24,6 +24,9 @@ import {
 
 export { buildSpikeScreen, SPIKE_MARKDOWN, spikeSyntaxTokens } from "./spike.ts";
 
+/** Rows per PgUp/PgDn press — the fork's fast-scroll step. */
+const PAGE = 10;
+
 /** Injectable surface — tests/selftest pass fakes; production uses core. */
 export interface TuiDeps {
   listInstalled(scope: "project" | "global"): Promise<InstalledSkill[]>;
@@ -283,6 +286,16 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       return;
     }
 
+    // Shifted batch keys (fork contract): A toggles all checks, I inverts;
+    // lowercase a keeps its check-all meaning in the switch below.
+    if (key.shift && (k === "a" || k === "i")) {
+      if (model.tab === "installed") {
+        dispatch({ type: k === "a" ? "toggle-all-checks" : "invert-checks" });
+        void deps.play("select", model.prefs);
+      }
+      return;
+    }
+
     const tab = tabFor(k === "/" ? "/" : k);
     if (tab) {
       dispatch({ type: "tab", tab });
@@ -323,6 +336,11 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         return;
       case "end":
         dispatch({ type: "end" });
+        return;
+      case "pageup":
+      case "pagedown":
+        dispatch({ type: "move", delta: k === "pageup" ? -PAGE : PAGE });
+        if (model.tab === "installed") void loadDetail();
         return;
       case "space":
         if (model.tab === "installed") {
@@ -371,6 +389,10 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         }
         return;
       case "s":
+        if (model.tab === "installed") dispatch({ type: "sort-toggle" });
+        return;
+      case ",":
+      case "comma":
         if (model.tab === "settings") {
           const prefs: UiPreferences = { ...model.prefs, sound: !model.prefs.sound };
           deps.savePrefs(prefs);
