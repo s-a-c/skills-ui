@@ -301,7 +301,7 @@ export function buildFooter(renderer: CliRenderer, model: TuiModel): BoxRenderab
   const legend =
     model.tab === "installed" && (model.filtering || model.filter)
       ? "u update · d delete checked · HOME/END · SPACE toggle · ESC clear filter"
-      : "i installed · / search · f agents · g|p scope · x settings · ? help · q quit";
+      : "i installed · / search · a agents · f filter · , settings · ? help · q quit";
   footer.add(new TextRenderable(renderer, { content: legend, fg: t.textMuted }));
   const status = model.toast
     ? model.toast.text
@@ -379,7 +379,7 @@ export function buildAgentSelectOverlay(renderer: CliRenderer, model: TuiModel):
     overlay.add(row);
   }
   overlay.add(
-    new TextRenderable(renderer, { content: "space toggle · enter apply · esc cancel", fg: t.textMuted })
+    new TextRenderable(renderer, { content: "space toggle · a all · enter apply · esc cancel", fg: t.textMuted })
   );
   return overlay;
 }
@@ -403,9 +403,10 @@ export function buildHelpOverlay(renderer: CliRenderer, model: TuiModel): BoxRen
     title: " help ",
   });
   const keys: Array<[string, string]> = [
-    ["i / x", "installed / settings tabs"],
+    ["i / ,", "installed / settings tabs"],
     ["/", "search tab"],
-    ["f", "agent filter (typing filters)"],
+    ["f", "filter (or just type)"],
+    ["a", "agent filter (multi, a=all)"],
     ["s", "sort checked first"],
     ["c", "check for updates"],
     ["A | I", "check all / invert"],

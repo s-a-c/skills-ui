@@ -149,6 +149,7 @@ export type Action =
   | { type: "agent-select-open" }
   | { type: "agent-select-move"; delta: number }
   | { type: "agent-select-toggle" }
+  | { type: "agent-select-toggle-all" }
   | { type: "agent-select-apply" }
   | { type: "agent-select-cancel" }
   | { type: "query"; text: string }
@@ -273,9 +274,19 @@ export function update(model: TuiModel, action: Action): TuiModel {
         }
       }
       break;
+    case "agent-select-toggle-all":
+      if (next.agentSelect) {
+        const sel = next.agentSelect;
+        if (sel.agents.length > 0 && sel.staged.size === sel.agents.length) sel.staged.clear();
+        else for (const agent of sel.agents) sel.staged.add(agent);
+      }
+      break;
     case "agent-select-apply":
       if (next.agentSelect) {
-        next.agentFilter = new Set(next.agentSelect.staged);
+        // staging every agent filters nothing — normalize to "no filter"
+        const all = next.agentSelect.agents.length > 0
+          && next.agentSelect.staged.size === next.agentSelect.agents.length;
+        next.agentFilter = all ? new Set<string>() : new Set(next.agentSelect.staged);
         next.agentSelect = null;
         clamp(next);
       }
@@ -338,10 +349,12 @@ export function update(model: TuiModel, action: Action): TuiModel {
   return next;
 }
 
-/** Keyboard contract — identical to the fork's TUI/webUI (user steer). */
+/** Keyboard contract — user steer 2026-10-28: `i` installed, `/` search,
+ * `,` settings (and `,` toggles sound once there). `x` is free; `a` owns the
+ * agent filter, `f` the text filter. */
 export function tabFor(key: string): Tab | null {
   if (key === "i") return "installed";
   if (key === "/") return "search";
-  if (key === "x") return "settings";
+  if (key === "," || key === "comma") return "settings";
   return null;
 }

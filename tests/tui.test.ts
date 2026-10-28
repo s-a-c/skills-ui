@@ -294,7 +294,12 @@ describe("tui model (pure)", () => {
     m = update(m, { type: "filter", text: "" });
 
     m = update(m, { type: "agent-select-open" });
-    expect(m.agentSelect?.agents).toEqual(["Claude Code", "Cursor"]);
+    m = update(m, { type: "agent-select-toggle-all" }); // stage every agent
+    expect(m.agentSelect?.staged.size).toBe(2);
+    m = update(m, { type: "agent-select-apply" }); // normalizes to no filter
+    expect(m.agentFilter.size).toBe(0);
+
+    m = update(m, { type: "agent-select-open" });
     m = update(m, { type: "agent-select-toggle" }); // stage Claude Code
     m = update(m, { type: "agent-select-move", delta: 1 });
     m = update(m, { type: "agent-select-toggle" }); // stage Cursor too
@@ -302,8 +307,9 @@ describe("tui model (pure)", () => {
     expect(visibleSkills(m)).toHaveLength(2);
 
     m = update(m, { type: "agent-select-open" });
+    m = update(m, { type: "agent-select-toggle-all" }); // stage every agent
     m = update(m, { type: "agent-select-move", delta: 1 });
-    m = update(m, { type: "agent-select-toggle" }); // unstage Cursor
+    m = update(m, { type: "agent-select-toggle" }); // unstage Cursor from all
     m = update(m, { type: "agent-select-apply" });
     expect(visibleSkills(m).map((s) => s.name)).toEqual(["tdd"]); // only Claude Code
 
@@ -318,7 +324,7 @@ describe("tui model (pure)", () => {
     await runTuiOn(s.renderer, undefined, fakeDeps());
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
-    await s.mockInput.pressKey("x"); // settings tab — triggers the lazy version load
+    await s.mockInput.pressKey(","); // settings tab — triggers the lazy version load
     await s.flush();
     await new Promise((r) => setTimeout(r, 150));
     const frame = s.captureCharFrame();
@@ -460,54 +466,61 @@ describe("0.2.x B1 (S-69): list ops", () => {
     await s.flush();
     await new Promise((r) => setTimeout(r, 50)); // let the parser close the bare ESC before x
 
-    await s.mockInput.pressKey("x"); // settings tab
+    await s.mockInput.pressKey(","); // settings tab — , is the settings key end-to-end
     await s.flush();
     await s.mockInput.typeText(",");
     await s.flush();
-    expect(saved).toHaveLength(1); // , toggles sound
+    expect(saved).toHaveLength(1); // , toggles sound once settings is open
     expect(s.captureCharFrame()).toContain(",  sound");
+
+    await s.mockInput.pressKey("i"); // back to installed
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 50));
+    await s.mockInput.pressKey("x"); // x is free — falls into the text filter
+    await s.flush();
+    expect(s.captureCharFrame()).toContain("filter: x");
   });
 
-  test("f opens the agent overlay; apply filters, cancel keeps; typing starts the text filter", async () => {
+  test("a opens the agent overlay (with all-toggle); f enters the text filter", async () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
 
-    await s.mockInput.pressKey("f");
+    await s.mockInput.pressKey("f"); // f enters the text filter…
+    await s.flush();
+    await s.mockInput.typeText("c"); // …so the bound key c lands in the filter, not the update check
+    await s.flush();
+    const afterF = s.captureCharFrame();
+    expect(afterF).toContain("filter: c");
+    expect(afterF).not.toContain("update(s) available");
+    await s.mockInput.pressEscape();
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 50));
+
+    await s.mockInput.pressKey("a"); // a = agent overlay
     await s.flush();
     let frame = s.captureCharFrame();
     expect(frame).toContain("filter by agent");
-    expect(frame).toContain("Claude Code");
-    expect(frame).toContain("Cursor");
-    await s.mockInput.pressKey(" "); // stage Claude Code (index 0)
+    await s.mockInput.pressKey("a"); // all — stages every agent
     await s.flush();
-    await s.mockInput.pressKey("\r"); // apply
+    await s.mockInput.pressKey("\r"); // apply → normalizes to no filter
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
     frame = s.captureCharFrame();
-    expect(frame).not.toContain("filter by agent"); // overlay closed
-    expect(frame).toContain("agents: Claude Code"); // applied filter shown
+    expect(frame).not.toContain("filter by agent");
+    expect(frame).not.toContain("agents:");
 
-    await s.mockInput.pressKey("f");
-    await s.flush();
-    await s.mockInput.pressEscape(); // cancel keeps the applied filter
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 50));
-    expect(s.captureCharFrame()).toContain("agents: Claude Code");
-
-    await s.mockInput.pressKey("f"); // reopen, unstage, apply → filter cleared
+    await s.mockInput.pressKey("a"); // reopen, stage just the first agent
     await s.flush();
     await s.mockInput.pressKey(" ");
     await s.flush();
     await s.mockInput.pressKey("\r");
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
-    expect(s.captureCharFrame()).not.toContain("agents:");
-
-    await s.mockInput.typeText("ev"); // typing unbound letters starts the text filter
-    await s.flush();
-    expect(s.captureCharFrame()).toContain("filter: ev");
+    const filtered = s.captureCharFrame();
+    expect(filtered).toContain("agents:"); // applied filter line (wraps in a 42-col pane)
+    expect(filtered).not.toContain("code-review"); // Cursor's skill filtered out
   });
 
   test("search queue sub-view: Tab flips panes, d removes the queued item", async () => {

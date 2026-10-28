@@ -357,6 +357,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       if (k === "up" || k === "k") dispatch({ type: "agent-select-move", delta: -1 });
       else if (k === "down" || k === "j") dispatch({ type: "agent-select-move", delta: 1 });
       else if (k === "space") dispatch({ type: "agent-select-toggle" });
+      else if (k === "a") dispatch({ type: "agent-select-toggle-all" });
       else if (k === "return") dispatch({ type: "agent-select-apply" });
       else if (k === "escape") dispatch({ type: "agent-select-cancel" });
       return;
@@ -432,7 +433,8 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     }
 
     const tab = tabFor(k === "/" ? "/" : k);
-    if (tab) {
+    // `,` doubles as the sound toggle once settings is open — fall through
+    if (tab && !(k === "," && model.tab === "settings")) {
       dispatch({ type: "tab", tab });
       void deps.play("select", model.prefs);
       if (tab === "settings" && model.skillsVersion === undefined) {
@@ -460,6 +462,9 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         void reloadSkills();
         return;
       case "f":
+        if (model.tab === "installed") dispatch({ type: "filtering", on: true });
+        return;
+      case "a":
         if (model.tab === "installed") dispatch({ type: "agent-select-open" });
         return;
       case "up":
@@ -494,9 +499,6 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
             void deps.play("select", model.prefs);
           }
         }
-        return;
-      case "a":
-        dispatch({ type: "check-all" });
         return;
       case "c":
         if (model.tab === "installed") {
