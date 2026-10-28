@@ -310,6 +310,25 @@ describe("tui model (pure)", () => {
     m = update(m, { type: "agent-select-cancel" }); // discard staging
     expect([...m.agentFilter]).toEqual(["Claude Code"]);
   });
+
+  test("queue sub-view: pane flip, cursor clamps, delete-at", () => {
+    const second: SearchSkill = { name: "b", slug: "b", source: "o/r", installs: 1 };
+    let m = base();
+    m = update(m, { type: "tab", tab: "search" });
+    m = update(m, { type: "results", results: [...RESULTS, second] });
+    m = update(m, { type: "queue-toggle", skill: RESULTS[0]! });
+    m = update(m, { type: "queue-toggle", skill: second });
+    m = update(m, { type: "search-pane", pane: "selected" });
+    expect(m.searchPane).toBe("selected");
+    m = update(m, { type: "move", delta: 5 }); // selected-pane cursor clamps
+    expect(m.selectedCursor).toBe(1);
+    m = update(m, { type: "queue-delete-at", key: "o/r#b" });
+    expect(m.queue.size).toBe(1);
+    expect(m.selectedCursor).toBe(0); // clamped after the delete
+    m = update(m, { type: "search-pane", pane: "results" });
+    m = update(m, { type: "move", delta: 1 }); // results cursor moves again
+    expect(m.searchSelected).toBe(1);
+  });
 });
 
 describe("0.2.x B1 (S-69): list ops", () => {
@@ -431,5 +450,34 @@ describe("0.2.x B1 (S-69): list ops", () => {
     await s.mockInput.typeText("ev"); // typing unbound letters starts the text filter
     await s.flush();
     expect(s.captureCharFrame()).toContain("filter: ev");
+  });
+
+  test("search queue sub-view: Tab flips panes, d removes the queued item", async () => {
+    const s = setup!;
+    await runTuiOn(s.renderer, undefined, fakeDeps());
+    await s.flush();
+    await s.mockInput.typeText("/");
+    await s.mockInput.typeText("cli");
+    await new Promise((r) => setTimeout(r, 500)); // debounce + search
+    await s.flush();
+    let frame = s.captureCharFrame();
+    expect(frame).toContain("cli-ansi");
+    await s.mockInput.typeText(" "); // queue it
+    await s.flush();
+    frame = s.captureCharFrame();
+    expect(frame).toContain("Selected (1)");
+    await s.mockInput.pressKey("\t"); // Tab → Selected pane
+    await s.flush();
+    frame = s.captureCharFrame();
+    expect(frame).toContain("❯ Selected (1)");
+    await s.mockInput.pressKey("d"); // remove the queued item
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    frame = s.captureCharFrame();
+    expect(frame).toContain("Selected (0)");
+    expect(frame).toContain("(empty");
+    await s.mockInput.pressKey("\t"); // Tab back → Results
+    await s.flush();
+    expect(s.captureCharFrame()).toContain("❯ Results");
   });
 });

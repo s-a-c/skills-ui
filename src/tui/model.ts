@@ -35,6 +35,8 @@ export interface TuiModel {
   searching: boolean;
   results: SearchSkill[];
   searchSelected: number;
+  searchPane: "results" | "selected";
+  selectedCursor: number;
   queue: Map<string, SearchSkill>; // key: source#name
   // transient
   busy: string | null;
@@ -62,6 +64,8 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     searching: false,
     results: [],
     searchSelected: 0,
+    searchPane: "results",
+    selectedCursor: 0,
     queue: new Map(),
     busy: null,
     toast: null,
@@ -117,6 +121,10 @@ function clamp(model: TuiModel): void {
   if (model.selected >= count) model.selected = Math.max(0, count - 1);
 }
 
+function clampSelectedCursor(model: TuiModel): void {
+  if (model.selectedCursor >= model.queue.size) model.selectedCursor = Math.max(0, model.queue.size - 1);
+}
+
 export type Action =
   | { type: "tab"; tab: Tab }
   | { type: "scope"; scope: Scope }
@@ -141,7 +149,9 @@ export type Action =
   | { type: "query"; text: string }
   | { type: "searching"; on: boolean }
   | { type: "results"; results: SearchSkill[] }
+  | { type: "search-pane"; pane: "results" | "selected" }
   | { type: "queue-toggle"; skill: SearchSkill }
+  | { type: "queue-delete-at"; key: string }
   | { type: "queue-clear" }
   | { type: "busy"; label: string | null }
   | { type: "toast"; toast: Toast | null }
@@ -179,6 +189,10 @@ export function update(model: TuiModel, action: Action): TuiModel {
       next.updatesAvailable = new Set(action.names);
       break;
     case "move": {
+      if (next.tab === "search" && next.searchPane === "selected") {
+        next.selectedCursor = Math.max(0, Math.min(next.queue.size - 1, next.selectedCursor + action.delta));
+        break;
+      }
       const count = next.tab === "installed" ? visibleSkills(next).length : next.results.length;
       next.selected = Math.max(0, Math.min(count - 1, (next.tab === "installed" ? next.selected : next.searchSelected) + action.delta));
       if (next.tab === "search") next.searchSelected = next.selected;
@@ -273,12 +287,21 @@ export function update(model: TuiModel, action: Action): TuiModel {
       next.results = action.results;
       next.searchSelected = 0;
       break;
+    case "search-pane":
+      next.searchPane = action.pane;
+      clampSelectedCursor(next);
+      break;
     case "queue-toggle": {
       const key = `${action.skill.source}#${action.skill.name}`;
       if (next.queue.has(key)) next.queue.delete(key);
       else next.queue.set(key, action.skill);
+      clampSelectedCursor(next);
       break;
     }
+    case "queue-delete-at":
+      next.queue.delete(action.key);
+      clampSelectedCursor(next);
+      break;
     case "queue-clear":
       next.queue.clear();
       break;

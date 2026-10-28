@@ -174,16 +174,27 @@ export function buildSearchBody(renderer: CliRenderer, model: TuiModel): BoxRend
   const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexDirection: "column", paddingLeft: 1, paddingRight: 1 });
   body.add(
     new TextRenderable(renderer, {
-      content: `search: ${model.query || "type to search"}${model.query ? "▌" : ""}`,
+      content: `search: ${model.query || "type to search"}${model.query && model.searching ? "▌" : ""}`,
       fg: t.primary,
     })
   );
+
+  // Results and Selected panes share one scroll column: the active pane's
+  // header carries the cursor arrow; panes are visually stacked like the fork.
   const scroll = new ScrollBoxRenderable(renderer, { width: "100%", flexGrow: 1, scrollY: true });
+  const resultsActive = model.searchPane === "results";
+  scroll.add(
+    new TextRenderable(renderer, {
+      content: `${resultsActive ? ARROW : " "} Results`,
+      fg: resultsActive ? t.primary : t.textMuted,
+      attributes: resultsActive ? TextAttributes.BOLD : TextAttributes.NONE,
+    })
+  );
   if (model.results.length === 0) {
     scroll.add(new TextRenderable(renderer, { content: model.query ? "no results" : "search the skills.sh registry", fg: t.textMuted }));
   }
   model.results.forEach((r, i) => {
-    const selected = i === model.searchSelected;
+    const selected = resultsActive && i === model.searchSelected;
     const row = new BoxRenderable(renderer, {
       width: "100%",
       flexDirection: "row",
@@ -208,10 +219,43 @@ export function buildSearchBody(renderer: CliRenderer, model: TuiModel): BoxRend
     row.add(new TextRenderable(renderer, { content: `${r.installs}`, fg: t.textMuted }));
     scroll.add(row);
   });
+
+  const selectedActive = model.searchPane === "selected";
+  scroll.add(
+    new TextRenderable(renderer, {
+      content: `${selectedActive ? ARROW : " "} Selected (${model.queue.size})`,
+      fg: selectedActive ? t.primary : t.textMuted,
+      attributes: selectedActive ? TextAttributes.BOLD : TextAttributes.NONE,
+    })
+  );
+  const queued = [...model.queue.values()];
+  if (queued.length === 0) {
+    scroll.add(new TextRenderable(renderer, { content: "  (empty — space or + queues from Results)", fg: t.textMuted }));
+  }
+  queued.forEach((r, i) => {
+    const selected = selectedActive && i === model.selectedCursor;
+    const row = new BoxRenderable(renderer, {
+      width: "100%",
+      flexDirection: "row",
+      gap: 1,
+      backgroundColor: selected ? t.selectionBg : undefined,
+    });
+    row.add(new TextRenderable(renderer, { content: `${selected ? ARROW : " "} `, fg: t.textMuted }));
+    row.add(
+      new TextRenderable(renderer, {
+        content: r.name,
+        fg: selected ? t.selectionText : t.text,
+        attributes: selected ? TextAttributes.BOLD : TextAttributes.NONE,
+      })
+    );
+    row.add(new TextRenderable(renderer, { content: r.source, fg: selected ? t.selectionText : t.textMuted }));
+    scroll.add(row);
+  });
   body.add(scroll);
+
   body.add(
     new TextRenderable(renderer, {
-      content: "space queue · enter install · u install all queued",
+      content: "space/+ queue · -/d/x remove · Tab pane · u install queued",
       fg: t.textMuted,
     })
   );

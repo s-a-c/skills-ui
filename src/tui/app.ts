@@ -234,6 +234,33 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
   };
 
   // ---- keyboard contract ----
+  const queueKeyAt = (): { key: string; skill: SearchSkill } | null => {
+    if (model.searchPane === "selected") {
+      const skill = [...model.queue.values()][model.selectedCursor];
+      return skill ? { key: `${skill.source}#${skill.name}`, skill } : null;
+    }
+    const skill = model.results[model.searchSelected];
+    return skill ? { key: `${skill.source}#${skill.name}`, skill } : null;
+  };
+
+  const handleQueueKey = (k: string): void => {
+    if (k === "tab") {
+      dispatch({ type: "search-pane", pane: model.searchPane === "results" ? "selected" : "results" });
+      void deps.play("select", model.prefs);
+      return;
+    }
+    const at = queueKeyAt();
+    if (!at) return;
+    if (k === "+") {
+      dispatch({ type: "queue-toggle", skill: at.skill });
+      void deps.play("select", model.prefs);
+    } else {
+      // "-", "d", "x" — per-item removal from the queue
+      dispatch({ type: "queue-delete-at", key: at.key });
+      void deps.play("select", model.prefs);
+    }
+  };
+
   const onKey = (key: { name: string; shift?: boolean; ctrl?: boolean }): void => {
     if (key.ctrl && key.name === "c") return; // exitOnCtrlC owns ctrl+c
     const k = key.name;
@@ -255,6 +282,13 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       else if (k === "escape") dispatch({ type: "agent-select-cancel" });
       return;
     }
+    // Search-tab queue keys work in both text-entry and command mode (fork
+    // contract): Tab flips Results/Selected anywhere on the search tab.
+    if (model.tab === "search" && (k === "tab" || k === "+" || k === "-" || k === "d" || k === "x")) {
+      handleQueueKey(k);
+      return;
+    }
+
     // Text-entry modes (filter/search) capture printable input; letter
     // hotkeys must not fire mid-word (the "cli"→i-jumps-tabs trap). Arrows
     // still navigate; Esc/Return exit the mode but keep the text (contract).
