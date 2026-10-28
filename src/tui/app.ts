@@ -357,9 +357,20 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       case "a":
         dispatch({ type: "check-all" });
         return;
+      case "r":
+        if (model.tab === "installed") {
+          const skill = visibleSkills(model)[model.selected];
+          if (skill) dispatch({ type: "confirm", confirm: { kind: "delete", names: [skill.name] } });
+        }
+        return;
       case "u":
         if (model.tab === "search") void runQueue();
         else if (model.checked.size > 0) dispatch({ type: "confirm", confirm: { kind: "update", names: [...model.checked] } });
+        else {
+          // nothing checked — update everything in scope, behind the same gate
+          const names = visibleSkills(model).map((s) => s.name);
+          if (names.length > 0) dispatch({ type: "confirm", confirm: { kind: "update", names } });
+        }
         return;
       case "d":
         if (model.checked.size > 0) dispatch({ type: "confirm", confirm: { kind: "delete", names: [...model.checked] } });

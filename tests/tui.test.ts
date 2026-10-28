@@ -129,6 +129,50 @@ describe("tui (in-memory)", () => {
     expect(installed as { source: string; names: string[] } | null).toEqual({ source: "o/r", names: ["cli-ansi"] });
   });
 
+  test("r removes the focused skill behind confirm; u with none checked updates all", async () => {
+    const s = setup!;
+    const removed: string[][] = [];
+    const updated: string[][] = [];
+    const deps = fakeDeps();
+    deps.remove = async (names) => {
+      removed.push(names);
+      return { ok: true, summary: `removed ${names.join(", ")}` };
+    };
+    deps.update = async (names) => {
+      updated.push(names);
+      return { ok: true, summary: "updated" };
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+
+    await s.mockInput.pressKey("r"); // focused skill (code-review, A→Z first)
+    await s.flush();
+    let frame = s.captureCharFrame();
+    expect(frame).toContain("delete skills");
+    expect(frame).toContain("code-review");
+    await s.mockInput.pressKey("escape"); // cancel — nothing runs
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(removed).toHaveLength(0);
+
+    await s.mockInput.pressKey("r");
+    await s.flush();
+    await s.mockInput.pressKey("y");
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    expect(removed).toEqual([["code-review"]]);
+
+    await s.mockInput.pressKey("u"); // nothing checked → update all in scope
+    await s.flush();
+    frame = s.captureCharFrame();
+    expect(frame).toContain("update skills");
+    await s.mockInput.pressKey("y");
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    expect(updated).toEqual([["code-review", "tdd"]]); // all visible names
+  });
+
   test("help overlay toggles with ?", async () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
