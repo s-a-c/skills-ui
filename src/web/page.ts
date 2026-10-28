@@ -1,0 +1,1267 @@
+/**
+ * Ported from vercel-labs/skills `src/web/page.ts` (MIT, branch dev/tui-webui)
+ * — the web UI over the /api contract; import paths adjusted for skills-ui.
+ */
+import {
+  THEME_TOKENS,
+  CATPPUCCIN_MOCHA,
+  CATPPUCCIN_LATTE,
+  type CatppuccinPalette,
+  type ThemeTokens,
+} from '../core/theme.ts';
+import { DEFAULT_UI_PREFERENCES, type UiPreferences } from '../core/prefs.ts';
+import type { UiSeed } from '../core/seed.ts';
+
+function cssVarsFor(tokens: ThemeTokens, palette: CatppuccinPalette): string {
+  // Custom properties keep the token's camelCase: APP_CSS references
+  // var(--t-primaryText) etc., and a kebab-mismatch would silently fall back
+  // to inherited colors (the dark-mode contrast bug).
+  const entries = Object.entries(tokens).map(([key, value]) => `  --t-${key}:${value};`);
+  const accents = Object.entries(palette as unknown as Record<string, string>).map(
+    ([key, value]) => `  --a-${key}:${value};`
+  );
+  return [...entries, ...accents].join('\n');
+}
+
+const APP_CSS = `
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--t-bg);color:var(--t-text);
+  font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  transition:background .35s ease,color .35s ease;
+}
+button,input,select{font:inherit;color:inherit}
+:root{--motion-scale:1;--ease:cubic-bezier(.2,.8,.2,1)}
+[data-motion="off"]{--motion-scale:.001}
+@media (prefers-reduced-motion:reduce){[data-motion="auto"]{--motion-scale:.001}}
+/* Reduced motion must also stop infinite loops: iteration-count 1 turns them
+   into a single 0.01ms frame instead of a machine-speed flicker. */
+[data-motion="off"] *,[data-motion="off"] *::before,[data-motion="off"] *::after{
+  animation-duration:.01ms !important;animation-iteration-count:1 !important;
+  transition-duration:.01ms !important;
+}
+@media (prefers-reduced-motion:reduce){
+  [data-motion="auto"] *,[data-motion="auto"] *::before,[data-motion="auto"] *::after{
+    animation-duration:.01ms !important;animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+}
+a{color:var(--t-primary)}
+
+/* ---------- top bar ---------- */
+header{
+  display:flex;align-items:center;gap:16px;padding:14px 22px;
+  background:var(--t-surface);border-bottom:1px solid var(--t-border);
+  position:sticky;top:0;z-index:20;backdrop-filter:blur(6px);
+}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px}
+.logo .mark{
+  width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--a-mauve),var(--a-blue),var(--a-teal));
+  background-size:200% 200%;color:var(--t-crust,var(--t-bg));
+  animation:gradient-pan calc(6s * var(--motion-scale)) ease-in-out infinite;
+  font-size:14px;font-weight:800;
+}
+@keyframes gradient-pan{0%,100%{background-position:0% 0%}50%{background-position:100% 100%}}
+.logo .ver{color:var(--t-textMuted);font-size:12px;font-weight:400}
+
+nav.tabs{display:flex;gap:4px;margin-left:8px;position:relative}
+.tab{
+  border:0;background:transparent;padding:8px 14px;border-radius:9px;cursor:pointer;
+  color:var(--t-textMuted);transition:background calc(.18s * var(--motion-scale)) var(--ease),color .18s var(--ease),transform .18s var(--ease);
+}
+.tab:hover{background:var(--t-surfaceAlt);color:var(--t-text);transform:translateY(-1px)}
+.tab[aria-selected="true"]{background:var(--t-selectionBg);color:var(--t-selectionText);font-weight:600}
+.tab:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--t-focusRing);outline-offset:2px;border-radius:9px;
+}
+
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+.scope-toggle{
+  display:inline-flex;border:1px solid var(--t-border);border-radius:999px;overflow:hidden;
+}
+.scope-toggle button{
+  border:0;background:transparent;padding:6px 14px;cursor:pointer;color:var(--t-textMuted);
+  transition:all calc(.18s * var(--motion-scale)) var(--ease);
+}
+.scope-toggle button[aria-pressed="true"]{
+  background:var(--t-primary);color:var(--t-primaryText);font-weight:600;
+}
+.scope-toggle button:hover:not([aria-pressed="true"]){background:var(--t-surfaceAlt);color:var(--t-text)}
+
+/* ---------- buttons ---------- */
+.btn{
+  border:1px solid var(--t-border);background:var(--t-surfaceAlt);border-radius:9px;
+  padding:7px 13px;cursor:pointer;color:var(--t-text);font-weight:500;position:relative;overflow:hidden;
+  transition:transform calc(.16s * var(--motion-scale)) var(--ease),box-shadow .16s var(--ease),background .16s var(--ease),border-color .16s var(--ease);
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 4px 14px color-mix(in srgb,var(--t-primary) 30%,transparent);border-color:var(--t-primary)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn.primary{background:var(--t-primary);border-color:var(--t-primary);color:var(--t-primaryText)}
+.btn.primary:hover{box-shadow:0 6px 18px color-mix(in srgb,var(--t-primary) 45%,transparent);filter:brightness(1.06)}
+.btn.danger{background:var(--t-danger);border-color:var(--t-danger);color:var(--t-dangerText)}
+.btn.danger:hover{box-shadow:0 6px 18px color-mix(in srgb,var(--t-danger) 45%,transparent);filter:brightness(1.06)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn .ripple{
+  position:absolute;border-radius:50%;transform:scale(0);pointer-events:none;
+  background:currentColor;opacity:.25;animation:ripple calc(.5s * var(--motion-scale)) ease-out forwards;
+}
+@keyframes ripple{to{transform:scale(2.6);opacity:0}}
+
+/* ---------- layout ---------- */
+main{display:grid;grid-template-columns:minmax(320px,420px) 1fr;gap:0;height:calc(100vh - 61px)}
+#listPane{border-right:1px solid var(--t-border);display:flex;flex-direction:column;min-height:0}
+#detailPane{overflow:auto;overflow-x:hidden;padding:26px 30px;min-height:0}
+.filter-row{padding:14px 16px 8px;display:flex;gap:8px;align-items:center}
+#filter{
+  width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--t-border);
+  background:var(--t-surfaceAlt);color:var(--t-text);
+  transition:border-color .18s var(--ease),box-shadow .18s var(--ease);
+}
+#filter::placeholder{color:var(--t-textMuted)}
+#filter:focus{outline:none;border-color:var(--t-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--t-primary) 25%,transparent)}
+
+#selBar{display:none;gap:10px;align-items:center;padding:0 16px 10px}
+#selBar .count{color:var(--t-textMuted);font-size:13px}
+.skill-check{width:15px;height:15px;accent-color:var(--t-primary);cursor:pointer;flex:none}
+#agentsWrap{position:relative}
+#agentsPop{
+  position:absolute;top:calc(100% + 6px);left:0;z-index:26;width:280px;max-height:320px;overflow:auto;
+  background:var(--t-surface);border:1px solid var(--t-border);border-radius:12px;padding:10px 12px;
+  box-shadow:0 16px 40px rgba(0,0,0,.3);display:none;
+}
+#agentsPop.open{display:block}
+#agentsPop label{display:flex;gap:10px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer}
+#agentsPop label:hover{background:var(--t-surfaceAlt)}
+#agentsPop input{accent-color:var(--t-primary);width:15px;height:15px}
+#agentsPop .row-actions{display:flex;gap:8px;margin-top:8px}
+kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radius:5px;padding:1px 6px;font-size:12px}
+#helpDialog kbd{display:inline-block;min-width:42px;text-align:center;margin-right:8px}
+#helpDialog table{border-collapse:collapse;font-size:13.5px}
+#helpDialog td{padding:4px 10px 4px 0}
+.seed-list{display:grid;gap:6px;margin:14px 0;max-height:45vh;overflow:auto}
+.seed-row{display:flex;gap:10px;align-items:center;padding:8px 12px;border:1px solid var(--t-border);border-radius:8px;cursor:pointer}
+.seed-row:hover{background:var(--t-surfaceAlt)}
+.seed-row input{accent-color:var(--t-primary);width:15px;height:15px}
+#skillList{list-style:none;margin:0;padding:10px 12px 20px;overflow:auto;flex:1}
+#skillList li{
+  padding:11px 14px;border-radius:10px;cursor:pointer;position:relative;margin-bottom:4px;
+  border:1px solid transparent;
+  transition:background .18s var(--ease),transform calc(.18s * var(--motion-scale)) var(--ease),border-color .18s var(--ease);
+  animation:rise calc(.35s * var(--motion-scale)) var(--ease) backwards;
+  animation-delay:calc(var(--i) * 28ms * var(--motion-scale));
+}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#skillList li::before{
+  content:"";position:absolute;left:0;top:18%;bottom:18%;width:3px;border-radius:3px;
+  background:var(--t-primary);transform:scaleY(0);transform-origin:center;
+  transition:transform calc(.2s * var(--motion-scale)) var(--ease);
+}
+#skillList li:hover{background:var(--t-surfaceAlt);transform:translateX(3px)}
+#skillList li:hover::before{transform:scaleY(1)}
+#skillList li[aria-selected="true"]{
+  background:var(--t-selectionBg);color:var(--t-selectionText);border-color:var(--t-primary);
+}
+#skillList li[aria-selected="true"]::before{transform:scaleY(1)}
+/* Descendants keep their own colors otherwise; on the mauve selection fill
+   they must switch to the selection text color to stay readable. */
+#skillList li[aria-selected="true"] .skill-desc{color:var(--t-selectionText)}
+#skillList li[aria-selected="true"] .chip{
+  color:var(--t-selectionText);
+  border-color:color-mix(in srgb,var(--t-selectionText) 45%,transparent);
+  background:color-mix(in srgb,var(--t-selectionText) 14%,transparent);
+}
+.skill-name{font-weight:600;display:flex;align-items:center;gap:8px}
+.skill-desc{color:var(--t-textMuted);font-size:13px;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--a-green);flex:none}
+.dot.unlinked{background:var(--t-textMuted)}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{
+  font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;
+  background:color-mix(in srgb,var(--chip,var(--a-blue)) 18%,transparent);
+  color:var(--t-text);border:1px solid color-mix(in srgb,var(--chip,var(--a-blue)) 45%,transparent);
+}
+
+.empty{color:var(--t-textMuted);padding:24px 18px;text-align:center;animation:rise .35s var(--ease)}
+
+/* ---------- detail ---------- */
+.detail-title{font-size:24px;font-weight:700;margin:0 0 4px;animation:rise .3s var(--ease)}
+.detail-source{color:var(--t-textMuted);margin:0 0 18px}
+.detail-actions{display:flex;gap:10px;margin:0 0 22px;flex-wrap:wrap}
+.detail-meta{display:grid;gap:6px;margin-bottom:22px;font-size:13px}
+.detail-meta dt{color:var(--t-textMuted);font-weight:600}
+.detail-meta dd{margin:0;min-width:0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;overflow-wrap:anywhere}
+.readme{
+  border:1px solid var(--t-border);border-radius:12px;background:var(--t-surface);
+  padding:20px 22px;white-space:pre-wrap;font-size:13.5px;line-height:1.65;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;max-height:52vh;overflow:auto;
+}
+
+function checkForUpdates(force){
+  var scope = state.scope;
+  if (!force && state.updateCheckDone[scope]) return Promise.resolve();
+  return api('/api/updates?scope=' + scope)
+    .then(function(d){
+      state.updates = d.updates || {};
+      state.updateCheckDone[scope] = true;
+      var n = Object.keys(state.updates).filter(function(k){ return state.updates[k].updateAvailable; }).length;
+      renderList();
+      if (state.selected) showDetail(state.selected);
+      if (n > 0) toast(n + ' update' + (n === 1 ? '' : 's') + ' available', 'success');
+    })
+    .catch(function(){ /* update check is advisory; failures stay silent */ });
+}
+
+/* ---------- search ---------- */
+#searchView{display:none;padding:26px 30px;overflow:auto;height:100%}
+.view-search main{grid-template-columns:1fr}
+#searchView{display:block}
+.subtabs{display:flex;gap:6px;margin:0 0 14px}
+.subtabs button{
+  border:1px solid var(--t-border);background:transparent;border-radius:999px;padding:5px 14px;
+  cursor:pointer;color:var(--t-textMuted);font-weight:500;
+  transition:all .16s var(--ease);
+}
+.subtabs button[aria-selected="true"]{background:var(--t-primary);border-color:var(--t-primary);color:var(--t-primaryText);font-weight:600}
+.subtabs button:hover:not([aria-selected="true"]){background:var(--t-surfaceAlt);color:var(--t-text)}
+#queueList{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:8px;max-width:860px}
+#queueList li{
+  display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--t-border);
+  border-radius:12px;background:var(--t-surface);
+  transition:border-color .16s var(--ease),box-shadow .16s var(--ease);
+  animation:rise .3s var(--ease) backwards;
+}
+#queueList li:hover{border-color:var(--t-primary)}
+#queueList .q-name{font-weight:600}
+#queueList .q-source{color:var(--t-textMuted);font-size:12.5px;font-family:ui-monospace,Menlo,monospace;margin-left:auto}
+#queueList .q-remove{
+  border:0;background:transparent;color:var(--t-textMuted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;
+}
+#queueList .q-remove:hover{color:var(--t-danger);background:color-mix(in srgb,var(--t-danger) 15%,transparent)}
+.add-btn.added{background:color-mix(in srgb,var(--a-green) 18%,transparent);border-color:var(--a-green);color:var(--t-text);cursor:default}
+.add-btn.added:hover{transform:none;box-shadow:none}
+.search-row{display:flex;gap:10px;max-width:720px}
+#searchInput{
+  flex:1;padding:12px 16px;border-radius:12px;border:1px solid var(--t-border);
+  background:var(--t-surfaceAlt);color:var(--t-text);font-size:15px;
+  transition:border-color .18s var(--ease),box-shadow .18s var(--ease);
+}
+#searchInput:focus{outline:none;border-color:var(--t-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--t-primary) 25%,transparent)}
+#results{list-style:none;margin:22px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+#results li{
+  border:1px solid var(--t-border);border-radius:14px;background:var(--t-surface);padding:16px 18px;
+  display:flex;flex-direction:column;gap:8px;
+  transition:transform calc(.2s * var(--motion-scale)) var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease);
+  animation:rise calc(.4s * var(--motion-scale)) var(--ease) backwards;
+  animation-delay:calc(var(--i) * 40ms * var(--motion-scale));
+}
+#results li:hover{transform:translateY(-3px);box-shadow:0 10px 26px color-mix(in srgb,var(--a-mauve) 22%,transparent);border-color:var(--t-primary)}
+.result-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.result-name{font-weight:700}
+.result-installs{color:var(--t-textMuted);font-size:12px;white-space:nowrap}
+.result-source{color:var(--t-textMuted);font-size:12.5px;font-family:ui-monospace,Menlo,monospace}
+
+/* ---------- settings drawer ---------- */
+#settings{
+  position:fixed;top:0;right:0;bottom:0;width:340px;z-index:40;
+  background:var(--t-surface);border-left:1px solid var(--t-border);
+  padding:22px 24px;overflow:auto;
+  /* closed = fully off-screen; --open 0 -> 100%, 1 -> 0% */
+  transform:translateX(calc((1 - var(--open,0)) * 100%));
+  transition:transform calc(.28s * var(--motion-scale)) var(--ease);
+  box-shadow:-12px 0 40px rgba(0,0,0,.25);
+  visibility:hidden;
+}
+#settings.open{--open:1;visibility:visible;transition:transform calc(.28s * var(--motion-scale)) var(--ease),visibility 0s}
+#settings h2{margin:0 0 18px;font-size:17px}
+.setting{margin-bottom:20px}
+.setting label{display:block;font-weight:600;margin-bottom:8px}
+.setting .hint{color:var(--t-textMuted);font-size:12px;margin-top:6px}
+.seg{display:inline-flex;border:1px solid var(--t-border);border-radius:10px;overflow:hidden;width:100%}
+.seg button{
+  flex:1;border:0;background:transparent;padding:8px 4px;cursor:pointer;color:var(--t-textMuted);
+  transition:all .16s var(--ease);
+}
+.seg button[aria-pressed="true"]{background:var(--t-primary);color:var(--t-primaryText);font-weight:600}
+.seg button:hover:not([aria-pressed="true"]){background:var(--t-surfaceAlt);color:var(--t-text)}
+#settingsClose{position:absolute;top:16px;right:16px}
+#scrim{
+  position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:30;opacity:0;pointer-events:none;
+  transition:opacity .25s var(--ease);
+}
+#scrim.open{opacity:1;pointer-events:auto}
+
+/* ---------- modal ---------- */
+dialog{
+  border:1px solid var(--t-border);border-radius:16px;background:var(--t-surface);color:var(--t-text);
+  padding:24px 26px;max-width:440px;box-shadow:0 24px 60px rgba(0,0,0,.4);
+}
+dialog::backdrop{background:rgba(0,0,0,.45);backdrop-filter:blur(2px)}
+dialog h3{margin:0 0 8px}
+dialog p{color:var(--t-textMuted);margin:0 0 18px}
+dialog .row{display:flex;gap:10px;justify-content:flex-end}
+
+/* ---------- toasts ---------- */
+#toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:50}
+.toast{
+  padding:10px 18px;border-radius:11px;font-weight:500;
+  background:var(--t-surfaceAlt);color:var(--t-text);border:1px solid var(--t-border);
+  animation:toast-in calc(.3s * var(--motion-scale)) var(--ease),toast-out .4s ease 3.4s forwards;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+}
+/* Tone rides the border + dot (non-text, >=3:1); text stays var(--t-text),
+   which is AA-verified on surfaceAlt — accent text there is not. */
+.toast.success{border-color:var(--t-success)}
+.toast.success::before{background:var(--t-success)}
+.toast.error{border-color:var(--t-danger)}
+.toast.error::before{background:var(--t-danger)}
+.toast::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:9px;background:var(--t-textMuted);vertical-align:middle}
+@keyframes toast-in{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes toast-out{to{opacity:0;transform:translateY(8px)}}
+
+.update-badge{
+  font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:auto;flex:none;
+  background:color-mix(in srgb,var(--a-peach) 22%,transparent);
+  border:1px solid color-mix(in srgb,var(--a-peach) 55%,transparent);
+}
+.result-chip{
+  font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;
+  background:color-mix(in srgb,var(--a-green) 20%,transparent);
+  border:1px solid color-mix(in srgb,var(--a-green) 50%,transparent);
+}
+.busy-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--t-primary);
+  animation:pulse calc(1s * var(--motion-scale)) ease-in-out infinite;margin-right:8px}
+@keyframes pulse{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
+
+kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radius:5px;padding:1px 6px;font-size:12px}
+footer.tip{color:var(--t-textMuted);font-size:12px;padding:8px 16px 14px;border-top:1px solid var(--t-border)}
+`;
+
+const APP_JS = `
+(function(){
+'use strict';
+var state = {
+  prefs: window.__PREFS__,
+  tab: 'installed',
+  scope: 'project',
+  skills: [],
+  selected: null,
+  checked: new Set(),
+  query: '',
+  results: [],
+  busy: false,
+  sortBy: 'name',
+  updates: {},
+  updateCheckDone: { project: false, global: false },
+  seedHold: false,
+  queue: [],
+  sview: 'results',
+  agentFilter: null
+};
+
+function $(sel){ return document.querySelector(sel); }
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function api(path, opts){
+  return fetch(path, opts).then(function(r){
+    return r.json().then(function(body){
+      if (!r.ok) throw new Error(body && body.error || ('HTTP ' + r.status));
+      return body;
+    });
+  });
+}
+
+/* ---------- sounds (WebAudio synth; no audio assets) ---------- */
+var audioCtx = null;
+function tone(freq, start, dur, type, gainPeak){
+  var ctx = audioCtx;
+  var osc = ctx.createOscillator();
+  var gain = ctx.createGain();
+  osc.type = type || 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, ctx.currentTime + start);
+  gain.gain.linearRampToValueAtTime(gainPeak || 0.06, ctx.currentTime + start + 0.012);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + dur);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(ctx.currentTime + start);
+  osc.stop(ctx.currentTime + start + dur + 0.05);
+}
+function play(kind){
+  if (!state.prefs.sound) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (kind === 'select') tone(660, 0, 0.06, 'sine', 0.04);
+    else if (kind === 'confirm') { tone(523, 0, 0.09); tone(784, 0.07, 0.12); }
+    else if (kind === 'success') { tone(523, 0, 0.1); tone(659, 0.08, 0.1); tone(784, 0.16, 0.16); }
+    else if (kind === 'error') { tone(170, 0, 0.14, 'square', 0.05); tone(140, 0.12, 0.14, 'square', 0.05); }
+  } catch (e) { /* audio unavailable */ }
+}
+
+/* ---------- prefs ---------- */
+function setPrefs(patch){
+  state.prefs = Object.assign({}, state.prefs, patch);
+  applyPrefs();
+  api('/api/prefs', { method:'PUT', headers:{'content-type':'application/json'}, body: JSON.stringify(patch) })
+    .catch(function(){ toast('Could not save preferences', 'error'); });
+}
+function applyPrefs(){
+  document.documentElement.setAttribute('data-theme', state.prefs.theme);
+  document.documentElement.setAttribute('data-motion', String(state.prefs.reduceMotion));
+  ['auto','true','false'].forEach(function(v){
+    var b = document.querySelector('[data-motion-choice="' + v + '"]');
+    if (b) b.setAttribute('aria-pressed', String(String(state.prefs.reduceMotion) === v));
+  });
+  [['on', true], ['off', false]].forEach(function(pair){
+    var b = document.querySelector('[data-sound-choice="' + pair[0] + '"]');
+    if (b) b.setAttribute('aria-pressed', String(state.prefs.sound === pair[1]));
+  });
+  var themeToggle = $('#themeToggle');
+  if (themeToggle) {
+    var light = state.prefs.theme === 'latte';
+    themeToggle.textContent = light ? '☾ Dark' : '☀ Light';
+    themeToggle.setAttribute('aria-label', light ? 'Switch to dark theme' : 'Switch to light theme');
+  }
+  var themeBtns = document.querySelectorAll('[data-theme-choice]');
+  themeBtns.forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-theme-choice') === state.prefs.theme)); });
+}
+
+/* ---------- toasts ---------- */
+function toast(text, tone){
+  var el = document.createElement('div');
+  el.className = 'toast' + (tone ? ' ' + tone : '');
+  el.setAttribute('role', 'status');
+  el.textContent = text;
+  $('#toasts').appendChild(el);
+  setTimeout(function(){ el.remove(); }, 3900);
+}
+
+/* ---------- busy ---------- */
+function setBusy(label){
+  state.busy = !!label;
+  var btns = document.querySelectorAll('.btn');
+  btns.forEach(function(b){ b.disabled = state.busy; });
+  var bar = $('#busyBar');
+  bar.style.display = label ? 'block' : 'none';
+  $('#busyText').textContent = label || '';
+}
+
+/* ---------- accent chips per agent (high color) ---------- */
+var ACCENTS = ['--a-mauve','--a-blue','--a-teal','--a-green','--a-peach','--a-red','--a-pink','--a-sapphire','--a-yellow','--a-flamingo'];
+function chipColor(name){
+  var h = 0;
+  for (var i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return ACCENTS[h % ACCENTS.length];
+}
+
+/* ---------- installed list ---------- */
+function loadSkills(){
+  setBusy('Loading skills…');
+  return api('/api/skills?scope=' + state.scope).then(function(data){
+    state.skills = data.skills;
+    renderList();
+    if (!data.skills.length) {
+      $('#detailPane').innerHTML = '<div class="empty">No ' + state.scope + ' skills installed.<br>Open the <b>Search</b> tab to install one.</div>';
+    } else if (!state.seedHold && (state.selected == null || !data.skills.some(function(s){ return s.name === state.selected; }))) {
+      selectSkill(data.skills[0].name);
+    } else if (!state.seedHold) {
+      showDetail(state.selected);
+    }
+  }).catch(function(e){ toast(e.message, 'error'); })
+  .finally(function(){ setBusy(null); });
+}
+
+function filteredSkills(){
+  var needle = ($('#filter').value || '').trim().toLowerCase();
+  var items = state.skills.filter(function(s){
+    var agentOk = !state.agentFilter || state.agentFilter.size === 0 ||
+      s.agents.some(function(a){ return state.agentFilter.has(a); });
+    if (!agentOk) return false;
+    if (!needle) return true;
+    var hay = (s.name + ' ' + s.description + ' ' + (s.source || '')).toLowerCase();
+    return hay.indexOf(needle) >= 0;
+  });
+  if (state.sortBy === 'checked') {
+    items = items.slice().sort(function(a, b){
+      var ca = state.checked.has(a.name) ? 0 : 1;
+      var cb = state.checked.has(b.name) ? 0 : 1;
+      return ca - cb || a.name.localeCompare(b.name);
+    });
+  }
+  return items;
+}
+function renderList(){
+  var list = $('#skillList');
+  var items = filteredSkills();
+  list.innerHTML = '';
+  items.forEach(function(s, i){
+    var li = document.createElement('li');
+    li.style.setProperty('--i', i);
+    li.setAttribute('role', 'option');
+    li.setAttribute('aria-selected', String(s.name === state.selected));
+    li.setAttribute('tabindex', '0');
+    var outdated = state.updates[s.name] && state.updates[s.name].updateAvailable;
+    li.innerHTML =
+      '<div class="skill-name">' +
+      '<input type="checkbox" class="skill-check" aria-label="Select ' + esc(s.name) + ' for update"' +
+      (state.checked.has(s.name) ? ' checked' : '') + '>' +
+      '<span class="dot' + (s.agents.length ? '' : ' unlinked') + '"></span>' +
+      esc(s.name) +
+      (outdated ? '<span class="update-badge">update</span>' : '') +
+      '</div>' +
+      '<div class="skill-desc">' + esc(s.description || '') + '</div>' +
+      '<div class="chips">' + s.agents.slice(0, 4).map(function(a){
+        return '<span class="chip" style="--chip:var(' + chipColor(a) + ')">' + esc(a) + '</span>';
+      }).join('') + (s.agents.length > 4 ? '<span class="chip">+' + (s.agents.length - 4) + '</span>' : '') + '</div>';
+    li.querySelector('.skill-check').addEventListener('click', function(ev){ ev.stopPropagation(); });
+    li.querySelector('.skill-check').addEventListener('change', function(ev){
+      if (ev.target.checked) state.checked.add(s.name); else state.checked.delete(s.name);
+      renderSelBar();
+      play('select');
+    });
+    li.addEventListener('click', function(){ selectSkill(s.name); play('select'); });
+    li.addEventListener('keydown', function(ev){ if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); selectSkill(s.name); play('select'); } });
+    list.appendChild(li);
+  });
+  if (!items.length) {
+    list.innerHTML = '<div class="empty">' + (needle ? 'No matches for “' + esc(needle) + '”' : 'Nothing here yet') + '</div>';
+  }
+}
+
+function selectSkill(name){
+  state.selected = name;
+  renderList();
+  showDetail(name);
+}
+
+function showDetail(name){
+  var skill = state.skills.filter(function(s){ return s.name === name; })[0];
+  if (!skill) return;
+  var pane = $('#detailPane');
+  var detailOutdated = state.updates[skill.name] && state.updates[skill.name].updateAvailable;
+  pane.innerHTML =
+    '<h1 class="detail-title">' + esc(skill.name) + '</h1>' +
+    '<p class="detail-source">' + esc(skill.source || 'local skill') +
+    (detailOutdated ? ' · <span class="update-badge">update available</span>' : '') + '</p>' +
+    '<div class="detail-actions">' +
+      '<button class="btn danger" id="removeBtn">Remove…</button>' +
+      '<button class="btn" id="updateBtn">Update</button>' +
+    '</div>' +
+    '<dl class="detail-meta">' +
+      '<dt>Scope</dt><dd>' + esc(skill.scope) + '</dd>' +
+      '<dt>Agents</dt><dd>' + (skill.agents.length ? skill.agents.map(esc).join(', ') : 'not linked') + '</dd>' +
+      '<dt>Path</dt><dd>' + esc(skill.path) + '</dd>' +
+    '</dl>' +
+    '<pre class="readme" id="readme">Loading…</pre>';
+  $('#removeBtn').addEventListener('click', function(){ openRemove(skill); });
+  $('#updateBtn').addEventListener('click', function(){ updateSkills([skill.name], skill.scope === 'global'); });
+  api('/api/skill?scope=' + skill.scope + '&name=' + encodeURIComponent(skill.name))
+    .then(function(d){ $('#readme').textContent = d.body || '(empty SKILL.md)'; })
+    .catch(function(){ $('#readme').textContent = '(SKILL.md unavailable)'; });
+}
+
+function deleteChecked(){
+  var names = Array.from(state.checked);
+  if (!names.length) return;
+  var dlg = $('#confirmDialog');
+  $('#confirmText').textContent =
+    'Remove ' + names.length + ' skill' + (names.length === 1 ? '' : 's') +
+    ' (' + names.join(', ') + ') from ' + state.scope + ' scope?';
+  dlg.showModal();
+  $('#confirmYes').onclick = function(){
+    dlg.close();
+    setBusy('Removing ' + names.length + ' skill' + (names.length === 1 ? '' : 's') + '…');
+    api('/api/remove', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ skills: names, global: state.scope === 'global' }) })
+      .then(function(){
+        play('success');
+        toast('Removed ' + names.length + ' skill' + (names.length === 1 ? '' : 's'), 'success');
+        state.checked.clear();
+        renderSelBar();
+        state.selected = null;
+        return loadSkills();
+      })
+      .catch(function(e){ play('error'); toast(e.message, 'error'); })
+      .finally(function(){ setBusy(null); });
+  };
+}
+
+function openRemove(skill){
+  var dlg = $('#confirmDialog');
+  $('#confirmText').textContent = 'Remove “' + skill.name + '” from ' + skill.scope + ' scope? Agent links will be cleaned up.';
+  dlg.showModal();
+  $('#confirmYes').onclick = function(){
+    dlg.close();
+    setBusy('Removing ' + skill.name + '…');
+    api('/api/remove', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ skills:[skill.name], global: skill.scope === 'global' }) })
+      .then(function(){ play('success'); toast('Removed ' + skill.name, 'success'); state.selected = null; return loadSkills(); })
+      .catch(function(e){ play('error'); toast(e.message, 'error'); })
+      .finally(function(){ setBusy(null); });
+  };
+}
+
+function applySeed(){
+  var seed = window.__SEED__ || { kind: 'none' };
+  if (seed.kind === 'add' && seed.source) showInstallSeed(seed);
+  else if (seed.kind === 'update' && seed.skills && seed.skills.length) {
+    state.checked = new Set(seed.skills);
+    renderList(); renderSelBar();
+    toast(seed.skills.length + ' skill' + (seed.skills.length === 1 ? '' : 's') + ' selected for update', 'success');
+  } else if (seed.kind === 'remove' && seed.skills && seed.skills.length) {
+    toast(seed.skills.length + ' skill' + (seed.skills.length === 1 ? '' : 's') + ' to remove: ' + seed.skills.join(', '), 'success');
+  }
+}
+
+function showInstallSeed(seed){
+  state.seedHold = true;
+  var pane = $('#detailPane');
+  pane.innerHTML =
+    '<h1 class="detail-title">Install from ' + esc(seed.source) + '</h1>' +
+    '<p class="detail-source" id="seedStatus">Loading skill list…</p>' +
+    '<div id="seedList" class="seed-list"></div>' +
+    '<div class="detail-actions" style="margin-top:16px">' +
+      '<button class="btn primary" id="seedInstall">Install selected</button>' +
+      '<button class="btn" id="seedInstallAll">Install all</button>' +
+      '<button class="btn" id="seedCancel">Cancel</button>' +
+    '</div>';
+  var closeSeed = function(){ state.seedHold = false; loadSkills(); };
+  $('#seedCancel').addEventListener('click', closeSeed);
+  var preSelected = seed.skills || [];
+  api('/api/source-skills?source=' + encodeURIComponent(seed.source))
+    .then(function(d){
+      if (state.seedHold === false) return;
+      var names = d.skills.map(function(x){ return x.name; });
+      if (!names.length) { $('#seedStatus').textContent = 'No skills found in this source.'; return; }
+      var chosen = new Set(preSelected.length ? names.filter(function(n){ return preSelected.indexOf(n) >= 0; }) : names);
+      if (!chosen.size) chosen = new Set(names);
+      $('#seedStatus').textContent = names.length + ' skills available — pick what to install:';
+      var box = $('#seedList');
+      box.innerHTML = '';
+      names.forEach(function(n){
+        var row = document.createElement('label');
+        row.className = 'seed-row';
+        row.innerHTML = '<input type="checkbox" data-skill="' + esc(n) + '"' +
+          (chosen.has(n) ? ' checked' : '') + '> <span>' + esc(n) + '</span>';
+        box.appendChild(row);
+      });
+      $('#seedInstall').addEventListener('click', function(){
+        var picked = Array.prototype.map.call(box.querySelectorAll('input:checked'), function(i){ return i.getAttribute('data-skill'); });
+        if (!picked.length) { play('error'); toast('Select at least one skill', 'error'); return; }
+        runSeedInstall(seed.source, picked);
+      });
+      $('#seedInstallAll').addEventListener('click', function(){ runSeedInstall(seed.source, ['*']); });
+    })
+    .catch(function(e){ $('#seedStatus').textContent = 'Could not list skills: ' + e.message; });
+}
+
+function runSeedInstall(source, skills){
+  setBusy('Installing from ' + source + '…');
+  api('/api/install', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ source: source, skills: skills, global: state.scope === 'global' }) })
+    .then(function(res){
+      if (res.ok) { play('success'); toast('Installed from ' + source, 'success'); }
+      else { play('error'); toast('Install failed for some skills', 'error'); }
+      state.seedHold = false;
+      return loadSkills();
+    })
+    .catch(function(e){ play('error'); toast(e.message, 'error'); })
+    .finally(function(){ setBusy(null); });
+}
+
+function updateSkills(skills, global){
+  var all = !skills || !skills.length;
+  setBusy(all ? 'Updating all skills…' : 'Updating ' + skills.join(', ') + '…');
+  api('/api/update', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ skills: skills, global: global }) })
+    .then(function(){
+      play('success');
+      toast(all ? 'Update finished' : 'Updated ' + skills.join(', '), 'success');
+      state.checked.clear();
+      renderSelBar();
+      return loadSkills();
+    })
+    .catch(function(e){ play('error'); toast(e.message, 'error'); })
+    .finally(function(){ setBusy(null); });
+}
+
+function checkForUpdates(force){
+  var scope = state.scope;
+  if (!force && state.updateCheckDone[scope]) return Promise.resolve();
+  return api('/api/updates?scope=' + scope)
+    .then(function(d){
+      state.updates = d.updates || {};
+      state.updateCheckDone[scope] = true;
+      var n = Object.keys(state.updates).filter(function(k){ return state.updates[k].updateAvailable; }).length;
+      renderList();
+      if (state.selected) showDetail(state.selected);
+      if (n > 0) toast(n + ' update' + (n === 1 ? '' : 's') + ' available', 'success');
+    })
+    .catch(function(){ /* update check is advisory; failures stay silent */ });
+}
+
+/* ---------- search ---------- */
+var searchTimer = null;
+function runSearch(){
+  var q = $('#searchInput').value.trim();
+  if (searchTimer) clearTimeout(searchTimer);
+  if (!q) { state.results = []; renderResults(); return; }
+  searchTimer = setTimeout(function(){
+    if (!state.installedAll) refreshInstalledAll();
+    setBusy('Searching skills.sh…');
+    api('/api/search?q=' + encodeURIComponent(q))
+      .then(function(d){
+        state.results = d.results;
+        renderResults();
+        if (d.adjustedQuery) toast('No exact matches — showing results for “' + d.adjustedQuery + '”', 'success');
+      })
+      .catch(function(e){ play('error'); toast(e.message, 'error'); })
+      .finally(function(){ setBusy(null); });
+  }, 300);
+}
+
+function installedKey(source, name){ return (source || '') + '#' + (name || ''); }
+function installedEntry(source, name){
+  var pool = state.installedAll || state.skills;
+  var key = installedKey(source, name);
+  var hits = pool.filter(function(s){ return s.source && installedKey(s.source, s.name) === key; });
+  return hits[0] || null;
+}
+function refreshInstalledAll(){
+  return Promise.all([api('/api/skills?scope=project'), api('/api/skills?scope=global')])
+    .then(function(rs){ state.installedAll = rs[0].skills.concat(rs[1].skills); })
+    .catch(function(){ state.installedAll = state.skills; });
+}
+function renderResults(){
+  var list = $('#results');
+  list.innerHTML = '';
+  if (!state.results.length) {
+    list.innerHTML = '<div class="empty">' + ($('#searchInput').value.trim() ? 'No results' : 'Type to search the skills.sh registry') + '</div>';
+    return;
+  }
+  state.results.forEach(function(r, i){
+    var li = document.createElement('li');
+    li.style.setProperty('--i', i);
+    var installed = installedEntry(r.source, r.name);
+    var sameScope = installed && installed.scope === state.scope;
+    var qk = (r.source || r.slug) + '#' + r.name;
+    var inQueue = state.queue.some(function(q){ return q.key === qk; });
+    li.innerHTML =
+      '<div class="result-head"><span class="result-name">' + esc(r.name) + '</span>' +
+      (installed ? '<span class="result-chip">installed' + (sameScope ? ' · ' + esc(installed.scope) : '') + '</span>' : '') +
+      '<span class="result-installs">' + esc(String(r.installs)) + ' installs</span></div>' +
+      '<span class="result-source">' + esc(r.source || r.slug) + '</span>' +
+      '<div style="display:flex;gap:8px">' +
+      '<button class="btn add-btn' + (inQueue ? ' added' : '') + '"' + (inQueue ? ' disabled title="Already in your install list"' : '') + '>' +
+      (inQueue ? '✓ In list' : '+ Add to list') + '</button>' +
+      '<button class="btn primary install-btn"' + (sameScope ? ' disabled title="Already installed in ' + esc(state.scope) + ' scope"' : '') + '>' +
+      (sameScope ? 'Installed' : 'Install') + '</button></div>';
+    li.querySelector('.add-btn').addEventListener('click', function(){
+      if (state.queue.some(function(q){ return q.key === qk; })) return;
+      state.queue.push({ key: qk, source: r.source || r.slug, name: r.name });
+      play('confirm');
+      toast('Added ' + r.name + ' to install list (' + state.queue.length + ')', 'success');
+      renderResults(); renderQueue(); updateSearchTabBadge();
+    });
+    li.querySelector('.install-btn').addEventListener('click', function(){
+      play('confirm');
+      setBusy('Installing ' + r.name + '…');
+      var scopeBtn = document.querySelector('.scope-toggle button[aria-pressed="true"]');
+      var installGlobal = scopeBtn ? scopeBtn.getAttribute('data-scope') === 'global' : false;
+      api('/api/install', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ source: r.source || r.slug, skill: r.name, global: installGlobal }) })
+        .then(function(res){
+          if (res.ok) { play('success'); toast('Installed ' + r.name, 'success'); }
+          else { play('error'); toast('Install failed for ' + r.name, 'error'); }
+        })
+        .catch(function(e){ play('error'); toast(e.message, 'error'); })
+        .finally(function(){ setBusy(null); });
+    });
+    list.appendChild(li);
+  });
+}
+
+/* ---------- install queue ---------- */
+function updateSearchTabBadge(){
+  var searchTab = document.querySelector('[data-tab="search"]');
+  if (searchTab) searchTab.textContent = 'Search' + (state.queue.length ? ' (' + state.queue.length + ')' : '');
+}
+function renderQueue(){
+  var list = $('#queueList');
+  list.innerHTML = '';
+  state.queue.forEach(function(q){
+    var li = document.createElement('li');
+    li.innerHTML =
+      '<span class="q-name">' + esc(q.name) + '</span>' +
+      '<span class="q-source">' + esc(q.source) + '</span>' +
+      '<button class="q-remove" aria-label="Remove ' + esc(q.name) + ' from list">✕</button>';
+    li.querySelector('.q-remove').addEventListener('click', function(){
+      state.queue = state.queue.filter(function(x){ return x.key !== q.key; });
+      renderQueue(); renderResults(); updateSearchTabBadge();
+    });
+    list.appendChild(li);
+  });
+  $('#qCount').textContent = String(state.queue.length);
+  var empty = state.queue.length === 0;
+  list.style.display = empty ? 'none' : 'grid';
+  $('#queueActions').style.display = empty || state.sview !== 'selected' ? 'none' : 'flex';
+  var searchRow = document.querySelector('.search-row');
+  searchRow.style.display = state.sview === 'results' ? 'flex' : 'none';
+  $('#results').style.display = state.sview === 'results' ? 'grid' : 'none';
+  list.style.display = state.sview === 'selected' && !empty ? 'grid' : 'none';
+}
+function setSview(view){
+  state.sview = view;
+  document.querySelectorAll('[data-sview]').forEach(function(b){
+    b.setAttribute('aria-selected', String(b.getAttribute('data-sview') === view));
+  });
+  renderQueue(); play('select');
+}
+function installQueue(){
+  var groups = new Map();
+  state.queue.forEach(function(q){
+    var names = groups.get(q.source) || [];
+    names.push(q.name);
+    groups.set(q.source, names);
+  });
+  var entries = Array.from(groups.entries());
+  var total = state.queue.length;
+  var done = 0, failed = 0;
+  var next = function(){
+    if (!entries.length) {
+      state.queue = [];
+      renderQueue(); renderResults(); updateSearchTabBadge();
+      if (failed) { play('error'); toast('Installed ' + (total - failed) + ', failed ' + failed, 'error'); }
+      else { play('success'); toast('Installed ' + total + ' skill' + (total === 1 ? '' : 's'), 'success'); }
+      setSview('results');
+      loadSkills();
+      return;
+    }
+    var entry = entries.shift();
+    setBusy('Installing ' + entry[1].join(', ') + '…');
+    api('/api/install', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ source: entry[0], skills: entry[1], global: state.scope === 'global' }) })
+      .then(function(res){ if (res.ok) done += entry[1].length; else failed += entry[1].length; })
+      .catch(function(){ failed += entry[1].length; })
+      .finally(function(){ setBusy(null); next(); });
+  };
+  play('confirm');
+  next();
+}
+
+/* ---------- tabs, scope, settings ---------- */
+function setTab(tab){
+  state.tab = tab;
+  document.querySelectorAll('.tab').forEach(function(t){ t.setAttribute('aria-selected', String(t.getAttribute('data-tab') === tab)); });
+  var searchTab = document.querySelector('[data-tab="search"]');
+  if (searchTab) searchTab.textContent = 'Search' + (state.queue.length ? ' (' + state.queue.length + ')' : '');
+  document.body.classList.toggle('view-search', tab === 'search');
+  $('#listPane').style.display = tab === 'installed' ? 'flex' : 'none';
+  $('#detailPane').style.display = tab === 'installed' ? 'block' : 'none';
+  $('#searchView').style.display = tab === 'search' ? 'block' : 'none';
+  if (tab === 'search') { $('#searchInput').focus(); refreshInstalledAll().then(function(){ if (state.results.length) renderResults(); }); }
+  else if (tab === 'installed') loadSkills().then(function(){ return checkForUpdates(false); });
+}
+
+function uniqueAgents(){
+  var set = new Set();
+  state.skills.forEach(function(s){ (s.agents || []).forEach(function(a){ set.add(a); }); });
+  return Array.from(set).sort();
+}
+function agentsActive(){ return state.agentFilter && state.agentFilter.size > 0; }
+function renderAgentsPop(){
+  var list = $('#agentsList');
+  list.innerHTML = '';
+  var agents = uniqueAgents();
+  agents.forEach(function(a){
+    var row = document.createElement('label');
+    var checked = state.agentFilter ? state.agentFilter.has(a) : true;
+    row.innerHTML = '<input type="checkbox" value="' + esc(a) + '"' + (checked ? ' checked' : '') + '><span>' + esc(a) + '</span>';
+    row.querySelector('input').addEventListener('change', function(ev){
+      if (!state.agentFilter) state.agentFilter = new Set(uniqueAgents());
+      if (ev.target.checked) state.agentFilter.add(a); else state.agentFilter.delete(a);
+      if (state.agentFilter.size === uniqueAgents().length) state.agentFilter = null;
+      renderList(); renderSelBar();
+    });
+    list.appendChild(row);
+  });
+  if (!agents.length) list.innerHTML = '<div class="empty">No agents in installed skills.</div>';
+  var btn = $('#agentsBtn');
+  btn.textContent = agentsActive() ? 'Agents (' + state.agentFilter.size + ')' : 'Agents';
+}
+function toggleAgentsPop(){
+  var pop = $('#agentsPop');
+  if (pop.classList.contains('open')) { closeAgentsPop(); return; }
+  renderAgentsPop();
+  pop.classList.add('open');
+}
+function closeAgentsPop(){ $('#agentsPop').classList.remove('open'); }
+
+function renderSelBar(){
+  var n = state.checked.size;
+  $('#selBar').style.display = n ? 'flex' : 'none';
+  $('#selCount').textContent = n;
+}
+function setScope(scope){
+  state.checked.clear();
+  renderSelBar();
+  state.scope = scope;
+  document.querySelectorAll('[data-scope]').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-scope') === scope)); });
+  play('select');
+  loadSkills();
+}
+
+function openSettings(open){
+  $('#settings').classList.toggle('open', open);
+  $('#scrim').classList.toggle('open', open);
+}
+
+/* ---------- wire up ---------- */
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click', function(){ setTab(t.getAttribute('data-tab')); play('select'); });
+  });
+  document.querySelectorAll('[data-sview]').forEach(function(b){
+    b.addEventListener('click', function(){ setSview(b.getAttribute('data-sview')); });
+  });
+  $('#installQueueBtn').addEventListener('click', installQueue);
+  $('#clearQueueBtn').addEventListener('click', function(){
+    state.queue = []; renderQueue(); renderResults(); updateSearchTabBadge();
+  });
+  document.querySelectorAll('[data-scope]').forEach(function(b){
+    b.addEventListener('click', function(){ setScope(b.getAttribute('data-scope')); });
+  });
+  $('#settingsBtn').addEventListener('click', function(){ openSettings(true); play('select'); });
+  $('#settingsClose').addEventListener('click', function(){ openSettings(false); });
+  $('#scrim').addEventListener('click', function(){ openSettings(false); });
+  $('#updateCheckedBtn').addEventListener('click', function(){
+    updateSkills(Array.from(state.checked), state.scope === 'global');
+  });
+  $('#deleteCheckedBtn').addEventListener('click', deleteChecked);
+  $('#clearCheckedBtn').addEventListener('click', function(){
+    state.checked.clear(); renderList(); renderSelBar();
+  });
+  $('#agentsBtn').addEventListener('click', function(){ toggleAgentsPop(); });
+  $('#agentsAll').addEventListener('click', function(){
+    state.agentFilter = null; renderAgentsPop(); renderList(); renderSelBar();
+  });
+  $('#agentsClear').addEventListener('click', function(){
+    state.agentFilter = new Set(); renderAgentsPop(); renderList(); renderSelBar();
+  });
+  $('#agentsDone').addEventListener('click', function(){ closeAgentsPop(); });
+  $('#helpBtn').addEventListener('click', function(){ $('#helpDialog').showModal(); });
+  $('#helpClose').addEventListener('click', function(){ $('#helpDialog').close(); });
+  $('#selectAllBtn').addEventListener('click', function(){
+    filteredSkills().forEach(function(s){ state.checked.add(s.name); });
+    play('confirm');
+    renderList(); renderSelBar();
+  });
+  document.querySelectorAll('[data-sort]').forEach(function(b){
+    b.addEventListener('click', function(){
+      state.sortBy = b.getAttribute('data-sort');
+      document.querySelectorAll('[data-sort]').forEach(function(x){
+        x.setAttribute('aria-pressed', String(x.getAttribute('data-sort') === state.sortBy));
+      });
+      play('select');
+      renderList();
+    });
+  });
+  $('#filter').addEventListener('input', renderList);
+  $('#filter').addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { $('#filter').value = ''; renderList(); } });
+  $('#searchInput').addEventListener('input', runSearch);
+  $('#updateAllBtn').addEventListener('click', function(){ updateSkills([], state.scope === 'global'); });
+  $('#checkUpdatesBtn').addEventListener('click', function(){ checkForUpdates(false); });
+
+  document.querySelectorAll('[data-theme-choice]').forEach(function(b){
+    b.addEventListener('click', function(){ setPrefs({ theme: b.getAttribute('data-theme-choice') }); play('confirm'); });
+  });
+  $('#themeToggle').addEventListener('click', function(){
+    setPrefs({ theme: state.prefs.theme === 'mocha' ? 'latte' : 'mocha' });
+    play('confirm');
+  });
+  document.querySelectorAll('[data-sound-choice]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var on = b.getAttribute('data-sound-choice') === 'on';
+      setPrefs({ sound: on });
+      if (on) play('confirm');
+    });
+  });
+  document.querySelectorAll('[data-motion-choice]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var v = b.getAttribute('data-motion-choice');
+      setPrefs({ reduceMotion: v === 'auto' ? 'auto' : v === 'true' });
+      play('confirm');
+    });
+  });
+
+  var portInput = $('#portInput');
+  if (portInput) {
+    // Default to the port actually serving this session.
+    portInput.value = window.__PORT__ || '';
+    $('#portNow').textContent = window.__PORT__ ? 'port ' + window.__PORT__ : 'a random port';
+    portInput.addEventListener('change', function(){
+      var raw = portInput.value.trim();
+      if (!raw) {
+        setPrefs({ port: null });
+        play('confirm');
+        toast('Port cleared — next launch picks a random unused port', 'success');
+        return;
+      }
+      var n = Number(raw);
+      if (!Number.isInteger(n) || n < 1 || n > 65535) {
+        play('error');
+        toast('Port must be a whole number from 1 to 65535', 'error');
+        portInput.value = window.__PORT__ || '';
+        return;
+      }
+      setPrefs({ port: n });
+      play('confirm');
+      toast('Port ' + n + ' saved — applies on next launch', 'success');
+    });
+  }
+
+  $('#confirmNo').addEventListener('click', function(){ $('#confirmDialog').close(); });
+
+  // click ripple
+  document.addEventListener('click', function(ev){
+    var btn = ev.target.closest ? ev.target.closest('.btn') : null;
+    if (!btn) return;
+    var rect = btn.getBoundingClientRect();
+    var rip = document.createElement('span');
+    rip.className = 'ripple';
+    var size = Math.max(rect.width, rect.height);
+    rip.style.width = rip.style.height = size + 'px';
+    rip.style.left = (ev.clientX - rect.left - size / 2) + 'px';
+    rip.style.top = (ev.clientY - rect.top - size / 2) + 'px';
+    btn.appendChild(rip);
+    setTimeout(function(){ rip.remove(); }, 550);
+  });
+
+  renderSelBar();
+  document.addEventListener('keydown', function(ev){
+    var key = ev.key;
+    var typing = /^(input|textarea|select)$/i.test((ev.target.tagName || ''));
+    if (key === 'Escape') {
+      if ($('#helpDialog').open) { $('#helpDialog').close(); return; }
+      if ($('#agentsPop').classList.contains('open')) { closeAgentsPop(); return; }
+      if ($('#settings').classList.contains('open')) { openSettings(false); return; }
+      if (ev.target === $('#filter')) { ev.target.blur(); return; } // keep applied filter
+      if (ev.target === $('#searchInput')) {
+        ev.target.value = '';
+        ev.target.dispatchEvent(new Event('input'));
+        ev.target.blur();
+        return;
+      }
+      return;
+    }
+    if (typing) return;
+    if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    if (key === '/') {
+      ev.preventDefault();
+      document.querySelector('[data-tab="search"]').click();
+      $('#searchInput').focus();
+    } else if (key === 'f') {
+      ev.preventDefault();
+      if (state.tab !== 'installed') setTab('installed');
+      $('#filter').focus();
+    } else if (key === '?') {
+      ev.preventDefault();
+      $('#helpDialog').showModal();
+    } else if (key === 'g' || key === 'p') {
+      var scope = key === 'g' ? 'global' : 'project';
+      var btn = document.querySelector('[data-scope="' + scope + '"]');
+      if (btn && btn.getAttribute('aria-pressed') !== 'true') btn.click();
+    } else if (key === 'a') {
+      ev.preventDefault();
+      if (state.tab !== 'installed') setTab('installed');
+      toggleAgentsPop();
+    } else if (key === 'i') {
+      ev.preventDefault();
+      if (state.tab !== 'installed') setTab('installed');
+    } else if (key === 'x') {
+      ev.preventDefault();
+      openSettings(true);
+    }
+  });
+  document.addEventListener('click', function(ev){
+    var wrap = document.querySelector('#agentsWrap');
+    if (wrap && !wrap.contains(ev.target)) closeAgentsPop();
+  });
+
+  applyPrefs();
+  setTab('installed');
+  applySeed();
+});
+})();
+`;
+
+export function renderPage(
+  version: string,
+  prefs?: UiPreferences,
+  serverPort?: number,
+  seed?: UiSeed
+): string {
+  const initialPrefs: UiPreferences = prefs ?? DEFAULT_UI_PREFERENCES;
+  return `<!doctype html>
+<html lang="en" data-theme="${initialPrefs.theme}" data-motion="${String(initialPrefs.reduceMotion)}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>skills — ${version}</title>
+<style>
+[data-theme="mocha"]{
+${cssVarsFor(THEME_TOKENS.mocha, CATPPUCCIN_MOCHA)}
+  --t-crust:${CATPPUCCIN_MOCHA.crust};
+}
+[data-theme="latte"]{
+${cssVarsFor(THEME_TOKENS.latte, CATPPUCCIN_LATTE)}
+  --t-crust:${CATPPUCCIN_LATTE.crust};
+}
+${APP_CSS}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span class="mark">S</span> skills <span class="ver">${version}</span></div>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="installed" aria-selected="true">Installed</button>
+    <button class="tab" role="tab" data-tab="search" aria-selected="false">Search</button>
+  </nav>
+  <div class="top-actions">
+    <div class="scope-toggle" role="group" aria-label="Scope">
+      <button data-scope="project" aria-pressed="true">Project</button>
+      <button data-scope="global" aria-pressed="false">Global</button>
+    </div>
+    <button class="btn" id="checkUpdatesBtn">Check for updates</button>
+    <button class="btn" id="updateAllBtn">Update all</button>
+    <button class="btn" id="themeToggle" aria-label="Switch theme">☀ Light</button>
+    <button class="btn" id="settingsBtn" aria-haspopup="dialog">⚙ Settings</button>
+  </div>
+</header>
+
+<div id="busyBar" style="display:none;padding:8px 22px;background:var(--t-surface);border-bottom:1px solid var(--t-border)">
+  <span class="busy-dot"></span><span id="busyText"></span>
+</div>
+
+<main>
+  <section id="listPane" aria-label="Installed skills">
+    <div class="filter-row">
+      <input id="filter" type="search" placeholder="Filter skills (name, description, or repo)…" aria-label="Filter skills by name, description, or repo">
+      <div id="agentsWrap">
+        <button class="btn" id="agentsBtn" aria-haspopup="true" title="Filter by agent (a)">Agents</button>
+        <div id="agentsPop" role="dialog" aria-label="Filter by agent">
+          <div id="agentsList"></div>
+          <div class="row-actions">
+            <button class="btn" id="agentsAll">All</button>
+            <button class="btn" id="agentsClear">Clear</button>
+            <button class="btn primary" id="agentsDone">Done</button>
+          </div>
+        </div>
+      </div>
+      <button class="btn" id="helpBtn" title="Keyboard shortcuts (?)">?</button>
+      <button class="btn" id="selectAllBtn" title="Check every skill in the filtered list">Select all</button>
+      <div class="seg" role="group" aria-label="Sort order">
+        <button data-sort="name" aria-pressed="true">A–Z</button>
+        <button data-sort="checked" aria-pressed="false">Checked first</button>
+      </div>
+    </div>
+    <div id="selBar">
+      <span class="count"><b id="selCount">0</b> selected</span>
+      <button class="btn primary" id="updateCheckedBtn">Update selected</button>
+      <button class="btn danger" id="deleteCheckedBtn">Delete selected</button>
+      <button class="btn" id="clearCheckedBtn">Clear</button>
+    </div>
+    <ul id="skillList" role="listbox" aria-label="Skills"></ul>
+    <footer class="tip"><kbd>click</kbd> a skill for details · <kbd>Search</kbd> tab installs from skills.sh</footer>
+  </section>
+  <section id="detailPane" aria-label="Skill details"></section>
+  <section id="searchView" aria-label="Registry search" style="display:none">
+    <div class="subtabs" role="tablist" aria-label="Search views">
+      <button data-sview="results" aria-selected="true">Results</button>
+      <button data-sview="selected" aria-selected="false">Selected (<span id="qCount">0</span>)</button>
+    </div>
+    <div class="search-row">
+      <input id="searchInput" type="search" placeholder="Search skills.sh — try “typescript”, “react”, “testing”…" aria-label="Search the skill registry">
+    </div>
+    <ul id="results"></ul>
+    <ul id="queueList" style="display:none"></ul>
+    <div style="margin-top:16px;display:none" id="queueActions">
+      <button class="btn primary" id="installQueueBtn">Install all queued</button>
+      <button class="btn" id="clearQueueBtn">Clear list</button>
+    </div>
+  </section>
+</main>
+
+<div id="scrim"></div>
+<aside id="settings" role="dialog" aria-modal="true" aria-label="Settings">
+  <button class="btn" id="settingsClose" aria-label="Close settings">✕</button>
+  <h2>Settings</h2>
+  <div class="setting">
+    <label>Theme</label>
+    <div class="seg" role="group" aria-label="Theme">
+      <button data-theme-choice="mocha">Mocha (dark)</button>
+      <button data-theme-choice="latte">Latte (light)</button>
+    </div>
+    <p class="hint">catppuccin mocha &amp; latte · WCAG AA contrast · light-theme accents darkened just enough to pass</p>
+  </div>
+  <div class="setting">
+    <label>Sound effects</label>
+    <div class="seg" role="group" aria-label="Sound">
+      <button data-sound-choice="on">On</button>
+      <button data-sound-choice="off">Off</button>
+    </div>
+    <p class="hint">Subtle synthesized feedback. Preference is retained across sessions.</p>
+  </div>
+  <div class="setting">
+    <label>Reduce motion</label>
+    <div class="seg" role="group" aria-label="Reduce motion">
+      <button data-motion-choice="auto">Auto</button>
+      <button data-motion-choice="true">Reduced</button>
+      <button data-motion-choice="false">Full</button>
+    </div>
+    <p class="hint">Auto follows your system “reduce motion” setting.</p>
+  </div>
+  <div class="setting">
+    <label for="portInput">Server port</label>
+    <input id="portInput" type="number" min="1" max="65535" step="1" inputmode="numeric"
+      placeholder="random unused port" autocomplete="off">
+    <p class="hint">
+      Fixed port for future launches — empty picks a random unused one.
+      This session is serving on <strong id="portNow"></strong>; changes apply next launch
+      (a busy port falls back to random).
+    </p>
+  </div>
+</aside>
+
+<dialog id="confirmDialog">
+  <h3>Remove skill</h3>
+  <p id="confirmText"></p>
+  <div class="row">
+    <button class="btn" id="confirmNo">Cancel</button>
+    <button class="btn danger" id="confirmYes">Yes, remove</button>
+  </div>
+</dialog>
+
+<div id="toasts" aria-live="polite"></div>
+
+<dialog id="helpDialog">
+  <h3>Keyboard shortcuts</h3>
+  <table>
+    <tr><td><kbd>/</kbd></td><td>search — <kbd>esc</kbd> cancels</td></tr>
+    <tr><td><kbd>f</kbd></td><td>filter box — <kbd>esc</kbd> leaves it as-is (does not clear)</td></tr>
+    <tr><td><kbd>g</kbd> / <kbd>p</kbd></td><td>global / project scope</td></tr>
+    <tr><td><kbd>a</kbd></td><td>select agents (multi-select)</td></tr>
+    <tr><td><kbd>i</kbd> / <kbd>x</kbd></td><td>installed tab / settings drawer</td></tr>
+    <tr><td><kbd>?</kbd></td><td>this help — <kbd>esc</kbd> closes</td></tr>
+  </table>
+  <div class="row" style="margin-top:14px"><button class="btn" id="helpClose">Close</button></div>
+</dialog>
+
+<script>window.__PREFS__ = ${JSON.stringify(initialPrefs)};window.__PORT__ = ${serverPort ?? 0};window.__SEED__ = ${JSON.stringify(seed ?? { kind: 'none' })};</script>
+<script>
+${APP_JS}
+</script>
+</body>
+</html>
+`;
+}
