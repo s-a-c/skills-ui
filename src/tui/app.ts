@@ -597,8 +597,19 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
   };
 
   renderer.keyInput.on("keypress", onKey);
+  // terminal resizes (SIGWINCH → stdout "resize") must re-render: the
+  // whole-tree rebuild is the only re-layout path (S-87)
+  const onStdoutResize = (): void => {
+    (renderer as unknown as { requestResize?: (width: number, height: number) => void }).requestResize?.(
+      process.stdout.columns ?? 0,
+      process.stdout.rows ?? 0
+    );
+    render();
+  };
+  process.stdout.on("resize", onStdoutResize);
   renderer.once("destroy", () => {
     renderer.keyInput.off("keypress", onKey);
+    process.stdout.off("resize", onStdoutResize);
     if (toastTimer) clearTimeout(toastTimer); // pending toasts must not render after teardown
   });
 

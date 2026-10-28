@@ -74,6 +74,19 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
     width: "42%",
     flexDirection: "column",
   });
+  // filter/agents line sits ABOVE the scroll: with flexGrow lists the
+  // bottom row is pushed off-viewport, hiding an active filter (S-87)
+  if (model.filtering || model.filter || model.agentFilter.size > 0) {
+    const parts: string[] = [];
+    if (model.filter) parts.push(`filter: ${model.filter}${model.filtering ? "▌" : ""}`);
+    if (model.agentFilter.size > 0) parts.push(`agents: ${[...model.agentFilter].sort().join(", ")}`);
+    listPane.add(
+      new TextRenderable(renderer, {
+        content: parts.join(" · "),
+        fg: t.primary,
+      })
+    );
+  }
   const visible = visibleSkills(model);
   const scroll = new ScrollBoxRenderable(renderer, {
     width: "100%",
@@ -121,17 +134,6 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
     scroll.add(row);
   });
   listPane.add(scroll);
-  if (model.filtering || model.filter || model.agentFilter.size > 0) {
-    const parts: string[] = [];
-    if (model.filter) parts.push(`filter: ${model.filter}${model.filtering ? "▌" : ""}`);
-    if (model.agentFilter.size > 0) parts.push(`agents: ${[...model.agentFilter].sort().join(", ")}`);
-    listPane.add(
-      new TextRenderable(renderer, {
-        content: parts.join(" · "),
-        fg: t.primary,
-      })
-    );
-  }
 
   // detail pane (markdown)
   const detailPane = new BoxRenderable(renderer, {
