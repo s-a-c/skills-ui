@@ -7,7 +7,7 @@ import type { SearchSkill } from "./types.ts";
  * prefixes, progressive shortening, trailing-dash fan-out.
  */
 
-const SEARCH_API_BASE = process.env.SKILLS_API_URL ?? "https://skills.sh";
+const SEARCH_API_BASE = process.env.SKILLS_UI_API_URL ?? "https://skills.sh";
 
 /** Strip terminal escape sequences + collapse newlines (CWE-150 defense). */
 export function sanitizeMetadata(str: string): string {

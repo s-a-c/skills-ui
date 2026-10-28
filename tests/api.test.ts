@@ -12,7 +12,7 @@ let server: { port: number; stop: () => Promise<void> } | null = null;
 beforeEach(() => {
   stateDir = mkdtempSync(join(tmpdir(), "skills-ui-api-"));
   prefsDir = mkdtempSync(join(tmpdir(), "skills-ui-prefs-"));
-  process.env.SKILLS_BIN = SHIM;
+  process.env.SKILLS_UI_SKILLS_BIN = SHIM;
   process.env.SKILLS_SHIM_STATE = stateDir;
   process.env.SKILLS_UI_PREFS_DIR = prefsDir;
 });
@@ -22,7 +22,7 @@ afterEach(async () => {
   server = null;
   rmSync(stateDir, { recursive: true, force: true });
   rmSync(prefsDir, { recursive: true, force: true });
-  delete process.env.SKILLS_BIN;
+  delete process.env.SKILLS_UI_SKILLS_BIN;
   delete process.env.SKILLS_SHIM_STATE;
   delete process.env.SKILLS_UI_PREFS_DIR;
 });

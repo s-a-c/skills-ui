@@ -2,7 +2,7 @@
  * Client for the external `skills` CLI (stock vercel-labs/skills).
  *
  * The wrapper owns no build-time dependency on `skills`: the binary is
- * resolved at runtime (SKILLS_BIN → PATH) and every invocation runs as a
+ * resolved at runtime (SKILLS_UI_SKILLS_BIN → PATH) and every invocation runs as a
  * subprocess with a sanitized environment. Agent-detection variables
  * (CURSOR_AGENT, CLAUDECODE, …) are stripped because they silently flip
  * `add`/`remove` into auto-yes/auto-agent modes upstream; parsed output
@@ -72,10 +72,10 @@ let cachedBin: string | null = null;
 
 export class SkillsCliError extends Error {}
 
-/** Resolve the `skills` executable: SKILLS_BIN override, else `skills` on PATH. */
+/** Resolve the `skills` executable: SKILLS_UI_SKILLS_BIN override, else `skills` on PATH. */
 export function resolveSkillsBin(): string {
   if (cachedBin) return cachedBin;
-  cachedBin = process.env.SKILLS_BIN?.trim() || "skills";
+  cachedBin = process.env.SKILLS_UI_SKILLS_BIN?.trim() || "skills";
   return cachedBin;
 }
 
@@ -103,7 +103,7 @@ export async function runSkills(args: string[], options: RunOptions = {}): Promi
     });
   } catch (error) {
     throw new SkillsCliError(
-      `cannot run \`${bin}\` — install skills (npm i -g skills) or set SKILLS_BIN: ${String(error)}`
+      `cannot run \`${bin}\` — install skills (npm i -g skills) or set SKILLS_UI_SKILLS_BIN: ${String(error)}`
     );
   }
   const timeoutMs = options.timeoutMs ?? 120_000;

@@ -11,7 +11,7 @@ let snapshotFile: string;
 beforeEach(() => {
   stateDir = mkdtempSync(join(tmpdir(), "skills-ui-test-"));
   snapshotFile = join(stateDir, "snapshot.json");
-  process.env.SKILLS_BIN = SHIM;
+  process.env.SKILLS_UI_SKILLS_BIN = SHIM;
   process.env.SKILLS_SHIM_STATE = stateDir;
   process.env.SKILLS_SHIM_SNAPSHOT = snapshotFile;
   // agent vars must be present in OUR env to prove the client strips them
@@ -21,7 +21,7 @@ beforeEach(() => {
 
 afterEach(() => {
   rmSync(stateDir, { recursive: true, force: true });
-  delete process.env.SKILLS_BIN;
+  delete process.env.SKILLS_UI_SKILLS_BIN;
   delete process.env.SKILLS_SHIM_STATE;
   delete process.env.SKILLS_SHIM_SNAPSHOT;
   delete process.env.CURSOR_AGENT;

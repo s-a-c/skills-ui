@@ -6,13 +6,13 @@
 
 - A single binary (`bun build --compile`) embedding the Bun runtime and OpenTUI's native core.
 - Three entry modes: `skills-ui` (terminal UI) · `skills-ui --web` (local web UI) · `skills-ui serve` (headless HTTP API).
-- Wraps the **stock** `skills` CLI via subprocess (`ls --json`, `add --json -y`, `rm -y`, `update -y`) — nothing of `skills` is bundled or imported; it is discovered at runtime (`SKILLS_BIN` → `PATH`).
+- Wraps the **stock** `skills` CLI via subprocess (`ls --json`, `add --json -y`, `rm -y`, `update -y`) — nothing of `skills` is bundled or imported; it is discovered at runtime (`SKILLS_UI_SKILLS_BIN` → `PATH`).
 - Talks to the public skills.sh registry directly for search.
 - Rich terminal UI: markdown (tree-sitter), images (kitty/sixel/blocks), 3D graph view (`@opentui/three`), synthesized audio, catppuccin latte|mocha theming with WCAG-verified contrast.
 
 ## Requirements
 
-- `skills` on `PATH` (or point `SKILLS_BIN` at it) — v1.7.x, stock upstream.
+- `skills` on `PATH` (or point `SKILLS_UI_SKILLS_BIN` at it) — v1.7.x, stock upstream.
 - Terminal with truecolor for full fidelity (degrades gracefully).
 
 ## Usage
