@@ -24,6 +24,7 @@ export interface TuiModel {
   skills: InstalledSkill[];
   selected: number;
   checked: Set<string>;
+  updatesAvailable: Set<string>;
   filter: string;
   filtering: boolean;
   sortCheckedFirst: boolean;
@@ -49,6 +50,7 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     skills: [],
     selected: 0,
     checked: new Set(),
+    updatesAvailable: new Set(),
     filter: "",
     filtering: false,
     sortCheckedFirst: true,
@@ -108,6 +110,7 @@ export type Action =
   | { type: "tab"; tab: Tab }
   | { type: "scope"; scope: Scope }
   | { type: "skills-loaded"; skills: InstalledSkill[] }
+  | { type: "updates-loaded"; names: string[] }
   | { type: "move"; delta: number }
   | { type: "home" }
   | { type: "end" }
@@ -135,6 +138,7 @@ export function update(model: TuiModel, action: Action): TuiModel {
   const next: TuiModel = {
     ...model,
     checked: new Set(model.checked),
+    updatesAvailable: new Set(model.updatesAvailable),
     queue: new Map(model.queue),
   };
   switch (action.type) {
@@ -150,6 +154,9 @@ export function update(model: TuiModel, action: Action): TuiModel {
     case "skills-loaded":
       next.skills = action.skills;
       clamp(next);
+      break;
+    case "updates-loaded":
+      next.updatesAvailable = new Set(action.names);
       break;
     case "move": {
       const count = next.tab === "installed" ? visibleSkills(next).length : next.results.length;

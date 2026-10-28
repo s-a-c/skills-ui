@@ -38,6 +38,14 @@ function fakeDeps(): TuiDeps {
     remove: async (names) => ({ ok: true, summary: `removed ${names.join(", ")}` }),
     update: async () => ({ ok: true, summary: "updated" }),
     skillBody: async () => "# tdd\n\n**markdown detail** rendered\n",
+    checkUpdates: async () => ({
+      scope: "project" as const,
+      updates: {
+        "code-review": { name: "code-review", updateAvailable: true, sourceType: "github" },
+        tdd: { name: "tdd", updateAvailable: false, sourceType: "github" },
+      },
+      checkedCount: 2,
+    }),
     savePrefs: () => {},
     play: async () => {},
   };
@@ -171,6 +179,22 @@ describe("tui (in-memory)", () => {
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
     expect(updated).toEqual([["code-review", "tdd"]]); // all visible names
+  });
+
+  test("c checks for updates: ↑ badge, detail hint, toast", async () => {
+    const s = setup!;
+    await runTuiOn(s.renderer, undefined, fakeDeps());
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    let frame = s.captureCharFrame();
+    expect(frame).not.toContain("↑");
+    await s.mockInput.pressKey("c");
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 150));
+    frame = s.captureCharFrame();
+    expect(frame).toContain("↑"); // badge on code-review's row
+    expect(frame).toContain("1 update(s) available"); // toast
+    expect(frame).toContain("update available"); // detail hint — code-review is selected (A→Z first)
   });
 
   test("help overlay toggles with ?", async () => {

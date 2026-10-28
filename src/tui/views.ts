@@ -115,6 +115,9 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
     if (skill.source) {
       row.add(new TextRenderable(renderer, { content: skill.source, fg: selected ? t.selectionText : t.textMuted }));
     }
+    if (model.updatesAvailable.has(skill.name)) {
+      row.add(new TextRenderable(renderer, { content: "↑", fg: t.success }));
+    }
     scroll.add(row);
   });
   listPane.add(scroll);
@@ -148,9 +151,10 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
   detailPane.add(detailScroll);
   const skill = visible[model.selected];
   if (skill) {
+    const updateHint = model.updatesAvailable.has(skill.name) ? " · ↑ update available" : "";
     detailPane.add(
       new TextRenderable(renderer, {
-        content: `${skill.agents.length} agent(s) · ${skill.scope} · ${skill.path}`,
+        content: `${skill.agents.length} agent(s) · ${skill.scope} · ${skill.path}${updateHint}`,
         fg: t.textMuted,
       })
     );
@@ -284,11 +288,11 @@ export function buildHelpOverlay(renderer: CliRenderer, model: TuiModel): BoxRen
   const overlay = new BoxRenderable(renderer, {
     position: "absolute",
     zIndex: 11,
-    top: "20%",
+    top: "10%",
     left: "25%",
     width: "50%",
     flexDirection: "column",
-    gap: 1,
+    gap: 0,
     padding: 1,
     border: true,
     borderStyle: "rounded",
@@ -301,18 +305,18 @@ export function buildHelpOverlay(renderer: CliRenderer, model: TuiModel): BoxRen
     ["/", "search tab"],
     ["f", "filter installed"],
     ["s", "sort checked first"],
+    ["c", "check for updates"],
     ["A | I", "check all / invert"],
     ["g | p", "global / project scope"],
     ["space", "toggle check"],
-    ["u / d", "update / delete checked"],
-    ["PgUp/PgDn", "page up / down"],
-    ["HOME/END", "top / bottom"],
+    ["u / d / r", "update / delete (checked or focused)"],
+    ["PgUp/PgDn/HOME/END", "page · top / bottom"],
     ["?", "this help"],
     ["q", "quit"],
   ];
   for (const [key, label] of keys) {
     const row = new BoxRenderable(renderer, { flexDirection: "row", gap: 2 });
-    row.add(new TextRenderable(renderer, { content: key.padEnd(9), fg: t.primary }));
+    row.add(new TextRenderable(renderer, { content: key.padEnd(18), fg: t.primary }));
     row.add(new TextRenderable(renderer, { content: label, fg: t.text }));
     overlay.add(row);
   }

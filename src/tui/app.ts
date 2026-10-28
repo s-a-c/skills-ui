@@ -1,5 +1,6 @@
 import { BoxRenderable, createCliRenderer, type CliRenderer } from "@opentui/core";
 import {
+  checkForUpdates as svcCheckForUpdates,
   install as svcInstall,
   listInstalled as svcListInstalled,
   remove as svcRemove,
@@ -8,7 +9,7 @@ import {
   update as svcUpdate,
 } from "../core/index.ts";
 import { loadUiPreferences, saveUiPreferences, type UiPreferences } from "../core/prefs.ts";
-import type { InstalledSkill, SearchSkill } from "../core/services/types.ts";
+import type { InstalledSkill, SearchSkill, UpdatesResult } from "../core/services/types.ts";
 import type { UiSeed } from "../core/seed.ts";
 import { disposeAudio, playSound, type SoundKind } from "./audio.ts";
 import { applySeed, createTuiModel, tabFor, update, visibleSkills, type Action, type TuiModel } from "./model.ts";
@@ -35,6 +36,7 @@ export interface TuiDeps {
   remove(names: string[], scope: "project" | "global"): Promise<{ ok: boolean; summary: string }>;
   update(names: string[], scope: "project" | "global"): Promise<{ ok: boolean; summary: string }>;
   skillBody(path: string): Promise<string | null>;
+  checkUpdates(scope: "project" | "global"): Promise<UpdatesResult>;
   savePrefs(prefs: UiPreferences): void;
   play(kind: SoundKind, prefs: UiPreferences): Promise<void>;
 }
@@ -64,6 +66,7 @@ export const realDeps: TuiDeps = {
     return { ok: result.ok, summary: result.ok ? "updated" : "update failed" };
   },
   skillBody: (path) => Promise.resolve(svcSkillBody(path)),
+  checkUpdates: (scope) => svcCheckForUpdates(scope),
   savePrefs: (prefs) => saveUiPreferences(prefs),
   play: (kind, prefs) => playSound(kind, prefs),
 };
@@ -357,6 +360,29 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       case "a":
         dispatch({ type: "check-all" });
         return;
+      case "c":
+        if (model.tab === "installed") {
+          void (async () => {
+            const scope = model.scope;
+            dispatch({ type: "busy", label: "checking for updates" });
+            try {
+              const result = await deps.checkUpdates(scope);
+              const names = Object.values(result.updates)
+                .filter((u) => u.updateAvailable)
+                .map((u) => u.name);
+              dispatch({ type: "updates-loaded", names });
+              toast(
+                names.length > 0 ? `${names.length} update(s) available` : "no updates available",
+                names.length > 0 ? "info" : "success"
+              );
+            } catch (error) {
+              toast(`update check failed: ${error instanceof Error ? error.message : String(error)}`, "error");
+            } finally {
+              dispatch({ type: "busy", label: null });
+            }
+          })();
+        }
+        return;
       case "r":
         if (model.tab === "installed") {
           const skill = visibleSkills(model)[model.selected];
@@ -425,7 +451,10 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
   };
 
   renderer.keyInput.on("keypress", onKey);
-  renderer.once("destroy", () => renderer.keyInput.off("keypress", onKey));
+  renderer.once("destroy", () => {
+    renderer.keyInput.off("keypress", onKey);
+    if (toastTimer) clearTimeout(toastTimer); // pending toasts must not render after teardown
+  });
 
   render();
   await reloadSkills();
