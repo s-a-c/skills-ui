@@ -6,6 +6,7 @@
       "name": "skills-ui",
       "dependencies": {
         "@opentui/core": "0.7.0",
+        "@opentui/keymap": "0.7.0",
       },
       "devDependencies": {
         "@types/bun": "1.4.4",
@@ -30,6 +31,8 @@
     "@opentui/core-win32-arm64": ["@opentui/core-win32-arm64@0.7.0", "", { "os": "win32", "cpu": "arm64" }, "sha512-8yqBoRsDbvKl2kGX0O8t5kpnVEnbzs+2qUZlJ8sbeA3Z+73WFj36G+clUIMVxpspOu78iKXlD84NIwTxjZUPKw=="],
 
     "@opentui/core-win32-x64": ["@opentui/core-win32-x64@0.7.0", "", { "os": "win32", "cpu": "x64" }, "sha512-OfNAX7fNFHhOiiojUkIjhVOZf+IDjpbpT5G7HrxGqhlZ+n4jITrrJzACHctteWbMUYcibieJzIIoKuLdmD5I+w=="],
+
+    "@opentui/keymap": ["@opentui/keymap@0.7.0", "", { "dependencies": { "@opentui/core": "0.7.0" }, "peerDependencies": { "@opentui/react": "0.7.0", "@opentui/solid": "0.7.0", "react": ">=19.2.0", "solid-js": "1.9.12" }, "optionalPeers": ["@opentui/react", "@opentui/solid", "react", "solid-js"] }, "sha512-2IqUnLP+SCZR7+LXRL/7/DGFyaAR6r9y16H5oQVdRTfbACxAjszOaq2iZDEzHp1HVtamQRqEfteuaLEDwmO3kg=="],
 
     "@types/bun": ["@types/bun@1.4.4", "", { "dependencies": { "bun-types": "1.4.4" } }, "sha512-9wkRDXUXK124pEnAutE6n/l18j+i9GC5IAHK8TmX/2nlySETmky0OU6yL5U8pW1AoKh++AN9auDCr647BfurjQ=="],
 

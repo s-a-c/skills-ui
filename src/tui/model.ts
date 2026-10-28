@@ -1,0 +1,224 @@
+import type { InstalledSkill, SearchSkill } from "../core/services/types.ts";
+import type { UiPreferences } from "../core/prefs.ts";
+import type { UiSeed } from "../core/seed.ts";
+
+/**
+ * Pure TUI model — the same Elm-style discipline as the fork's TUI
+ * (state transitions are pure functions; the app layer owns all I/O).
+ * Renderer-agnostic: unit-tested without OpenTUI.
+ */
+
+export type Tab = "installed" | "search" | "settings";
+export type Scope = "project" | "global";
+
+export interface Toast {
+  text: string;
+  tone: "info" | "success" | "error";
+}
+
+export interface TuiModel {
+  tab: Tab;
+  scope: Scope;
+  prefs: UiPreferences;
+  // installed
+  skills: InstalledSkill[];
+  selected: number;
+  checked: Set<string>;
+  filter: string;
+  filtering: boolean;
+  // search
+  query: string;
+  searching: boolean;
+  results: SearchSkill[];
+  searchSelected: number;
+  queue: Map<string, SearchSkill>; // key: source#name
+  // transient
+  busy: string | null;
+  toast: Toast | null;
+  confirm: { kind: "delete" | "update"; names: string[] } | null;
+  help: boolean;
+  detailBody: string | null;
+}
+
+export function createTuiModel(prefs: UiPreferences): TuiModel {
+  return {
+    tab: "installed",
+    scope: "project",
+    prefs,
+    skills: [],
+    selected: 0,
+    checked: new Set(),
+    filter: "",
+    filtering: false,
+    query: "",
+    searching: false,
+    results: [],
+    searchSelected: 0,
+    queue: new Map(),
+    busy: null,
+    toast: null,
+    confirm: null,
+    help: false,
+    detailBody: null,
+  };
+}
+
+export function applySeed(model: TuiModel, seed: UiSeed | undefined): void {
+  if (!seed || seed.kind === "none") return;
+  if (seed.kind === "add") {
+    model.tab = "search";
+    model.query = seed.source;
+  } else if (seed.kind === "update") {
+    for (const name of seed.skills) model.checked.add(name);
+  } else if (seed.kind === "remove") {
+    model.tab = "installed";
+    for (const name of seed.skills) model.checked.add(name);
+  }
+}
+
+/** Visible installed skills under the current filter (matches repo too). */
+export function visibleSkills(model: TuiModel): InstalledSkill[] {
+  const q = model.filter.trim().toLowerCase();
+  if (!q) return model.skills;
+  return model.skills.filter(
+    (s) =>
+      s.name.toLowerCase().includes(q) ||
+      s.source?.toLowerCase().includes(q) ||
+      s.agents.some((a) => a.toLowerCase().includes(q))
+  );
+}
+
+function clamp(model: TuiModel): void {
+  const count = model.tab === "installed" ? visibleSkills(model).length : model.results.length;
+  if (model.selected >= count) model.selected = Math.max(0, count - 1);
+}
+
+export type Action =
+  | { type: "tab"; tab: Tab }
+  | { type: "scope"; scope: Scope }
+  | { type: "skills-loaded"; skills: InstalledSkill[] }
+  | { type: "move"; delta: number }
+  | { type: "home" }
+  | { type: "end" }
+  | { type: "toggle-check" }
+  | { type: "check-all" }
+  | { type: "clear-checks" }
+  | { type: "filter"; text: string }
+  | { type: "filtering"; on: boolean }
+  | { type: "query"; text: string }
+  | { type: "searching"; on: boolean }
+  | { type: "results"; results: SearchSkill[] }
+  | { type: "queue-toggle"; skill: SearchSkill }
+  | { type: "queue-clear" }
+  | { type: "busy"; label: string | null }
+  | { type: "toast"; toast: Toast | null }
+  | { type: "confirm"; confirm: TuiModel["confirm"] }
+  | { type: "help"; on: boolean }
+  | { type: "detail"; body: string | null }
+  | { type: "prefs"; prefs: UiPreferences };
+
+export function update(model: TuiModel, action: Action): TuiModel {
+  const next: TuiModel = {
+    ...model,
+    checked: new Set(model.checked),
+    queue: new Map(model.queue),
+  };
+  switch (action.type) {
+    case "tab":
+      next.tab = action.tab;
+      next.searching = action.tab === "search";
+      break;
+    case "scope":
+      next.scope = action.scope;
+      next.selected = 0;
+      next.checked.clear();
+      break;
+    case "skills-loaded":
+      next.skills = action.skills;
+      clamp(next);
+      break;
+    case "move": {
+      const count = next.tab === "installed" ? visibleSkills(next).length : next.results.length;
+      next.selected = Math.max(0, Math.min(count - 1, (next.tab === "installed" ? next.selected : next.searchSelected) + action.delta));
+      if (next.tab === "search") next.searchSelected = next.selected;
+      break;
+    }
+    case "home":
+      if (next.tab === "search") next.searchSelected = 0;
+      else next.selected = 0;
+      break;
+    case "end": {
+      const count = next.tab === "search" ? next.results.length : visibleSkills(next).length;
+      if (next.tab === "search") next.searchSelected = Math.max(0, count - 1);
+      else next.selected = Math.max(0, count - 1);
+      break;
+    }
+    case "toggle-check": {
+      const skill = visibleSkills(next)[next.selected];
+      if (skill) {
+        if (next.checked.has(skill.name)) next.checked.delete(skill.name);
+        else next.checked.add(skill.name);
+      }
+      break;
+    }
+    case "check-all":
+      for (const s of visibleSkills(next)) next.checked.add(s.name);
+      break;
+    case "clear-checks":
+      next.checked.clear();
+      break;
+    case "filter":
+      next.filter = action.text;
+      clamp(next);
+      break;
+    case "filtering":
+      next.filtering = action.on;
+      break;
+    case "query":
+      next.query = action.text;
+      break;
+    case "searching":
+      next.searching = action.on;
+      break;
+    case "results":
+      next.results = action.results;
+      next.searchSelected = 0;
+      break;
+    case "queue-toggle": {
+      const key = `${action.skill.source}#${action.skill.name}`;
+      if (next.queue.has(key)) next.queue.delete(key);
+      else next.queue.set(key, action.skill);
+      break;
+    }
+    case "queue-clear":
+      next.queue.clear();
+      break;
+    case "busy":
+      next.busy = action.label;
+      break;
+    case "toast":
+      next.toast = action.toast;
+      break;
+    case "confirm":
+      next.confirm = action.confirm;
+      break;
+    case "help":
+      next.help = action.on;
+      break;
+    case "detail":
+      next.detailBody = action.body;
+      break;
+    case "prefs":
+      next.prefs = action.prefs;
+      break;
+  }
+  return next;
+}
+
+/** Keyboard contract — identical to the fork's TUI/webUI (user steer). */
+export function tabFor(key: string): Tab | null {
+  if (key === "i") return "installed";
+  if (key === "/") return "search";
+  if (key === "x") return "settings";
+  return null;
+}

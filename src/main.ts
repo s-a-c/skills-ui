@@ -1,4 +1,4 @@
-import { buildSpikeScreen, runSpikeTui } from "./tui/app.ts";
+import { buildSpikeScreen, runTui } from "./tui/app.ts";
 
 /**
  * skills-ui entry: mode dispatch.
@@ -86,5 +86,6 @@ if (rest.includes("--selftest")) {
 } else if (rest[0] === "--web" || rest[0] === "web") {
   await runWeb(false, port, rest.slice(1));
 } else {
-  await runSpikeTui();
+  const { parseUiSeed } = await import("./core/seed.ts");
+  await runTui(parseUiSeed(rest.filter((a) => a[0] !== "-")));
 }

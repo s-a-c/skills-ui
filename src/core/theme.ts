@@ -4,6 +4,7 @@
  * additions start at `syntaxTokensFor` below.
  */
 import type { ThemeName } from './prefs.ts';
+export type { ThemeName };
 
 /**
  * Catppuccin palette hex values. Sources of truth:
