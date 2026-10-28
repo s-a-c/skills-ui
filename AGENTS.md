@@ -66,6 +66,20 @@ https://linear.app/s-a-c/project/skills-ui-521f0931af82
   record resolutions as a comment, close the ticket, and append the gist to the
   map's Decisions so far.
 
+## Agent skills
+
+### Issue tracker
+
+Issues live in the Linear project skills-ui (P-S-4), team S-a-c, via Linear MCP tools. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Canonical five-role vocabulary, default strings. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` + `docs/adr/` at the repo root, created lazily. See `docs/agents/domain.md`.
+
 ## Skills for this project
 
 - `i-have-adhd` — shape output for an ADHD reader: lead with the next action,
