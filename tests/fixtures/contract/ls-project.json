@@ -1,0 +1,20 @@
+[
+  {
+    "name": "tdd",
+    "path": "/Users/s-a-c/Projects/s-a-c/vercel-labs-skills/main/.agents/skills/tdd",
+    "scope": "project",
+    "agents": ["Antigravity", "Codex", "Cursor", "Gemini CLI"],
+    "source": null,
+    "sourceUrl": null,
+    "sourceType": null
+  },
+  {
+    "name": "code-review",
+    "path": "/Users/s-a-c/Projects/s-a-c/vercel-labs-skills/main/.agents/skills/code-review",
+    "scope": "project",
+    "agents": ["Claude Code"],
+    "source": "anthropics/skills",
+    "sourceUrl": "https://github.com/anthropics/skills",
+    "sourceType": "github"
+  }
+]

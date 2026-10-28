@@ -1,0 +1,19 @@
+[
+  {
+    "name": "alpha",
+    "status": "installed",
+    "source": "fixture/source",
+    "ref": null,
+    "hash": null,
+    "path": "/tmp/skills-shim-state/alpha",
+    "scope": "project",
+    "agents": ["claude-code"],
+    "mode": "copy",
+    "security": null
+  },
+  {
+    "name": "beta",
+    "status": "failed",
+    "error": "simulated failure for contract test"
+  }
+]
