@@ -15,15 +15,26 @@
 - `skills` on `PATH` (or point `SKILLS_BIN` at it) — v1.7.x, stock upstream.
 - Terminal with truecolor for full fidelity (degrades gracefully).
 
+## Usage
+
+```sh
+skills-ui               # terminal UI (OpenTUI)
+skills-ui --web         # local web UI (opens the browser)
+skills-ui serve         # headless HTTP API on 127.0.0.1
+skills-ui add owner/repo --skill tdd   # opens the UI seeded for that install
+skills-ui --selftest    # in-memory smoke check — no TTY needed
+```
+
 ## Development
 
 ```sh
 mise install            # bun 1.4.4
 bun install
-bun run dev             # terminal app (spike: hello screen)
+bun run dev             # terminal app
 bun run selftest        # in-memory renderer smoke test — no TTY needed
-bun test
-bun run build           # compiled binaries → dist/
+bun test                # 36 tests: services (skills shim) · API · TUI snapshots
+bun run build           # compiled binary → dist/ (host target)
+bun run build --all     # darwin-x64/arm64 + linux-x64/arm64 matrix
 ```
 
 ## Relationship to `skills`
