@@ -3,7 +3,7 @@
 Versioning policy: **0.x.y indefinitely** — minor = milestone, patch = fixes. Breaking changes allowed at any minor; no 1.0 is implied.
 
 ```mermaid
-flowchart LR
+flowchart TB
   M0["0.0.x — spike + core services"] --> M1["0.1.x — HTTP API + WebUI"]
   M1 --> M2["0.2.x — OpenTUI TUI parity"]
   M2 --> M3["0.3.x — rich rendering: markdown · images · 3D graph · audio · motion"]
@@ -17,7 +17,7 @@ flowchart LR
 | Version | Scope | Status |
 |---|---|---|
 | 0.0.x | Feasibility spike ✓ · core services over the `skills` subprocess contract ✓ · HTTP API + WebUI port ✓ · OpenTUI TUI with the full keyboard contract ✓ · packaging matrix ✓ · audio synth + markdown + image pipeline ✓ | done (this milestone) |
-| 0.1.x | HTTP API (10 endpoints + `/api/version`) via `Bun.serve`; WebUI port; `--web` / `serve` modes | planned |
+| 0.1.x | HTTP API (10 endpoints + `/api/version`) via `Bun.serve`; WebUI port; `--web` / `serve` modes | done — absorbed into 0.0.x (S-61/S-62, 2026-10-28) |
 | 0.2.x | OpenTUI TUI parity with the fork's TUI: installed list/detail/filter/batch, search+queue, settings, keyboard contract | planned |
 | 0.3.x | Rich rendering depth: images in real views (splash, source cards), 3D graph view (`@opentui/three`), motion polish. Markdown detail, audio synth, image pipeline and theme tokens already landed in 0.0.x | planned |
 | 0.4.x | Packaging matrix: darwin-arm64 → linux-x64/arm64 → win32; `OPENTUI_LIBC`, codesign, version stamping | planned |
