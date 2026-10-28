@@ -39,12 +39,14 @@ export interface TuiModel {
   searchPane: "results" | "selected";
   selectedCursor: number;
   queue: Map<string, SearchSkill>; // key: source#name
-  // transient
+  transient
   busy: string | null;
   toast: Toast | null;
   confirm: { kind: "delete" | "update"; names: string[] } | null;
   help: boolean;
   detailBody: string | null;
+  /** Discovered `skills` CLI version: undefined = not queried yet, null = not found. */
+  skillsVersion: string | null | undefined;
 }
 
 export function createTuiModel(prefs: UiPreferences): TuiModel {
@@ -74,6 +76,7 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     confirm: null,
     help: false,
     detailBody: null,
+    skillsVersion: undefined,
   };
 }
 
@@ -160,6 +163,7 @@ export type Action =
   | { type: "confirm"; confirm: TuiModel["confirm"] }
   | { type: "help"; on: boolean }
   | { type: "detail"; body: string | null }
+  | { type: "skills-version"; version: string | null }
   | { type: "prefs"; prefs: UiPreferences };
 
 export function update(model: TuiModel, action: Action): TuiModel {
@@ -323,6 +327,9 @@ export function update(model: TuiModel, action: Action): TuiModel {
       break;
     case "detail":
       next.detailBody = action.body;
+      break;
+    case "skills-version":
+      next.skillsVersion = action.version;
       break;
     case "prefs":
       next.prefs = action.prefs;

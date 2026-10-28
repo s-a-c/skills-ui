@@ -275,7 +275,10 @@ export function buildSettingsBody(renderer: CliRenderer, model: TuiModel): BoxRe
   const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexDirection: "column", paddingLeft: 2, gap: 1 });
   body.add(new TextRenderable(renderer, { content: "Settings", fg: t.primary, attributes: TextAttributes.BOLD }));
   const motion = model.prefs.reduceMotion === "auto" ? "auto (explicit toggle is authoritative in terminals)" : String(model.prefs.reduceMotion);
+  const skillsVersion =
+    model.skillsVersion === undefined ? "…" : model.skillsVersion ?? "not found";
   const rows: Array<[string, string]> = [
+    ["skills CLI", skillsVersion],
     ["t  theme", `${model.prefs.theme}${model.prefs.theme === "mocha" ? " → latte" : " → mocha"}`],
     [",  sound", model.prefs.sound ? "on → off" : "off → on"],
     ["m  motion", motion],

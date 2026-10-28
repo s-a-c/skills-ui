@@ -47,6 +47,7 @@ function fakeDeps(): TuiDeps {
       },
       checkedCount: 2,
     }),
+    skillsVersion: async () => "1.7.2",
     savePrefs: () => {},
     play: async () => {},
   };
@@ -310,6 +311,19 @@ describe("tui model (pure)", () => {
     m = update(m, { type: "agent-select-toggle" }); // would unstage Claude Code
     m = update(m, { type: "agent-select-cancel" }); // discard staging
     expect([...m.agentFilter]).toEqual(["Claude Code"]);
+  });
+
+  test("settings shows the discovered skills CLI version", async () => {
+    const s = setup!;
+    await runTuiOn(s.renderer, undefined, fakeDeps());
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    await s.mockInput.pressKey("x"); // settings tab — triggers the lazy version load
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 150));
+    const frame = s.captureCharFrame();
+    expect(frame).toContain("skills CLI");
+    expect(frame).toContain("1.7.2");
   });
 
   test("crash guard: signals run cleanup once and exit; dispose unbinds; fatal errors exit 1", () => {

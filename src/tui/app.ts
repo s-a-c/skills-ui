@@ -9,6 +9,7 @@ import {
   update as svcUpdate,
 } from "../core/index.ts";
 import { loadUiPreferences, saveUiPreferences, type UiPreferences } from "../core/prefs.ts";
+import { skillsVersion } from "../core/skills-client.ts";
 import type { InstalledSkill, SearchSkill, UpdatesResult } from "../core/services/types.ts";
 import type { UiSeed } from "../core/seed.ts";
 import { readSkillDoc } from "../core/services/skill-doc.ts";
@@ -102,6 +103,7 @@ export interface TuiDeps {
   update(names: string[], scope: "project" | "global"): Promise<{ ok: boolean; summary: string }>;
   skillBody(path: string): Promise<string | null>;
   checkUpdates(scope: "project" | "global"): Promise<UpdatesResult>;
+  skillsVersion(): Promise<string | null>;
   savePrefs(prefs: UiPreferences): void;
   play(kind: SoundKind, prefs: UiPreferences): Promise<void>;
 }
@@ -136,6 +138,13 @@ export const realDeps: TuiDeps = {
   },
   skillBody: (path) => Promise.resolve(svcSkillBody(path)),
   checkUpdates: (scope) => svcCheckForUpdates(scope),
+  skillsVersion: async () => {
+    try {
+      return await skillsVersion();
+    } catch {
+      return null; // the CLI may be missing — settings shows "not found"
+    }
+  },
   savePrefs: (prefs) => saveUiPreferences(prefs),
   play: (kind, prefs) => playSound(kind, prefs),
 };
@@ -426,6 +435,12 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     if (tab) {
       dispatch({ type: "tab", tab });
       void deps.play("select", model.prefs);
+      if (tab === "settings" && model.skillsVersion === undefined) {
+        void deps
+          .skillsVersion()
+          .then((version) => dispatch({ type: "skills-version", version }))
+          .catch(() => dispatch({ type: "skills-version", version: null }));
+      }
       return;
     }
 
