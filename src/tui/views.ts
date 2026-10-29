@@ -67,7 +67,14 @@ export function buildHeader(renderer: CliRenderer, model: TuiModel): BoxRenderab
   return header;
 }
 
-export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxRenderable {
+export interface BodyRefs {
+  selectedRow?: BoxRenderable | null;
+  listScroll?: ScrollBoxRenderable;
+  searchScroll?: ScrollBoxRenderable;
+  searchLayout?: { resultsShown: number };
+}
+
+export function buildInstalledBody(renderer: CliRenderer, model: TuiModel, refs?: BodyRefs): BoxRenderable {
   const t = tokensFor(model.prefs.theme);
   // flexGrow without flexShrink overflows the terminal with long content —
   // Yoga's default flexShrink is 0, so growing panes must also shrink (S-87)
@@ -102,6 +109,7 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
     flexShrink: 1,
     scrollY: true,
   });
+  if (refs) refs.listScroll = scroll;
   if (visible.length === 0) {
     scroll.add(
       new TextRenderable(renderer, {
@@ -110,10 +118,9 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
       })
     );
   }
-  let renderedSelected = -1;
+  let renderedSelected: BoxRenderable | null = null;
   visible.forEach((skill, i) => {
     const selected = i === model.selected;
-    if (selected) renderedSelected = i;
     const row = new BoxRenderable(renderer, {
       width: "100%",
       flexDirection: "row",
@@ -140,8 +147,10 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
     if (model.updatesAvailable.has(skill.name)) {
       row.add(new TextRenderable(renderer, { content: "↑", fg: t.success }));
     }
+    if (selected) renderedSelected = row;
     scroll.add(row);
   });
+  if (refs) refs.selectedRow = renderedSelected;
   listPane.add(scroll);
 
   // detail pane (markdown)
@@ -177,11 +186,10 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
 
   body.add(listPane);
   body.add(detailPane);
-  void renderedSelected;
   return body;
 }
 
-export function buildSearchBody(renderer: CliRenderer, model: TuiModel): BoxRenderable {
+export function buildSearchBody(renderer: CliRenderer, model: TuiModel, refs?: BodyRefs): BoxRenderable {
   const t = tokensFor(model.prefs.theme);
   const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexShrink: 1, minHeight: 0, flexDirection: "column", paddingLeft: 1, paddingRight: 1 });
   // bordered scroll container — same renderer-isolation shape as the
@@ -202,6 +210,10 @@ export function buildSearchBody(renderer: CliRenderer, model: TuiModel): BoxRend
   // header carries the cursor arrow; panes are visually stacked like the fork.
   const scroll = new ScrollBoxRenderable(renderer, { width: "100%", flexGrow: 1, flexShrink: 1, scrollY: true });
   const resultsActive = model.searchPane === "results";
+  if (refs) {
+    refs.searchScroll = scroll;
+    refs.searchLayout = { resultsShown: Math.min(50, model.results.length) };
+  }
   scroll.add(
     new TextRenderable(renderer, {
       content: `${resultsActive ? ARROW : " "} Results`,

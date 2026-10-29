@@ -24,6 +24,7 @@ import {
   buildInstalledBody,
   buildSearchBody,
   buildSettingsBody,
+  type BodyRefs,
 } from "./views.ts";
 
 export { buildSpikeScreen, SPIKE_MARKDOWN, spikeSyntaxTokens } from "./spike.ts";
@@ -181,9 +182,10 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
   applySeed(model, seed);
 
   // whole-tree re-render per dispatch adds selection listeners on the
-  // renderer (ScrollBox etc.) — raise the ceiling; incremental updates
-  // land in the rich-rendering phase
-  (renderer as unknown as { setMaxListeners?: (n: number) => void }).setMaxListeners?.(200);
+  // renderer (ScrollBox etc.) — raise the ceiling high enough for long
+  // scrolling sessions (warnings leak into the TTY otherwise); listener
+  // cleanup lands with the rich-rendering phase
+  (renderer as unknown as { setMaxListeners?: (n: number) => void }).setMaxListeners?.(50_000);
 
   const frame = new BoxRenderable(renderer as never, { width: "100%", height: "100%", flexDirection: "column" });
   renderer.root.add(frame);
@@ -199,11 +201,12 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     if (footer) frame.remove(footer);
     if (overlay) frame.remove(overlay);
     header = buildHeader(renderer, model);
+    const refs: BodyRefs = {};
     body =
       model.tab === "installed"
-        ? buildInstalledBody(renderer, model)
+        ? buildInstalledBody(renderer, model, refs)
         : model.tab === "search"
-          ? buildSearchBody(renderer, model)
+          ? buildSearchBody(renderer, model, refs)
           : buildSettingsBody(renderer, model);
     footer = buildFooter(renderer, model);
     overlay = buildConfirmOverlay(renderer, model) ?? buildHelpOverlay(renderer, model) ?? buildAgentSelectOverlay(renderer, model);
@@ -211,6 +214,42 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     frame.add(body);
     frame.add(footer);
     if (overlay) frame.add(overlay);
+    followSelection(refs);
+  };
+
+  // Keep the cursor row visible: the ScrollBox does not follow selection on
+  // its own. Rows are height 1, so row i sits at content offset i. The
+  // viewport height is only known after layout — read it on a macrotask.
+  const followSelection = (refs: BodyRefs): void => {
+    console.error(`FS-RUN list=${!!refs.listScroll} sel=${model.selected}`);
+    const settle = (): void => {
+      console.error(`FS-SETTLE vs=${refs.listScroll?.viewport?.height ?? -1} top=${refs.listScroll?.scrollTop ?? -1} h=${refs.listScroll?.scrollHeight ?? -1} d=${refs.listScroll?.isDestroyed}`);
+      if (model.tab === "installed" && refs.listScroll) {
+        const scroll = refs.listScroll;
+        const vs = scroll.viewport?.height ?? 0;
+        if (vs > 0) {
+          // wrapped rows make index ≠ content offset: use the row's computed y
+          const rowY = (refs.selectedRow as unknown as { y?: number })?.y;
+          const i = typeof rowY === "number" ? rowY : model.selected;
+          if (i < scroll.scrollTop) scroll.scrollTop = i;
+          else if (i >= scroll.scrollTop + vs) scroll.scrollTop = i - vs + 1;
+          (renderer as unknown as { requestRender?: () => void }).requestRender?.();
+        }
+      } else if (model.tab === "search" && refs.searchScroll && refs.searchLayout) {
+        const scroll = refs.searchScroll;
+        const vs = scroll.viewport?.height ?? 0;
+        if (vs > 0) {
+          // layout: [Results header, results…, Selected header, queue…]
+          const i =
+            model.searchPane === "results"
+              ? 1 + model.searchSelected
+              : 1 + refs.searchLayout.resultsShown + 1 + model.selectedCursor;
+          if (i < scroll.scrollTop) scroll.scrollTop = i;
+          else if (i >= scroll.scrollTop + vs) scroll.scrollTop = i - vs + 1;
+        }
+      }
+    };
+    setTimeout(settle, 50); // after the renderer's next frame
   };
 
   const dispatch = (action: Action): void => {
