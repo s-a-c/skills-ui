@@ -1,4 +1,4 @@
-import { BoxRenderable, createCliRenderer, type CliRenderer } from "@opentui/core";
+import { createCliRenderer, type CliRenderer, type ScrollBoxRenderable } from "@opentui/core";
 import {
   checkForUpdates as svcCheckForUpdates,
   install as svcInstall,
@@ -15,18 +15,7 @@ import type { UiSeed } from "../core/seed.ts";
 import { readSkillDoc } from "../core/services/skill-doc.ts";
 import { disposeAudio, playSound, type SoundKind } from "./audio.ts";
 import { applySeed, createTuiModel, tabFor, update, visibleSkills, type Action, type TuiModel } from "./model.ts";
-import {
-  buildAgentSelectOverlay,
-  buildConfirmOverlay,
-  buildFooter,
-  buildHeader,
-  buildHelpOverlay,
-  buildInstalledBody,
-  buildSearchBody,
-  buildSettingsBody,
-  type BodyHandlers,
-  type BodyRefs,
-} from "./views.ts";
+import { mountApp, type AppBridge, type RefsHolder } from "./Views.tsx";
 
 export { buildSpikeScreen, SPIKE_MARKDOWN, spikeSyntaxTokens } from "./spike.ts";
 
@@ -201,88 +190,17 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
   // cleanup lands with the rich-rendering phase
   (renderer as unknown as { setMaxListeners?: (n: number) => void }).setMaxListeners?.(50_000);
 
-  const frame = new BoxRenderable(renderer as never, { width: "100%", height: "100%", flexDirection: "column" });
-  renderer.root.add(frame);
-
-  let header: ReturnType<typeof buildHeader> | null = null;
-  let body: ReturnType<typeof buildInstalledBody> | null = null;
-  let footer: ReturnType<typeof buildFooter> | null = null;
-  let overlay: ReturnType<typeof buildConfirmOverlay> | null = null;
-
-  let lastRefs: BodyRefs = {};
-  const render = (): void => {
-    if (header) frame.remove(header);
-    if (body) frame.remove(body);
-    if (footer) frame.remove(footer);
-    if (overlay) frame.remove(overlay);
-    header = buildHeader(renderer, model);
-    const refs: BodyRefs = {};
-    // mouse (S-98): click a row to select it, click the detail pane to
-    // enter its scroll mode — handlers carry into the React shell as props
-    const handlers: BodyHandlers = {
-      onSelectSkill: (i) => {
-        dispatch({ type: "move", delta: i - model.selected });
-        void loadDetail();
-      },
-      onSelectResult: (i) => {
-        dispatch({ type: "move", delta: i - model.searchSelected });
-      },
-      onDetailClick: () => {
-        if (!model.detailScroll) dispatch({ type: "detail-scroll", on: true });
-      },
-    };
-    body =
-      model.tab === "installed"
-        ? buildInstalledBody(renderer, model, refs, handlers)
-        : model.tab === "search"
-          ? buildSearchBody(renderer, model, refs, handlers)
-          : buildSettingsBody(renderer, model);
-    footer = buildFooter(renderer, model);
-    overlay = buildConfirmOverlay(renderer, model) ?? buildHelpOverlay(renderer, model) ?? buildAgentSelectOverlay(renderer, model);
-    frame.add(header);
-    frame.add(body);
-    frame.add(footer);
-    if (overlay) frame.add(overlay);
-    lastRefs = refs;
-    followSelection(refs);
+  // ---- store (S-96): model.ts stays the Elm core; React subscribes ----
+  const listeners = new Set<() => void>();
+  const subscribe = (fn: () => void): (() => void) => {
+    listeners.add(fn);
+    return () => listeners.delete(fn);
   };
-
-  // Keep the cursor row visible: the ScrollBox does not follow selection on
-  // its own. Rows are height 1, so row i sits at content offset i. The
-  // viewport height is only known after layout — read it on a macrotask.
-  const followSelection = (refs: BodyRefs): void => {
-    const settle = (): void => {
-      if (model.tab === "installed" && refs.listScroll) {
-        const scroll = refs.listScroll;
-        const vs = scroll.viewport?.height ?? 0;
-        if (vs > 0) {
-          // wrapped rows make index ≠ content offset: use the row's computed y
-          const rowY = (refs.selectedRow as unknown as { y?: number })?.y;
-          const i = typeof rowY === "number" ? rowY : model.selected;
-          if (i < scroll.scrollTop) scroll.scrollTop = i;
-          else if (i >= scroll.scrollTop + vs) scroll.scrollTop = i - vs + 1;
-          (renderer as unknown as { requestRender?: () => void }).requestRender?.();
-        }
-      } else if (model.tab === "search" && refs.searchScroll && refs.searchLayout) {
-        const scroll = refs.searchScroll;
-        const vs = scroll.viewport?.height ?? 0;
-        if (vs > 0) {
-          // layout: [Results header, results…, Selected header, queue…]
-          const i =
-            model.searchPane === "results"
-              ? 1 + model.searchSelected
-              : 1 + refs.searchLayout.resultsShown + 1 + model.selectedCursor;
-          if (i < scroll.scrollTop) scroll.scrollTop = i;
-          else if (i >= scroll.scrollTop + vs) scroll.scrollTop = i - vs + 1;
-        }
-      }
-    };
-    setTimeout(settle, 50); // after the renderer's next frame
-  };
+  const getState = (): TuiModel => model;
+  const refsHolder: RefsHolder = {};
 
   // detail-scroll mode: arrows/PgUp/PgDn page the doc, not the list
-  const scrollDetail = (refs: BodyRefs, delta: number): void => {
-    const scroll = refs.detailScroll;
+  const scrollDetail = (scroll: ScrollBoxRenderable | undefined, delta: number): void => {
     if (!scroll) return;
     const vs = scroll.viewport?.height ?? 0;
     if (vs <= 0) return;
@@ -292,7 +210,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
 
   const dispatch = (action: Action): void => {
     model = update(model, action);
-    render();
+    for (const fn of listeners) fn();
   };
 
   let toastTimer: ReturnType<typeof setTimeout> | null = null;
@@ -453,11 +371,11 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     }
     if (model.detailScroll && model.tab === "installed") {
       if (k === "up" || k === "down" || k === "pageup" || k === "pagedown") {
-        scrollDetail(lastRefs, k === "up" ? -1 : k === "down" ? 1 : k === "pageup" ? -PAGE : PAGE);
+        scrollDetail(refsHolder.detailScroll, k === "up" ? -1 : k === "down" ? 1 : k === "pageup" ? -PAGE : PAGE);
         return;
       }
       if (k === "home" || k === "end") {
-        const scroll = lastRefs.detailScroll;
+        const scroll = refsHolder.detailScroll;
         if (scroll) {
           const vs = scroll.viewport?.height ?? 0;
           scroll.scrollTop = k === "home" ? 0 : Math.max(0, scroll.scrollHeight - vs);
@@ -706,25 +624,30 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
   };
 
   renderer.keyInput.on("keypress", onKey);
-  // terminal resizes (SIGWINCH → stdout "resize") must re-render: the
-  // whole-tree rebuild is the only re-layout path (S-87)
+  // terminal resizes (SIGWINCH → stdout "resize"): the React tree re-layouts
+  // with the renderer; we only nudge the size (S-87)
   const onStdoutResize = (): void => {
     (renderer as unknown as { requestResize?: (width: number, height: number) => void }).requestResize?.(
       process.stdout.columns ?? 0,
       process.stdout.rows ?? 0
     );
-    render();
   };
   process.stdout.on("resize", onStdoutResize);
+  let unmount: (() => void) | null = null;
   renderer.once("destroy", () => {
     renderer.keyInput.off("keypress", onKey);
     process.stdout.off("resize", onStdoutResize);
     if (toastTimer) clearTimeout(toastTimer); // pending toasts must not render after teardown
+    unmount?.();
   });
 
-  render();
+  const bridge: AppBridge = { subscribe, getState, dispatch, loadDetail, play: (k, prefs) => void deps.play(k, prefs), refs: refsHolder };
+  unmount = mountApp(renderer, bridge);
   await reloadSkills();
   if (seed?.kind === "add") scheduleSearch();
 
-  return () => renderer.keyInput.off("keypress", onKey);
+  return () => {
+    renderer.keyInput.off("keypress", onKey);
+    unmount?.();
+  };
 }

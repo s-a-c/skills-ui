@@ -93,6 +93,7 @@ describe("tui (in-memory)", () => {
     await s.flush();
     await s.mockInput.typeText(" ");
     await s.flush();
+    await new Promise((r) => setTimeout(r, 100)); // React commits async (S-96)
     let frame = s.captureCharFrame();
     expect(frame).toContain("✔"); // checked marker
     s.mockInput.pressKey("d");
@@ -205,6 +206,7 @@ describe("tui (in-memory)", () => {
     await s.flush();
     await s.mockInput.typeText("?");
     await s.flush();
+    await new Promise((r) => setTimeout(r, 100)); // React commits async (S-96)
     expect(s.captureCharFrame()).toContain("this help");
     s.mockInput.pressEscape();
     await s.flush();

@@ -1,7 +1,7 @@
 [
   {
     "name": "skill-001",
-    "path": "/tmp/pty-smoke/skill-001",
+    "path": "/Users/s-a-c/Projects/s-a-c/skills-ui/tui/scripts/pty-smoke/fixtures/docs/skill-001",
     "scope": "global",
     "agents": [
       "Claude Code",
@@ -14,7 +14,7 @@
   },
   {
     "name": "skill-002",
-    "path": "/tmp/pty-smoke/skill-002",
+    "path": "/Users/s-a-c/Projects/s-a-c/skills-ui/tui/scripts/pty-smoke/fixtures/docs/skill-002",
     "scope": "global",
     "agents": [
       "Claude Code"
@@ -26,7 +26,7 @@
   },
   {
     "name": "skill-003",
-    "path": "/tmp/pty-smoke/skill-003",
+    "path": "/Users/s-a-c/Projects/s-a-c/skills-ui/tui/scripts/pty-smoke/fixtures/docs/skill-003",
     "scope": "global",
     "agents": [
       "Claude Code",
