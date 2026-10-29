@@ -3,17 +3,28 @@ import type { UiPreferences } from "../core/prefs.ts";
 /**
  * Synthesized UI sounds via OpenTUI's Audio engine (playStream with
  * generated PCM) — replaces the fork's BEL-only alerts with the webUI's
- * synth design. Pref-gated; disposal on app exit.
+ * synth design. Pref-gated; disposal on app exit. Audio failures degrade
+ * silently: a broken sound must never surface in the UI (S-88).
  */
 
 export type SoundKind = "select" | "confirm" | "success" | "error";
 
+interface AudioStreamLike {
+  closed: Promise<void> | void;
+  dispose(): Promise<void> | void;
+}
+
 interface AudioLike {
-  start(): Promise<void> | void;
+  start(): boolean | Promise<void>;
   playStream(
-    data: Float32Array,
-    options?: { sampleRate?: number; channels?: number; format?: string }
-  ): Promise<void> | void;
+    source: AsyncIterable<Uint8Array>,
+    options: {
+      format: "pcm";
+      sampleFormat: "f32le";
+      sampleRate: number;
+      channels: number;
+    }
+  ): Promise<AudioStreamLike>;
   dispose(): Promise<void> | void;
 }
 
@@ -24,11 +35,11 @@ async function ensure(): Promise<AudioLike | null> {
   if (audio || failed) return audio;
   try {
     const mod = (await import("@opentui/core")) as unknown as {
-      Audio?: { create?: () => AudioLike };
+      Audio?: { create?: (opts?: { autoStart?: boolean }) => AudioLike };
     };
     if (!mod.Audio?.create) return null;
     const instance = mod.Audio.create();
-    await instance.start();
+    instance.start();
     audio = instance;
     return instance;
   } catch {
@@ -37,17 +48,22 @@ async function ensure(): Promise<AudioLike | null> {
   }
 }
 
-/** A short sine tone as Float32 PCM (44.1 kHz mono). */
-function tone(freq: number, seconds: number, gain: number): Float32Array {
+/** A short sine tone as little-endian f32 PCM bytes (44.1 kHz mono). */
+async function* toneBytes(freq: number, seconds: number, gain: number): AsyncGenerator<Uint8Array> {
   const rate = 44100;
+  const framesPerChunk = 441;
   const total = Math.floor(rate * seconds);
-  const data = new Float32Array(total);
-  for (let i = 0; i < total; i++) {
-    const t = i / rate;
-    const envelope = Math.min(1, t / 0.008) * Math.exp(-4 * t);
-    data[i] = Math.sin(2 * Math.PI * freq * t) * gain * envelope;
+  for (let offset = 0; offset < total; offset += framesPerChunk) {
+    const frames = Math.min(framesPerChunk, total - offset);
+    const chunk = new Uint8Array(frames * 4);
+    const view = new DataView(chunk.buffer);
+    for (let frame = 0; frame < frames; frame++) {
+      const t = (offset + frame) / rate;
+      const envelope = Math.min(1, t / 0.008) * Math.exp(-4 * t);
+      view.setFloat32(frame * 4, Math.sin(2 * Math.PI * freq * t) * gain * envelope, true);
+    }
+    yield chunk;
   }
-  return data;
 }
 
 const PATTERNS: Record<SoundKind, Array<[number, number, number]>> = {
@@ -59,20 +75,33 @@ const PATTERNS: Record<SoundKind, Array<[number, number, number]>> = {
 
 export async function playSound(kind: SoundKind, prefs: UiPreferences): Promise<void> {
   if (!prefs.sound) return;
-  const instance = await ensure();
-  if (!instance) return;
-  for (const [freq, seconds, gain] of PATTERNS[kind]) {
-    await instance.playStream(tone(freq, seconds, gain), {
-      sampleRate: 44100,
-      channels: 1,
-      format: "f32le",
-    });
+  try {
+    const instance = await ensure();
+    if (!instance) return;
+    for (const [freq, seconds, gain] of PATTERNS[kind]) {
+      const stream = await instance.playStream(toneBytes(freq, seconds, gain), {
+        format: "pcm",
+        sampleFormat: "f32le",
+        sampleRate: 44100,
+        channels: 1,
+      });
+      await stream.closed;
+      stream.dispose?.();
+    }
+  } catch {
+    // never let a sound failure reach the renderer's error console
+    failed = true;
+    audio = null;
   }
 }
 
 export async function disposeAudio(): Promise<void> {
   if (audio) {
-    await audio.dispose();
+    try {
+      await audio.dispose();
+    } catch {
+      // best effort — shutdown path
+    }
     audio = null;
   }
 }

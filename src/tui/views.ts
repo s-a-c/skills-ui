@@ -73,14 +73,32 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
   // Yoga's default flexShrink is 0, so growing panes must also shrink (S-87)
   const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexShrink: 1, minHeight: 0, flexDirection: "row", gap: 1, paddingLeft: 1, paddingRight: 1 });
 
-  // list pane (fixed 42% like the fork's split). Pane children are shape-
-  // stable (always exactly the scroll): conditional siblings here triggered
-  // an OpenTUI 0.7 cell-diff bug that drew new nodes at stale coordinates
-  // (S-87) — the filter/agents status lives in the footer instead.
+  // list pane (fixed 42% like the fork's split). Pane children are
+  // shape-stable and boxed: a bare TextRenderable directly under a column
+  // draws at stale coordinates on the real renderer (S-87/S-88), while the
+  // same text wrapped in a Box paints correctly under rebuild churn.
   const listPane = new BoxRenderable(renderer, {
     width: "42%",
     flexDirection: "column",
   });
+  // permanent filter bar above the list (boxed — see note above)
+  const filterParts: string[] = [];
+  if (model.filter || model.filtering) {
+    filterParts.push(`filter: ${model.filter || ""}${model.filtering ? "▌" : ""}`);
+  } else {
+    filterParts.push("filter: (type or f)");
+  }
+  if (model.agentFilter.size > 0) {
+    filterParts.push(`agents: ${[...model.agentFilter].sort().join(", ")}`);
+  }
+  const filterBar = new BoxRenderable(renderer, { width: "100%", flexDirection: "row" });
+  filterBar.add(
+    new TextRenderable(renderer, {
+      content: filterParts.join(" · "),
+      fg: model.filtering || model.filter || model.agentFilter.size > 0 ? t.primary : t.textMuted,
+    })
+  );
+  listPane.add(filterBar);
   const visible = visibleSkills(model);
   const scroll = new ScrollBoxRenderable(renderer, {
     width: "100%",
@@ -170,18 +188,20 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
 export function buildSearchBody(renderer: CliRenderer, model: TuiModel): BoxRenderable {
   const t = tokensFor(model.prefs.theme);
   const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexShrink: 1, minHeight: 0, flexDirection: "column", paddingLeft: 1, paddingRight: 1 });
-  // search + adjusted-query share one persistent line: conditional rows here
-  // would hit the same OpenTUI cell-diff bug as the old filter line (S-87)
+  // search + adjusted-query share one boxed line above the scroll (boxed
+  // text paints reliably on the real renderer — see the list pane note)
   const searchParts = [`search: ${model.query || "type to search"}${model.query && model.searching ? "▌" : ""}`];
   if (model.adjustedQuery && model.query) {
     searchParts.push(`no exact matches — showing "${model.adjustedQuery}"`);
   }
-  body.add(
+  const searchBar = new BoxRenderable(renderer, { width: "100%", flexDirection: "row" });
+  searchBar.add(
     new TextRenderable(renderer, {
       content: searchParts.join(" · "),
       fg: t.primary,
     })
   );
+  body.add(searchBar);
 
   // Results and Selected panes share one scroll column: the active pane's
   // header carries the cursor arrow; panes are visually stacked like the fork.
@@ -293,24 +313,17 @@ export function buildSettingsBody(renderer: CliRenderer, model: TuiModel): BoxRe
 
 export function buildFooter(renderer: CliRenderer, model: TuiModel): BoxRenderable {
   const t = tokensFor(model.prefs.theme);
-  // flexShrink: 0 — with tall bodies the header/footer otherwise get crushed
-  // to zero height (S-87: filter line and tabs vanished off-screen)
   const footer = new BoxRenderable(renderer, { width: "100%", flexShrink: 0, flexDirection: "row", justifyContent: "space-between", paddingLeft: 1, paddingRight: 1 });
   const legend =
     model.tab === "installed" && (model.filtering || model.filter)
       ? "u update · d delete checked · HOME/END · SPACE toggle · ESC clear filter"
       : "i installed · / search · a agents · f filter · , settings · ? help · q quit";
   footer.add(new TextRenderable(renderer, { content: legend, fg: t.textMuted }));
-  // filter/agents status renders here — the footer slot updates reliably on
-  // the real renderer, unlike a conditional node in the list pane (S-87)
-  const statusParts: string[] = [];
-  if (model.filter) statusParts.push(`filter: ${model.filter}${model.filtering ? "▌" : ""}`);
-  if (model.agentFilter.size > 0) statusParts.push(`agents: ${[...model.agentFilter].sort().join(", ")}`);
   const status = model.toast
     ? model.toast.text
     : model.confirm
       ? `${model.confirm.kind} ${model.confirm.names.join(", ")}? y/N`
-      : statusParts.join(" · ");
+      : "";
   footer.add(
     new TextRenderable(renderer, {
       content: status.slice(0, 60),

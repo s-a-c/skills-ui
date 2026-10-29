@@ -523,21 +523,23 @@ describe("0.2.x B1 (S-69): list ops", () => {
     expect(filtered).not.toContain("code-review"); // Cursor's skill filtered out
   });
 
-  test("filter status stays visible with a long list (global-scope shape) and resize re-renders", async () => {
+  test("filter bar sits permanently above the list with a long list, and resize re-renders", async () => {
     const s = setup!;
     const deps = fakeDeps();
     deps.listInstalled = async () => manySkills; // 12 rows — pushes bottom rows off-viewport
     await runTuiOn(s.renderer, undefined, deps);
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
+    expect(s.captureCharFrame()).toContain("filter: (type or f)"); // idle placeholder, always visible
     await s.mockInput.pressKey("f");
     await s.flush();
-    await s.mockInput.typeText("s0"); // filter status now carries text
+    await s.mockInput.typeText("s0"); // filter bar now carries text
     await s.flush();
     const frame = s.captureCharFrame();
-    // the status renders in the footer slot — on screen regardless of list
-    // length (S-87: a pane-local line drew off-screen in a real terminal)
+    // the bar renders above the list, on screen regardless of list length
+    // (S-87/S-88: in a real terminal the text must also be boxed to paint)
     expect(frame.indexOf("filter: s0")).toBeGreaterThanOrEqual(0);
+    expect(frame.indexOf("filter: s0")).toBeLessThan(frame.indexOf("❯ s01"));
     process.stdout.emit("resize"); // SIGWINCH path — must re-render without throwing
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
