@@ -598,3 +598,54 @@ describe("0.2.x B1 (S-69): list ops", () => {
     expect(s.captureCharFrame()).toContain("❯ Results");
   });
 });
+
+describe("S-100 rich views", () => {
+  test("splash: initial model shows it, first load settles it away", async () => {
+    expect(createTuiModel(DEFAULT_UI_PREFERENCES).splash).toBe(true);
+    const s = setup!;
+    await runTuiOn(s.renderer, undefined, fakeDeps());
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 150));
+    const model = update(createTuiModel(DEFAULT_UI_PREFERENCES), { type: "splash-dismiss" });
+    expect(model.splash).toBe(false);
+    // and the live app no longer shows the splash marker
+    const frame = s.captureCharFrame();
+    expect(frame).toContain("tdd"); // normal installed view after load
+    expect(frame).not.toContain("starting…");
+  });
+
+  test("graph: G opens the 3D view, esc closes it; g still switches scope", async () => {
+    const s = setup!;
+    await runTuiOn(s.renderer, undefined, fakeDeps());
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 150));
+    await s.mockInput.pressKey("G", { shift: true });
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    let frame = s.captureCharFrame();
+    expect(frame).toContain("graph");
+    expect(frame).toContain("2 skills"); // snapshot title
+    await s.mockInput.pressKey("\x1b"); // esc
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    frame = s.captureCharFrame();
+    expect(frame).toContain("❯ Installed"); // back to the tabs
+  });
+
+  test("art: source badges are deterministic per source, distinct across sources", async () => {
+    const { sourceBadge, splashImage } = await import("../src/tui/art.ts");
+    const a1 = sourceBadge("anthropics/skills", "mocha");
+    const a2 = sourceBadge("anthropics/skills", "mocha");
+    expect(a1).toBe(a2); // cached instance
+    const b = sourceBadge("o/r", "mocha");
+    expect(b).not.toBe(a1);
+    const px = (img: ReturnType<typeof sourceBadge>, i: number) => img.raw("rgba8").data[i];
+    const hash = (arr: number[]) => arr.join(",");
+    const aSignature = hash([0, 1, 2, 3, 4].map((i) => px(a1, i)));
+    const bSignature = hash([0, 1, 2, 3, 4].map((i) => px(b, i)));
+    expect(aSignature).not.toBe(bSignature);
+    const splash = splashImage("mocha");
+    expect(splash.info().width).toBe(96);
+    expect(splash.info().height).toBe(28);
+  });
+});

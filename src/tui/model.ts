@@ -39,7 +39,6 @@ export interface TuiModel {
   searchPane: "results" | "selected";
   selectedCursor: number;
   queue: Map<string, SearchSkill>; // key: source#name
-  transient
   busy: string | null;
   toast: Toast | null;
   confirm: { kind: "delete" | "update"; names: string[] } | null;
@@ -47,6 +46,10 @@ export interface TuiModel {
   detailBody: string | null;
   /** detail-scroll mode: arrows/PgUp/PgDn scroll the doc, not the list */
   detailScroll: boolean;
+  /** startup splash (S-100): shows until the first skills load settles */
+  splash: boolean;
+  /** 3D graph view open (S-100): takes over the body, G closes */
+  graph: boolean;
   /** Discovered `skills` CLI version: undefined = not queried yet, null = not found. */
   skillsVersion: string | null | undefined;
 }
@@ -79,6 +82,8 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     help: false,
     detailBody: null,
     detailScroll: false,
+    splash: true,
+    graph: false,
     skillsVersion: undefined,
   };
 }
@@ -167,6 +172,8 @@ export type Action =
   | { type: "toast"; toast: Toast | null }
   | { type: "confirm"; confirm: TuiModel["confirm"] }
   | { type: "help"; on: boolean }
+  | { type: "splash-dismiss" }
+  | { type: "graph"; on: boolean }
   | { type: "detail"; body: string | null }
   | { type: "skills-version"; version: string | null }
   | { type: "prefs"; prefs: UiPreferences };
@@ -343,6 +350,13 @@ export function update(model: TuiModel, action: Action): TuiModel {
       break;
     case "help":
       next.help = action.on;
+      break;
+    case "splash-dismiss":
+      next.splash = false;
+      break;
+    case "graph":
+      next.graph = action.on;
+      next.detailScroll = false;
       break;
     case "detail":
       next.detailBody = action.body;

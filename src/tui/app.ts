@@ -233,6 +233,8 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       toast(`load failed: ${error instanceof Error ? error.message : String(error)}`, "error");
     } finally {
       dispatch({ type: "busy", label: null });
+      // success or failure, the first settled load ends the splash (S-100)
+      dispatch({ type: "splash-dismiss" });
     }
   };
 
@@ -357,6 +359,12 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       else if (k === "escape") dispatch({ type: "agent-select-cancel" });
       return;
     }
+    if (model.graph) {
+      // the 3D graph owns the body — leave-intent keys only (q still quits)
+      if (k === "escape" || k === "G" || (key.shift && k === "g")) dispatch({ type: "graph", on: false });
+      else if (k === "q") renderer.destroy();
+      return;
+    }
     // Search-tab queue keys work in both text-entry and command mode (fork
     // contract): Tab flips Results/Selected anywhere on the search tab.
     // On the installed tab, Tab toggles detail-scroll mode (S-88).
@@ -456,6 +464,13 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         dispatch({ type: k === "a" ? "toggle-all-checks" : "invert-checks" });
         void deps.play("select", model.prefs);
       }
+      return;
+    }
+
+    // G (shift+g) opens the 3D skills graph (S-100); g stays scope-global
+    if (k === "G" || (key.shift && k === "g")) {
+      dispatch({ type: "graph", on: true });
+      void deps.play("select", model.prefs);
       return;
     }
 

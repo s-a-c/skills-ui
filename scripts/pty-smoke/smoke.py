@@ -71,10 +71,22 @@ def main():
         app.send("\x1b", settle=1.5)  # ESC exits, text kept
 
         # 6. space toggles a check; no console overlay appears (S-88 audio
-        #    class — smoke runs with sound off, checks the render path only)
+        # class — smoke runs with sound off, checks the render path only)
         app.send(" ", settle=2.0)
         check("space: check rendered", app.find("✔") >= 0)
         check("space: no error console", app.find("Console") == -1)
+
+        # 7. 3D graph (S-100): G opens the view, esc closes it — real pty,
+        #    exercises the lazy @opentui/three load end to end
+        app.send("G", settle=3.5)
+        graph_row = app.find("graph ·")
+        check("G: graph view opens", graph_row >= 0, f"row={graph_row}")
+        check("G: no crash console", app.find("TypeError") == -1)
+        app.send("\x1b", settle=2.0)
+        check("G: esc closes graph", app.find("❯ Installed") == 0)
+        app.send("G", settle=2.5)
+        check("G: graph reopens (singleton reattach)", app.find("graph ·") >= 0)
+        app.send("\x1b", settle=1.5)
     finally:
         app.stop()
 

@@ -5,11 +5,12 @@
  * border titles carry live state, header/footer text stays boxed, the
  * footer legend is constant.
  */
-import { BoxRenderable, type CliRenderer, ScrollBoxRenderable, SyntaxStyle, TextAttributes } from "@opentui/core";
+import { BoxRenderable, createTimeline, getTimelineEngine, type CliRenderer, ScrollBoxRenderable, SyntaxStyle, TextAttributes } from "@opentui/core";
 import { createRoot, useRenderer } from "@opentui/react";
-import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSyncExternalStore } from "react";
 import { CATPPUCCIN_LATTE, CATPPUCCIN_MOCHA, syntaxTokensFor, tokensFor } from "../core/theme.ts";
+import { sourceBadge, splashImage } from "./art.ts";
 import { visibleSkills, type Action, type TuiModel } from "./model.ts";
 import type { SoundKind } from "./audio.ts";
 import type { InstalledSkill, SearchSkill, UpdatesResult, UiPreferences } from "../core/services/types.ts";
@@ -48,13 +49,53 @@ export function mountApp(renderer: CliRenderer, bridge: AppBridge): () => void {
 const CHECK = "✔";
 const ARROW = "❯";
 
+/** Overlay pop-in (S-100 motion polish): slide down 3 rows to the target
+ * over 180ms — only when reduce-motion is explicitly OFF ("auto" stays
+ * static: terminals don't expose a system preference, so the explicit
+ * toggle is authoritative). Text-layout motion (selection, list) is
+ * deliberately NOT animated — per-frame text re-layout near a scrollbox
+ * is the S-88 cell-diff corruption trigger; overlays are isolated
+ * absolute layers and safe. */
+const POP_IN_MS = 180;
+
+function usePopInOverlay(prefs: UiPreferences, targetTop: number): {
+  ref: ReturnType<typeof useRef<BoxRenderable | null>>;
+  top: number;
+} {
+  const renderer = useRenderer();
+  const ref = useRef<BoxRenderable>(null);
+  const animate = prefs.reduceMotion === false;
+  const top = targetTop + (animate ? 3 : 0);
+  useEffect(() => {
+    const box = ref.current;
+    if (!animate || !box) return;
+    const timeline = createTimeline({ duration: POP_IN_MS }, renderer);
+    timeline.add(box, { top: targetTop, duration: POP_IN_MS, ease: "outQuad" });
+    return () => {
+      timeline.pause();
+      try {
+        getTimelineEngine(renderer).unregister(timeline);
+      } catch {
+        // renderer already destroyed
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per open
+  }, [renderer]);
+  return { ref, top };
+}
+
 export function App(): ReactNode {
   const { subscribe, getState } = useApp();
   const model = useSyncExternalStore(subscribe, getState, getState);
+  if (model.splash) {
+    return <Splash model={model} />;
+  }
   return (
     <box width="100%" height="100%" flexDirection="column">
       <Header model={model} />
-      {model.tab === "installed" ? (
+      {model.graph ? (
+        <GraphView model={model} />
+      ) : model.tab === "installed" ? (
         <InstalledBody model={model} />
       ) : model.tab === "search" ? (
         <SearchBody model={model} />
@@ -65,6 +106,87 @@ export function App(): ReactNode {
       <ConfirmOverlay model={model} />
       <HelpOverlay model={model} />
       <AgentSelectOverlay model={model} />
+    </box>
+  );
+}
+
+/** Startup splash (S-100): procedural gradient banner while the first
+ * skills load runs; the whole screen is ours until it settles. */
+function Splash({ model }: { model: TuiModel }): ReactNode {
+  const t = tokensFor(model.prefs.theme);
+  return (
+    <box width="100%" height="100%" flexDirection="column" alignItems="center" justifyContent="center" gap={1} backgroundColor={t.bg}>
+      <image source={splashImage(model.prefs.theme)} fit="cover" protocol="auto" style={{ width: 44, height: 12 }} />
+      <text fg={t.primary} attributes={TextAttributes.BOLD}>skills-ui</text>
+      <text fg={t.textMuted}>{model.busy ?? "starting…"}</text>
+    </box>
+  );
+}
+
+/** 3D skills graph (S-100): @opentui/three is dynamically imported so the
+ * app never pays for it (or breaks on runtimes without WebGPU) unless the
+ * view opens. Rotation rides a core timeline — the engine owns the render
+ * loop; reduce-motion skips it. */
+function GraphView({ model }: { model: TuiModel }): ReactNode {
+  const t = tokensFor(model.prefs.theme);
+  const renderer = useRenderer();
+  const skillsRef = useRef(visibleSkills(model)); // snapshot at open
+  const hostRef = useRef<BoxRenderable>(null);
+  const [phase, setPhase] = useState<"loading" | "ready" | "unavailable">("loading");
+
+  useEffect(() => {
+    let disposed = false;
+    let timeline: ReturnType<typeof createTimeline> | null = null;
+    let handle: import("./three-scene.ts").GraphViewHandle | null = null;
+    const theme = model.prefs.theme;
+    void import("./three-scene.ts")
+      .then((m) => {
+        if (disposed) return;
+        handle = m.getGraphView(renderer, skillsRef.current, theme);
+        hostRef.current?.add(handle.view);
+        if (model.prefs.reduceMotion !== true) {
+          timeline = createTimeline({ duration: m.GRAPH_ROTATION_MS, loop: true }, renderer);
+          timeline.add(handle.graph.animTarget, {
+            angle: Math.PI * 2,
+            duration: m.GRAPH_ROTATION_MS,
+            loop: true,
+            onUpdate: () => handle?.graph.applyRotation(),
+          });
+        }
+        setPhase("ready");
+      })
+      .catch(() => {
+        if (!disposed) setPhase("unavailable");
+      });
+    return () => {
+      disposed = true;
+      if (timeline) {
+        timeline.pause();
+        try {
+          getTimelineEngine(renderer).unregister(timeline);
+        } catch {
+          // renderer already destroyed
+        }
+      }
+      // detach, never destroy — the view is a per-renderer singleton (see
+      // three-scene.ts: destroying a never-initialized view kills the
+      // renderer); the box is about to unmount under us
+      try {
+        handle?.view.parent?.remove(handle.view);
+      } catch {
+        // best-effort detach
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one attach per open
+  }, [renderer]);
+
+  return (
+    <box ref={hostRef} width="100%" flexGrow={1} flexShrink={1} minHeight={0} border={true} borderStyle="rounded" borderColor={t.border} title={` graph · ${skillsRef.current.length} skills · esc/G close `}>
+      {phase === "unavailable" ? (
+        <text fg={t.textMuted}>3D graph unavailable — requires the Bun runtime with WebGPU (@opentui/three)</text>
+      ) : phase === "loading" ? (
+        <text fg={t.textMuted}>initializing 3D…</text>
+      ) : null}
     </box>
   );
 }
@@ -246,6 +368,7 @@ function SearchBody({ model }: { model: TuiModel }): ReactNode {
                   }}
                 >
                   <text fg={queued ? t.success : t.textMuted}>{`${queued ? CHECK : " "}${sel ? ARROW : " "}`}</text>
+                  <image source={sourceBadge(r.source, model.prefs.theme)} fit="fill" protocol="auto" style={{ width: 2, height: 1 }} />
                   <text fg={sel ? t.selectionText : t.text} attributes={sel ? TextAttributes.BOLD : TextAttributes.NONE}>
                     {r.name}
                   </text>
@@ -336,6 +459,7 @@ function Footer({ model }: { model: TuiModel }): ReactNode {
 
 function HelpOverlay({ model }: { model: TuiModel }): ReactNode {
   const t = tokensFor(model.prefs.theme);
+  const pop = usePopInOverlay(model.prefs, 2);
   if (!model.help) return null;
   const keys: Array<[string, string]> = [
     ["i / ,", "installed / settings tabs"],
@@ -347,6 +471,7 @@ function HelpOverlay({ model }: { model: TuiModel }): ReactNode {
     ["c", "check for updates"],
     ["A | I", "check all / invert"],
     ["g | p", "global / project scope"],
+    ["G", "3D skills graph (esc/G closes)"],
     ["space", "toggle check"],
     ["u / d / r", "update / delete (checked or focused)"],
     ["PgUp/PgDn/HOME/END", "page · top / bottom"],
@@ -355,7 +480,7 @@ function HelpOverlay({ model }: { model: TuiModel }): ReactNode {
     ["q", "quit"],
   ];
   return (
-    <box position="absolute" zIndex={11} top="10%" left="25%" width="50%" flexDirection="column" padding={1} border={true} borderStyle="rounded" borderColor={t.border} backgroundColor={t.surface} title=" help ">
+    <box ref={pop.ref} position="absolute" zIndex={11} top={pop.top} left="25%" width="50%" flexDirection="column" padding={1} border={true} borderStyle="rounded" borderColor={t.border} backgroundColor={t.surface} title=" help ">
       {keys.map(([key, label]) => (
         <box key={key} flexDirection="row" gap={2}>
           <text fg={t.primary}>{key.padEnd(18)}</text>
@@ -369,9 +494,10 @@ function HelpOverlay({ model }: { model: TuiModel }): ReactNode {
 function AgentSelectOverlay({ model }: { model: TuiModel }): ReactNode {
   const t = tokensFor(model.prefs.theme);
   const sel = model.agentSelect;
+  const pop = usePopInOverlay(model.prefs, 4);
   if (!sel) return null;
   return (
-    <box position="absolute" zIndex={12} top="15%" left="25%" width="50%" flexDirection="column" padding={1} border={true} borderStyle="rounded" borderColor={t.border} backgroundColor={t.surface} title=" filter by agent ">
+    <box ref={pop.ref} position="absolute" zIndex={12} top={pop.top} left="25%" width="50%" flexDirection="column" padding={1} border={true} borderStyle="rounded" borderColor={t.border} backgroundColor={t.surface} title=" filter by agent ">
       {sel.agents.map((agent, i) => {
         const cursor = i === sel.index;
         const staged = sel.staged.has(agent);
@@ -389,9 +515,10 @@ function AgentSelectOverlay({ model }: { model: TuiModel }): ReactNode {
 
 function ConfirmOverlay({ model }: { model: TuiModel }): ReactNode {
   const t = tokensFor(model.prefs.theme);
+  const pop = usePopInOverlay(model.prefs, 7);
   if (!model.confirm) return null;
   return (
-    <box position="absolute" zIndex={10} top="30%" left="25%" width="50%" flexDirection="column" gap={1} padding={1} border={true} borderStyle="rounded" borderColor={model.confirm.kind === "delete" ? t.danger : t.primary} backgroundColor={t.surface} title={model.confirm.kind === "delete" ? " delete skills " : " update skills "}>
+    <box ref={pop.ref} position="absolute" zIndex={10} top={pop.top} left="25%" width="50%" flexDirection="column" gap={1} padding={1} border={true} borderStyle="rounded" borderColor={model.confirm.kind === "delete" ? t.danger : t.primary} backgroundColor={t.surface} title={model.confirm.kind === "delete" ? " delete skills " : " update skills "}>
       <text fg={t.text}>{model.confirm.names.join(", ")}</text>
       <text fg={t.textMuted}>y confirm · esc cancel</text>
     </box>
