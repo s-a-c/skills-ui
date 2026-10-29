@@ -221,9 +221,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
   // its own. Rows are height 1, so row i sits at content offset i. The
   // viewport height is only known after layout — read it on a macrotask.
   const followSelection = (refs: BodyRefs): void => {
-    console.error(`FS-RUN list=${!!refs.listScroll} sel=${model.selected}`);
     const settle = (): void => {
-      console.error(`FS-SETTLE vs=${refs.listScroll?.viewport?.height ?? -1} top=${refs.listScroll?.scrollTop ?? -1} h=${refs.listScroll?.scrollHeight ?? -1} d=${refs.listScroll?.isDestroyed}`);
       if (model.tab === "installed" && refs.listScroll) {
         const scroll = refs.listScroll;
         const vs = scroll.viewport?.height ?? 0;
@@ -423,6 +421,13 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         dispatch({ type: "move", delta: k === "up" ? -1 : k === "down" ? 1 : 0 });
         if (k === "home") dispatch({ type: "home" });
         if (k === "end") dispatch({ type: "end" });
+        if (model.tab === "installed") void loadDetail();
+        return;
+      }
+      if (k === "pageup" || k === "pagedown") {
+        // paging must survive text-entry modes too — the branch swallows
+        // unlisted keys, which silently ate PgUp/PgDn mid-filter (S-88)
+        dispatch({ type: "move", delta: k === "pageup" ? -PAGE : PAGE });
         if (model.tab === "installed") void loadDetail();
         return;
       }

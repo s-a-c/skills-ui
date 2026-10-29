@@ -540,6 +540,10 @@ describe("0.2.x B1 (S-69): list ops", () => {
     // (S-87/S-88: in a real terminal the text must also be boxed to paint)
     expect(frame.indexOf("filter: s0")).toBeGreaterThanOrEqual(0);
     expect(frame.indexOf("filter: s0")).toBeLessThan(frame.indexOf("❯ s01"));
+    await s.mockInput.pressKey("\x1b[6~"); // PgDn must page even mid-filter (S-88)
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 150));
+    expect(s.captureCharFrame()).toContain("─ s09 ─"); // filter "s0" matches s01–s09; PgDn clamps to the last
     process.stdout.emit("resize"); // SIGWINCH path — must re-render without throwing
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
