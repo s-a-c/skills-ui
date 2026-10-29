@@ -58,9 +58,13 @@ for (const target of selected) {
   const outfile = `dist/skills-ui-${pkg.version}-${target.name}`;
   console.log(`building ${target.name} → ${outfile}`);
   // Bun.build's JS API does not expose --compile on this version; the CLI does
-  // (verified in phase 0: natives + worker + grammars embed cleanly)
+  // (verified in phase 0: natives + worker + grammars embed cleanly).
+  // --target is what actually cross-compiles: without it bun emits a host
+  // binary under every outfile name (the A1 finding — all four "targets"
+  // used to be identical Mach-O arm64).
   const defineFlags = Object.entries(target.define ?? {}).flatMap(([k, v]) => ["--define", `${k}=${v}`]);
-  await $`bun build --compile src/main.ts --outfile ${outfile} ${defineFlags}`.quiet();
+  const targetFlag = target.name === "darwin-arm64" ? [] : ["--target", `bun-${target.name}`];
+  await $`bun build --compile ${targetFlag} src/main.ts --outfile ${outfile} ${defineFlags}`.quiet();
   if (target.codesign) {
     await $`codesign --sign - --force --entitlements ${ENTITLEMENTS} ${outfile}`.quiet();
   }
