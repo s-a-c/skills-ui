@@ -16,6 +16,7 @@
  * Usage: bun run build [--target <name>]... | --all | (no args = host target)
  */
 import { $ } from "bun";
+import { readdirSync, rmSync } from "node:fs";
 
 const pkg = (await Bun.file("package.json").json()) as { version: string };
 
@@ -73,3 +74,31 @@ for (const target of selected) {
   console.log(`  ${size} MB`);
 }
 console.log("done");
+
+// ---------- release artifacts: prune stale versions, regenerate checksums ----------
+
+// dist/ accumulates binaries across version bumps. After every run, drop
+// skills-ui-*/checksums-* files from OTHER versions (build intermediates like
+// entitlements.plist stay) and rewrite the checksum manifest so it always
+// matches exactly what is on disk — `shasum -a 256 -c checksums-<ver>.txt`
+// from dist/ verifies the set.
+const versionedName = /^(?:skills-ui|checksums)-(\d+\.\d+\.\d+)/;
+for (const name of readdirSync("dist").sort()) {
+  const match = versionedName.exec(name);
+  if (match && match[1] !== pkg.version) {
+    rmSync(`dist/${name}`);
+    console.log(`pruned stale ${name}`);
+  }
+}
+const binaries = readdirSync("dist").filter((n) => n.startsWith(`skills-ui-${pkg.version}-`)).sort();
+if (binaries.length > 0) {
+  const manifest = `dist/checksums-${pkg.version}.txt`;
+  const lines: string[] = [];
+  for (const name of binaries) {
+    const hasher = new Bun.CryptoHasher("sha256");
+    hasher.update(await Bun.file(`dist/${name}`).arrayBuffer());
+    lines.push(`${hasher.digest("hex")}  ${name}`);
+  }
+  await Bun.write(manifest, `${lines.join("\n")}\n`);
+  console.log(`checksums → ${manifest} (${binaries.length} binaries)`);
+}
