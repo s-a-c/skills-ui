@@ -11,10 +11,14 @@ import type { UiSeed } from "../core/seed.ts";
 export type Tab = "installed" | "search" | "settings";
 export type Scope = "project" | "global";
 
-/** Search results render at most this many rows (S-88: growth beyond ~60
- * rows in one render garbles neighbors) — the cursor must stay inside the
- * rendered rows, so moves/Home/End clamp to it too (S-101). */
-export const SEARCH_RENDER_CAP = 50;
+/** Search results render at most this many rows — a memory bound against
+ * pathological registry responses, NOT a renderer workaround: under the
+ * React shell large single-frame scrollbox growth renders clean (the
+ * installed list ships 390 rows; the S-92 spike proved the shape). The
+ * title always carries the true count; the cursor clamps to this so it
+ * stays on rendered rows (S-101/S-102 — the old 50-row cap froze tall
+ * terminals on the first screen). */
+export const SEARCH_RENDER_CAP = 200;
 
 export interface Toast {
   text: string;

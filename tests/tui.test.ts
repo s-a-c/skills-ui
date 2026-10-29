@@ -653,14 +653,14 @@ describe("S-100 rich views", () => {
 describe("S-101 search pane navigation", () => {
   const result = (i: number): SearchSkill => ({ name: `r-${String(i).padStart(2, "0")}`, slug: `r${i}`, source: "o/r", installs: 1 });
 
-  test("move/end clamp the results cursor to the rendered cap (50)", () => {
+  test("move/end clamp the results cursor to the rendered cap (200)", () => {
     let m = createTuiModel(DEFAULT_UI_PREFERENCES);
     m.tab = "search";
-    m.results = Array.from({ length: 60 }, (_, i) => result(i));
+    m.results = Array.from({ length: 250 }, (_, i) => result(i));
     m = update(m, { type: "end" });
-    expect(m.searchSelected).toBe(49); // not 59 — cursor stays on rendered rows
+    expect(m.searchSelected).toBe(199); // not 249 — cursor stays on rendered rows
     m = update(m, { type: "move", delta: 10 });
-    expect(m.searchSelected).toBe(49); // still clamped
+    expect(m.searchSelected).toBe(199); // still clamped
     m = update(m, { type: "home" });
     expect(m.searchSelected).toBe(0);
   });

@@ -29,7 +29,7 @@ class _SearchFixtureHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         skills = [
             {"id": f"cli-ansi-{i:03d}", "name": f"cli-ansi-{i:03d}", "source": "fixture/registry", "installs": 1000 - i}
-            for i in range(1, 61)
+            for i in range(1, 121)
         ]
         body = json.dumps({"skills": skills}).encode()
         self.send_response(200)
@@ -128,7 +128,11 @@ def main():
         app.send("cli", settle=2.5)  # 300ms debounce + fetch
         r1 = app.find("cli-ansi-001")
         check("search: results render", r1 >= 0, f"row={r1}")
-        check("search: true count in title", app.find("60 results") >= 0)
+        check("search: true count in title", app.find("120 results") >= 0)
+        app.send("\x1b[F", settle=2.0)  # END → last result
+        r120 = app.find("cli-ansi-120")
+        check("search: END reaches result 120 (past the old 50-row cap)", r120 >= 0, f"row={r120}")
+        app.send("\x1b[H", settle=2.0)  # HOME → top
         app.send("\x1b[6~", settle=1.2)  # PgDn ×3 → cursor 30
         app.send("\x1b[6~", settle=1.2)
         app.send("\x1b[6~", settle=2.0)
