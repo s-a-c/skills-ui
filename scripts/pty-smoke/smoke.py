@@ -9,13 +9,37 @@ Usage (from any cwd):
     uv run --with pyte python scripts/pty-smoke/smoke.py
 or add pyte to your python and: python3 scripts/pty-smoke/smoke.py
 """
+import json
 import sys
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from runner import PtyApp
 
 FAILURES = []
+
+
+class _SearchFixtureHandler(BaseHTTPRequestHandler):
+    """Serves a 60-result registry answer for /api/search (S-101) — the
+    TUI reads SKILLS_UI_API_URL at module load, before the renderer scrubs
+    the environment, so a plain env override reaches it in a real pty."""
+
+    def do_GET(self):
+        skills = [
+            {"id": f"cli-ansi-{i:03d}", "name": f"cli-ansi-{i:03d}", "source": "fixture/registry", "installs": 1000 - i}
+            for i in range(1, 61)
+        ]
+        body = json.dumps({"skills": skills}).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, *args):
+        pass
 
 
 def check(name, ok, detail=""):
@@ -25,7 +49,9 @@ def check(name, ok, detail=""):
 
 
 def main():
-    app = PtyApp()
+    server = HTTPServer(("127.0.0.1", 0), _SearchFixtureHandler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    app = PtyApp(env={"SKILLS_UI_API_URL": f"http://127.0.0.1:{server.server_address[1]}"})
     try:
         app.read(5.0)  # startup, project scope
 
@@ -51,6 +77,14 @@ def main():
         check("END: cursor on the last skill, visible", 0 < end_row < app.rows - 1, f"row={end_row}")
         app.send("\x1b[H", settle=2.5)  # HOME
         check("HOME: back to the first skill", app.find("❯ skill-001") >= 0)
+        # consecutive paging must follow every page — the follow pass used
+        # to drift when scrollTop was already non-zero (S-101)
+        app.send("\x1b[6~", settle=1.2)
+        app.send("\x1b[6~", settle=2.0)  # +20 rows; cursor must stay visible
+        pg_row = app.find("❯ skill-021")
+        check("PgDn x2: cursor follows to skill-021", pg_row >= 0, f"row={pg_row}")
+        app.send("\x1b[H", settle=2.0)
+        check("PgDn HOME: back to the first skill", app.find("❯ skill-001") >= 0)
 
         # 5. mouse (S-98): click a list row — SGR rows are 1-based, so
         #    row 6 = 0-based y 5 = list index 3 -> skill-004
@@ -87,8 +121,34 @@ def main():
         app.send("G", settle=2.5)
         check("G: graph reopens (singleton reattach)", app.find("graph ·") >= 0)
         app.send("\x1b", settle=1.5)
+
+        # 8. search pane navigation (S-101): fixture registry over
+        #    SKILLS_UI_API_URL, then PgDn follow + pane-aware Home/End
+        app.send("/", settle=1.2)
+        app.send("cli", settle=2.5)  # 300ms debounce + fetch
+        r1 = app.find("cli-ansi-001")
+        check("search: results render", r1 >= 0, f"row={r1}")
+        check("search: true count in title", app.find("60 results") >= 0)
+        app.send("\x1b[6~", settle=1.2)  # PgDn ×3 → cursor 30
+        app.send("\x1b[6~", settle=1.2)
+        app.send("\x1b[6~", settle=2.0)
+        r31 = app.find("cli-ansi-031")
+        check("search: PgDn viewport follows to row 31", r31 >= 0, f"row={r31}")
+        app.send(" ", settle=1.5)  # queue cli-ansi-031
+        app.send("\x1b[H", settle=2.0)  # HOME → cursor 0, viewport follows back
+        r1b = app.find("cli-ansi-001")
+        check("search: HOME follows back to top", r1b >= 0, f"row={r1b}")
+        app.send(" ", settle=1.5)  # queue cli-ansi-001
+        app.send("\t", settle=1.5)  # Tab → Selected pane
+        check("search: Selected pane active", app.find("❯ Selected (2)") >= 0)
+        check("search: queue cursor on first queued", app.find("❯ cli-ansi-031") >= 0)
+        app.send("\x1b[F", settle=1.5)  # END in Selected pane
+        check("search: END moves queue cursor to last queued", app.find("❯ cli-ansi-001") >= 0)
+        app.send("\x1b[H", settle=1.5)  # HOME in Selected pane
+        check("search: HOME moves queue cursor to first queued", app.find("❯ cli-ansi-031") >= 0)
     finally:
         app.stop()
+        server.shutdown()
 
     print()
     if FAILURES:

@@ -649,3 +649,35 @@ describe("S-100 rich views", () => {
     expect(splash.info().height).toBe(28);
   });
 });
+
+describe("S-101 search pane navigation", () => {
+  const result = (i: number): SearchSkill => ({ name: `r-${String(i).padStart(2, "0")}`, slug: `r${i}`, source: "o/r", installs: 1 });
+
+  test("move/end clamp the results cursor to the rendered cap (50)", () => {
+    let m = createTuiModel(DEFAULT_UI_PREFERENCES);
+    m.tab = "search";
+    m.results = Array.from({ length: 60 }, (_, i) => result(i));
+    m = update(m, { type: "end" });
+    expect(m.searchSelected).toBe(49); // not 59 — cursor stays on rendered rows
+    m = update(m, { type: "move", delta: 10 });
+    expect(m.searchSelected).toBe(49); // still clamped
+    m = update(m, { type: "home" });
+    expect(m.searchSelected).toBe(0);
+  });
+
+  test("Home/End follow the active pane — the queue cursor moves too", () => {
+    let m = createTuiModel(DEFAULT_UI_PREFERENCES);
+    m.tab = "search";
+    m.searchPane = "selected";
+    m.queue = new Map([
+      ["o/r#a", result(0)],
+      ["o/r#b", result(1)],
+      ["o/r#c", result(2)],
+    ]);
+    m = update(m, { type: "end" });
+    expect(m.selectedCursor).toBe(2);
+    expect(m.searchSelected).toBe(0); // results cursor untouched
+    m = update(m, { type: "home" });
+    expect(m.selectedCursor).toBe(0);
+  });
+});

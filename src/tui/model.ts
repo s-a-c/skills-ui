@@ -11,6 +11,11 @@ import type { UiSeed } from "../core/seed.ts";
 export type Tab = "installed" | "search" | "settings";
 export type Scope = "project" | "global";
 
+/** Search results render at most this many rows (S-88: growth beyond ~60
+ * rows in one render garbles neighbors) — the cursor must stay inside the
+ * rendered rows, so moves/Home/End clamp to it too (S-101). */
+export const SEARCH_RENDER_CAP = 50;
+
 export interface Toast {
   text: string;
   tone: "info" | "success" | "error";
@@ -215,19 +220,26 @@ export function update(model: TuiModel, action: Action): TuiModel {
         next.selectedCursor = Math.max(0, Math.min(next.queue.size - 1, next.selectedCursor + action.delta));
         break;
       }
-      const count = next.tab === "installed" ? visibleSkills(next).length : next.results.length;
+      const count =
+        next.tab === "installed" ? visibleSkills(next).length : Math.min(next.results.length, SEARCH_RENDER_CAP);
       next.selected = Math.max(0, Math.min(count - 1, (next.tab === "installed" ? next.selected : next.searchSelected) + action.delta));
       if (next.tab === "search") next.searchSelected = next.selected;
       break;
     }
     case "home":
-      if (next.tab === "search") next.searchSelected = 0;
-      else next.selected = 0;
+      if (next.tab === "search") {
+        if (next.searchPane === "selected") next.selectedCursor = 0;
+        else next.searchSelected = 0;
+      } else next.selected = 0;
       break;
     case "end": {
-      const count = next.tab === "search" ? next.results.length : visibleSkills(next).length;
-      if (next.tab === "search") next.searchSelected = Math.max(0, count - 1);
-      else next.selected = Math.max(0, count - 1);
+      if (next.tab === "search") {
+        // clamp to the rendered rows — the cursor must stay visible (S-101)
+        if (next.searchPane === "selected") next.selectedCursor = Math.max(0, next.queue.size - 1);
+        else next.searchSelected = Math.max(0, Math.min(next.results.length, SEARCH_RENDER_CAP) - 1);
+      } else {
+        next.selected = Math.max(0, visibleSkills(next).length - 1);
+      }
       break;
     }
     case "toggle-check": {

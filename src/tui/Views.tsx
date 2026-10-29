@@ -11,7 +11,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type R
 import { useSyncExternalStore } from "react";
 import { CATPPUCCIN_LATTE, CATPPUCCIN_MOCHA, syntaxTokensFor, tokensFor } from "../core/theme.ts";
 import { sourceBadge, splashImage } from "./art.ts";
-import { visibleSkills, type Action, type TuiModel } from "./model.ts";
+import { visibleSkills, SEARCH_RENDER_CAP, type Action, type TuiModel } from "./model.ts";
 import type { SoundKind } from "./audio.ts";
 import type { InstalledSkill, SearchSkill, UpdatesResult, UiPreferences } from "../core/services/types.ts";
 import type { UiSeed } from "../core/seed.ts";
@@ -250,10 +250,19 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
     if (!scroll) return;
     const vs = scroll.viewport?.height ?? 0;
     if (vs <= 0) return;
-    const rowY = selectedRowRef.current?.y;
-    const i = typeof rowY === "number" ? rowY : model.selected;
-    if (i < scroll.scrollTop) scroll.scrollTop = i;
-    else if (i >= scroll.scrollTop + vs) scroll.scrollTop = i - vs + 1;
+    // renderable .y is an absolute SCREEN row (container offset + content
+    // y - scrollTop), so the renderer-agnostic position is the row's
+    // offset inside the viewport: row.y - scroll.y. The old code compared
+    // .y against scrollTop directly — it happened to survive single
+    // END/HOME and drifted on consecutive paging (S-101).
+    const y = selectedRowRef.current?.y;
+    const sy = scroll.y;
+    if (typeof y === "number" && typeof sy === "number") {
+      const rel = y - sy;
+      if (rel < 0) scroll.scrollTop += rel;
+      else if (rel >= vs) scroll.scrollTop += rel - vs + 1;
+    } else if (model.selected < scroll.scrollTop) scroll.scrollTop = model.selected;
+    else if (model.selected >= scroll.scrollTop + vs) scroll.scrollTop = model.selected - vs + 1;
   }, [model.selected, visible.length]);
 
   return (
@@ -331,8 +340,31 @@ function SearchBody({ model }: { model: TuiModel }): ReactNode {
   const t = tokensFor(model.prefs.theme);
   const { dispatch } = useApp();
   const resultsActive = model.searchPane === "results";
-  const resultsShown = Math.min(50, model.results.length);
+  const resultsShown = Math.min(SEARCH_RENDER_CAP, model.results.length);
   const title = ` search: ${model.query}${model.query && model.searching ? "▌" : ""} · ${model.results.length} results${model.adjustedQuery && model.query ? ` · showing "${model.adjustedQuery}"` : ""} `;
+  const scrollRef = useRef<ScrollBoxRenderable>(null);
+  const resultRowRef = useRef<BoxRenderable>(null);
+  const queueRowRef = useRef<BoxRenderable>(null);
+
+  // selection follow (S-101, the S-88 pass adapted to the stacked panes):
+  // keep the ACTIVE pane's cursor row inside the viewport — results and
+  // queue live in one scroll column, so the row's computed y is the only
+  // reliable coordinate (the cap keeps the cursor on rendered rows).
+  useEffect(() => {
+    const scroll = scrollRef.current;
+    if (!scroll) return;
+    const vs = scroll.viewport?.height ?? 0;
+    if (vs <= 0) return;
+    // .y is an absolute screen row — offset inside the viewport is
+    // row.y - scroll.y (see the installed follow for the full story)
+    const y = (resultsActive ? resultRowRef.current : queueRowRef.current)?.y;
+    const sy = scroll.y;
+    if (typeof y !== "number" || typeof sy !== "number") return;
+    const rel = y - sy;
+    if (rel < 0) scroll.scrollTop += rel;
+    else if (rel >= vs) scroll.scrollTop += rel - vs + 1;
+  }, [model.searchSelected, model.selectedCursor, model.searchPane, model.results.length, model.queue.size]);
+
   return (
     <box width="100%" flexGrow={1} flexShrink={1} minHeight={0} flexDirection="column" paddingLeft={1} paddingRight={1}>
       <box
@@ -346,19 +378,20 @@ function SearchBody({ model }: { model: TuiModel }): ReactNode {
         borderColor={t.border}
         title={title}
       >
-        <scrollbox width="100%" flexGrow={1} flexShrink={1} scrollY={true}>
+        <scrollbox ref={scrollRef} width="100%" flexGrow={1} flexShrink={1} scrollY={true}>
           <text fg={resultsActive ? t.primary : t.textMuted} attributes={resultsActive ? TextAttributes.BOLD : TextAttributes.NONE}>
             {`${resultsActive ? ARROW : " "} Results`}
           </text>
           {model.results.length === 0 ? (
             <text fg={t.textMuted}>{model.query ? "no results" : "search the skills.sh registry"}</text>
           ) : (
-            model.results.slice(0, 50).map((r, i) => {
+            model.results.slice(0, SEARCH_RENDER_CAP).map((r, i) => {
               const sel = resultsActive && i === model.searchSelected;
               const queued = model.queue.has(`${r.source}#${r.name}`);
               return (
                 <box
                   key={`${r.source}#${r.name}`}
+                  ref={sel ? resultRowRef : undefined}
                   width="100%"
                   flexDirection="row"
                   gap={1}
@@ -387,8 +420,8 @@ function SearchBody({ model }: { model: TuiModel }): ReactNode {
             [...model.queue.values()].map((r, i) => {
               const sel = !resultsActive && i === model.selectedCursor;
               return (
-                <box key={`${r.source}#${r.name}`} width="100%" flexDirection="row" gap={1} backgroundColor={sel ? t.selectionBg : undefined}>
-                  <text fg={t.textMuted}>{`${sel ? ARROW : " "} `}</text>
+                <box key={`${r.source}#${r.name}`} ref={sel ? queueRowRef : undefined} width="100%" flexDirection="row" gap={1} backgroundColor={sel ? t.selectionBg : undefined}>
+                  <text fg={t.textMuted}>{`${sel ? ARROW : " "}`}</text>
                   <text fg={sel ? t.selectionText : t.text} attributes={sel ? TextAttributes.BOLD : TextAttributes.NONE}>
                     {r.name}
                   </text>
