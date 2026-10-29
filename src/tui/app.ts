@@ -24,6 +24,7 @@ import {
   buildInstalledBody,
   buildSearchBody,
   buildSettingsBody,
+  type BodyHandlers,
   type BodyRefs,
 } from "./views.ts";
 
@@ -216,11 +217,25 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     if (overlay) frame.remove(overlay);
     header = buildHeader(renderer, model);
     const refs: BodyRefs = {};
+    // mouse (S-98): click a row to select it, click the detail pane to
+    // enter its scroll mode — handlers carry into the React shell as props
+    const handlers: BodyHandlers = {
+      onSelectSkill: (i) => {
+        dispatch({ type: "move", delta: i - model.selected });
+        void loadDetail();
+      },
+      onSelectResult: (i) => {
+        dispatch({ type: "move", delta: i - model.searchSelected });
+      },
+      onDetailClick: () => {
+        if (!model.detailScroll) dispatch({ type: "detail-scroll", on: true });
+      },
+    };
     body =
       model.tab === "installed"
-        ? buildInstalledBody(renderer, model, refs)
+        ? buildInstalledBody(renderer, model, refs, handlers)
         : model.tab === "search"
-          ? buildSearchBody(renderer, model, refs)
+          ? buildSearchBody(renderer, model, refs, handlers)
           : buildSettingsBody(renderer, model);
     footer = buildFooter(renderer, model);
     overlay = buildConfirmOverlay(renderer, model) ?? buildHelpOverlay(renderer, model) ?? buildAgentSelectOverlay(renderer, model);

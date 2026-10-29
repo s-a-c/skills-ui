@@ -67,6 +67,14 @@ export function buildHeader(renderer: CliRenderer, model: TuiModel): BoxRenderab
   return header;
 }
 
+/** Mouse handlers — the app layer injects dispatch-backed callbacks
+ * (S-98: click row selects, click detail pane enters scroll mode). */
+export interface BodyHandlers {
+  onSelectSkill?: (index: number) => void;
+  onSelectResult?: (index: number) => void;
+  onDetailClick?: () => void;
+}
+
 export interface BodyRefs {
   selectedRow?: BoxRenderable | null;
   listScroll?: ScrollBoxRenderable;
@@ -75,7 +83,7 @@ export interface BodyRefs {
   searchLayout?: { resultsShown: number };
 }
 
-export function buildInstalledBody(renderer: CliRenderer, model: TuiModel, refs?: BodyRefs): BoxRenderable {
+export function buildInstalledBody(renderer: CliRenderer, model: TuiModel, refs?: BodyRefs, handlers?: BodyHandlers): BoxRenderable {
   const t = tokensFor(model.prefs.theme);
   // flexGrow without flexShrink overflows the terminal with long content —
   // Yoga's default flexShrink is 0, so growing panes must also shrink (S-87)
@@ -127,6 +135,7 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel, refs?
       flexDirection: "row",
       gap: 1,
       backgroundColor: selected ? t.selectionBg : undefined,
+      ...(handlers?.onSelectSkill ? { onMouseDown: () => handlers.onSelectSkill?.(i) } : {}),
     });
     const checked = model.checked.has(skill.name);
     row.add(
@@ -161,6 +170,7 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel, refs?
     flexDirection: "column",
     border: true,
     borderStyle: "rounded",
+    ...(handlers?.onDetailClick ? { onMouseDown: () => handlers.onDetailClick?.() } : {}),
     borderColor: model.detailScroll ? t.primary : t.border,
     title: visible[model.selected]
       ? ` ${visible[model.selected]!.name}${model.detailScroll ? " · scroll (tab)" : ""} `
@@ -193,7 +203,7 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel, refs?
   return body;
 }
 
-export function buildSearchBody(renderer: CliRenderer, model: TuiModel, refs?: BodyRefs): BoxRenderable {
+export function buildSearchBody(renderer: CliRenderer, model: TuiModel, refs?: BodyRefs, handlers?: BodyHandlers): BoxRenderable {
   const t = tokensFor(model.prefs.theme);
   const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexShrink: 1, minHeight: 0, flexDirection: "column", paddingLeft: 1, paddingRight: 1 });
   // bordered scroll container — same renderer-isolation shape as the
@@ -238,6 +248,7 @@ export function buildSearchBody(renderer: CliRenderer, model: TuiModel, refs?: B
       flexDirection: "row",
       gap: 1,
       backgroundColor: selected ? t.selectionBg : undefined,
+      ...(handlers?.onSelectResult ? { onMouseDown: () => handlers.onSelectResult?.(i) } : {}),
     });
     const queued = model.queue.has(`${r.source}#${r.name}`);
     row.add(
@@ -447,6 +458,7 @@ export function buildHelpOverlay(renderer: CliRenderer, model: TuiModel): BoxRen
     ["space", "toggle check"],
     ["u / d / r", "update / delete (checked or focused)"],
     ["PgUp/PgDn/HOME/END", "page · top / bottom"],
+    ["mouse", "wheel scrolls · click selects"],
     ["?", "this help"],
     ["q", "quit"],
   ];

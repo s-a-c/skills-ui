@@ -52,6 +52,17 @@ def main():
         app.send("\x1b[H", settle=2.5)  # HOME
         check("HOME: back to the first skill", app.find("❯ skill-001") >= 0)
 
+        # 5. mouse (S-98): click a list row — SGR rows are 1-based, so
+        #    row 6 = 0-based y 5 = list index 3 -> skill-004
+        app.send("\x1b[<0;10;6M", settle=0.6)   # SGR press
+        app.send("\x1b[<0;10;6m", settle=2.0)   # SGR release
+        check("click: cursor moved to the clicked row", app.find("❯ skill-004") >= 0, f"row={app.find('❯ skill-004')}")
+        app.send("\x1b[<0;60;10M", settle=0.6)
+        app.send("\x1b[<0;60;10m", settle=2.0)
+        check("click detail: scroll mode entered", app.find("scroll (tab)") >= 0)
+        app.send("\t", settle=1.5)  # exit scroll mode for the later checks
+        app.send("\x1b[H", settle=1.5)  # HOME back to the top
+
         # 4. filter typing: the title is the live filter display (S-88)
         app.send("f", settle=1.2)
         app.send("skill-11", settle=2.0)
@@ -59,7 +70,7 @@ def main():
         check("filter: list narrowed", app.find("❯ skill-001") == -1)
         app.send("\x1b", settle=1.5)  # ESC exits, text kept
 
-        # 5. space toggles a check; no console overlay appears (S-88 audio
+        # 6. space toggles a check; no console overlay appears (S-88 audio
         #    class — smoke runs with sound off, checks the render path only)
         app.send(" ", settle=2.0)
         check("space: check rendered", app.find("✔") >= 0)
