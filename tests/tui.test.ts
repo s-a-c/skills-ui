@@ -587,6 +587,9 @@ describe("0.2.x B1 (S-69): list ops", () => {
     await s.flush();
     frame = s.captureCharFrame();
     expect(frame).toContain("❯ Selected (1)");
+    await s.mockInput.pressKey("\x1b"); // Esc → command mode (queue keys live there now, S-103)
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 50));
     await s.mockInput.pressKey("d"); // remove the queued item
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
@@ -679,5 +682,66 @@ describe("S-101 search pane navigation", () => {
     expect(m.searchSelected).toBe(0); // results cursor untouched
     m = update(m, { type: "home" });
     expect(m.selectedCursor).toBe(0);
+  });
+});
+
+describe("S-103 search text-entry + match highlighting", () => {
+  test("typing vercel-labs keeps the hyphen; letters land in the query, not the queue", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await s.mockInput.typeText("/");
+    await s.mockInput.typeText("vercel-labs");
+    await new Promise((r) => setTimeout(r, 500)); // debounce + search
+    await s.flush();
+    const frame = s.captureCharFrame();
+    expect(frame).toContain("vercel-labs"); // hyphen survives (space stays queue-by fork contract)
+  });
+
+  test("queue items survive letters typed in search mode; Esc restores queue keys", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await s.mockInput.typeText("/");
+    await s.mockInput.typeText("cli");
+    await new Promise((r) => setTimeout(r, 500));
+    await s.flush();
+    await s.mockInput.typeText(" "); // queue cli-ansi
+    await s.flush();
+    let frame = s.captureCharFrame();
+    expect(frame).toContain("Selected (1)");
+    await s.mockInput.typeText("d"); // a letter mid-query — must NOT delete the queued item
+    await new Promise((r) => setTimeout(r, 450));
+    await s.flush();
+    frame = s.captureCharFrame();
+    expect(frame).toContain("Selected (1)"); // queue untouched
+    expect(frame).toContain("clid"); // the letter reached the query
+    await s.mockInput.pressKey("\x1b"); // command mode
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 50));
+    await s.mockInput.pressKey("d"); // now it removes
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    frame = s.captureCharFrame();
+    expect(frame).toContain("Selected (0)");
+  });
+
+  test("highlightSegments marks every case-insensitive occurrence", async () => {
+    const { highlightSegments } = await import("../src/tui/Views.tsx");
+    expect(highlightSegments("vercel-labs/skills", ["labs"])).toEqual([
+      { text: "vercel-", match: false },
+      { text: "labs", match: true },
+      { text: "/skills", match: false },
+    ]);
+    expect(highlightSegments("Lab-Lab", ["lab"])).toEqual([
+      { text: "Lab", match: true },
+      { text: "-", match: false },
+      { text: "Lab", match: true },
+    ]);
+    expect(highlightSegments("nomatch", ["labs", null])).toEqual([{ text: "nomatch", match: false }]);
+    // adjusted query wins only when the raw query misses
+    expect(highlightSegments("cli-ansi", ["zzz", "ansi"])[1]).toEqual({ text: "ansi", match: true });
   });
 });

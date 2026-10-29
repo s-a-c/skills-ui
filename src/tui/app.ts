@@ -365,10 +365,13 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       else if (k === "q") renderer.destroy();
       return;
     }
-    // Search-tab queue keys work in both text-entry and command mode (fork
-    // contract): Tab flips Results/Selected anywhere on the search tab.
-    // On the installed tab, Tab toggles detail-scroll mode (S-88).
-    if (model.tab === "search" && (k === "tab" || k === "+" || k === "-" || k === "d" || k === "x")) {
+    // Search-tab queue keys: Tab flips Results/Selected anywhere on the
+    // search tab (not printable text, safe mid-word). The -/d/x/+ queue
+    // keys are COMMAND-MODE only — they used to fire while typing too,
+    // eating every d/x/+/- out of the query ("vercel-labs" → "vercellabs",
+    // S-103). After Esc/Return all five work as queue keys again.
+    const queueKey = model.tab === "search" && (k === "tab" || (!model.searching && (k === "+" || k === "-" || k === "d" || k === "x")));
+    if (queueKey) {
       handleQueueKey(k);
       return;
     }

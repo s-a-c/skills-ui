@@ -336,6 +336,34 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
   );
 }
 
+/** Query-match segmentation (S-103): splits `text` into runs, marking
+ * case-insensitive occurrences of the first needle that matches anywhere
+ * in the text (the raw query, else the fuzzy-adjusted one). Exported for
+ * unit tests. */
+export function highlightSegments(
+  text: string,
+  needles: Array<string | null | undefined>,
+): Array<{ text: string; match: boolean }> {
+  const needle = needles.find((n) => n && n.trim() !== "" && text.toLowerCase().includes(n.trim().toLowerCase()));
+  const q = needle?.trim();
+  if (!q) return [{ text, match: false }];
+  const lower = text.toLowerCase();
+  const lq = q.toLowerCase();
+  const out: Array<{ text: string; match: boolean }> = [];
+  let i = 0;
+  while (i < text.length) {
+    const idx = lower.indexOf(lq, i);
+    if (idx === -1) {
+      out.push({ text: text.slice(i), match: false });
+      break;
+    }
+    if (idx > i) out.push({ text: text.slice(i, idx), match: false });
+    out.push({ text: text.slice(idx, idx + q.length), match: true });
+    i = idx + q.length;
+  }
+  return out;
+}
+
 function SearchBody({ model }: { model: TuiModel }): ReactNode {
   const t = tokensFor(model.prefs.theme);
   const { dispatch } = useApp();
@@ -402,10 +430,30 @@ function SearchBody({ model }: { model: TuiModel }): ReactNode {
                 >
                   <text fg={queued ? t.success : t.textMuted}>{`${queued ? CHECK : " "}${sel ? ARROW : " "}`}</text>
                   <image source={sourceBadge(r.source, model.prefs.theme)} fit="fill" protocol="auto" style={{ width: 2, height: 1 }} />
-                  <text fg={sel ? t.selectionText : t.text} attributes={sel ? TextAttributes.BOLD : TextAttributes.NONE}>
-                    {r.name}
-                  </text>
-                  <text fg={sel ? t.selectionText : t.textMuted}>{r.source}</text>
+                  {/* query-match highlighting (S-103): segments live in a
+                      gap-0 wrapper so no spaces creep between runs */}
+                  <box flexDirection="row">
+                    {highlightSegments(r.name, [model.query, model.adjustedQuery]).map((seg, j) => (
+                      <text
+                        key={j}
+                        fg={seg.match ? (sel ? t.selectionText : t.primary) : sel ? t.selectionText : t.text}
+                        attributes={seg.match || sel ? TextAttributes.BOLD : TextAttributes.NONE}
+                      >
+                        {seg.text}
+                      </text>
+                    ))}
+                  </box>
+                  <box flexDirection="row">
+                    {highlightSegments(r.source, [model.query, model.adjustedQuery]).map((seg, j) => (
+                      <text
+                        key={j}
+                        fg={seg.match ? (sel ? t.selectionText : t.primary) : sel ? t.selectionText : t.textMuted}
+                        attributes={seg.match ? TextAttributes.BOLD : TextAttributes.NONE}
+                      >
+                        {seg.text}
+                      </text>
+                    ))}
+                  </box>
                   <text fg={t.textMuted}>{`${r.installs}`}</text>
                 </box>
               );

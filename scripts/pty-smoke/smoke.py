@@ -125,7 +125,11 @@ def main():
         # 8. search pane navigation (S-101): fixture registry over
         #    SKILLS_UI_API_URL, then PgDn follow + pane-aware Home/End
         app.send("/", settle=1.2)
-        app.send("cli", settle=2.5)  # 300ms debounce + fetch
+        # hyphenated query that is also a substring of the fixture names —
+        # exercises hyphen survival AND passes the registry's gating
+        app.send("cli-an", settle=2.5)  # debounce + fetch
+        hyph = app.find("search: cli-an")
+        check("search: hyphen survives typing", hyph == 1, f"row={hyph}")
         r1 = app.find("cli-ansi-001")
         check("search: results render", r1 >= 0, f"row={r1}")
         check("search: true count in title", app.find("120 results") >= 0)
