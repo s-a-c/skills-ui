@@ -109,16 +109,27 @@ export interface TuiDeps {
   play(kind: SoundKind, prefs: UiPreferences): Promise<void>;
 }
 
+// `skills ls --json` is the load cost (~5s at 295 skills — the CLI scans
+// every agent dir); the description enrichment is ~12ms and innocent.
+// Cache per scope so g↔p switches don't re-pay the subprocess; any
+// mutation drops the cache (S-89).
+const listCache = new Map<"project" | "global", InstalledSkill[]>();
+
 export const realDeps: TuiDeps = {
   // enrich with frontmatter descriptions so the TUI text filter can match them (secondary)
   listInstalled: async (scope) => {
+    const cached = listCache.get(scope);
+    if (cached) return cached.map((s) => ({ ...s }));
     const skills = await svcListInstalled(scope);
-    return skills.map((s) => ({ ...s, description: descriptionOf(s.path) }));
+    const enriched = skills.map((s) => ({ ...s, description: descriptionOf(s.path) }));
+    listCache.set(scope, enriched);
+    return enriched.map((s) => ({ ...s }));
   },
   search: (query) => svcSearch(query),
   install: async (source, skills) => {
     const result = await svcInstall({ source, skills });
     const failed = result.results.filter((r) => r.status !== "installed");
+    listCache.clear();
     return {
       ok: result.ok,
       summary: failed.length
@@ -128,6 +139,7 @@ export const realDeps: TuiDeps = {
   },
   remove: async (names, scope) => {
     const result = await svcRemove(names, scope);
+    listCache.clear();
     return {
       ok: result.ok,
       summary: result.ok ? `removed ${result.removed.join(", ")}` : `failed: ${result.missing.join(", ")}`,
@@ -135,6 +147,7 @@ export const realDeps: TuiDeps = {
   },
   update: async (names, scope) => {
     const result = await svcUpdate(names, scope);
+    listCache.clear();
     return { ok: result.ok, summary: result.ok ? "updated" : "update failed" };
   },
   skillBody: (path) => Promise.resolve(svcSkillBody(path)),
