@@ -1,0 +1,1502 @@
+[
+  {
+    "name": "skill-001",
+    "path": "/tmp/pty-smoke/skill-001",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-001",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 1 for pty smoke"
+  },
+  {
+    "name": "skill-002",
+    "path": "/tmp/pty-smoke/skill-002",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-002",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 2 for pty smoke"
+  },
+  {
+    "name": "skill-003",
+    "path": "/tmp/pty-smoke/skill-003",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-003",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 3 for pty smoke"
+  },
+  {
+    "name": "skill-004",
+    "path": "/tmp/pty-smoke/skill-004",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-004",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 4 for pty smoke"
+  },
+  {
+    "name": "skill-005",
+    "path": "/tmp/pty-smoke/skill-005",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-005",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 5 for pty smoke"
+  },
+  {
+    "name": "skill-006",
+    "path": "/tmp/pty-smoke/skill-006",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-006",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 6 for pty smoke"
+  },
+  {
+    "name": "skill-007",
+    "path": "/tmp/pty-smoke/skill-007",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-007",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 7 for pty smoke"
+  },
+  {
+    "name": "skill-008",
+    "path": "/tmp/pty-smoke/skill-008",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-008",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 8 for pty smoke"
+  },
+  {
+    "name": "skill-009",
+    "path": "/tmp/pty-smoke/skill-009",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-009",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 9 for pty smoke"
+  },
+  {
+    "name": "skill-010",
+    "path": "/tmp/pty-smoke/skill-010",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-010",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 10 for pty smoke"
+  },
+  {
+    "name": "skill-011",
+    "path": "/tmp/pty-smoke/skill-011",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-011",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 11 for pty smoke"
+  },
+  {
+    "name": "skill-012",
+    "path": "/tmp/pty-smoke/skill-012",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-012",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 12 for pty smoke"
+  },
+  {
+    "name": "skill-013",
+    "path": "/tmp/pty-smoke/skill-013",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-013",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 13 for pty smoke"
+  },
+  {
+    "name": "skill-014",
+    "path": "/tmp/pty-smoke/skill-014",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-014",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 14 for pty smoke"
+  },
+  {
+    "name": "skill-015",
+    "path": "/tmp/pty-smoke/skill-015",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-015",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 15 for pty smoke"
+  },
+  {
+    "name": "skill-016",
+    "path": "/tmp/pty-smoke/skill-016",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-016",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 16 for pty smoke"
+  },
+  {
+    "name": "skill-017",
+    "path": "/tmp/pty-smoke/skill-017",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-017",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 17 for pty smoke"
+  },
+  {
+    "name": "skill-018",
+    "path": "/tmp/pty-smoke/skill-018",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-018",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 18 for pty smoke"
+  },
+  {
+    "name": "skill-019",
+    "path": "/tmp/pty-smoke/skill-019",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-019",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 19 for pty smoke"
+  },
+  {
+    "name": "skill-020",
+    "path": "/tmp/pty-smoke/skill-020",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-020",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 20 for pty smoke"
+  },
+  {
+    "name": "skill-021",
+    "path": "/tmp/pty-smoke/skill-021",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-021",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 21 for pty smoke"
+  },
+  {
+    "name": "skill-022",
+    "path": "/tmp/pty-smoke/skill-022",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-022",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 22 for pty smoke"
+  },
+  {
+    "name": "skill-023",
+    "path": "/tmp/pty-smoke/skill-023",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-023",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 23 for pty smoke"
+  },
+  {
+    "name": "skill-024",
+    "path": "/tmp/pty-smoke/skill-024",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-024",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 24 for pty smoke"
+  },
+  {
+    "name": "skill-025",
+    "path": "/tmp/pty-smoke/skill-025",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-025",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 25 for pty smoke"
+  },
+  {
+    "name": "skill-026",
+    "path": "/tmp/pty-smoke/skill-026",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-026",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 26 for pty smoke"
+  },
+  {
+    "name": "skill-027",
+    "path": "/tmp/pty-smoke/skill-027",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-027",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 27 for pty smoke"
+  },
+  {
+    "name": "skill-028",
+    "path": "/tmp/pty-smoke/skill-028",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-028",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 28 for pty smoke"
+  },
+  {
+    "name": "skill-029",
+    "path": "/tmp/pty-smoke/skill-029",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-029",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 29 for pty smoke"
+  },
+  {
+    "name": "skill-030",
+    "path": "/tmp/pty-smoke/skill-030",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-030",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 30 for pty smoke"
+  },
+  {
+    "name": "skill-031",
+    "path": "/tmp/pty-smoke/skill-031",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-031",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 31 for pty smoke"
+  },
+  {
+    "name": "skill-032",
+    "path": "/tmp/pty-smoke/skill-032",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-032",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 32 for pty smoke"
+  },
+  {
+    "name": "skill-033",
+    "path": "/tmp/pty-smoke/skill-033",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-033",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 33 for pty smoke"
+  },
+  {
+    "name": "skill-034",
+    "path": "/tmp/pty-smoke/skill-034",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-034",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 34 for pty smoke"
+  },
+  {
+    "name": "skill-035",
+    "path": "/tmp/pty-smoke/skill-035",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-035",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 35 for pty smoke"
+  },
+  {
+    "name": "skill-036",
+    "path": "/tmp/pty-smoke/skill-036",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-036",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 36 for pty smoke"
+  },
+  {
+    "name": "skill-037",
+    "path": "/tmp/pty-smoke/skill-037",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-037",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 37 for pty smoke"
+  },
+  {
+    "name": "skill-038",
+    "path": "/tmp/pty-smoke/skill-038",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-038",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 38 for pty smoke"
+  },
+  {
+    "name": "skill-039",
+    "path": "/tmp/pty-smoke/skill-039",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-039",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 39 for pty smoke"
+  },
+  {
+    "name": "skill-040",
+    "path": "/tmp/pty-smoke/skill-040",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-040",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 40 for pty smoke"
+  },
+  {
+    "name": "skill-041",
+    "path": "/tmp/pty-smoke/skill-041",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-041",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 41 for pty smoke"
+  },
+  {
+    "name": "skill-042",
+    "path": "/tmp/pty-smoke/skill-042",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-042",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 42 for pty smoke"
+  },
+  {
+    "name": "skill-043",
+    "path": "/tmp/pty-smoke/skill-043",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-043",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 43 for pty smoke"
+  },
+  {
+    "name": "skill-044",
+    "path": "/tmp/pty-smoke/skill-044",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-044",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 44 for pty smoke"
+  },
+  {
+    "name": "skill-045",
+    "path": "/tmp/pty-smoke/skill-045",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-045",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 45 for pty smoke"
+  },
+  {
+    "name": "skill-046",
+    "path": "/tmp/pty-smoke/skill-046",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-046",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 46 for pty smoke"
+  },
+  {
+    "name": "skill-047",
+    "path": "/tmp/pty-smoke/skill-047",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-047",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 47 for pty smoke"
+  },
+  {
+    "name": "skill-048",
+    "path": "/tmp/pty-smoke/skill-048",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-048",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 48 for pty smoke"
+  },
+  {
+    "name": "skill-049",
+    "path": "/tmp/pty-smoke/skill-049",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-049",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 49 for pty smoke"
+  },
+  {
+    "name": "skill-050",
+    "path": "/tmp/pty-smoke/skill-050",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-050",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 50 for pty smoke"
+  },
+  {
+    "name": "skill-051",
+    "path": "/tmp/pty-smoke/skill-051",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-051",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 51 for pty smoke"
+  },
+  {
+    "name": "skill-052",
+    "path": "/tmp/pty-smoke/skill-052",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-052",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 52 for pty smoke"
+  },
+  {
+    "name": "skill-053",
+    "path": "/tmp/pty-smoke/skill-053",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-053",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 53 for pty smoke"
+  },
+  {
+    "name": "skill-054",
+    "path": "/tmp/pty-smoke/skill-054",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-054",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 54 for pty smoke"
+  },
+  {
+    "name": "skill-055",
+    "path": "/tmp/pty-smoke/skill-055",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-055",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 55 for pty smoke"
+  },
+  {
+    "name": "skill-056",
+    "path": "/tmp/pty-smoke/skill-056",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-056",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 56 for pty smoke"
+  },
+  {
+    "name": "skill-057",
+    "path": "/tmp/pty-smoke/skill-057",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-057",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 57 for pty smoke"
+  },
+  {
+    "name": "skill-058",
+    "path": "/tmp/pty-smoke/skill-058",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-058",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 58 for pty smoke"
+  },
+  {
+    "name": "skill-059",
+    "path": "/tmp/pty-smoke/skill-059",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-059",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 59 for pty smoke"
+  },
+  {
+    "name": "skill-060",
+    "path": "/tmp/pty-smoke/skill-060",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-060",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 60 for pty smoke"
+  },
+  {
+    "name": "skill-061",
+    "path": "/tmp/pty-smoke/skill-061",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-061",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 61 for pty smoke"
+  },
+  {
+    "name": "skill-062",
+    "path": "/tmp/pty-smoke/skill-062",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-062",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 62 for pty smoke"
+  },
+  {
+    "name": "skill-063",
+    "path": "/tmp/pty-smoke/skill-063",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-063",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 63 for pty smoke"
+  },
+  {
+    "name": "skill-064",
+    "path": "/tmp/pty-smoke/skill-064",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-064",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 64 for pty smoke"
+  },
+  {
+    "name": "skill-065",
+    "path": "/tmp/pty-smoke/skill-065",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-065",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 65 for pty smoke"
+  },
+  {
+    "name": "skill-066",
+    "path": "/tmp/pty-smoke/skill-066",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-066",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 66 for pty smoke"
+  },
+  {
+    "name": "skill-067",
+    "path": "/tmp/pty-smoke/skill-067",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-067",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 67 for pty smoke"
+  },
+  {
+    "name": "skill-068",
+    "path": "/tmp/pty-smoke/skill-068",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-068",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 68 for pty smoke"
+  },
+  {
+    "name": "skill-069",
+    "path": "/tmp/pty-smoke/skill-069",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-069",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 69 for pty smoke"
+  },
+  {
+    "name": "skill-070",
+    "path": "/tmp/pty-smoke/skill-070",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-070",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 70 for pty smoke"
+  },
+  {
+    "name": "skill-071",
+    "path": "/tmp/pty-smoke/skill-071",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-071",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 71 for pty smoke"
+  },
+  {
+    "name": "skill-072",
+    "path": "/tmp/pty-smoke/skill-072",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-072",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 72 for pty smoke"
+  },
+  {
+    "name": "skill-073",
+    "path": "/tmp/pty-smoke/skill-073",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-073",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 73 for pty smoke"
+  },
+  {
+    "name": "skill-074",
+    "path": "/tmp/pty-smoke/skill-074",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-074",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 74 for pty smoke"
+  },
+  {
+    "name": "skill-075",
+    "path": "/tmp/pty-smoke/skill-075",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-075",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 75 for pty smoke"
+  },
+  {
+    "name": "skill-076",
+    "path": "/tmp/pty-smoke/skill-076",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-076",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 76 for pty smoke"
+  },
+  {
+    "name": "skill-077",
+    "path": "/tmp/pty-smoke/skill-077",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-077",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 77 for pty smoke"
+  },
+  {
+    "name": "skill-078",
+    "path": "/tmp/pty-smoke/skill-078",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-078",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 78 for pty smoke"
+  },
+  {
+    "name": "skill-079",
+    "path": "/tmp/pty-smoke/skill-079",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-079",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 79 for pty smoke"
+  },
+  {
+    "name": "skill-080",
+    "path": "/tmp/pty-smoke/skill-080",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-080",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 80 for pty smoke"
+  },
+  {
+    "name": "skill-081",
+    "path": "/tmp/pty-smoke/skill-081",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-081",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 81 for pty smoke"
+  },
+  {
+    "name": "skill-082",
+    "path": "/tmp/pty-smoke/skill-082",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-082",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 82 for pty smoke"
+  },
+  {
+    "name": "skill-083",
+    "path": "/tmp/pty-smoke/skill-083",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-083",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 83 for pty smoke"
+  },
+  {
+    "name": "skill-084",
+    "path": "/tmp/pty-smoke/skill-084",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-084",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 84 for pty smoke"
+  },
+  {
+    "name": "skill-085",
+    "path": "/tmp/pty-smoke/skill-085",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-085",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 85 for pty smoke"
+  },
+  {
+    "name": "skill-086",
+    "path": "/tmp/pty-smoke/skill-086",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-086",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 86 for pty smoke"
+  },
+  {
+    "name": "skill-087",
+    "path": "/tmp/pty-smoke/skill-087",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-087",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 87 for pty smoke"
+  },
+  {
+    "name": "skill-088",
+    "path": "/tmp/pty-smoke/skill-088",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-088",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 88 for pty smoke"
+  },
+  {
+    "name": "skill-089",
+    "path": "/tmp/pty-smoke/skill-089",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-089",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 89 for pty smoke"
+  },
+  {
+    "name": "skill-090",
+    "path": "/tmp/pty-smoke/skill-090",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-090",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 90 for pty smoke"
+  },
+  {
+    "name": "skill-091",
+    "path": "/tmp/pty-smoke/skill-091",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-091",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 91 for pty smoke"
+  },
+  {
+    "name": "skill-092",
+    "path": "/tmp/pty-smoke/skill-092",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-092",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 92 for pty smoke"
+  },
+  {
+    "name": "skill-093",
+    "path": "/tmp/pty-smoke/skill-093",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-093",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 93 for pty smoke"
+  },
+  {
+    "name": "skill-094",
+    "path": "/tmp/pty-smoke/skill-094",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-094",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 94 for pty smoke"
+  },
+  {
+    "name": "skill-095",
+    "path": "/tmp/pty-smoke/skill-095",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-095",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 95 for pty smoke"
+  },
+  {
+    "name": "skill-096",
+    "path": "/tmp/pty-smoke/skill-096",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-096",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 96 for pty smoke"
+  },
+  {
+    "name": "skill-097",
+    "path": "/tmp/pty-smoke/skill-097",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-097",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 97 for pty smoke"
+  },
+  {
+    "name": "skill-098",
+    "path": "/tmp/pty-smoke/skill-098",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-098",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 98 for pty smoke"
+  },
+  {
+    "name": "skill-099",
+    "path": "/tmp/pty-smoke/skill-099",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-099",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 99 for pty smoke"
+  },
+  {
+    "name": "skill-100",
+    "path": "/tmp/pty-smoke/skill-100",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-100",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 100 for pty smoke"
+  },
+  {
+    "name": "skill-101",
+    "path": "/tmp/pty-smoke/skill-101",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-101",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 101 for pty smoke"
+  },
+  {
+    "name": "skill-102",
+    "path": "/tmp/pty-smoke/skill-102",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-102",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 102 for pty smoke"
+  },
+  {
+    "name": "skill-103",
+    "path": "/tmp/pty-smoke/skill-103",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-103",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 103 for pty smoke"
+  },
+  {
+    "name": "skill-104",
+    "path": "/tmp/pty-smoke/skill-104",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-104",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 104 for pty smoke"
+  },
+  {
+    "name": "skill-105",
+    "path": "/tmp/pty-smoke/skill-105",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-105",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 105 for pty smoke"
+  },
+  {
+    "name": "skill-106",
+    "path": "/tmp/pty-smoke/skill-106",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-106",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 106 for pty smoke"
+  },
+  {
+    "name": "skill-107",
+    "path": "/tmp/pty-smoke/skill-107",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-107",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 107 for pty smoke"
+  },
+  {
+    "name": "skill-108",
+    "path": "/tmp/pty-smoke/skill-108",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-108",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 108 for pty smoke"
+  },
+  {
+    "name": "skill-109",
+    "path": "/tmp/pty-smoke/skill-109",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-109",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 109 for pty smoke"
+  },
+  {
+    "name": "skill-110",
+    "path": "/tmp/pty-smoke/skill-110",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-110",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 110 for pty smoke"
+  },
+  {
+    "name": "skill-111",
+    "path": "/tmp/pty-smoke/skill-111",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-111",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 111 for pty smoke"
+  },
+  {
+    "name": "skill-112",
+    "path": "/tmp/pty-smoke/skill-112",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-112",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 112 for pty smoke"
+  },
+  {
+    "name": "skill-113",
+    "path": "/tmp/pty-smoke/skill-113",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-113",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 113 for pty smoke"
+  },
+  {
+    "name": "skill-114",
+    "path": "/tmp/pty-smoke/skill-114",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-114",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 114 for pty smoke"
+  },
+  {
+    "name": "skill-115",
+    "path": "/tmp/pty-smoke/skill-115",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-115",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 115 for pty smoke"
+  },
+  {
+    "name": "skill-116",
+    "path": "/tmp/pty-smoke/skill-116",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-116",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 116 for pty smoke"
+  },
+  {
+    "name": "skill-117",
+    "path": "/tmp/pty-smoke/skill-117",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-117",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 117 for pty smoke"
+  },
+  {
+    "name": "skill-118",
+    "path": "/tmp/pty-smoke/skill-118",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-118",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 118 for pty smoke"
+  },
+  {
+    "name": "skill-119",
+    "path": "/tmp/pty-smoke/skill-119",
+    "scope": "global",
+    "agents": [
+      "Claude Code",
+      "Cursor"
+    ],
+    "source": "fixture/skill-119",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 119 for pty smoke"
+  },
+  {
+    "name": "skill-120",
+    "path": "/tmp/pty-smoke/skill-120",
+    "scope": "global",
+    "agents": [
+      "Claude Code"
+    ],
+    "source": "fixture/skill-120",
+    "sourceUrl": null,
+    "sourceType": "git",
+    "description": "Fixture skill number 120 for pty smoke"
+  }
+]

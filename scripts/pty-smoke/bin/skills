@@ -1,0 +1,4 @@
+#!/bin/sh
+# relocatable: bin/ is scripts/pty-smoke/bin — the smoke binary sits two levels up
+DIR=$(cd "$(dirname "$0")/.." && pwd)
+exec bun run "$DIR/skills-smoke-bin.ts" "$@"
