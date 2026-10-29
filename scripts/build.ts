@@ -85,7 +85,7 @@ console.log("done");
 const versionedName = /^(?:skills-ui|checksums)-(\d+\.\d+\.\d+)/;
 for (const name of readdirSync("dist").sort()) {
   const match = versionedName.exec(name);
-  if (match && match[1] !== pkg.version) {
+  if (name === "skills-ui" || (match && match[1] !== pkg.version)) {
     rmSync(`dist/${name}`);
     console.log(`pruned stale ${name}`);
   }
