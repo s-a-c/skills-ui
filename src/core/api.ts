@@ -20,6 +20,7 @@ import {
 import type { UiSeed } from "./seed.ts";
 import { readSkillDoc } from "./services/skill-doc.ts";
 import { skillsVersion } from "./skills-client.ts";
+import { APP_VERSION } from "./version.ts";
 
 /**
  * The wrapper's HTTP API — contract ported 1:1 from the fork's web server
@@ -28,7 +29,6 @@ import { skillsVersion } from "./skills-client.ts";
  * Binds 127.0.0.1 only; JSON everywhere; no-store; 1 MiB body cap.
  */
 
-const VERSION = "0.0.0";
 const BODY_LIMIT = 1024 * 1024;
 
 export interface ApiOptions {
@@ -106,7 +106,7 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
     try {
       if (method === "GET" && (path === "/" || path === "/index.html")) {
         if (!options.withPage) return json({ error: "not found: headless serve mode" }, 404);
-        return new Response(renderPage(VERSION, prefs, undefined, options.seed), {
+        return new Response(renderPage(APP_VERSION, prefs, undefined, options.seed), {
           headers: {
             "content-type": "text/html; charset=utf-8",
             "cache-control": "no-store",
@@ -124,7 +124,7 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
           skills = null;
         }
         return json({
-          version: VERSION,
+          version: APP_VERSION,
           skillsVersion: skills,
           capabilities: { updatesCheck: "github" },
         });

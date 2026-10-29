@@ -13,6 +13,7 @@ import { CATPPUCCIN_LATTE, CATPPUCCIN_MOCHA, syntaxTokensFor, tokensFor } from "
 import { sourceBadge, splashImage } from "./art.ts";
 import { visibleSkills, SEARCH_RENDER_CAP, type Action, type TuiModel } from "./model.ts";
 import type { SoundKind } from "./audio.ts";
+import { APP_VERSION } from "../core/version.ts";
 import type { InstalledSkill, SearchSkill, UpdatesResult, UiPreferences } from "../core/services/types.ts";
 import type { UiSeed } from "../core/seed.ts";
 
@@ -494,6 +495,7 @@ function SettingsBody({ model }: { model: TuiModel }): ReactNode {
   const motion = model.prefs.reduceMotion === "auto" ? "auto (explicit toggle is authoritative in terminals)" : String(model.prefs.reduceMotion);
   const skillsVersion = model.skillsVersion === undefined ? "…" : model.skillsVersion ?? "not found";
   const rows: Array<[string, string]> = [
+    ["skills-ui", APP_VERSION],
     ["skills CLI", skillsVersion],
     ["t  theme", `${model.prefs.theme}${model.prefs.theme === "mocha" ? " → latte" : " → mocha"}`],
     [",  sound", model.prefs.sound ? "on → off" : "off → on"],

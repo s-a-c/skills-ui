@@ -1,4 +1,5 @@
 import { buildSpikeScreen, runTui } from "./tui/app.ts";
+import { APP_VERSION } from "./core/version.ts";
 
 /**
  * skills-ui entry: mode dispatch.
@@ -6,6 +7,9 @@ import { buildSpikeScreen, runTui } from "./tui/app.ts";
  *   skills-ui --web        → HTTP API + WebUI in the browser
  *   skills-ui serve        → headless HTTP API
  *   skills-ui --selftest   → in-memory renderer smoke check (no TTY needed)
+ *   skills-ui --version    → print APP_VERSION, exit 0 (works in every
+ *                            compiled target — the packaging verification
+ *                            surface, docker included)
  * Shared flags: --port <n> · seed passthrough (add/update/remove args).
  */
 
@@ -79,7 +83,9 @@ async function runWeb(headless: boolean, portArg: number | null, seedArgs: strin
 const argv = process.argv.slice(2);
 const { port, rest } = parsePortArg(argv);
 
-if (rest.includes("--selftest")) {
+if (rest.includes("--version")) {
+  console.log(APP_VERSION);
+} else if (rest.includes("--selftest")) {
   await selftest();
 } else if (rest[0] === "serve") {
   await runWeb(true, port, rest.slice(1));

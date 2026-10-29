@@ -63,8 +63,9 @@ for (const target of selected) {
   // binary under every outfile name (the A1 finding — all four "targets"
   // used to be identical Mach-O arm64).
   const defineFlags = Object.entries(target.define ?? {}).flatMap(([k, v]) => ["--define", `${k}=${v}`]);
+  const versionDefine = ["--define", `__APP_VERSION__=${JSON.stringify(pkg.version)}`];
   const targetFlag = target.name === "darwin-arm64" ? [] : ["--target", `bun-${target.name}`];
-  await $`bun build --compile ${targetFlag} src/main.ts --outfile ${outfile} ${defineFlags}`.quiet();
+  await $`bun build --compile ${targetFlag} src/main.ts --outfile ${outfile} ${versionDefine} ${defineFlags}`.quiet();
   if (target.codesign) {
     await $`codesign --sign - --force --entitlements ${ENTITLEMENTS} ${outfile}`.quiet();
   }

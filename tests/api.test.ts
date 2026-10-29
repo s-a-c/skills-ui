@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { APP_VERSION } from "../src/core/version.ts";
 
 const SHIM = new URL("fixtures/skills-shim.mjs", import.meta.url).pathname;
 
@@ -39,7 +40,7 @@ describe("api", () => {
     const res = await fetch(`${base}/api/version`);
     expect(res.status).toBe(200);
     const body = (await res.json()) as { version: string; skillsVersion: string; capabilities: Record<string, string> };
-    expect(body.version).toBe("0.0.0");
+    expect(body.version).toBe(APP_VERSION);
     expect(body.skillsVersion).toBe("1.7.4");
     expect(body.capabilities.updatesCheck).toBe("github");
   });
