@@ -73,32 +73,28 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
   // Yoga's default flexShrink is 0, so growing panes must also shrink (S-87)
   const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexShrink: 1, minHeight: 0, flexDirection: "row", gap: 1, paddingLeft: 1, paddingRight: 1 });
 
-  // list pane (fixed 42% like the fork's split). Pane children are
-  // shape-stable and boxed: a bare TextRenderable directly under a column
-  // draws at stale coordinates on the real renderer (S-87/S-88), while the
-  // same text wrapped in a Box paints correctly under rebuild churn.
+  // list pane — a bordered, scrollable container (user-confirmed design).
+  // The border is also the renderer fix: an unbordered pane sharing a
+  // subtree with a massively-growing ScrollBox paints siblings at stale
+  // coordinates on `g` (short project list → long global list), overlaying
+  // the filter bar. A bordered pane absorbs the growth — the detail pane
+  // has always survived 600-line doc loads in this exact shape (S-88).
   const listPane = new BoxRenderable(renderer, {
     width: "42%",
     flexDirection: "column",
+    border: true,
+    borderStyle: "rounded",
+    borderColor: t.border,
+    // titles render on the border line — the one dynamic surface that
+    // survives big scroll mutations on the real renderer (S-88). Keep it
+    // short: overlong titles are dropped at narrow pane widths.
+    title:
+      model.agentFilter.size > 0
+        ? ` agents: ${[...model.agentFilter].sort().join(", ")} `
+        : model.filter || model.filtering
+          ? ` filter: ${model.filter}${model.filtering ? "▌" : ""} `
+          : ` ${visibleSkills(model).length} skills · f filter `,
   });
-  // permanent filter bar above the list (boxed — see note above)
-  const filterParts: string[] = [];
-  if (model.filter || model.filtering) {
-    filterParts.push(`filter: ${model.filter || ""}${model.filtering ? "▌" : ""}`);
-  } else {
-    filterParts.push("filter: (type or f)");
-  }
-  if (model.agentFilter.size > 0) {
-    filterParts.push(`agents: ${[...model.agentFilter].sort().join(", ")}`);
-  }
-  const filterBar = new BoxRenderable(renderer, { width: "100%", flexDirection: "row" });
-  filterBar.add(
-    new TextRenderable(renderer, {
-      content: filterParts.join(" · "),
-      fg: model.filtering || model.filter || model.agentFilter.size > 0 ? t.primary : t.textMuted,
-    })
-  );
-  listPane.add(filterBar);
   const visible = visibleSkills(model);
   const scroll = new ScrollBoxRenderable(renderer, {
     width: "100%",
@@ -188,20 +184,19 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
 export function buildSearchBody(renderer: CliRenderer, model: TuiModel): BoxRenderable {
   const t = tokensFor(model.prefs.theme);
   const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexShrink: 1, minHeight: 0, flexDirection: "column", paddingLeft: 1, paddingRight: 1 });
-  // search + adjusted-query share one boxed line above the scroll (boxed
-  // text paints reliably on the real renderer — see the list pane note)
-  const searchParts = [`search: ${model.query || "type to search"}${model.query && model.searching ? "▌" : ""}`];
-  if (model.adjustedQuery && model.query) {
-    searchParts.push(`no exact matches — showing "${model.adjustedQuery}"`);
-  }
-  const searchBar = new BoxRenderable(renderer, { width: "100%", flexDirection: "row" });
-  searchBar.add(
-    new TextRenderable(renderer, {
-      content: searchParts.join(" · "),
-      fg: t.primary,
-    })
-  );
-  body.add(searchBar);
+  // bordered scroll container — same renderer-isolation shape as the
+  // installed list pane (see note there); search line lives inside it
+  const searchPane = new BoxRenderable(renderer, {
+    width: "100%",
+    flexGrow: 1,
+    flexShrink: 1,
+    minHeight: 0,
+    flexDirection: "column",
+    border: true,
+    borderStyle: "rounded",
+    borderColor: t.border,
+    title: ` search: ${model.query}${model.query && model.searching ? "▌" : ""} · ${model.results.length} results${model.adjustedQuery && model.query ? ` · showing "${model.adjustedQuery}"` : ""} `,
+  });
 
   // Results and Selected panes share one scroll column: the active pane's
   // header carries the cursor arrow; panes are visually stacked like the fork.
@@ -217,7 +212,10 @@ export function buildSearchBody(renderer: CliRenderer, model: TuiModel): BoxRend
   if (model.results.length === 0) {
     scroll.add(new TextRenderable(renderer, { content: model.query ? "no results" : "search the skills.sh registry", fg: t.textMuted }));
   }
-  model.results.forEach((r, i) => {
+  // growth beyond ~60 rows in one render garbles neighbors on the real
+  // renderer (S-88) — cap the fed rows; the title keeps the true count
+  const MAX_ROWS = 50;
+  model.results.slice(0, MAX_ROWS).forEach((r, i) => {
     const selected = resultsActive && i === model.searchSelected;
     const row = new BoxRenderable(renderer, {
       width: "100%",
@@ -275,14 +273,17 @@ export function buildSearchBody(renderer: CliRenderer, model: TuiModel): BoxRend
     row.add(new TextRenderable(renderer, { content: r.source, fg: selected ? t.selectionText : t.textMuted }));
     scroll.add(row);
   });
-  body.add(scroll);
+  searchPane.add(scroll);
+  body.add(searchPane);
 
-  body.add(
+  const hintBar = new BoxRenderable(renderer, { width: "100%", flexDirection: "row" });
+  hintBar.add(
     new TextRenderable(renderer, {
       content: "space/+ queue · -/d/x remove · Tab pane · u install queued",
       fg: t.textMuted,
     })
   );
+  body.add(hintBar);
   return body;
 }
 
@@ -314,10 +315,9 @@ export function buildSettingsBody(renderer: CliRenderer, model: TuiModel): BoxRe
 export function buildFooter(renderer: CliRenderer, model: TuiModel): BoxRenderable {
   const t = tokensFor(model.prefs.theme);
   const footer = new BoxRenderable(renderer, { width: "100%", flexShrink: 0, flexDirection: "row", justifyContent: "space-between", paddingLeft: 1, paddingRight: 1 });
-  const legend =
-    model.tab === "installed" && (model.filtering || model.filter)
-      ? "u update · d delete checked · HOME/END · SPACE toggle · ESC clear filter"
-      : "i installed · / search · a agents · f filter · , settings · ? help · q quit";
+  // legend text is CONSTANT across states: a legend that changes content in
+  // the same render as a body swap double-paints on the real renderer (S-88)
+  const legend = "i installed · / search · a agents · f filter · , settings · ? help · q quit";
   footer.add(new TextRenderable(renderer, { content: legend, fg: t.textMuted }));
   const status = model.toast
     ? model.toast.text

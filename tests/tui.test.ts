@@ -372,7 +372,7 @@ describe("tui model (pure)", () => {
     await s.mockInput.typeText("zz");
     await new Promise((r) => setTimeout(r, 500));
     await s.flush();
-    expect(s.captureCharFrame()).toContain('no exact matches — showing "cli-ansi"');
+    expect(s.captureCharFrame()).toContain('showing "cli-ansi"'); // in the search pane title
   });
 
   test("queue sub-view: pane flip, cursor clamps, delete-at", () => {
@@ -519,7 +519,7 @@ describe("0.2.x B1 (S-69): list ops", () => {
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
     const filtered = s.captureCharFrame();
-    expect(filtered).toContain("agents:"); // applied filter status in the footer
+    expect(filtered).toContain("agents:"); // applied filter in the list pane title
     expect(filtered).not.toContain("code-review"); // Cursor's skill filtered out
   });
 
@@ -530,7 +530,7 @@ describe("0.2.x B1 (S-69): list ops", () => {
     await runTuiOn(s.renderer, undefined, deps);
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
-    expect(s.captureCharFrame()).toContain("filter: (type or f)"); // idle placeholder, always visible
+    expect(s.captureCharFrame()).toContain("f filter"); // idle hint lives in the pane title
     await s.mockInput.pressKey("f");
     await s.flush();
     await s.mockInput.typeText("s0"); // filter bar now carries text
