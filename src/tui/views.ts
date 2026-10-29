@@ -70,6 +70,7 @@ export function buildHeader(renderer: CliRenderer, model: TuiModel): BoxRenderab
 export interface BodyRefs {
   selectedRow?: BoxRenderable | null;
   listScroll?: ScrollBoxRenderable;
+  detailScroll?: ScrollBoxRenderable;
   searchScroll?: ScrollBoxRenderable;
   searchLayout?: { resultsShown: number };
 }
@@ -160,10 +161,13 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel, refs?
     flexDirection: "column",
     border: true,
     borderStyle: "rounded",
-    borderColor: t.border,
-    title: visible[model.selected] ? ` ${visible[model.selected]!.name} ` : " detail ",
+    borderColor: model.detailScroll ? t.primary : t.border,
+    title: visible[model.selected]
+      ? ` ${visible[model.selected]!.name}${model.detailScroll ? " · scroll (tab)" : ""} `
+      : " detail ",
   });
   const detailScroll = new ScrollBoxRenderable(renderer, { width: "100%", flexGrow: 1, flexShrink: 1, scrollY: true });
+  if (refs) refs.detailScroll = detailScroll;
   const syntaxStyle = SyntaxStyle.fromTheme(syntaxTokensFor(paletteFor(model.prefs.theme)), renderer.nativeScene);
   if (model.detailBody !== null) {
     detailScroll.add(
@@ -434,6 +438,7 @@ export function buildHelpOverlay(renderer: CliRenderer, model: TuiModel): BoxRen
     ["i / ,", "installed / settings tabs"],
     ["/", "search tab"],
     ["f", "filter (or just type)"],
+    ["tab", "detail scroll mode (arrows/PgUp/PgDn scroll the doc)"],
     ["a", "agent filter (multi, a=all)"],
     ["s", "sort checked first"],
     ["c", "check for updates"],

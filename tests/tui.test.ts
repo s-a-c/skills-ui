@@ -523,6 +523,23 @@ describe("0.2.x B1 (S-69): list ops", () => {
     expect(filtered).not.toContain("code-review"); // Cursor's skill filtered out
   });
 
+  test("tab toggles detail-scroll mode: title marker, keys route to the doc (S-88)", async () => {
+    const s = setup!;
+    await runTuiOn(s.renderer, undefined, fakeDeps());
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    await s.mockInput.pressKey("\t");
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    let frame = s.captureCharFrame();
+    expect(frame).toContain("scroll (tab)"); // mode marker in the detail title
+    await s.mockInput.pressKey("\t"); // off
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    frame = s.captureCharFrame();
+    expect(frame).not.toContain("scroll (tab)");
+  });
+
   test("filter bar sits permanently above the list with a long list, and resize re-renders", async () => {
     const s = setup!;
     const deps = fakeDeps();

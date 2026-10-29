@@ -195,6 +195,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
   let footer: ReturnType<typeof buildFooter> | null = null;
   let overlay: ReturnType<typeof buildConfirmOverlay> | null = null;
 
+  let lastRefs: BodyRefs = {};
   const render = (): void => {
     if (header) frame.remove(header);
     if (body) frame.remove(body);
@@ -214,6 +215,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     frame.add(body);
     frame.add(footer);
     if (overlay) frame.add(overlay);
+    lastRefs = refs;
     followSelection(refs);
   };
 
@@ -248,6 +250,16 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       }
     };
     setTimeout(settle, 50); // after the renderer's next frame
+  };
+
+  // detail-scroll mode: arrows/PgUp/PgDn page the doc, not the list
+  const scrollDetail = (refs: BodyRefs, delta: number): void => {
+    const scroll = refs.detailScroll;
+    if (!scroll) return;
+    const vs = scroll.viewport?.height ?? 0;
+    if (vs <= 0) return;
+    scroll.scrollTop = Math.max(0, scroll.scrollTop + delta);
+    (renderer as unknown as { requestRender?: () => void }).requestRender?.();
   };
 
   const dispatch = (action: Action): void => {
@@ -401,9 +413,34 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     }
     // Search-tab queue keys work in both text-entry and command mode (fork
     // contract): Tab flips Results/Selected anywhere on the search tab.
+    // On the installed tab, Tab toggles detail-scroll mode (S-88).
     if (model.tab === "search" && (k === "tab" || k === "+" || k === "-" || k === "d" || k === "x")) {
       handleQueueKey(k);
       return;
+    }
+    if (model.tab === "installed" && k === "tab") {
+      dispatch({ type: "detail-scroll", on: !model.detailScroll });
+      void deps.play("select", model.prefs);
+      return;
+    }
+    if (model.detailScroll && model.tab === "installed") {
+      if (k === "up" || k === "down" || k === "pageup" || k === "pagedown") {
+        scrollDetail(lastRefs, k === "up" ? -1 : k === "down" ? 1 : k === "pageup" ? -PAGE : PAGE);
+        return;
+      }
+      if (k === "home" || k === "end") {
+        const scroll = lastRefs.detailScroll;
+        if (scroll) {
+          const vs = scroll.viewport?.height ?? 0;
+          scroll.scrollTop = k === "home" ? 0 : Math.max(0, scroll.scrollHeight - vs);
+          (renderer as unknown as { requestRender?: () => void }).requestRender?.();
+        }
+        return;
+      }
+      if (k === "escape" || k === "tab") {
+        dispatch({ type: "detail-scroll", on: false });
+        return;
+      }
     }
 
     // Text-entry modes (filter/search) capture printable input; letter

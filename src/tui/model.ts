@@ -45,6 +45,8 @@ export interface TuiModel {
   confirm: { kind: "delete" | "update"; names: string[] } | null;
   help: boolean;
   detailBody: string | null;
+  /** detail-scroll mode: arrows/PgUp/PgDn scroll the doc, not the list */
+  detailScroll: boolean;
   /** Discovered `skills` CLI version: undefined = not queried yet, null = not found. */
   skillsVersion: string | null | undefined;
 }
@@ -76,6 +78,7 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     confirm: null,
     help: false,
     detailBody: null,
+    detailScroll: false,
     skillsVersion: undefined,
   };
 }
@@ -132,6 +135,7 @@ function clampSelectedCursor(model: TuiModel): void {
 
 export type Action =
   | { type: "tab"; tab: Tab }
+  | { type: "detail-scroll"; on: boolean }
   | { type: "scope"; scope: Scope }
   | { type: "skills-loaded"; skills: InstalledSkill[] }
   | { type: "updates-loaded"; names: string[] }
@@ -182,6 +186,10 @@ export function update(model: TuiModel, action: Action): TuiModel {
     case "tab":
       next.tab = action.tab;
       next.searching = action.tab === "search";
+      next.detailScroll = false;
+      break;
+    case "detail-scroll":
+      next.detailScroll = action.on;
       break;
     case "scope":
       next.scope = action.scope;
