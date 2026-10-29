@@ -9,8 +9,7 @@ import { BoxRenderable, type CliRenderer, ScrollBoxRenderable, SyntaxStyle, Text
 import { createRoot, useRenderer } from "@opentui/react";
 import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from "react";
 import { useSyncExternalStore } from "react";
-import { tokensFor } from "./views.ts";
-import { CATPPUCCIN_LATTE, CATPPUCCIN_MOCHA, syntaxTokensFor } from "../core/theme.ts";
+import { CATPPUCCIN_LATTE, CATPPUCCIN_MOCHA, syntaxTokensFor, tokensFor } from "../core/theme.ts";
 import { visibleSkills, type Action, type TuiModel } from "./model.ts";
 import type { SoundKind } from "./audio.ts";
 import type { InstalledSkill, SearchSkill, UpdatesResult, UiPreferences } from "../core/services/types.ts";
@@ -107,21 +106,18 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
   const listScrollRef = useRef<ScrollBoxRenderable>(null);
   const selectedRowRef = useRef<BoxRenderable>(null);
   const detailScrollRef = useRef<ScrollBoxRenderable>(null);
-  const paneRef = useRef<BoxRenderable>(null);
   const visible = visibleSkills(model);
   const selected = visible[model.selected];
 
   // live filter state rides the border title (S-88 discipline). The title
-  // prop had an update anomaly in the spike — sync it imperatively too.
+  // prop alone carries it — pty-smoke's filter-typing check guards this
+  // path (the S-92 spike anomaly never reproduced on the shipped tree).
   const listTitle =
     model.agentFilter.size > 0
       ? ` agents: ${[...model.agentFilter].sort().join(", ")} `
       : model.filter || model.filtering
         ? ` filter: ${model.filter}${model.filtering ? "▌" : ""} `
         : ` ${visible.length} skills · f filter `;
-  useEffect(() => {
-    if (paneRef.current) paneRef.current.title = listTitle;
-  }, [listTitle]);
   useEffect(() => {
     refs.detailScroll = detailScrollRef.current ?? undefined;
   });
@@ -141,7 +137,6 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
   return (
     <box width="100%" flexGrow={1} flexShrink={1} minHeight={0} flexDirection="row" gap={1} paddingLeft={1} paddingRight={1}>
       <box
-        ref={paneRef}
         width="42%"
         flexDirection="column"
         border={true}

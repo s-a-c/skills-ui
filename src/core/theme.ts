@@ -247,6 +247,11 @@ export const THEME_TOKENS: Record<ThemeName, ThemeTokens> = {
   latte: buildThemeTokens(CATPPUCCIN_LATTE, 'latte'),
 };
 
+/** Semantic tokens for a theme — the accessor every view layer uses. */
+export function tokensFor(theme: ThemeName): ThemeTokens {
+  return THEME_TOKENS[theme];
+}
+
 // ---------- Terminal color output ----------
 
 function supportsTruecolor(): boolean {
