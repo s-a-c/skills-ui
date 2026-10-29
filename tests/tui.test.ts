@@ -372,7 +372,7 @@ describe("tui model (pure)", () => {
     await s.mockInput.typeText("zz");
     await new Promise((r) => setTimeout(r, 500));
     await s.flush();
-    expect(s.captureCharFrame()).toContain('no exact matches — showing results for "cli-ansi"');
+    expect(s.captureCharFrame()).toContain('no exact matches — showing "cli-ansi"');
   });
 
   test("queue sub-view: pane flip, cursor clamps, delete-at", () => {
@@ -519,11 +519,11 @@ describe("0.2.x B1 (S-69): list ops", () => {
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
     const filtered = s.captureCharFrame();
-    expect(filtered).toContain("agents:"); // applied filter line (wraps in a 42-col pane)
+    expect(filtered).toContain("agents:"); // applied filter status in the footer
     expect(filtered).not.toContain("code-review"); // Cursor's skill filtered out
   });
 
-  test("filter line stays visible with a long list (global-scope shape) and resize re-renders", async () => {
+  test("filter status stays visible with a long list (global-scope shape) and resize re-renders", async () => {
     const s = setup!;
     const deps = fakeDeps();
     deps.listInstalled = async () => manySkills; // 12 rows — pushes bottom rows off-viewport
@@ -532,11 +532,12 @@ describe("0.2.x B1 (S-69): list ops", () => {
     await new Promise((r) => setTimeout(r, 100));
     await s.mockInput.pressKey("f");
     await s.flush();
-    await s.mockInput.typeText("s0"); // filter line now carries text
+    await s.mockInput.typeText("s0"); // filter status now carries text
     await s.flush();
     const frame = s.captureCharFrame();
+    // the status renders in the footer slot — on screen regardless of list
+    // length (S-87: a pane-local line drew off-screen in a real terminal)
     expect(frame.indexOf("filter: s0")).toBeGreaterThanOrEqual(0);
-    expect(frame.indexOf("filter: s0")).toBeLessThan(frame.indexOf("❯ s01")); // above the list, not clipped
     process.stdout.emit("resize"); // SIGWINCH path — must re-render without throwing
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));

@@ -31,6 +31,7 @@ export function buildHeader(renderer: CliRenderer, model: TuiModel): BoxRenderab
   const t = tokensFor(model.prefs.theme);
   const header = new BoxRenderable(renderer, {
     width: "100%",
+    flexShrink: 0,
     flexDirection: "row",
     justifyContent: "space-between",
     paddingTop: 0, paddingBottom: 0, paddingLeft: 1, paddingRight: 1,
@@ -51,15 +52,16 @@ export function buildHeader(renderer: CliRenderer, model: TuiModel): BoxRenderab
     );
   }
   const right = new BoxRenderable(renderer, { flexDirection: "row", gap: 1 });
+  // one persistent text: conditional children here left stale cells on the
+  // real renderer (S-87) — content swaps on a stable node paint correctly
+  const rightParts = [`[${model.scope === "project" ? "p" : "g"}] ${model.scope}`];
+  if (model.busy) rightParts.push(`· ${model.busy}…`);
   right.add(
     new TextRenderable(renderer, {
-      content: `[${model.scope === "project" ? "p" : "g"}] ${model.scope}`,
+      content: rightParts.join(" "),
       fg: t.textMuted,
     })
   );
-  if (model.busy) {
-    right.add(new TextRenderable(renderer, { content: `· ${model.busy}…`, fg: t.primary }));
-  }
   header.add(tabs);
   header.add(right);
   return header;
@@ -67,30 +69,23 @@ export function buildHeader(renderer: CliRenderer, model: TuiModel): BoxRenderab
 
 export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxRenderable {
   const t = tokensFor(model.prefs.theme);
-  const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexDirection: "row", gap: 1, paddingLeft: 1, paddingRight: 1 });
+  // flexGrow without flexShrink overflows the terminal with long content —
+  // Yoga's default flexShrink is 0, so growing panes must also shrink (S-87)
+  const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexShrink: 1, minHeight: 0, flexDirection: "row", gap: 1, paddingLeft: 1, paddingRight: 1 });
 
-  // list pane (fixed 42% like the fork's split)
+  // list pane (fixed 42% like the fork's split). Pane children are shape-
+  // stable (always exactly the scroll): conditional siblings here triggered
+  // an OpenTUI 0.7 cell-diff bug that drew new nodes at stale coordinates
+  // (S-87) — the filter/agents status lives in the footer instead.
   const listPane = new BoxRenderable(renderer, {
     width: "42%",
     flexDirection: "column",
   });
-  // filter/agents line sits ABOVE the scroll: with flexGrow lists the
-  // bottom row is pushed off-viewport, hiding an active filter (S-87)
-  if (model.filtering || model.filter || model.agentFilter.size > 0) {
-    const parts: string[] = [];
-    if (model.filter) parts.push(`filter: ${model.filter}${model.filtering ? "▌" : ""}`);
-    if (model.agentFilter.size > 0) parts.push(`agents: ${[...model.agentFilter].sort().join(", ")}`);
-    listPane.add(
-      new TextRenderable(renderer, {
-        content: parts.join(" · "),
-        fg: t.primary,
-      })
-    );
-  }
   const visible = visibleSkills(model);
   const scroll = new ScrollBoxRenderable(renderer, {
     width: "100%",
     flexGrow: 1,
+    flexShrink: 1,
     scrollY: true,
   });
   if (visible.length === 0) {
@@ -138,13 +133,14 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
   // detail pane (markdown)
   const detailPane = new BoxRenderable(renderer, {
     flexGrow: 1,
+    flexShrink: 1,
     flexDirection: "column",
     border: true,
     borderStyle: "rounded",
     borderColor: t.border,
     title: visible[model.selected] ? ` ${visible[model.selected]!.name} ` : " detail ",
   });
-  const detailScroll = new ScrollBoxRenderable(renderer, { width: "100%", flexGrow: 1, scrollY: true });
+  const detailScroll = new ScrollBoxRenderable(renderer, { width: "100%", flexGrow: 1, flexShrink: 1, scrollY: true });
   const syntaxStyle = SyntaxStyle.fromTheme(syntaxTokensFor(paletteFor(model.prefs.theme)), renderer.nativeScene);
   if (model.detailBody !== null) {
     detailScroll.add(
@@ -173,25 +169,23 @@ export function buildInstalledBody(renderer: CliRenderer, model: TuiModel): BoxR
 
 export function buildSearchBody(renderer: CliRenderer, model: TuiModel): BoxRenderable {
   const t = tokensFor(model.prefs.theme);
-  const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexDirection: "column", paddingLeft: 1, paddingRight: 1 });
+  const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexShrink: 1, minHeight: 0, flexDirection: "column", paddingLeft: 1, paddingRight: 1 });
+  // search + adjusted-query share one persistent line: conditional rows here
+  // would hit the same OpenTUI cell-diff bug as the old filter line (S-87)
+  const searchParts = [`search: ${model.query || "type to search"}${model.query && model.searching ? "▌" : ""}`];
+  if (model.adjustedQuery && model.query) {
+    searchParts.push(`no exact matches — showing "${model.adjustedQuery}"`);
+  }
   body.add(
     new TextRenderable(renderer, {
-      content: `search: ${model.query || "type to search"}${model.query && model.searching ? "▌" : ""}`,
+      content: searchParts.join(" · "),
       fg: t.primary,
     })
   );
-  if (model.adjustedQuery && model.query) {
-    body.add(
-      new TextRenderable(renderer, {
-        content: `no exact matches — showing results for "${model.adjustedQuery}"`,
-        fg: t.danger,
-      })
-    );
-  }
 
   // Results and Selected panes share one scroll column: the active pane's
   // header carries the cursor arrow; panes are visually stacked like the fork.
-  const scroll = new ScrollBoxRenderable(renderer, { width: "100%", flexGrow: 1, scrollY: true });
+  const scroll = new ScrollBoxRenderable(renderer, { width: "100%", flexGrow: 1, flexShrink: 1, scrollY: true });
   const resultsActive = model.searchPane === "results";
   scroll.add(
     new TextRenderable(renderer, {
@@ -274,7 +268,7 @@ export function buildSearchBody(renderer: CliRenderer, model: TuiModel): BoxRend
 
 export function buildSettingsBody(renderer: CliRenderer, model: TuiModel): BoxRenderable {
   const t = tokensFor(model.prefs.theme);
-  const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexDirection: "column", paddingLeft: 2, gap: 1 });
+  const body = new BoxRenderable(renderer, { width: "100%", flexGrow: 1, flexShrink: 1, minHeight: 0, flexDirection: "column", paddingLeft: 2, gap: 1 });
   body.add(new TextRenderable(renderer, { content: "Settings", fg: t.primary, attributes: TextAttributes.BOLD }));
   const motion = model.prefs.reduceMotion === "auto" ? "auto (explicit toggle is authoritative in terminals)" : String(model.prefs.reduceMotion);
   const skillsVersion =
@@ -299,17 +293,24 @@ export function buildSettingsBody(renderer: CliRenderer, model: TuiModel): BoxRe
 
 export function buildFooter(renderer: CliRenderer, model: TuiModel): BoxRenderable {
   const t = tokensFor(model.prefs.theme);
-  const footer = new BoxRenderable(renderer, { width: "100%", flexDirection: "row", justifyContent: "space-between", paddingLeft: 1, paddingRight: 1 });
+  // flexShrink: 0 — with tall bodies the header/footer otherwise get crushed
+  // to zero height (S-87: filter line and tabs vanished off-screen)
+  const footer = new BoxRenderable(renderer, { width: "100%", flexShrink: 0, flexDirection: "row", justifyContent: "space-between", paddingLeft: 1, paddingRight: 1 });
   const legend =
     model.tab === "installed" && (model.filtering || model.filter)
       ? "u update · d delete checked · HOME/END · SPACE toggle · ESC clear filter"
       : "i installed · / search · a agents · f filter · , settings · ? help · q quit";
   footer.add(new TextRenderable(renderer, { content: legend, fg: t.textMuted }));
+  // filter/agents status renders here — the footer slot updates reliably on
+  // the real renderer, unlike a conditional node in the list pane (S-87)
+  const statusParts: string[] = [];
+  if (model.filter) statusParts.push(`filter: ${model.filter}${model.filtering ? "▌" : ""}`);
+  if (model.agentFilter.size > 0) statusParts.push(`agents: ${[...model.agentFilter].sort().join(", ")}`);
   const status = model.toast
     ? model.toast.text
     : model.confirm
       ? `${model.confirm.kind} ${model.confirm.names.join(", ")}? y/N`
-      : "";
+      : statusParts.join(" · ");
   footer.add(
     new TextRenderable(renderer, {
       content: status.slice(0, 60),
