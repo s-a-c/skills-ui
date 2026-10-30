@@ -1,4 +1,7 @@
-# Issue Tracker: Linear
+---
+title: "Issue Tracker: Linear"
+nav_order: 20
+---
 
 Issues for this repo live in the Linear project **skills-ui** (P-S-4), team **S-a-c** (key S), workspace `s-a-c`: https://linear.app/s-a-c/project/skills-ui-521f0931af82
 

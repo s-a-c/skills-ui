@@ -1,0 +1,21 @@
+title: skills-ui
+description: >-
+  TUI/WebUI wrapper for the stock skills CLI — one self-contained binary
+  serving an OpenTUI terminal app, a local web UI, and a headless HTTP API.
+
+remote_theme: just-the-docs/just-the-docs
+plugins:
+  - jekyll-remote-theme
+
+url: https://s-a-c.github.io
+baseurl: /skills-ui
+
+aux_links:
+  GitHub: https://github.com/s-a-c/skills-ui
+  Releases: https://github.com/s-a-c/skills-ui/releases
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"
