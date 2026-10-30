@@ -1,13 +1,17 @@
 #!/bin/sh
 # skills-ui installer.
 #
+# Pinned to a signed tag (recommended — script and checksums both come from
+# the tag's tree; see docs/release.md):
+#   curl -fsSL https://raw.githubusercontent.com/s-a-c/skills-ui/v0.5.1/scripts/install.sh | sh -s v0.5.1
+#
+# Rolling latest from main:
 #   curl -fsSL https://raw.githubusercontent.com/s-a-c/skills-ui/main/scripts/install.sh | sh
 #
-# Or a pinned version:
-#   curl -fsSL .../install.sh | sh -s v0.5.0
-#
-# Downloads the matching release binary, verifies it against the release
-# checksums, and installs to $SKILLS_UI_INSTALL_DIR (default ~/.local/bin).
+# Downloads the matching release binary, verifies it against the checksum
+# manifest (preferring the tag-committed copy under checksums/ — a different
+# trust path than the release assets; falls back to the release asset for
+# older tags), and installs to $SKILLS_UI_INSTALL_DIR (default ~/.local/bin).
 set -eu
 
 REPO="s-a-c/skills-ui"
@@ -47,27 +51,37 @@ asset="skills-ui-$ver-$os-$arch"
 base="https://github.com/$REPO/releases/download/$VERSION"
 
 tmp=$(mktemp -d) || die "mktemp"
-trap 'rm -rf "$tmp"' EXIT
+mkdir -p "$DEST" || die "cannot create $DEST (set SKILLS_UI_INSTALL_DIR to override)"
+# download straight into $DEST as a temp file: verification and the final
+# rename then happen on the same filesystem — no cross-device copy between
+# verify and install, and an interrupted run never leaves a partial binary
+tmpbin="$DEST/.skills-ui.$$.tmp"
+trap 'rm -f "$tmpbin"; rm -rf "$tmp"' EXIT
 
 say "-> $asset -> $DEST/skills-ui"
-curl -fsSL -o "$tmp/$asset" "$base/$asset" || die "download failed ($base/$asset)"
-curl -fsSL -o "$tmp/checksums" "$base/checksums-$ver.txt" || die "checksums download failed"
+curl -fsSL -o "$tmpbin" "$base/$asset" || die "download failed ($base/$asset)"
+
+# checksums: the tag-committed manifest (signed with the tag) is the
+# preferred source — the release asset shares the binary's trust path
+if ! curl -fsSL -o "$tmp/checksums" \
+     "https://raw.githubusercontent.com/$REPO/$VERSION/checksums/checksums-$ver.txt" 2>/dev/null; then
+  curl -fsSL -o "$tmp/checksums" "$base/checksums-$ver.txt" || die "checksums download failed"
+fi
 
 # --- verify ---
 want=$(grep "  $asset\$" "$tmp/checksums" | cut -d' ' -f1)
 [ -n "$want" ] || die "no checksum entry for $asset"
 if command -v sha256sum >/dev/null 2>&1; then
-  got=$(sha256sum "$tmp/$asset" | cut -d' ' -f1)
+  got=$(sha256sum "$tmpbin" | cut -d' ' -f1)
 elif command -v shasum >/dev/null 2>&1; then
-  got=$(shasum -a 256 "$tmp/$asset" | cut -d' ' -f1)
+  got=$(shasum -a 256 "$tmpbin" | cut -d' ' -f1)
 else
   die "need sha256sum or shasum to verify the download"
 fi
 [ "$got" = "$want" ] || die "checksum mismatch for $asset — retry, or report at https://github.com/$REPO/issues"
 
-# --- install ---
-mkdir -p "$DEST" || die "cannot create $DEST (set SKILLS_UI_INSTALL_DIR to override)"
-mv "$tmp/$asset" "$DEST/skills-ui"
+# --- install (same-directory rename: atomic) ---
+mv -f "$tmpbin" "$DEST/skills-ui"
 chmod +x "$DEST/skills-ui"
 
 case ":$PATH:" in

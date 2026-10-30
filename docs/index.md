@@ -9,13 +9,13 @@ description: TUI/WebUI wrapper for the stock skills CLI.
 
 ## Install
 
-One line — detects OS/arch, downloads the release binary, verifies its checksum, installs to `~/.local/bin`:
+Pinned to a signed release tag (recommended — the installer script and the checksum manifest both come from the tag's tree):
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/s-a-c/skills-ui/main/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/s-a-c/skills-ui/v0.5.1/scripts/install.sh | sh -s v0.5.1
 ```
 
-Pinned version: `| sh -s v0.5.0`. Manual alternative: grab a binary from the [releases](https://github.com/s-a-c/skills-ui/releases) (darwin-arm64 · darwin-x64 · linux-x64 · linux-arm64), `chmod +x`, put it on your `PATH` (macOS browser downloads also need `xattr -d com.apple.quarantine <file>`).
+Rolling latest from `main`: `curl -fsSL https://raw.githubusercontent.com/s-a-c/skills-ui/main/scripts/install.sh | sh`. Either way it detects OS/arch, downloads the release binary, verifies it against the checksum manifest, and installs to `~/.local/bin`. Manual alternative: grab a binary from the [releases](https://github.com/s-a-c/skills-ui/releases) (darwin-arm64 · darwin-x64 · linux-x64 · linux-arm64), `chmod +x`, put it on your `PATH` (macOS browser downloads also need `xattr -d com.apple.quarantine <file>`).
 
 Requires the stock `skills` CLI v1.7.x on `PATH` (or point `SKILLS_UI_SKILLS_BIN` at it).
 

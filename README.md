@@ -17,13 +17,19 @@
 
 ## Install
 
-One line — detects OS/arch, downloads the release binary, verifies its checksum, installs to `~/.local/bin` (override with `SKILLS_UI_INSTALL_DIR`):
+Pinned to a signed release tag (recommended — the installer script and the checksum manifest both come from the tag's tree, so `git tag -v` covers what verifies your binary):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/s-a-c/skills-ui/v0.5.1/scripts/install.sh | sh -s v0.5.1
+```
+
+Rolling latest from `main` (unpinned script):
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/s-a-c/skills-ui/main/scripts/install.sh | sh
 ```
 
-Pinned version: append the tag — `| sh -s v0.5.0`. Manual alternative: grab a binary from the [releases](https://github.com/s-a-c/skills-ui/releases) (darwin-arm64 · darwin-x64 · linux-x64 · linux-arm64), `chmod +x`, put it on your `PATH`; browser-downloaded macOS copies also need `xattr -d com.apple.quarantine <file>` (ad-hoc signed). Package managers (Homebrew, winget, …) are roadmap-later.
+Either way it detects OS/arch, downloads the release binary, verifies it against the checksum manifest, and installs to `~/.local/bin` (override with `SKILLS_UI_INSTALL_DIR`). Manual alternative: grab a binary from the [releases](https://github.com/s-a-c/skills-ui/releases) (darwin-arm64 · darwin-x64 · linux-x64 · linux-arm64), `chmod +x`, put it on your `PATH`; browser-downloaded macOS copies also need `xattr -d com.apple.quarantine <file>` (ad-hoc signed). Package managers (Homebrew, winget, …) are roadmap-later.
 
 ## Usage
 
