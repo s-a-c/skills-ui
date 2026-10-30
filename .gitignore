@@ -6,3 +6,6 @@ dist/
 # playwright
 test-results/
 playwright-report/
+
+# stray compile outputs (never commit binaries at root)
+/main
