@@ -302,6 +302,14 @@ dialog::backdrop{background:rgba(0,0,0,.45);backdrop-filter:blur(2px)}
 dialog h3{margin:0 0 8px}
 dialog p{color:var(--t-textMuted);margin:0 0 18px}
 dialog .row{display:flex;gap:10px;justify-content:flex-end}
+#connectDialog{max-width:480px}
+#connectDialog label{display:block;font-size:12.5px;color:var(--t-textMuted);margin:0 0 4px}
+#connectDialog input{
+  width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--t-border);
+  background:var(--t-surfaceAlt);color:var(--t-text);margin-bottom:12px;
+}
+#connectStatus{min-height:20px;font-size:13.5px;white-space:pre-wrap}
+#connectDialog .connect-help{font-size:12.5px;margin-top:14px}
 
 /* ---------- toasts ---------- */
 #toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:50}
@@ -358,7 +366,9 @@ var state = {
   seedHold: false,
   queue: [],
   sview: 'results',
-  agentFilter: null
+  agentFilter: null,
+  backend: '',
+  token: ''
 };
 
 function $(sel){ return document.querySelector(sel); }
@@ -367,8 +377,23 @@ function esc(s){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
   });
 }
+/* Hosted mode: the page was NOT served by skills-ui itself (GitHub Pages),
+   so every call goes to a user-supplied loopback backend with the Bearer token. */
+var HOSTED = !/^(127\\.0\\.0\\.1|localhost|\\[::1\\]|::1)$/.test(location.hostname);
+var LS_BACKEND = 'skills-ui.backend';
+var LS_TOKEN = 'skills-ui.token';
+
 function api(path, opts){
-  return fetch(path, opts).then(function(r){
+  opts = opts || {};
+  var url = path;
+  if (HOSTED) {
+    if (!state.backend) {
+      return Promise.reject(new Error('Not connected — connect your local skills-ui serve first (Connect button, top right).'));
+    }
+    url = state.backend + path;
+    opts.headers = Object.assign({}, opts.headers, { authorization: 'Bearer ' + state.token });
+  }
+  return fetch(url, opts).then(function(r){
     return r.json().then(function(body){
       if (!r.ok) throw new Error(body && body.error || ('HTTP ' + r.status));
       return body;
@@ -439,6 +464,74 @@ function toast(text, tone){
   el.textContent = text;
   $('#toasts').appendChild(el);
   setTimeout(function(){ el.remove(); }, 3900);
+}
+
+/* ---------- hosted connect (S-137) ---------- */
+function probeBackend(base, token, onStatus){
+  var url = base.replace(/\/+$/, '');
+  onStatus('Reaching ' + url + ' …');
+  return fetch(url + '/api/version').then(function(r){
+    if (r.status === 403) throw new Error('origin-not-allowed');
+    if (!r.ok) throw new Error('unreachable');
+    return r.json();
+  }).then(function(v){
+    if (!v.capabilities || !v.capabilities.hosted) throw new Error('old-binary');
+    onStatus('Backend reachable — checking token …');
+    return fetch(url + '/api/prefs', { headers: { authorization: 'Bearer ' + token } }).then(function(r2){
+      if (r2.status === 401) throw new Error('bad-token');
+      if (!r2.ok) throw new Error('unreachable');
+      return v;
+    });
+  }).catch(function(e){
+    var msg = e && e.message;
+    if (msg === 'origin-not-allowed') {
+      throw new Error("This page's origin is not in serve's allowlist. Restart serve with SKILLS_UI_ALLOWED_ORIGINS including " + location.origin + ".");
+    }
+    if (msg === 'old-binary') {
+      throw new Error('Connected, but your skills-ui binary predates the hosted UI — update the binary and restart serve.');
+    }
+    if (msg === 'bad-token') {
+      throw new Error('Token rejected — re-copy the "Hosted-UI token" line from serve\'s startup output.');
+    }
+    var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (isSafari) {
+      throw new Error('Safari blocks pages from reaching your local network — use Chrome, Edge, or Firefox 153+.');
+    }
+    throw new Error('Cannot reach the backend. If the browser showed a local-network access prompt, choose Allow, then retry — and check the URL/port and that serve is running.');
+  });
+}
+function connectedDot(ok){
+  var b = $('#connectState');
+  if (!b) return;
+  b.textContent = ok ? '\u25CF connected' : '\u25CB connect';
+  b.setAttribute('aria-pressed', String(ok));
+}
+function tryConnect(base, token){
+  if (!base || !token) { $('#connectStatus').textContent = 'Both the backend URL and the token are needed.'; return; }
+  $('#connectBtn').disabled = true;
+  probeBackend(base, token, function(s){ $('#connectStatus').textContent = s; })
+    .then(function(v){
+      state.backend = base.replace(/\/+$/, '');
+      state.token = token;
+      try { localStorage.setItem(LS_BACKEND, state.backend); localStorage.setItem(LS_TOKEN, token); } catch (e) {}
+      $('#connectStatus').textContent = 'Connected to skills-ui ' + v.version + '.';
+      $('#connectDialog').close();
+      connectedDot(true);
+      boot();
+    })
+    .catch(function(e){ $('#connectStatus').textContent = e.message || String(e); connectedDot(false); })
+    .finally(function(){ $('#connectBtn').disabled = false; });
+}
+function openConnect(){
+  var savedBase = state.backend, savedToken = state.token;
+  try {
+    savedBase = savedBase || localStorage.getItem(LS_BACKEND) || '';
+    savedToken = savedToken || localStorage.getItem(LS_TOKEN) || '';
+  } catch (e) {}
+  $('#backendInput').value = savedBase;
+  $('#tokenInput').value = savedToken;
+  $('#connectStatus').textContent = '';
+  $('#connectDialog').showModal();
 }
 
 /* ---------- busy ---------- */
@@ -950,6 +1043,10 @@ document.addEventListener('DOMContentLoaded', function(){
   $('#agentsDone').addEventListener('click', function(){ closeAgentsPop(); });
   $('#helpBtn').addEventListener('click', function(){ $('#helpDialog').showModal(); });
   $('#helpClose').addEventListener('click', function(){ $('#helpDialog').close(); });
+  $('#connectBtn').addEventListener('click', function(){
+    tryConnect($('#backendInput').value.trim(), $('#tokenInput').value.trim());
+  });
+  $('#connectState').addEventListener('click', openConnect);
   $('#selectAllBtn').addEventListener('click', function(){
     filteredSkills().forEach(function(s){ state.checked.add(s.name); });
     play('confirm');
@@ -1088,9 +1185,31 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 
   applyPrefs();
+  if (HOSTED) {
+    $('#connectState').style.display = '';
+    var savedBase = null, savedToken = null;
+    try { savedBase = localStorage.getItem(LS_BACKEND); savedToken = localStorage.getItem(LS_TOKEN); } catch (e) {}
+    if (savedBase && savedToken) {
+      probeBackend(savedBase, savedToken, function(){})
+        .then(function(){
+          state.backend = savedBase; state.token = savedToken;
+          connectedDot(true);
+          boot();
+        })
+        .catch(function(){ connectedDot(false); openConnect(); });
+    } else {
+      connectedDot(false);
+      openConnect();
+    }
+  } else {
+    boot();
+  }
+});
+
+function boot(){
   setTab('installed');
   applySeed();
-});
+}
 })();
 `;
 
@@ -1098,7 +1217,8 @@ export function renderPage(
   version: string,
   prefs?: UiPreferences,
   serverPort?: number,
-  seed?: UiSeed
+  seed?: UiSeed,
+  opts?: { hosted?: boolean }
 ): string {
   const initialPrefs: UiPreferences = prefs ?? DEFAULT_UI_PREFERENCES;
   return `<!doctype html>
@@ -1107,7 +1227,8 @@ export function renderPage(
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
-<title>skills — ${version}</title>
+${opts?.hosted ? `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src http://127.0.0.1:* http://localhost:*">
+` : ""}<title>skills — ${version}</title>
 <style>
 [data-theme="mocha"]{
 ${cssVarsFor(THEME_TOKENS.mocha, CATPPUCCIN_MOCHA)}
@@ -1134,6 +1255,7 @@ ${APP_CSS}
     </div>
     <button class="btn" id="checkUpdatesBtn">Check for updates</button>
     <button class="btn" id="updateAllBtn">Update all</button>
+    <button class="btn" id="connectState" style="display:none" aria-pressed="false" title="Connect to your local skills-ui serve">&#9675; connect</button>
     <button class="btn" id="themeToggle" aria-label="Switch theme">☀ Light</button>
     <button class="btn" id="settingsBtn" aria-haspopup="dialog">⚙ Settings</button>
   </div>
@@ -1255,6 +1377,20 @@ ${APP_CSS}
     <tr><td><kbd>?</kbd></td><td>this help — <kbd>esc</kbd> closes</td></tr>
   </table>
   <div class="row" style="margin-top:14px"><button class="btn" id="helpClose">Close</button></div>
+</dialog>
+
+<dialog id="connectDialog" aria-label="Connect to your local skills-ui serve">
+  <h3>Connect your backend</h3>
+  <p>This is the hosted skills-ui — it talks to a <code>skills-ui serve</code> running on <b>your</b> machine. Start one in a terminal (<code>skills-ui serve --port 8123</code>) and copy the URL and <code>Hosted-UI token</code> lines it prints.</p>
+  <label for="backendInput">Backend URL</label>
+  <input id="backendInput" type="url" placeholder="http://127.0.0.1:8123" autocomplete="off" spellcheck="false">
+  <label for="tokenInput">Hosted-UI token</label>
+  <input id="tokenInput" type="password" placeholder="paste the Hosted-UI token" autocomplete="off">
+  <p id="connectStatus" role="status"></p>
+  <div class="row">
+    <button class="btn primary" id="connectBtn">Connect</button>
+  </div>
+  <p class="connect-help">Chrome, Edge, and Firefox 153+ will ask once for <b>local network access</b> — choose Allow. Safari currently blocks local network access entirely. Wrong token? Re-copy it from serve's startup output.</p>
 </dialog>
 
 <script>window.__PREFS__ = ${JSON.stringify(initialPrefs)};window.__PORT__ = ${serverPort ?? 0};window.__SEED__ = ${JSON.stringify(seed ?? { kind: 'none' })};</script>

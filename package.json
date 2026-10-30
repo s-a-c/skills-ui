@@ -12,6 +12,7 @@
     "selftest": "bun run src/main.ts --selftest",
     "test": "bun test",
     "build": "bun run scripts/build.ts",
+    "export:page": "bun run scripts/export-page.ts",
     "pty-smoke": "uv run --with pyte python scripts/pty-smoke/smoke.py"
   },
   "dependencies": {

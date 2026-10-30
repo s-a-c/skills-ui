@@ -159,4 +159,15 @@ describe("api", () => {
     });
     expect(res.status).toBe(413);
   });
+
+  test("hosted page variant carries loopback-only meta CSP; embedded carries none", async () => {
+    const { renderPage } = await import("../src/web/page.ts");
+    const hosted = renderPage("0.0.0-test", undefined, undefined, undefined, { hosted: true });
+    expect(hosted).toContain('http-equiv="Content-Security-Policy"');
+    expect(hosted).toMatch(/connect-src[^"]*127\.0\.0\.1:\*/);
+    expect(hosted).toContain('id="connectDialog"');
+    const embedded = renderPage("0.0.0-test");
+    expect(embedded).not.toContain('http-equiv="Content-Security-Policy"');
+    expect(embedded).toContain('id="connectDialog"'); // present but only shown off-loopback
+  });
 });
