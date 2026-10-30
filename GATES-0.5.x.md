@@ -34,5 +34,5 @@ Scope: the hosted zero-install WebUI shipped and verified — serve gate (prefli
   EXPECT: G6-OK
   EVIDENCE: automatic-evidence=v1; definition-sha256=bef3d83b348e2685d0374252dbcda8941d254468a8f570992bcc3dcaa75affd7; exit=0; EXPECT=matched; output-sha256=6233fa6beb413a3b89a765ac4e145e64251faee409e778323811a8466b872b67; output-bytes=6; shell=/bin/sh; cwd=/Users/s-a-c/Projects/s-a-c/skills-ui/main; path=8f49f3ac95ce/10 entries
 
-- [ ] G7: manual smoke — the native LNA prompt itself needs a human click (S-138: only the prompt click is manual; everything else is automated above)
-  EVIDENCE: pending — pending first human visit to https://s-a-c.github.io/skills-ui/app.html connecting to a real `skills-ui serve`
+- [x] G7: manual smoke — the native LNA prompt itself needs a human click (S-138: only the prompt click is manual; everything else is automated above)
+  EVIDENCE: 2026-10-30 — the user connected the live page (https://s-a-c.github.io/skills-ui/app.html) to a real `skills-ui serve` and allowed the native local-network-access prompt; reported directly as "manual smoke test done".
