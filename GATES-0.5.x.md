@@ -10,9 +10,9 @@ Scope: the hosted zero-install WebUI shipped and verified — serve gate (prefli
   EVIDENCE: automatic-evidence=v1; definition-sha256=177b8fb11796cf920604677f65f6f000e816f4d11f557b90873597e89d8286e0; exit=0; EXPECT=matched; output-sha256=20bc802a0d03fd18fa0c0a594f33a39a1651ebb4da758fc19cd4e856470b7ea7; output-bytes=23; shell=/bin/sh; cwd=/Users/s-a-c/Projects/s-a-c/skills-ui/main; path=8f49f3ac95ce/10 entries
 
 - [x] G2: compiled binary builds and selftests
-  CHECK: PATH="$HOME/.bun/bin:$PATH" bun run build >/dev/null 2>&1 && ./dist/skills-ui-0.4.0-darwin-arm64 --selftest | grep -q "SELFTEST PASS" && echo G2-OK
+  CHECK: PATH="$HOME/.bun/bin:$PATH" bun run build >/dev/null 2>&1 && ./dist/skills-ui-0.5.0-darwin-arm64 --selftest | grep -q "SELFTEST PASS" && echo G2-OK
   EXPECT: G2-OK
-  EVIDENCE: automatic-evidence=v1; definition-sha256=006a8028509c2a28d7f0916a51c108b76f2958f95e7c5b27e16a463816c8be73; exit=0; EXPECT=matched; output-sha256=93890fd4c80f3df391be82be697d08d9ab7694e662e180c61c319e9d3b574fb7; output-bytes=6; shell=/bin/sh; cwd=/Users/s-a-c/Projects/s-a-c/skills-ui/main; path=8f49f3ac95ce/10 entries
+  EVIDENCE: automatic-evidence=v1; definition-sha256=290b64979a40db8aec0bb73679703045f6d52037b79203377e3aa138af997a9e; exit=0; EXPECT=matched; output-sha256=93890fd4c80f3df391be82be697d08d9ab7694e662e180c61c319e9d3b574fb7; output-bytes=6; shell=/bin/sh; cwd=/Users/s-a-c/Projects/s-a-c/skills-ui/main; path=8f49f3ac95ce/10 entries
 
 - [x] G3: TUI pty smoke suite green (no regressions from the serve/page work)
   CHECK: PATH="$HOME/.bun/bin:$PATH" bun run pty-smoke 2>&1 | grep -q "SMOKE PASS" && echo G3-OK
