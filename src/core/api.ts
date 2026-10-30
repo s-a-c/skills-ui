@@ -403,6 +403,11 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
       // enforce the 1 MiB cap at transport level (0.5.1 impl A): without
       // this Bun buffers up to 128 MB before our readJsonBody check runs
       maxRequestBodySize: BODY_LIMIT,
+      // keep the socket alive across slow handlers (0.5.1 hotfix): Bun's
+      // default 10 s idle timeout tears down any request whose handler
+      // outlasts it — a global `skills ls` takes ~62 s on a real corpus,
+      // which surfaced in the browser as "Failed to fetch"
+      idleTimeout: 255,
     });
     // ready() resolves once the socket is bound (typed loosely across Bun minors)
     await (s as unknown as { ready?: Promise<unknown> }).ready;

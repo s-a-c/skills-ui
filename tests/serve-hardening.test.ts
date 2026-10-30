@@ -248,4 +248,13 @@ describe("api: serialized spawn queue", () => {
     expect(busy + ok).toBe(6);
     delete process.env.SKILLS_SHIM_DELAY_MS;
   });
+
+  test("a handler slower than Bun's default idle timeout still answers (0.5.1 hotfix)", async () => {
+    process.env.SKILLS_UI_SKILLS_BIN = SLOW_SHIM;
+    process.env.SKILLS_SHIM_DELAY_MS = "13000"; // past the ~12 s teardown window
+    const base = await start();
+    const res = await fetch(`${base}/api/skills`);
+    expect(res.status).toBe(200); // pre-fix: the socket died and fetch rejected
+    delete process.env.SKILLS_SHIM_DELAY_MS;
+  }, 30_000);
 });
