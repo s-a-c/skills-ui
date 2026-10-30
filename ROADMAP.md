@@ -9,7 +9,10 @@ flowchart TB
   M2 --> M3["0.3.x — rich rendering: markdown · images · 3D graph · audio · motion"]
   M3 --> M4["0.4.x — packaging matrix + distributions"]
   M4 --> M5["0.5.x — Hosted UI"]
-  M5 --> MX["later 0.x — @opentui/ssh serving · musl/win targets · upstream serve convergence"]
+  M5 --> M5A["0.5.1 — security hardening"]
+  M5A --> M5B["0.5.2 — UI/UX consistency (web + TUI)"]
+  M5B --> M5C["0.5.3 — performance: retrieval · filtering · search"]
+  M5C --> MX["later 0.x — @opentui/ssh serving · musl/win targets · upstream serve convergence"]
 ```
 
 ## Milestones
@@ -22,6 +25,9 @@ flowchart TB
 | 0.3.x | Rich rendering depth: images in real views (splash, source cards), 3D graph view (`@opentui/three`), motion polish, mouse interactions (wheel-scroll the hovered pane, click to select/focus — OpenTUI built-ins, S-88 evidence: reporting already on, wheel not yet wired). Markdown detail, audio synth, image pipeline and theme tokens already landed in 0.0.x | done — S-89, S-100–S-103 (rich views, search depth); no separate tag, released within v0.4.0 |
 | 0.4.x | Packaging matrix: darwin-arm64 → linux-x64/arm64 → win32; `OPENTUI_LIBC`, codesign, version stamping | done — v0.4.0 tagged + published, repo public (2026-10-29) |
 | 0.5.x | Hosted UI (below) | **done** — map S-130 shipped 2026-10-30: page live on Pages, serve gate, e2e 3/3, GATES-0.5.x 6/7 (G7 = the manual LNA prompt click) |
+| 0.5.1 | Security hardening: comprehensive audit + fixes across serve API, hosted page + installer + release pipeline, dependencies/supply chain (map [S-142](https://linear.app/s-a-c/issue/S-142/skills-ui-051-security-hardening-wayfinder-map)) | **active** — defog audits running |
+| 0.5.2 | UI/UX consistency across web (local `--web` + hosted) and TUI: audits → divergence matrix → ratified fix slice (map [S-143](https://linear.app/s-a-c/issue/S-143/skills-ui-052-uiux-consistency-wayfinder-map-web-tui)) | next |
+| 0.5.3 | Performance of retrieval, filtering, search: baselines → ratified budgets + harness → fixes for the ratified hot paths (map [S-144](https://linear.app/s-a-c/issue/S-144/skills-ui-053-performance-wayfinder-map-retrieval-filtering)) | later |
 
 ## Hosted UI (0.5.x, shipped)
 
@@ -41,6 +47,18 @@ Guardrails (what this line never grows into):
 - The static bundle never enters the native-app packaging gates.
 
 Shipped follow-ons not taken here (parked): browser-bundled core (feasible, no wasm — a later design choice) and the optional TUI-in-browser PoC spike.
+
+## Hardening series (0.5.1–0.5.3, charted 2026-10-30)
+
+Three follow-on wayfinder maps inside the 0.5.x line, each **defog-first** (read-only audits) and closing on its own **shipped patch release** — execution carried into the map, not handed off. Serial order ratified: security → UI/UX → performance (audit defog may run early in parallel; implementation waits for the prior map's ship gate).
+
+Ship gate per milestone: merged to `main`, `bun test` green, tagged release with binaries built, hosted page updated when web-facing, gate ledger (`GATES-0.5.1/2/3.md`) with evidence, live checks pass.
+
+| Map | Scope | Skills (beyond the mandatory set: wayfinder · grill-with-docs · unlazy · code-review-and-quality · i-have-adhd · caveman) |
+|---|---|---|
+| [S-142](https://linear.app/s-a-c/issue/S-142/skills-ui-051-security-hardening-wayfinder-map) | serve API · hosted page · installer/pipeline · deps/supply chain | security-and-hardening · github:secret |
+| [S-143](https://linear.app/s-a-c/issue/S-143/skills-ui-052-uiux-consistency-wayfinder-map-web-tui) | consistency definition → divergence matrix → ratified slice | frontend-design · web-design-guidelines · tui-design · opentui |
+| [S-144](https://linear.app/s-a-c/issue/S-144/skills-ui-053-performance-wayfinder-map-retrieval-filtering) | retrieval pipeline · filtering/search paths · budgets + harness | performance-optimization · systematic-debugging |
 
 ## Later (unversioned)
 
