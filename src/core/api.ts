@@ -10,10 +10,12 @@ import {
   update,
 } from "./index.ts";
 import {
+  bearerMatches,
   corsHeaders,
   getOrCreateHostedToken,
   isAllowedHost,
   isAllowedOrigin,
+  isCrossSiteFetch,
   isSameOrigin,
   preflightResponse,
 } from "./hosted-auth.ts";
@@ -27,7 +29,7 @@ import {
 } from "./prefs.ts";
 import type { UiSeed } from "./seed.ts";
 import { readSkillDoc } from "./services/skill-doc.ts";
-import { skillsVersion } from "./skills-client.ts";
+import { SkillsBusyError, skillsVersion } from "./skills-client.ts";
 import { APP_VERSION } from "./version.ts";
 
 /**
@@ -47,6 +49,12 @@ export interface ApiOptions {
   onReady?: (info: { port: number; fellBack: boolean }) => void;
   /** Called once at startup with the hosted-UI token (main.ts prints it). */
   onToken?: (token: string) => void;
+  /**
+   * Global request limiter (0.5.1 impl A): token-bucket capacity and
+   * refill per second. Defaults are generous for a single local user;
+   * `null` disables (tests may shrink or disable it).
+   */
+  rateLimit?: { capacity: number; refillPerSec: number } | null;
 }
 
 function json(body: unknown, status = 200): Response {
@@ -93,6 +101,63 @@ async function readJsonBody(req: Request): Promise<Record<string, unknown>> {
 
 class BodyTooLarge extends Error {}
 class BadJson extends Error {}
+
+// ---------- boundary validation (0.5.1 impl A) ----------
+//
+// Everything validated here flows into `Bun.spawn` argv or outbound URLs:
+// reject leading `-` (upstream flag injection), control characters, and
+// oversized values before they leave the HTTP boundary.
+
+const CONTROL_CHARS_RE = /[\u0000-\u001f\u007f]/;
+const SKILL_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9 ._@/-]*$/;
+
+function validText(value: string, max: number): string | null {
+  if (!value || value.length > max || CONTROL_CHARS_RE.test(value)) return null;
+  if (value.startsWith("-")) return null;
+  return value;
+}
+
+/** Skill name going to `skills add/rm/update`: conservative charset. */
+function validSkillName(value: string): string | null {
+  const text = validText(value, 128);
+  return text !== null && SKILL_NAME_RE.test(text) ? text : null;
+}
+
+/** Source: http(s) URL without credentials, or a plain path/shorthand. */
+function validSource(value: string): string | null {
+  const text = validText(value, 512);
+  if (text === null) return null;
+  if (/^https?:\/\//i.test(text)) {
+    try {
+      const url = new URL(text);
+      if (url.username || url.password) return null;
+    } catch {
+      return null;
+    }
+  }
+  return text;
+}
+
+/** Free-text query (never reaches argv; still bounded and clean). */
+function validQuery(value: string): string | null {
+  if (value.length > 512 || CONTROL_CHARS_RE.test(value)) return null;
+  return value;
+}
+
+// ---------- rate limiter (0.5.1 impl A) ----------
+
+function createLimiter(capacity: number, refillPerSec: number): () => boolean {
+  let tokens = capacity;
+  let last = Date.now();
+  return () => {
+    const now = Date.now();
+    tokens = Math.min(capacity, tokens + ((now - last) / 1000) * refillPerSec);
+    last = now;
+    if (tokens < 1) return false;
+    tokens -= 1;
+    return true;
+  };
+}
 
 function scopeParam(url: URL): "project" | "global" {
   return url.searchParams.get("scope") === "global" ? "global" : "project";
@@ -159,6 +224,7 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
       if (method === "GET" && path === "/api/skill") {
         const name = url.searchParams.get("name");
         if (!name) return json({ error: "name is required" }, 400);
+        if (!validSkillName(name)) return json({ error: "invalid skill name" }, 400);
         const scope = scopeParam(url);
         const skills = await listInstalled(scope);
         const skill = skills.find((s) => s.name === name);
@@ -170,6 +236,7 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
       if (method === "GET" && path === "/api/search") {
         const q = url.searchParams.get("q") ?? "";
         if (!q.trim()) return json({ results: [], adjustedQuery: null });
+        if (validQuery(q) === null) return json({ error: "invalid query" }, 400);
         const { results, adjustedQuery } = await searchWithFallback(q);
         return json({ results, adjustedQuery });
       }
@@ -178,6 +245,7 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
         const body = await readJsonBody(req);
         const source = typeof body.source === "string" ? body.source : null;
         if (!source) return json({ error: "source is required" }, 400);
+        if (validSource(source) === null) return json({ error: "invalid source" }, 400);
         let skillsList: string[] | null = null;
         if (typeof body.skill === "string" && body.skill) skillsList = [body.skill];
         else if (Array.isArray(body.skills)) {
@@ -187,6 +255,9 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
           skillsList = body.skills as string[];
         }
         if (!skillsList) return json({ error: "skill or skills is required" }, 400);
+        if (!skillsList.every((s) => validSkillName(s) !== null)) {
+          return json({ error: "invalid skill name" }, 400);
+        }
         const result = await install({
           source,
           skills: skillsList,
@@ -200,6 +271,7 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
       if (method === "GET" && path === "/api/source-skills") {
         const source = url.searchParams.get("source");
         if (!source) return json({ error: "source is required" }, 400);
+        if (validSource(source) === null) return json({ error: "invalid source" }, 400);
         const skills = await listSourceSkills(source);
         return json({ source, skills });
       }
@@ -208,6 +280,9 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
         const body = await readJsonBody(req);
         if (!Array.isArray(body.skills) || !body.skills.every((s) => typeof s === "string")) {
           return json({ error: "skills must be a string array" }, 400);
+        }
+        if (!(body.skills as string[]).every((s) => validSkillName(s) !== null)) {
+          return json({ error: "invalid skill name" }, 400);
         }
         const scope = body.global === true ? "global" : "project";
         const result = await remove(body.skills as string[], scope);
@@ -223,6 +298,9 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
           Array.isArray(body.skills) && body.skills.every((s) => typeof s === "string")
             ? (body.skills as string[])
             : [];
+        if (!skillsList.every((s) => validSkillName(s) !== null)) {
+          return json({ error: "invalid skill name" }, 400);
+        }
         const scope = body.global === true ? "global" : "project";
         const result = await update(skillsList, scope);
         return json({ ok: result.ok, output: result.output });
@@ -247,8 +325,13 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
       return json({ error: `not found: ${method} ${path}` }, 404);
     } catch (error) {
       if (error instanceof BodyTooLarge) return json({ error: "body too large" }, 413);
-      if (error instanceof BadJson) return json({ error: (error as Error).message }, 500);
-      return json({ error: error instanceof Error ? error.message : String(error) }, 500);
+      if (error instanceof BadJson) return json({ error: (error as Error).message }, 400);
+      if (error instanceof SkillsBusyError) {
+        return json({ error: "server busy — try again shortly" }, 503);
+      }
+      // internals stay in the server log; clients get a generic body
+      console.error("[api] internal error:", error);
+      return json({ error: "internal error" }, 500);
     }
   };
 
@@ -266,9 +349,22 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
     });
   };
 
+  // Global token bucket (0.5.1 impl A): generous for one local user, but a
+  // request storm cannot multiply subprocess work. `rateLimit: null` disables.
+  const limiter =
+    options.rateLimit === null
+      ? null
+      : createLimiter(options.rateLimit?.capacity ?? 120, options.rateLimit?.refillPerSec ?? 30);
+
   const handler = async (req: Request): Promise<Response> => {
     const host = req.headers.get("host");
     if (!isAllowedHost(host)) return json({ error: "host not allowed" }, 403);
+
+    // No-Origin + Sec-Fetch-Site: cross-site = a hostile page's no-cors
+    // request (0.5.1 impl A). Real non-browser clients send neither header.
+    if (isCrossSiteFetch(req)) return json({ error: "cross-site request rejected" }, 403);
+
+    if (limiter && !limiter()) return json({ error: "rate limited" }, 429);
 
     const origin = req.headers.get("origin");
     const crossOrigin = origin !== null && !isSameOrigin(origin, host);
@@ -282,7 +378,7 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
     const isVersionProbe = req.method === "GET" && new URL(req.url).pathname === "/api/version";
     if (crossOrigin && !isVersionProbe) {
       const auth = req.headers.get("authorization") ?? "";
-      if (auth !== `Bearer ${token}`) {
+      if (!bearerMatches(auth, token)) {
         // CORS headers on error responses too — the page must be able to read
         // the 401 to say "wrong token" instead of an opaque network failure.
         return withCors(json({ error: "unauthorized" }, 401), origin);
@@ -294,7 +390,14 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
   let server: Awaited<ReturnType<typeof listen>>;
   let fellBack = false;
   const listen = async (port: number) => {
-    const s = Bun.serve({ port, hostname: "127.0.0.1", fetch: handler });
+    const s = Bun.serve({
+      port,
+      hostname: "127.0.0.1",
+      fetch: handler,
+      // enforce the 1 MiB cap at transport level (0.5.1 impl A): without
+      // this Bun buffers up to 128 MB before our readJsonBody check runs
+      maxRequestBodySize: BODY_LIMIT,
+    });
     // ready() resolves once the socket is bound (typed loosely across Bun minors)
     await (s as unknown as { ready?: Promise<unknown> }).ready;
     return s;

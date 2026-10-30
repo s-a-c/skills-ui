@@ -19,15 +19,23 @@ interface TreeEntry {
   type: string;
 }
 
-async function fetchRepoTree(source: string, ref?: string): Promise<TreeEntry[] | null> {
+export async function fetchRepoTree(source: string, ref?: string): Promise<TreeEntry[] | null> {
   const refPath = ref ? `/${encodeURIComponent(ref)}` : "";
-  const url = `https://api.github.com/repos/${source}/git/trees${refPath}?recursive=1`;
+  // segment-wise encoding (0.5.1 impl A): a lockfile-controlled `source`
+  // must not smuggle path separators or ':' into the authed API URL
+  const repoPath = source
+    .split("/")
+    .filter(Boolean)
+    .map(encodeURIComponent)
+    .join("/");
+  const url = `https://api.github.com/repos/${repoPath}/git/trees${refPath}?recursive=1`;
   const res = await fetch(url, {
     headers: {
       Accept: "application/vnd.github+json",
       "User-Agent": "skills-ui",
       ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
     },
+    signal: AbortSignal.timeout(10_000),
   });
   if (!res.ok) return null;
   const data = (await res.json()) as { tree?: TreeEntry[] };

@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 
 /**
  * Hosted-UI auth surface (0.5.x, S-131 design): a stable Bearer token for
@@ -9,6 +9,8 @@ import { randomBytes } from "node:crypto";
  * Host-header allowlist against DNS rebinding. Same-origin / no-Origin
  * requests (the embedded `--web` page, curl, tests) are exempt — this
  * guards other websites' JS driving the local serve, nothing else.
+ * Since 0.5.1 impl A, no-Origin requests stamped `Sec-Fetch-Site:
+ * cross-site` (a hostile page's no-cors fetch) are rejected outright.
  */
 
 const TOKEN_ENV = "SKILLS_UI_HOSTED_TOKEN";
@@ -44,6 +46,30 @@ export function getOrCreateHostedToken(path = hostedTokenPath()): string {
     // persistence failed (read-only dir) — the per-run token still works
   }
   return token;
+}
+
+/**
+ * Timing-safe Bearer check (0.5.1 impl A): hash both sides to a fixed
+ * length, then compare in constant time — never compare tokens directly.
+ */
+export function bearerMatches(authHeader: string, token: string): boolean {
+  const a = createHash("sha256").update(authHeader).digest();
+  const b = createHash("sha256").update(`Bearer ${token}`).digest();
+  return timingSafeEqual(a, b);
+}
+
+/**
+ * Hostile no-cors detection (0.5.1 impl A): a browser always stamps
+ * Sec-Fetch-Site. No Origin + `cross-site` can only be another page's
+ * no-cors GET (legit hosted calls send Origin; address-bar navigation
+ * sends `none`; curl and Bun fetch send neither). Serves as the
+ * browser-detection the "no-Origin ⇒ non-browser" assumption lacked.
+ */
+export function isCrossSiteFetch(req: Request): boolean {
+  return (
+    req.headers.get("origin") === null &&
+    req.headers.get("sec-fetch-site")?.toLowerCase() === "cross-site"
+  );
 }
 
 /** Host-header allowlist: loopback names only (DNS-rebinding defense). */

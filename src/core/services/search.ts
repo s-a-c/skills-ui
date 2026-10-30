@@ -28,7 +28,9 @@ export async function searchRegistryFuzzy(query: string, owner?: string): Promis
   try {
     const params = new URLSearchParams({ q: query });
     if (owner) params.set("owner", owner);
-    const res = await fetch(`${SEARCH_API_BASE}/api/search?${params.toString()}`);
+    const res = await fetch(`${SEARCH_API_BASE}/api/search?${params.toString()}`, {
+      signal: AbortSignal.timeout(10_000),
+    });
     if (!res.ok) return [];
     const data = (await res.json()) as {
       skills?: Array<{ id: string; name: string; installs: number; source: string }>;

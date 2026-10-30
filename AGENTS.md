@@ -29,6 +29,7 @@ Every env var owned by this project is prefixed `SKILLS_UI_`:
 | `SKILLS_UI_SKILLS_BIN` | Path to the wrapped `skills` executable | `skills` on PATH |
 | `SKILLS_UI_PREFS_DIR` | Override prefs directory | `~/.config/skills-ui/prefs.json` |
 | `SKILLS_UI_API_URL` | skills.sh registry base URL | `https://skills.sh` |
+| `SKILLS_UI_SPAWN_QUEUE_CAP` | Max queued `skills` CLI invocations before 503 busy (0.5.1 impl A) | `8` |
 
 Standard and third-party vars (`GITHUB_TOKEN`, `XDG_STATE_HOME`, `COLORTERM`,
 `OPENTUI_LIBC`) keep their conventional names. New project-owned vars must take

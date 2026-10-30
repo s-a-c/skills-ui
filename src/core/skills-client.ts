@@ -8,7 +8,14 @@
  * `add`/`remove` into auto-yes/auto-agent modes upstream; parsed output
  * runs with NO_COLOR, except `--list` which needs FORCE_COLOR=1 to keep
  * its cyan name markers through the pipe (ANSI regex upstream of us).
+ *
+ * Every invocation goes through a serialized spawn queue (0.5.1 impl A):
+ * one child at a time, bounded waiting line, SkillsBusyError on overflow.
  */
+
+import { createSpawnQueue } from "./spawn-queue.ts";
+
+export { SkillsBusyError } from "./spawn-queue.ts";
 
 export interface RunResult {
   stdout: string;
@@ -72,6 +79,9 @@ let cachedBin: string | null = null;
 
 export class SkillsCliError extends Error {}
 
+// One serialized queue for every child: 0.5.1 impl A fan-out defense.
+const spawnQueue = createSpawnQueue(1);
+
 /** Resolve the `skills` executable: SKILLS_UI_SKILLS_BIN override, else `skills` on PATH. */
 export function resolveSkillsBin(): string {
   if (cachedBin) return cachedBin;
@@ -83,8 +93,16 @@ export function resetSkillsBinCache(): void {
   cachedBin = null;
 }
 
-/** Run `skills <args>` and capture everything. */
+/** Run `skills <args>` and capture everything. Serialized; rejects with
+ * SkillsBusyError when the spawn queue is full. */
 export async function runSkills(args: string[], options: RunOptions = {}): Promise<RunResult> {
+  return spawnQueue.run(() => runSkillsUnqueued(args, options));
+}
+
+async function runSkillsUnqueued(
+  args: string[],
+  options: RunOptions
+): Promise<RunResult> {
   const bin = resolveSkillsBin();
   const env = sanitizeEnv();
   env.NO_COLOR = "1";
