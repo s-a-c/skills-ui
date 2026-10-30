@@ -46,4 +46,5 @@ Shipped follow-ons not taken here (parked): browser-bundled core (feasible, no w
 
 - `@opentui/ssh` — serve the TUI over SSH.
 - musl + Windows targets in the packaging matrix.
+- Package-manager distribution (Homebrew tap, winget, scoop, …) — the `curl | sh` installer (`scripts/install.sh`, checksum-verified) covers the interim.
 - Convergence: if `vercel-labs/skills` ever ships a headless `skills serve`, swap the subprocess backend for it without architecture change.

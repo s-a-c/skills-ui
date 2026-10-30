@@ -9,7 +9,15 @@ description: TUI/WebUI wrapper for the stock skills CLI.
 
 ## Install
 
-Grab a binary from the [releases](https://github.com/s-a-c/skills-ui/releases) (darwin-arm64 · darwin-x64 · linux-x64 · linux-arm64), then:
+One line — detects OS/arch, downloads the release binary, verifies its checksum, installs to `~/.local/bin`:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/s-a-c/skills-ui/main/scripts/install.sh | sh
+```
+
+Pinned version: `| sh -s v0.5.0`. Manual alternative: grab a binary from the [releases](https://github.com/s-a-c/skills-ui/releases) (darwin-arm64 · darwin-x64 · linux-x64 · linux-arm64), `chmod +x`, put it on your `PATH` (macOS browser downloads also need `xattr -d com.apple.quarantine <file>`).
+
+Requires the stock `skills` CLI v1.7.x on `PATH` (or point `SKILLS_UI_SKILLS_BIN` at it).
 
 ```sh
 skills-ui               # terminal UI (OpenTUI)
@@ -18,14 +26,12 @@ skills-ui serve         # headless HTTP API on 127.0.0.1
 skills-ui --selftest    # in-memory smoke check — no TTY needed
 ```
 
-Requires the stock `skills` CLI v1.7.x on `PATH` (or point `SKILLS_UI_SKILLS_BIN` at it).
-
 ## Highlights
 
 - Wraps the **stock** `skills` CLI via subprocess — nothing bundled, nothing forked.
 - Rich terminal UI: markdown, images, 3D graph view, synthesized audio, catppuccin theming.
 - Headless `serve` API on loopback for scripting.
-- A **hosted zero-install web UI** is coming in 0.5.x — see the [roadmap](https://github.com/s-a-c/skills-ui/blob/main/ROADMAP.md).
+- A **hosted zero-install web UI** shipped in 0.5.x — open **[s-a-c.github.io/skills-ui/app.html](https://s-a-c.github.io/skills-ui/app.html)**, run `skills-ui serve`, paste the URL + token. See the [roadmap](https://github.com/s-a-c/skills-ui/blob/main/ROADMAP.md).
 
 ## Repo & agent conventions
 

@@ -15,6 +15,16 @@
 - `skills` on `PATH` (or point `SKILLS_UI_SKILLS_BIN` at it) — v1.7.x, stock upstream.
 - Terminal with truecolor for full fidelity (degrades gracefully).
 
+## Install
+
+One line — detects OS/arch, downloads the release binary, verifies its checksum, installs to `~/.local/bin` (override with `SKILLS_UI_INSTALL_DIR`):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/s-a-c/skills-ui/main/scripts/install.sh | sh
+```
+
+Pinned version: append the tag — `| sh -s v0.5.0`. Manual alternative: grab a binary from the [releases](https://github.com/s-a-c/skills-ui/releases) (darwin-arm64 · darwin-x64 · linux-x64 · linux-arm64), `chmod +x`, put it on your `PATH`; browser-downloaded macOS copies also need `xattr -d com.apple.quarantine <file>` (ad-hoc signed). Package managers (Homebrew, winget, …) are roadmap-later.
+
 ## Usage
 
 ```sh
