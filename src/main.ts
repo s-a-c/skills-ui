@@ -56,13 +56,18 @@ async function runWeb(headless: boolean, portArg: number | null, seedArgs: strin
   const { createSkillsUiServer } = await import("./core/api.ts");
   const { parseUiSeed } = await import("./core/seed.ts");
   const seed = parseUiSeed(seedArgs);
+  let hostedToken: string | undefined;
   const server = await createSkillsUiServer({
     port: portArg,
     seed,
     withPage: !headless,
+    onToken: (t) => {
+      hostedToken = t;
+    },
     onReady: ({ port, fellBack }) => {
       if (fellBack) console.log(`Port ${portArg} is in use — picked a random unused port instead.`);
       console.log(`skills-ui ${headless ? "API" : "web UI"} running at http://127.0.0.1:${port}`);
+      if (hostedToken) console.log(`Hosted-UI token: ${hostedToken}`);
       console.log("Press Ctrl+C to stop.");
     },
   });

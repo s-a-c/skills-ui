@@ -10,6 +10,14 @@ import {
   update,
 } from "./index.ts";
 import {
+  corsHeaders,
+  getOrCreateHostedToken,
+  isAllowedHost,
+  isAllowedOrigin,
+  isSameOrigin,
+  preflightResponse,
+} from "./hosted-auth.ts";
+import {
   DEFAULT_UI_PREFERENCES,
   loadUiPreferences,
   normalizePreferences,
@@ -37,6 +45,8 @@ export interface ApiOptions {
   /** Serve the HTML page at / (true for --web, false for headless serve). */
   withPage?: boolean;
   onReady?: (info: { port: number; fellBack: boolean }) => void;
+  /** Called once at startup with the hosted-UI token (main.ts prints it). */
+  onToken?: (token: string) => void;
 }
 
 function json(body: unknown, status = 200): Response {
@@ -98,7 +108,7 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
   const prefs: UiPreferences = loadUiPreferences();
   const preferred = options.port ?? prefs.port ?? 0;
 
-  const handler = async (req: Request): Promise<Response> => {
+  const route = async (req: Request): Promise<Response> => {
     const url = new URL(req.url);
     const path = url.pathname;
     const method = req.method;
@@ -126,7 +136,7 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
         return json({
           version: APP_VERSION,
           skillsVersion: skills,
-          capabilities: { updatesCheck: "github" },
+          capabilities: { updatesCheck: "github", hosted: true },
         });
       }
 
@@ -240,6 +250,41 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
       if (error instanceof BadJson) return json({ error: (error as Error).message }, 500);
       return json({ error: error instanceof Error ? error.message : String(error) }, 500);
     }
+  };
+
+  // Hosted-UI gate (S-131 design): Host allowlist → preflight → Bearer on
+  // cross-origin requests. GET /api/version stays token-free (still Host- and
+  // origin-gated) so the hosted page can negotiate capabilities before pairing.
+  const token = getOrCreateHostedToken();
+  options.onToken?.(token);
+
+  const withCors = (res: Response, origin: string | null): Response => {
+    if (origin === null) return res;
+    return new Response(res.body, {
+      status: res.status,
+      headers: { ...Object.fromEntries(res.headers.entries()), ...corsHeaders(origin) },
+    });
+  };
+
+  const handler = async (req: Request): Promise<Response> => {
+    const host = req.headers.get("host");
+    if (!isAllowedHost(host)) return json({ error: "host not allowed" }, 403);
+
+    const origin = req.headers.get("origin");
+    const crossOrigin = origin !== null && !isSameOrigin(origin, host);
+    if (crossOrigin && !isAllowedOrigin(origin)) {
+      return json({ error: "origin not allowed" }, 403);
+    }
+    if (req.method === "OPTIONS") {
+      // preflights cannot carry Authorization (browser rule) — answer allowed ones
+      return crossOrigin ? preflightResponse(origin) : json({ error: "not found" }, 404);
+    }
+    const isVersionProbe = req.method === "GET" && new URL(req.url).pathname === "/api/version";
+    if (crossOrigin && !isVersionProbe) {
+      const auth = req.headers.get("authorization") ?? "";
+      if (auth !== `Bearer ${token}`) return json({ error: "unauthorized" }, 401);
+    }
+    return withCors(await route(req), crossOrigin ? origin : null);
   };
 
   let server: Awaited<ReturnType<typeof listen>>;
