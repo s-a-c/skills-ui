@@ -282,7 +282,11 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
     const isVersionProbe = req.method === "GET" && new URL(req.url).pathname === "/api/version";
     if (crossOrigin && !isVersionProbe) {
       const auth = req.headers.get("authorization") ?? "";
-      if (auth !== `Bearer ${token}`) return json({ error: "unauthorized" }, 401);
+      if (auth !== `Bearer ${token}`) {
+        // CORS headers on error responses too — the page must be able to read
+        // the 401 to say "wrong token" instead of an opaque network failure.
+        return withCors(json({ error: "unauthorized" }, 401), origin);
+      }
     }
     return withCors(await route(req), crossOrigin ? origin : null);
   };

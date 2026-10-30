@@ -128,10 +128,11 @@ describe("api hosted-UI gate", () => {
     expect(res.headers.get("access-control-max-age")).toBe("7200");
   });
 
-  test("cross-origin without token → 401; with token → 200 + ACAO + Vary", async () => {
+  test("cross-origin without token → 401 (readable: carries ACAO); with token → 200 + ACAO + Vary", async () => {
     const base = await start();
     const denied = await fetch(`${base}/api/skills`, { headers: { origin: PAGES } });
     expect(denied.status).toBe(401);
+    expect(denied.headers.get("access-control-allow-origin")).toBe(PAGES);
     const allowed = await fetch(`${base}/api/skills`, {
       headers: { origin: PAGES, authorization: `Bearer ${token}` },
     });
