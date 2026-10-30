@@ -1,0 +1,15 @@
+[
+  {
+    "name": "\u001b[36mhostile\u001b[39m-added",
+    "status": "installed",
+    "source": "\u001b]0;pwn\u0007src",
+    "path": "/tmp/x",
+    "scope": "project"
+  },
+  {
+    "name": "fail-one",
+    "status": "failed",
+    "error": "boom\u001b[31m!",
+    "reason": "why\u0000not"
+  }
+]

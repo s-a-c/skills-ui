@@ -1,4 +1,5 @@
 import { runSkills } from "../skills-client.ts";
+import { sanitizeMetadata } from "./sanitize.ts";
 import type { Scope } from "./types.ts";
 
 /**
@@ -10,5 +11,6 @@ import type { Scope } from "./types.ts";
 export async function update(names: string[], scope: Scope): Promise<{ ok: boolean; output: string }> {
   const args = ["update", scope === "global" ? "-g" : "-p", "-y", ...names];
   const { combined, exitCode } = await runSkills(args, { timeoutMs: 300_000 });
-  return { ok: exitCode === 0, output: combined.trim() };
+  // CLI output is external text headed for toasts — sanitized at ingress
+  return { ok: exitCode === 0, output: sanitizeMetadata(combined) };
 }

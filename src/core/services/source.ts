@@ -1,4 +1,5 @@
 import { runSkills } from "../skills-client.ts";
+import { sanitizeMetadata } from "./sanitize.ts";
 
 /**
  * Skills available in a source, via `skills add <source> --list --yes`
@@ -21,7 +22,9 @@ export async function listSourceSkills(source: string): Promise<SourceSkill[]> {
   });
   const names: string[] = [];
   for (const match of combined.matchAll(CYAN_NAME_RE)) {
-    const name = match[1]!.trim();
+    // sanitize at ingress (0.5.1 impl D): the captured span can still
+    // carry controls between the cyan markers
+    const name = sanitizeMetadata(match[1]!);
     if (name && !name.includes(" ") && !names.includes(name)) names.push(name);
   }
   return names.map((name) => ({ name, description: "" }));

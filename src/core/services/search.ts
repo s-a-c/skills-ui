@@ -1,4 +1,5 @@
 import type { SearchSkill } from "./types.ts";
+import { sanitizeMetadata } from "./sanitize.ts";
 
 /**
  * Registry search + fuzzy fallback, ported from vercel-labs/skills
@@ -9,20 +10,7 @@ import type { SearchSkill } from "./types.ts";
 
 const SEARCH_API_BASE = process.env.SKILLS_UI_API_URL ?? "https://skills.sh";
 
-/** Strip terminal escape sequences + collapse newlines (CWE-150 defense). */
-export function sanitizeMetadata(str: string): string {
-  return str
-    .replace(
-      /\x1b\[[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e]/g, // CSI
-      ""
-    )
-    .replace(/\x1b\][\s\S]*?(?:\x07|\x1b\\)/g, "") // OSC
-    .replace(/\x1b[P^_][\s\S]*?(?:\x1b\\)/g, "") // DCS/PM/APC
-    .replace(/\x1b[\x20-\x7e]/g, "") // simple escapes
-    .replace(/[\x00-\x08\x0b-\x1f\x7f\x80-\x9f]/g, "") // control chars
-    .replace(/[\r\n]+/g, " ")
-    .trim();
-}
+export { sanitizeMetadata };
 
 export async function searchRegistryFuzzy(query: string, owner?: string): Promise<SearchSkill[]> {
   try {

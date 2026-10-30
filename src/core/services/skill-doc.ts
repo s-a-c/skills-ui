@@ -1,5 +1,6 @@
 import { statSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { sanitizeBody } from "./sanitize.ts";
 
 /**
  * Read a skill's SKILL.md. `path` (from `ls --json`) may be the file itself
@@ -29,5 +30,7 @@ export function stripFrontmatter(doc: string): string {
 
 export function skillBody(path: string): string | null {
   const doc = readSkillDoc(path);
-  return doc === null ? null : stripFrontmatter(doc);
+  // sanitized at ingress (0.5.1 impl D): SKILL.md is external text that
+  // renders as markdown in the TUI — escapes stripped, structure kept
+  return doc === null ? null : sanitizeBody(stripFrontmatter(doc));
 }

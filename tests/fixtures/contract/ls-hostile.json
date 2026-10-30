@@ -1,0 +1,27 @@
+[
+  {
+    "name": "good-skill",
+    "path": "tests/fixtures/contract/hostile-skill",
+    "scope": "project",
+    "agents": ["Claude Code"],
+    "source": "https://example.com/repo"
+  },
+  {
+    "name": "\u001b[36mevil\u001b[0m-skill\u0007",
+    "path": "/tmp/nowhere",
+    "scope": "project",
+    "agents": ["Age\u001b]0;nt\u0007nt", "\u009b31mBad Agent"],
+    "source": "\u001b[31mred\u001b[0m source",
+    "sourceUrl": "http://x/\u0007bell",
+    "sourceType": "git\u0000hub"
+  },
+  {
+    "name": 12345,
+    "path": "/tmp/num",
+    "scope": "project",
+    "agents": ["ok", 42],
+    "source": 7,
+    "sourceUrl": null,
+    "sourceType": true
+  }
+]

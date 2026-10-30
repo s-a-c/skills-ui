@@ -1,4 +1,5 @@
 import { runSkills } from "../skills-client.ts";
+import { sanitizeMetadata } from "./sanitize.ts";
 import type { InstalledSkill, Scope } from "./types.ts";
 
 /**
@@ -20,13 +21,16 @@ export async function listInstalled(scope: Scope): Promise<InstalledSkill[]> {
     throw new Error(`skills ls --json produced ${typeof parsed}, expected array`);
   }
   return (parsed as Array<Record<string, unknown>>).map((raw) => ({
-    name: String(raw.name ?? ""),
+    // display/model fields are external text — sanitized at ingress
+    // (0.5.1 impl D); `path` stays raw: it addresses the filesystem and
+    // is never rendered
+    name: sanitizeMetadata(String(raw.name ?? "")),
     path: String(raw.path ?? ""),
     scope: raw.scope === "global" ? "global" : "project",
-    agents: Array.isArray(raw.agents) ? raw.agents.map(String) : [],
-    source: raw.source == null ? null : String(raw.source),
-    sourceUrl: raw.sourceUrl == null ? null : String(raw.sourceUrl),
-    sourceType: raw.sourceType == null ? null : String(raw.sourceType),
+    agents: Array.isArray(raw.agents) ? raw.agents.map((a) => sanitizeMetadata(String(a))) : [],
+    source: raw.source == null ? null : sanitizeMetadata(String(raw.source)),
+    sourceUrl: raw.sourceUrl == null ? null : sanitizeMetadata(String(raw.sourceUrl)),
+    sourceType: raw.sourceType == null ? null : sanitizeMetadata(String(raw.sourceType)),
   }));
 }
 

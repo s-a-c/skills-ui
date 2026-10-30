@@ -29,6 +29,7 @@ import {
 } from "./prefs.ts";
 import type { UiSeed } from "./seed.ts";
 import { readSkillDoc } from "./services/skill-doc.ts";
+import { sanitizeMetadata } from "./services/sanitize.ts";
 import { SkillsBusyError, skillsVersion } from "./skills-client.ts";
 import { APP_VERSION } from "./version.ts";
 
@@ -76,7 +77,8 @@ function descriptionFor(path: string): string {
   if (cached !== undefined) return cached;
   const doc = readSkillDoc(path);
   const match = doc?.match(/^description:\s*(.+)$/m);
-  const description = match?.[1]?.trim() ?? "";
+  // frontmatter descriptions are external text — sanitized at ingress
+  const description = sanitizeMetadata(match?.[1] ?? "");
   descriptionCache.set(path, description);
   return description;
 }

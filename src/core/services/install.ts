@@ -1,4 +1,5 @@
 import { runSkills } from "../skills-client.ts";
+import { sanitizeMetadata } from "./sanitize.ts";
 import type { AddResultEntry } from "./types.ts";
 
 export interface InstallOptions {
@@ -39,6 +40,18 @@ export async function install(opts: InstallOptions): Promise<InstallResult> {
     // shape is broken, surface it as a single failed entry
     results = [{ status: "failed", error: `unparseable add output: ${stdout.slice(0, 200)}` }];
   }
+  // entries are external text headed for toasts — sanitized at ingress
+  const clean = (v: unknown): string | undefined =>
+    v == null ? undefined : sanitizeMetadata(String(v));
+  results = results.map((r) => ({
+    ...r,
+    name: clean(r.name),
+    source: r.source == null ? null : clean(r.source) ?? null,
+    path: clean(r.path),
+    scope: clean(r.scope),
+    error: clean(r.error),
+    reason: clean(r.reason),
+  }));
   const ok = exitCode === 0 && results.every((r) => r.status === "installed");
   return { ok, results };
 }

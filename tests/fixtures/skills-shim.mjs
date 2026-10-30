@@ -66,7 +66,12 @@ if (args[0] === "ls" || args[0] === "list") {
 if (args[0] === "install" && args.includes("--list")) {
   // upstream prints names in cyan; only meaningful with FORCE_COLOR through a pipe
   const source = args.find((a, i) => i > 0 && !a.startsWith("-")) ?? "fixture/source";
-  for (const name of ["alpha", "beta", "gamma"]) {
+  // SKILLS_SHIM_LIST_NAMES (JSON array) overrides the names — used by the
+  // hostile-input tests to push escape sequences through this path
+  const names = process.env.SKILLS_SHIM_LIST_NAMES
+    ? JSON.parse(process.env.SKILLS_SHIM_LIST_NAMES)
+    : ["alpha", "beta", "gamma"];
+  for (const name of names) {
     console.log(`\x1b[36m${name}\x1b[39m — from ${source}`);
   }
   process.exit(0);
