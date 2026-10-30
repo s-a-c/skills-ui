@@ -2,6 +2,7 @@
  * Ported from vercel-labs/skills `src/web/page.ts` (MIT, branch dev/tui-webui)
  * — the web UI over the /api contract; import paths adjusted for skills-ui.
  */
+import { createHash } from "node:crypto";
 import {
   THEME_TOKENS,
   CATPPUCCIN_MOCHA,
@@ -382,6 +383,21 @@ function esc(s){
 var HOSTED = !/^(127\\.0\\.0\\.1|localhost|\\[::1\\]|::1)$/.test(location.hostname);
 var LS_BACKEND = 'skills-ui.backend';
 var LS_TOKEN = 'skills-ui.token';
+/* Session storage only (0.5.1 impl B): this page lives on a shared origin
+   (s-a-c.github.io) — any sibling page could read a localStorage token and
+   drive the local serve. sessionStorage is per-tab and clears on close. */
+function storageGet(k){ try { return sessionStorage.getItem(k); } catch (e) { return null; } }
+function storageSet(k, v){ try { sessionStorage.setItem(k, v); } catch (e) {} }
+function migrateLegacyStorage(){
+  try {
+    var b = localStorage.getItem(LS_BACKEND), t = localStorage.getItem(LS_TOKEN);
+    if (b === null && t === null) return;
+    if (b !== null && sessionStorage.getItem(LS_BACKEND) === null) sessionStorage.setItem(LS_BACKEND, b);
+    if (t !== null && sessionStorage.getItem(LS_TOKEN) === null) sessionStorage.setItem(LS_TOKEN, t);
+    localStorage.removeItem(LS_BACKEND);
+    localStorage.removeItem(LS_TOKEN);
+  } catch (e) {}
+}
 
 function api(path, opts){
   opts = opts || {};
@@ -513,7 +529,8 @@ function tryConnect(base, token){
     .then(function(v){
       state.backend = base.replace(/\\/+$/, '');
       state.token = token;
-      try { localStorage.setItem(LS_BACKEND, state.backend); localStorage.setItem(LS_TOKEN, token); } catch (e) {}
+      storageSet(LS_BACKEND, state.backend);
+      storageSet(LS_TOKEN, token);
       $('#connectStatus').textContent = 'Connected to skills-ui ' + v.version + '.';
       $('#connectDialog').close();
       connectedDot(true);
@@ -524,10 +541,8 @@ function tryConnect(base, token){
 }
 function openConnect(){
   var savedBase = state.backend, savedToken = state.token;
-  try {
-    savedBase = savedBase || localStorage.getItem(LS_BACKEND) || '';
-    savedToken = savedToken || localStorage.getItem(LS_TOKEN) || '';
-  } catch (e) {}
+  savedBase = savedBase || storageGet(LS_BACKEND) || '';
+  savedToken = savedToken || storageGet(LS_TOKEN) || '';
   $('#backendInput').value = savedBase;
   $('#tokenInput').value = savedToken;
   $('#connectStatus').textContent = '';
@@ -1187,8 +1202,8 @@ document.addEventListener('DOMContentLoaded', function(){
   applyPrefs();
   if (HOSTED) {
     $('#connectState').style.display = '';
-    var savedBase = null, savedToken = null;
-    try { savedBase = localStorage.getItem(LS_BACKEND); savedToken = localStorage.getItem(LS_TOKEN); } catch (e) {}
+    migrateLegacyStorage();
+    var savedBase = storageGet(LS_BACKEND), savedToken = storageGet(LS_TOKEN);
     if (savedBase && savedToken) {
       probeBackend(savedBase, savedToken, function(){})
         .then(function(){
@@ -1213,6 +1228,49 @@ function boot(){
 })();
 `;
 
+/** JSON for an inline <script> embed — `</script>` must never appear raw. */
+function safeJsonEmbed(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
+/** The deterministic bootstrap <script> body — one definition so the CSP
+ *  hash and the emitted markup can never drift apart. */
+function bootstrapScript(
+  prefs?: UiPreferences,
+  serverPort?: number,
+  seed?: UiSeed
+): string {
+  return `window.__PREFS__ = ${safeJsonEmbed(prefs ?? DEFAULT_UI_PREFERENCES)};window.__PORT__ = ${serverPort ?? 0};window.__SEED__ = ${safeJsonEmbed(seed ?? { kind: "none" })};`;
+}
+
+/**
+ * Content-Security-Policy for the rendered page (0.5.1 impl B): both inline
+ * scripts are deterministic, so they are pinned by sha256 hash instead of
+ * `unsafe-inline`. `frame-ancestors`/`nosniff` cannot be expressed in a
+ * meta CSP — the embedded page gets them as real headers from serve; for
+ * the hosted static page they are recorded accepted-risk.
+ */
+export function pageCspFor(
+  prefs?: UiPreferences,
+  serverPort?: number,
+  seed?: UiSeed,
+  hosted = false
+): string {
+  const hashes = [
+    createHash("sha256").update(bootstrapScript(prefs, serverPort, seed)).digest("base64"),
+    createHash("sha256").update(`\n${APP_JS}\n`).digest("base64"),
+  ].map((h) => `'sha256-${h}'`);
+  return [
+    "default-src 'none'",
+    "style-src 'unsafe-inline'",
+    `script-src ${hashes.join(" ")}`,
+    "img-src data:",
+    hosted ? "connect-src http://127.0.0.1:* http://localhost:*" : "connect-src 'self'",
+    "base-uri 'none'",
+    "form-action 'none'",
+  ].join("; ");
+}
+
 export function renderPage(
   version: string,
   prefs?: UiPreferences,
@@ -1221,13 +1279,16 @@ export function renderPage(
   opts?: { hosted?: boolean }
 ): string {
   const initialPrefs: UiPreferences = prefs ?? DEFAULT_UI_PREFERENCES;
+  const csp = pageCspFor(initialPrefs, serverPort, seed, !!opts?.hosted);
+  const bootstrap = bootstrapScript(initialPrefs, serverPort, seed);
   return `<!doctype html>
 <html lang="en" data-theme="${initialPrefs.theme}" data-motion="${String(initialPrefs.reduceMotion)}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
-${opts?.hosted ? `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src http://127.0.0.1:* http://localhost:*">
+${opts?.hosted ? `<meta http-equiv="Content-Security-Policy" content="${csp}">
+<meta name="referrer" content="no-referrer">
 ` : ""}<title>skills — ${version}</title>
 <style>
 [data-theme="mocha"]{
@@ -1393,7 +1454,7 @@ ${APP_CSS}
   <p class="connect-help">Chrome, Edge, and Firefox 153+ will ask once for <b>local network access</b> — choose Allow. Safari currently blocks local network access entirely. Wrong token? Re-copy it from serve's startup output.</p>
 </dialog>
 
-<script>window.__PREFS__ = ${JSON.stringify(initialPrefs)};window.__PORT__ = ${serverPort ?? 0};window.__SEED__ = ${JSON.stringify(seed ?? { kind: 'none' })};</script>
+<script>${bootstrap}</script>
 <script>
 ${APP_JS}
 </script>

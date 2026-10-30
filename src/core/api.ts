@@ -1,4 +1,4 @@
-import { renderPage } from "../web/page.ts";
+import { pageCspFor, renderPage } from "../web/page.ts";
 import {
   checkForUpdates,
   install,
@@ -185,8 +185,12 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
           headers: {
             "content-type": "text/html; charset=utf-8",
             "cache-control": "no-store",
-            "content-security-policy":
-              "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'self'",
+            // hash-pinned CSP (0.5.1 impl B) — no script-src 'unsafe-inline';
+            // these two cannot go in a meta CSP, so the embedded page gets
+            // them as real headers
+            "content-security-policy": pageCspFor(prefs, undefined, options.seed, false),
+            "x-content-type-options": "nosniff",
+            "referrer-policy": "no-referrer",
           },
         });
       }
