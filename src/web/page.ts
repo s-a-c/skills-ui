@@ -637,7 +637,11 @@ function renderList(){
     list.appendChild(li);
   });
   if (!items.length) {
-    list.innerHTML = '<div class="empty">' + (needle ? 'No matches for “' + esc(needle) + '”' : 'Nothing here yet') + '</div>';
+    // needle lives in filteredSkills scope — read the filter here instead
+    // (0.5.1 hotfix: the old out-of-scope reference threw 'needle is not
+    // defined' on every empty render, blanking the list)
+    var filterText = (($('#filter').value || '').trim());
+    list.innerHTML = '<div class="empty">' + (filterText ? 'No matches for “' + esc(filterText) + '”' : 'Nothing here yet') + '</div>';
   }
 }
 

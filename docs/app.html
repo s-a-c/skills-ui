@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-hPW3SJ8AKrAkRrH2BCV/ChD6PJlpBaDnmD7DzSvVN6w=' 'sha256-IUPFu5nSgwtKgrAbvpKlC8Wnnb1ltJH3pxd5CY0kEAA='; img-src data:; connect-src http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-hPW3SJ8AKrAkRrH2BCV/ChD6PJlpBaDnmD7DzSvVN6w=' 'sha256-YX7vRnqo7vFBgKWFj480NS5W/jGg8LxvCY2LY/9fFsI='; img-src data:; connect-src http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
-<title>skills — 0.5.0</title>
+<title>skills — 0.5.1</title>
 <style>
 [data-theme="mocha"]{
   --t-bg:#1e1e2e;
@@ -423,7 +423,7 @@ footer.tip{color:var(--t-textMuted);font-size:12px;padding:8px 16px 14px;border-
 </head>
 <body>
 <header>
-  <div class="logo"><span class="mark">S</span> skills <span class="ver">0.5.0</span></div>
+  <div class="logo"><span class="mark">S</span> skills <span class="ver">0.5.1</span></div>
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" data-tab="installed" aria-selected="true">Installed</button>
     <button class="tab" role="tab" data-tab="search" aria-selected="false">Search</button>
@@ -864,7 +864,11 @@ function renderList(){
     list.appendChild(li);
   });
   if (!items.length) {
-    list.innerHTML = '<div class="empty">' + (needle ? 'No matches for “' + esc(needle) + '”' : 'Nothing here yet') + '</div>';
+    // needle lives in filteredSkills scope — read the filter here instead
+    // (0.5.1 hotfix: the old out-of-scope reference threw 'needle is not
+    // defined' on every empty render, blanking the list)
+    var filterText = (($('#filter').value || '').trim());
+    list.innerHTML = '<div class="empty">' + (filterText ? 'No matches for “' + esc(filterText) + '”' : 'Nothing here yet') + '</div>';
   }
 }
 
