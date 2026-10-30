@@ -468,7 +468,7 @@ function toast(text, tone){
 
 /* ---------- hosted connect (S-137) ---------- */
 function probeBackend(base, token, onStatus){
-  var url = base.replace(/\/+$/, '');
+  var url = base.replace(/\\/+$/, '');
   onStatus('Reaching ' + url + ' …');
   return fetch(url + '/api/version').then(function(r){
     if (r.status === 403) throw new Error('origin-not-allowed');
@@ -491,7 +491,7 @@ function probeBackend(base, token, onStatus){
       throw new Error('Connected, but your skills-ui binary predates the hosted UI — update the binary and restart serve.');
     }
     if (msg === 'bad-token') {
-      throw new Error('Token rejected — re-copy the "Hosted-UI token" line from serve\'s startup output.');
+      throw new Error('Token rejected — re-copy the Hosted-UI token line from the serve startup output.');
     }
     var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     if (isSafari) {
@@ -511,7 +511,7 @@ function tryConnect(base, token){
   $('#connectBtn').disabled = true;
   probeBackend(base, token, function(s){ $('#connectStatus').textContent = s; })
     .then(function(v){
-      state.backend = base.replace(/\/+$/, '');
+      state.backend = base.replace(/\\/+$/, '');
       state.token = token;
       try { localStorage.setItem(LS_BACKEND, state.backend); localStorage.setItem(LS_TOKEN, token); } catch (e) {}
       $('#connectStatus').textContent = 'Connected to skills-ui ' + v.version + '.';
