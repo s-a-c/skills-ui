@@ -29,6 +29,6 @@ Requires the stock `skills` CLI v1.7.x on `PATH` (or point `SKILLS_UI_SKILLS_BIN
 
 ## Repo & agent conventions
 
-- [Issue tracker (Linear)]({% link agents/issue-tracker.md %})
-- [Triage labels]({% link agents/triage-labels.md %})
-- [Domain docs]({% link agents/domain.md %})
+- [Issue tracker (Linear)]({{ site.baseurl }}/agents/issue-tracker.html)
+- [Triage labels]({{ site.baseurl }}/agents/triage-labels.html)
+- [Domain docs]({{ site.baseurl }}/agents/domain.html)
