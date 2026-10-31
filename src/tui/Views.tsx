@@ -560,7 +560,7 @@ function HelpOverlay({ model }: { model: TuiModel }): ReactNode {
     ["PgUp/PgDn/HOME/END", "page · top / bottom"],
     ["mouse", "wheel scrolls · click selects"],
     ["?", "this help"],
-    ["q", "quit"],
+    ["q", "quit (press twice)"],
   ];
   return (
     <box ref={pop.ref} position="absolute" zIndex={11} top={pop.top} left="25%" width="50%" flexDirection="column" padding={1} border={true} borderStyle="rounded" borderColor={t.border} backgroundColor={t.surface} title=" help ">

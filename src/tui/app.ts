@@ -89,7 +89,7 @@ function descriptionOf(path: string): string {
 export interface TuiDeps {
   listInstalled(scope: "project" | "global"): Promise<InstalledSkill[]>;
   search(query: string): Promise<{ results: SearchSkill[]; adjustedQuery: string | null }>;
-  install(source: string, skills: string[]): Promise<{ ok: boolean; summary: string }>;
+  install(source: string, skills: string[], scope: "project" | "global"): Promise<{ ok: boolean; summary: string }>;
   remove(names: string[], scope: "project" | "global"): Promise<{ ok: boolean; summary: string }>;
   update(names: string[], scope: "project" | "global"): Promise<{ ok: boolean; summary: string }>;
   skillBody(path: string): Promise<string | null>;
@@ -116,8 +116,8 @@ export const realDeps: TuiDeps = {
     return enriched.map((s) => ({ ...s }));
   },
   search: (query) => svcSearch(query),
-  install: async (source, skills) => {
-    const result = await svcInstall({ source, skills });
+  install: async (source, skills, scope) => {
+    const result = await svcInstall({ source, skills, global: scope === "global" });
     const failed = result.results.filter((r) => r.status !== "installed");
     listCache.clear();
     return {
@@ -220,6 +220,20 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     toastTimer = setTimeout(() => dispatch({ type: "toast", toast: null }), 3500);
   };
 
+  // Double-press quit (S-161): a bare `q` in command mode must not be a
+  // one-keystroke destructive exit — the first press arms with a toast,
+  // the second destroys. Any non-q key, any text-entry key, or ~1.5s of
+  // silence disarms.
+  let quitArmed = false;
+  let quitTimer: ReturnType<typeof setTimeout> | null = null;
+  const disarmQuit = (): void => {
+    quitArmed = false;
+    if (quitTimer) {
+      clearTimeout(quitTimer);
+      quitTimer = null;
+    }
+  };
+
   // ---- effects ----
   const reloadSkills = async (): Promise<void> => {
     dispatch({ type: "busy", label: "loading skills" });
@@ -282,7 +296,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     dispatch({ type: "busy", label: "installing queue" });
     try {
       for (const [source, names] of bySource) {
-        const result = await deps.install(source, names);
+        const result = await deps.install(source, names, model.scope);
         toast(`${source}: ${result.summary}`, result.ok ? "success" : "error");
         await deps.play(result.ok ? "success" : "error", model.prefs);
       }
@@ -340,6 +354,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
   const onKey = (key: { name: string; shift?: boolean; ctrl?: boolean }): void => {
     if (key.ctrl && key.name === "c") return; // exitOnCtrlC owns ctrl+c
     const k = key.name;
+    if (k !== "q") disarmQuit(); // any non-q press cancels an armed quit (S-161)
 
     if (model.confirm) {
       if (k === "y") void confirmRun();
@@ -401,11 +416,15 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     }
 
     // Text-entry modes (filter/search) capture printable input; letter
-    // hotkeys must not fire mid-word (the "cli"→i-jumps-tabs trap). Arrows
-    // still navigate; Esc/Return exit the mode but keep the text (contract).
+    // hotkeys must not fire mid-word (the "cli"→i-jumps-tabs trap). This
+    // claims `q` too (S-161): while the filter/search is live, a filter
+    // word starting with q must type, never quit — quitting is reachable
+    // only after Esc/Return leaves text mode. Arrows still navigate;
+    // Esc/Return exit the mode but keep the text (contract).
     const inFilter = model.tab === "installed" && model.filtering;
     const inSearch = model.tab === "search" && model.searching;
     if (inFilter || inSearch) {
+      disarmQuit(); // typing — any key here, even q — cancels an armed quit
       if (k === "escape" || k === "return") {
         if (inFilter) dispatch({ type: "filtering", on: false });
         else dispatch({ type: "searching", on: false });
@@ -491,9 +510,25 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       return;
     }
 
+    // Keymap ratification (S-161): command-mode single letters are
+    // a c d f g i j k m p q r s t u (+ shift A/G/I). Intentionally unbound:
+    // b e h l n o v w x y z — an unbound printable falls through to the
+    // filter-start below, so filter words can BEGIN with those. Binding any
+    // of them costs that first character (the user must press `f` first);
+    // `q` stays the quit key, now DOUBLE-PRESS (arm, then confirm) so no
+    // single bare keystroke reaches the destructive destroy — while the
+    // filter/search is live the text-entry branch above claims q entirely
+    // (S-161 q-guard).
     switch (k) {
-      case "q":
-        renderer.destroy();
+      case "q": // double-press quit — unreachable while filtering/searching (claimed above)
+        if (quitArmed) {
+          disarmQuit();
+          renderer.destroy();
+        } else {
+          quitArmed = true;
+          quitTimer = setTimeout(disarmQuit, 1500);
+          toast("press q again to quit", "info");
+        }
         return;
       case "?":
         dispatch({ type: "help", on: true });
@@ -594,7 +629,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
           if (skill) {
             void (async () => {
               dispatch({ type: "busy", label: `installing ${skill.name}` });
-              const result = await deps.install(skill.source, [skill.name]);
+              const result = await deps.install(skill.source, [skill.name], model.scope);
               toast(result.summary, result.ok ? "success" : "error");
               await deps.play(result.ok ? "success" : "error", model.prefs);
               dispatch({ type: "busy", label: null });
@@ -656,6 +691,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     renderer.keyInput.off("keypress", onKey);
     process.stdout.off("resize", onStdoutResize);
     if (toastTimer) clearTimeout(toastTimer); // pending toasts must not render after teardown
+    if (quitTimer) clearTimeout(quitTimer); // same for an armed-quit timer
     unmount?.();
   });
 

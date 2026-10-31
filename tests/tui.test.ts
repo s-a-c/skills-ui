@@ -1,8 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { EventEmitter } from "node:events";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { createTestRenderer } from "@opentui/core/testing";
-import { installCrashGuard, runTuiOn, type TuiDeps } from "../src/tui/app.ts";
+import { installCrashGuard, realDeps, runTuiOn, type TuiDeps } from "../src/tui/app.ts";
 import { createTuiModel, update, visibleSkills, type TuiModel } from "../src/tui/model.ts";
+import { resetSkillsBinCache } from "../src/core/skills-client.ts";
 import { DEFAULT_UI_PREFERENCES } from "../src/core/prefs.ts";
 import type { InstalledSkill, SearchSkill } from "../src/core/services/types.ts";
 
@@ -35,7 +39,7 @@ function fakeDeps(): TuiDeps {
   return {
     listInstalled: async () => SKILLS,
     search: async () => ({ results: RESULTS, adjustedQuery: null }),
-    install: async (source, names) => ({ ok: true, summary: `installed ${names.join(",")} from ${source}` }),
+    install: async (source, names, scope) => ({ ok: true, summary: `installed ${names.join(",")} from ${source} (${scope})` }),
     remove: async (names) => ({ ok: true, summary: `removed ${names.join(", ")}` }),
     update: async () => ({ ok: true, summary: "updated" }),
     skillBody: async () => "# tdd\n\n**markdown detail** rendered\n",
@@ -51,6 +55,24 @@ function fakeDeps(): TuiDeps {
     savePrefs: () => {},
     play: async () => {},
   };
+}
+
+/** Poll until `fn` returns true, retrying thrown bun-test assertions —
+ * fixed sleeps flake when a shim spawn or React commit lands late. */
+async function waitFor(fn: () => boolean, timeoutMs = 4000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    let failed: unknown = null;
+    let ok = false;
+    try {
+      ok = fn();
+    } catch (error) {
+      failed = error;
+    }
+    if (ok) return;
+    if (Date.now() > deadline) throw failed ?? new Error("waitFor: condition still false after timeout");
+    await new Promise((r) => setTimeout(r, 25));
+  }
 }
 
 let setup: Awaited<ReturnType<typeof createTestRenderer>> | null = null;
@@ -112,10 +134,10 @@ describe("tui (in-memory)", () => {
 
   test("search tab: / then typing searches, space queues, u installs", async () => {
     const s = setup!;
-    let installed: { source: string; names: string[] } | null = null;
+    let installed: { source: string; names: string[]; scope: string } | null = null;
     const deps = fakeDeps();
-    deps.install = async (source, names) => {
-      installed = { source, names };
+    deps.install = async (source, names, scope) => {
+      installed = { source, names, scope };
       return { ok: true, summary: "ok" };
     };
     await runTuiOn(s.renderer, undefined, deps);
@@ -137,7 +159,175 @@ describe("tui (in-memory)", () => {
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
     await s.flush();
-    expect(installed as { source: string; names: string[] } | null).toEqual({ source: "o/r", names: ["cli-ansi"] });
+    expect(installed as { source: string; names: string[]; scope: string } | null).toEqual({
+      source: "o/r",
+      names: ["cli-ansi"],
+      scope: "project",
+    });
+  });
+
+  test("S-161 G1: single- and queue-install thread the scope (project + global)", async () => {
+    const s = setup!;
+    const calls: Array<{ source: string; names: string[]; scope: string }> = [];
+    const deps = fakeDeps();
+    deps.install = async (source, names, scope) => {
+      calls.push({ source, names, scope });
+      return { ok: true, summary: "ok" };
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+
+    await s.mockInput.typeText("/"); // search tab, text mode
+    await s.mockInput.typeText("cli");
+    await new Promise((r) => setTimeout(r, 500)); // debounce + search
+    await s.flush();
+    await s.mockInput.pressEscape(); // command mode
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 50));
+
+    await s.mockInput.pressKey("\r"); // single-result install — project scope
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 150));
+    await s.mockInput.typeText(" "); // queue cli-ansi
+    await s.flush();
+    await s.mockInput.pressKey("u"); // queue install — project scope
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 200));
+
+    await s.mockInput.pressKey("g"); // scope → global
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 200));
+    await s.mockInput.pressKey("\r"); // single-result install — global scope
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 150));
+    await s.mockInput.typeText(" "); // queue cli-ansi
+    await s.flush();
+    await s.mockInput.pressKey("u"); // queue install — global scope
+    await s.flush();
+    await waitFor(() => {
+      expect(calls.length).toBe(4); // settle-proof: wait, don't sleep-guess
+      return true;
+    });
+
+    expect(calls).toEqual([
+      { source: "o/r", names: ["cli-ansi"], scope: "project" },
+      { source: "o/r", names: ["cli-ansi"], scope: "project" },
+      { source: "o/r", names: ["cli-ansi"], scope: "global" },
+      { source: "o/r", names: ["cli-ansi"], scope: "global" },
+    ]);
+  });
+
+  test("S-161 G1: skills-shim snapshot — --global only when scope is global", async () => {
+    const s = setup!;
+    const SHIM = new URL("fixtures/skills-shim.mjs", import.meta.url).pathname;
+    const stateDir = mkdtempSync(join(tmpdir(), "skills-ui-tui-shim-"));
+    const snapshotFile = join(stateDir, "snapshot.json");
+    // realDeps.install → svcInstall → the shim; only the add call spawns
+    const deps: TuiDeps = {
+      ...realDeps,
+      listInstalled: async () => SKILLS,
+      search: async () => ({ results: RESULTS, adjustedQuery: null }),
+      skillBody: async () => null,
+      savePrefs: () => {},
+      play: async () => {},
+    };
+    process.env.SKILLS_UI_SKILLS_BIN = SHIM;
+    process.env.SKILLS_SHIM_STATE = stateDir;
+    process.env.SKILLS_SHIM_SNAPSHOT = snapshotFile;
+    resetSkillsBinCache(); // bin path is cached at first spawn — re-resolve to the shim
+    try {
+      await runTuiOn(s.renderer, undefined, deps);
+      await s.flush();
+      await new Promise((r) => setTimeout(r, 100));
+
+      await s.mockInput.typeText("/");
+      await s.mockInput.typeText("cli");
+      await new Promise((r) => setTimeout(r, 500)); // debounce + search
+      await s.flush();
+      await s.mockInput.pressEscape(); // command mode
+      await s.flush();
+      await new Promise((r) => setTimeout(r, 50));
+      await s.mockInput.typeText(" "); // queue cli-ansi
+      await s.flush();
+      await s.mockInput.pressKey("u"); // queue install — project scope
+      await s.flush();
+      // subprocess + reload settle: poll the snapshot, don't sleep-guess
+      await waitFor(() => {
+        const a = JSON.parse(readFileSync(snapshotFile, "utf-8")).args as string[];
+        expect(a).toEqual(["add", "o/r", "--skill", "cli-ansi", "--yes", "--json"]);
+        return true;
+      });
+
+      await s.mockInput.pressKey("g"); // scope → global
+      await s.flush();
+      await new Promise((r) => setTimeout(r, 200));
+      await s.mockInput.typeText(" "); // queue again
+      await s.flush();
+      await s.mockInput.pressKey("u"); // queue install — global scope
+      await s.flush();
+      await waitFor(() => {
+        const a = JSON.parse(readFileSync(snapshotFile, "utf-8")).args as string[];
+        expect(a).toEqual(["add", "o/r", "--global", "--skill", "cli-ansi", "--yes", "--json"]);
+        return true;
+      });
+    } finally {
+      delete process.env.SKILLS_UI_SKILLS_BIN;
+      delete process.env.SKILLS_SHIM_STATE;
+      delete process.env.SKILLS_SHIM_SNAPSHOT;
+      resetSkillsBinCache(); // leave the cache clean for other files in this process
+      rmSync(stateDir, { recursive: true, force: true });
+    }
+  });
+
+  test("S-161 A2: q types into the live filter and does not quit", async () => {
+    const s = setup!;
+    await runTuiOn(s.renderer, undefined, fakeDeps());
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    await s.mockInput.pressKey("f"); // filter live
+    await s.flush();
+    await s.mockInput.typeText("q"); // must type, never quit (S-161)
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(s.captureCharFrame()).toContain("filter: q");
+    await s.mockInput.typeText("a"); // liveness: a dead app would ignore this
+    await s.flush();
+    expect(s.captureCharFrame()).toContain("filter: qa");
+  });
+
+  test("S-161 A2: q quits only on double-press; other keys disarm", async () => {
+    const s = setup!;
+    await runTuiOn(s.renderer, undefined, fakeDeps());
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    let destroyed = false;
+    s.renderer.once("destroy", () => {
+      destroyed = true;
+    });
+
+    await s.mockInput.pressKey("q"); // first press: arms + toasts, still alive
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100)); // React commits the toast
+    expect(destroyed).toBe(false);
+    expect(s.captureCharFrame()).toContain("press q again to quit");
+
+    await s.mockInput.pressKey("s"); // an unrelated key disarms
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 50));
+    expect(destroyed).toBe(false);
+    await s.mockInput.pressKey("q"); // re-arms only
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    expect(destroyed).toBe(false);
+    expect(s.captureCharFrame()).toContain("press q again to quit");
+
+    await s.mockInput.pressKey("q"); // second consecutive press: destroy
+    await s.flush();
+    await waitFor(() => {
+      expect(destroyed).toBe(true);
+      return true;
+    });
   });
 
   test("r removes the focused skill behind confirm; u with none checked updates all", async () => {
