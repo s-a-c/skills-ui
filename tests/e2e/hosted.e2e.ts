@@ -527,3 +527,129 @@ test.describe("local page web semantics (S-164)", () => {
     await ctx.close();
   });
 });
+
+/* ---------- S-165: web markdown detail — zero-dep renderer, escape-first.
+   Same harness pattern as the S-163/S-164 blocks: the page served by GET /
+   (the shipped APP_JS itself), with the /api surface stubbed at the network
+   layer so the SKILL.md body under test is exact. */
+
+const MD_PORT = 8402;
+let mdServe: ChildProcessWithoutNullStreams | null = null;
+let mdPrefsDir = "";
+
+const CORPUS_MD = [
+  "# Usage",
+  "",
+  "Run with **care**, see `skills-ui serve`.",
+  "",
+  "- item one",
+  "- item two",
+  "",
+  "```",
+  "bun run src/main.ts",
+  "```",
+].join("\n");
+
+const HOSTILE_MD = [
+  "<script>alert(1)</script>",
+  "",
+  "<img src=x onerror=alert(1)>",
+  "",
+  "[x](javascript:alert(1))",
+  "",
+  "```",
+  "</pre><script>alert(2)</script>",
+  "```",
+].join("\n");
+
+/** One fixture skill whose SKILL.md comes from the given markdown body. */
+async function stubSkillApi(
+  page: import("@playwright/test").Page,
+  body: string
+): Promise<void> {
+  await page.route("**/*", (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname === "/api/updates") {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ scope: "project", updates: {}, checkedCount: 0 }),
+      });
+    }
+    if (url.pathname === "/api/skills") {
+      const scope = url.searchParams.get("scope") ?? "project";
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          scope,
+          skills: [
+            { name: "md-fixture", description: "markdown fixture", scope, agents: ["Claude Code"], path: "/x/md-fixture", source: null },
+          ],
+        }),
+      });
+    }
+    if (url.pathname === "/api/skill") {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ body }),
+      });
+    }
+    return route.continue();
+  });
+}
+
+test.describe("local page markdown detail (S-165)", () => {
+  test.beforeAll(async () => {
+    mdPrefsDir = mkdtempSync(join(process.env.TMPDIR ?? "/tmp", "skills-ui-e2e-md-"));
+    mdServe = await startServe(MD_PORT, {}, mdPrefsDir, "web");
+  });
+  test.afterAll(async () => {
+    mdServe?.kill("SIGTERM");
+    if (mdPrefsDir) rmSync(mdPrefsDir, { recursive: true, force: true });
+  });
+
+  test("detail view renders SKILL.md as markdown structure, not a raw pre", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await quietUpdateCheck(page);
+    await stubSkillApi(page, CORPUS_MD);
+    await page.goto(localOrigin(MD_PORT) + "/");
+    await expect(page.locator("#skillList li", { hasText: "md-fixture" })).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("#readme h2")).toHaveText("Usage");
+    await expect(page.locator("#readme .md-li")).toHaveCount(2);
+    await expect(page.locator("#readme .md-li").first()).toHaveText("item one");
+    await expect(page.locator("#readme strong")).toHaveText("care");
+    await expect(page.locator("#readme .md-code")).toHaveText("skills-ui serve");
+    await expect(page.locator("#readme pre.md-pre code.md-codeblock")).toHaveText("bun run src/main.ts");
+    // links stay inert text: no anchor, no href, URL visible
+    await expect(page.locator("#readme a")).toHaveCount(0);
+    await ctx.close();
+  });
+
+  test("hostile SKILL.md shows the payload as text only — no script runs, no page error", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    const pageErrors: string[] = [];
+    page.on("pageerror", (error) => pageErrors.push(String(error)));
+    await quietUpdateCheck(page);
+    await stubSkillApi(page, HOSTILE_MD);
+    await page.goto(localOrigin(MD_PORT) + "/");
+    await expect(page.locator("#skillList li", { hasText: "md-fixture" })).toBeVisible({ timeout: 15_000 });
+    // every payload string is present in the DOM as TEXT
+    const readme = page.locator("#readme");
+    await expect(readme).toContainText("<script>alert(1)</script>");
+    await expect(readme).toContainText("<img src=x onerror=alert(1)>");
+    await expect(readme).toContainText("javascript:alert(1)");
+    await expect(readme).toContainText("</pre><script>alert(2)</script>");
+    // and none of it is live: no script/anchor/img element inside the pane,
+    // no href attribute anywhere in it
+    await expect(page.locator("#readme script")).toHaveCount(0);
+    await expect(page.locator("#readme a")).toHaveCount(0);
+    await expect(page.locator("#readme img")).toHaveCount(0);
+    await expect(page.locator("#readme [href]")).toHaveCount(0);
+    expect(pageErrors).toEqual([]);
+    await ctx.close();
+  });
+});

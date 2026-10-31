@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-hPW3SJ8AKrAkRrH2BCV/ChD6PJlpBaDnmD7DzSvVN6w=' 'sha256-l5DJuuh5lymRsXMnX5Haqa2yWWAsbn65/lF2GBiYP6w='; img-src data:; connect-src http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-hPW3SJ8AKrAkRrH2BCV/ChD6PJlpBaDnmD7DzSvVN6w=' 'sha256-pT3U/J1PxyzCWYpVIGePtS4At4A49+mNj/67T5lwUiM='; img-src data:; connect-src http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <title>skills — 0.5.1</title>
 <style>
@@ -268,9 +268,49 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
 .detail-meta dd{margin:0;min-width:0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;overflow-wrap:anywhere}
 .readme{
   border:1px solid var(--t-border);border-radius:12px;background:var(--t-surface);
-  padding:20px 22px;white-space:pre-wrap;font-size:13.5px;line-height:1.65;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;max-height:52vh;overflow:auto;
+  padding:20px 22px;font-size:13.5px;line-height:1.65;max-height:52vh;overflow:auto;
+  overflow-wrap:break-word;
 }
+/* Rendered SKILL.md (S-165). The pane is a sidebar, not a landing page, so
+   headings scale modestly under the pane's h1; every color rides the theme
+   tokens, code keeps the existing monospace stack distinct from prose. */
+.readme .md-h{font-weight:700;line-height:1.3;margin:1.15em 0 .4em}
+.readme .md-h:first-child{margin-top:0}
+.readme h2.md-h{font-size:16.5px}
+.readme h3.md-h{font-size:15px}
+.readme h4.md-h{font-size:14px}
+.readme h5.md-h{font-size:13.5px}
+.readme .md-p{margin:.55em 0}
+.readme .md-list{margin:.55em 0;padding-left:1.5em}
+.readme ol.md-list{padding-left:1.7em}
+.readme .md-li{margin:.28em 0}
+.readme .md-li::marker{color:var(--t-textMuted)}
+.readme .md-pre{
+  background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radius:9px;
+  padding:11px 14px;margin:.7em 0;overflow:auto;white-space:pre;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.6;
+}
+.readme .md-codeblock{font-family:inherit}
+.readme .md-lang{
+  display:block;color:var(--t-textMuted);font-size:11px;margin:0 0 6px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.readme .md-code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;
+  background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radius:5px;padding:.5px 5px;
+}
+.readme .md-quote{
+  margin:.6em 0;padding:2px 0 2px 14px;border-left:3px solid var(--t-border);color:var(--t-textMuted);
+}
+.readme .md-link{color:var(--t-primary);font-weight:500}
+.readme .md-link-url{
+  color:var(--t-textMuted);font-size:.82em;overflow-wrap:anywhere;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.readme .md-hr{border:0;border-top:1px solid var(--t-border);margin:1.1em 0}
+.readme .md-table{border-collapse:collapse;margin:.7em 0;font-size:12.5px;display:block;overflow:auto;max-width:100%}
+.readme .md-table th,.readme .md-table td{border:1px solid var(--t-border);padding:4px 10px;text-align:left;vertical-align:top}
+.readme .md-table th{background:var(--t-surfaceAlt);font-weight:600}
 
 /* ---------- search ---------- */
 #searchView{display:none;padding:26px 30px;overflow:auto;height:100%}
@@ -881,6 +921,164 @@ function selectSkill(name){
   showDetail(name);
 }
 
+/* ---------- markdown detail (S-165) ----------
+   Zero-dep renderer for the SKILL.md subset the corpus uses: ATX headings
+   (# to ####), flat unordered + ordered lists, fenced code blocks (info
+   string echoed as a label), inline code, bold, italic, links, blockquotes,
+   horizontal rules, and a cheap GFM table. Escape-FIRST: every text token
+   goes through esc() before any tag is built, so the only tags in the
+   output are the ones this function emits — no innerHTML of unescaped
+   external text anywhere.
+   Links never navigate: the ratified CSP posture is no navigation
+   (default-src 'none'), so no href attribute is emitted and
+   rel="noopener noreferrer" would be moot — the URL stays visible as
+   muted text instead.
+   Backticks are written as \u0060 escapes throughout: this whole function
+   lives inside the APP_JS template literal, which must stay free of raw
+   backtick characters (a raw one would terminate the template). */
+function renderMarkdown(md){
+  var lines = String(md == null ? '' : md).split(/\r?\n/);
+  var out = [];
+  var para = [];
+  function flushPara(){
+    if (!para.length) return;
+    out.push('<p class="md-p">' + inline(esc(para.join(' '))) + '</p>');
+    para = [];
+  }
+  /* s arrives PRE-ESCAPED — esc() ran before inline() is ever called, so
+     every captured group below is already-inert text and the only tags
+     added are the renderer's own. */
+  var RX_INLINE_FULL = /(\u0060+(\u0060?[^\u0060]+)\u0060+)|(\*\*([^*]+)\*\*)|(\*([^*\s][^*]*?)\*)|(\[([^\]]+)\]\(([^)\s][^)]*)\))/g;
+  var RX_INLINE_NOLINK = /(\u0060+(\u0060?[^\u0060]+)\u0060+)|(\*\*([^*]+)\*\*)|(\*([^*\s][^*]*?)\*)/g;
+  function inline(s){
+    /* guard (S-165 review): a run of unmatched '[' makes the link
+       alternative rescan to end-of-line per start — O(n^2) on
+       pathological input. No '](' means no link can ever match, so drop
+       the link alternative from the scan (code/bold/em still run). */
+    var canLink = s.indexOf('](') >= 0;
+    return s.replace(canLink ? RX_INLINE_FULL : RX_INLINE_NOLINK,
+      function(m, codeAll, codeBody, boldAll, boldBody, emAll, emBody, linkAll, linkText, linkUrl){
+        if (codeAll != null) return '<code class="md-code">' + codeBody + '</code>';
+        if (boldAll != null) return '<strong class="md-strong">' + boldBody + '</strong>';
+        if (emAll != null) return '<em class="md-em">' + emBody + '</em>';
+        /* link branch: no href ever (see block comment) — the URL is shown
+           as visible muted text. linkText/linkUrl are re-inlined so bold or
+           italic inside them still renders. */
+        if (linkAll != null) {
+          return '<span class="md-link">' + inline(linkText) + '</span>' +
+            '<span class="md-link-url"> (' + inline(linkUrl) + ')</span>';
+        }
+        return m;
+      }
+    );
+  }
+  var i = 0;
+  while (i < lines.length) {
+    var line = lines[i];
+    /* fenced code block: open fence (info string echoed as a label) */
+    var fence = /^\s{0,3}\u0060{3,}\s*([^\u0060]*?)\s*$/.exec(line);
+    if (fence) {
+      flushPara();
+      var lang = fence[1];
+      var buf = [];
+      i++;
+      while (i < lines.length && !/^\s{0,3}\u0060{3,}\s*$/.test(lines[i])) { buf.push(lines[i]); i++; }
+      i++; /* swallow the closing fence (or stop at EOF) */
+      out.push(
+        '<pre class="md-pre">' +
+        (lang ? '<span class="md-lang">' + esc(lang) + '</span>' : '') +
+        '<code class="md-codeblock">' + esc(buf.join('\n')) + '</code></pre>'
+      );
+      continue;
+    }
+    /* ATX heading #..#### -> h2..h5 (the pane's h1 is the skill name) */
+    var h = /^\s{0,3}(#{1,4})\s+(.*?)\s*#*\s*$/.exec(line);
+    if (h) {
+      flushPara();
+      var lvl = h[1].length + 1;
+      out.push('<h' + lvl + ' class="md-h md-h' + lvl + '">' + inline(esc(h[2])) + '</h' + lvl + '>');
+      i++;
+      continue;
+    }
+    /* horizontal rule --- *** ___ */
+    if (/^\s{0,3}((-\s*){3,}|(\*\s*){3,}|(_\s*){3,})$/.test(line)) {
+      flushPara();
+      out.push('<hr class="md-hr">');
+      i++;
+      continue;
+    }
+    /* blockquote: consecutive > lines flatten into one quote */
+    if (/^\s{0,3}>/.test(line)) {
+      flushPara();
+      var q = [];
+      while (i < lines.length && /^\s{0,3}>/.test(lines[i])) {
+        q.push(lines[i].replace(/^\s{0,3}>\s?/, ''));
+        i++;
+      }
+      out.push('<blockquote class="md-quote">' + inline(esc(q.join(' '))) + '</blockquote>');
+      continue;
+    }
+    /* lists: flat (nesting stays a TUI-canonical concern, the corpus is flat) */
+    var ul = /^\s{0,3}[-*+]\s+(.*)$/.exec(line);
+    var ol = /^\s{0,3}(\d{1,9})[.)]\s+(.*)$/.exec(line);
+    if (ul || ol) {
+      flushPara();
+      var ordered = !!ol;
+      var marker = ordered ? /^\s{0,3}\d{1,9}[.)]\s+(.*)$/ : /^\s{0,3}[-*+]\s+(.*)$/;
+      var cont = /^\s{0,3}([-*+]|\d{1,9}[.)])\s+/;
+      var items = [];
+      while (i < lines.length) {
+        var item = marker.exec(lines[i]);
+        if (!item) break;
+        items.push(item[1]);
+        i++;
+        /* lazy continuation: a plain follow-on line joins the open item */
+        while (i < lines.length && lines[i].trim() !== '' && !cont.test(lines[i])) {
+          items[items.length - 1] += ' ' + lines[i].trim();
+          i++;
+        }
+      }
+      var tag = ordered ? 'ol' : 'ul';
+      var listHtml = '<' + tag + ' class="md-list">';
+      for (var j = 0; j < items.length; j++) {
+        listHtml += '<li class="md-li">' + inline(esc(items[j])) + '</li>';
+      }
+      out.push(listHtml + '</' + tag + '>');
+      continue;
+    }
+    /* cheap GFM table: a row containing a pipe over a dashed separator row */
+    var sep = /^\s{0,3}\|?\s*:?-{3,}[\s:|-]*$/;
+    if (line.indexOf('|') >= 0 && i + 1 < lines.length && sep.test(lines[i + 1])) {
+      flushPara();
+      var cells = function(row){
+        return row.replace(/^\s*\|/, '').replace(/\|\s*$/, '').split('|').map(function(c){
+          return inline(esc(c.trim()));
+        });
+      };
+      var head = cells(lines[i]);
+      i++; /* header row consumed */
+      if (i < lines.length && sep.test(lines[i])) i++; /* separator row skipped */
+      var tbl = '<table class="md-table"><thead><tr>';
+      for (var th = 0; th < head.length; th++) tbl += '<th>' + head[th] + '</th>';
+      tbl += '</tr></thead><tbody>';
+      while (i < lines.length && lines[i].indexOf('|') >= 0 && !sep.test(lines[i])) {
+        var bodyCells = cells(lines[i]);
+        tbl += '<tr>';
+        for (var td = 0; td < bodyCells.length; td++) tbl += '<td>' + bodyCells[td] + '</td>';
+        tbl += '</tr>';
+        i++;
+      }
+      out.push(tbl + '</tbody></table>');
+      continue;
+    }
+    if (line.trim() === '') { flushPara(); i++; continue; }
+    para.push(line.trim());
+    i++;
+  }
+  flushPara();
+  return out.join('\n');
+}
+
 function showDetail(name){
   var skill = state.skills.filter(function(s){ return s.name === name; })[0];
   if (!skill) return;
@@ -899,12 +1097,16 @@ function showDetail(name){
       '<dt>Agents</dt><dd>' + (skill.agents.length ? skill.agents.map(esc).join(', ') : 'not linked') + '</dd>' +
       '<dt>Path</dt><dd>' + esc(skill.path) + '</dd>' +
     '</dl>' +
-    '<pre class="readme" id="readme">Loading…</pre>';
+    '<div class="readme" id="readme">Loading…</div>';
   $('#removeBtn').addEventListener('click', function(){ openRemove(skill); });
   $('#updateBtn').addEventListener('click', function(){ updateSkills([skill.name], skill.scope === 'global'); });
   api('/api/skill?scope=' + skill.scope + '&name=' + encodeURIComponent(skill.name))
-    .then(function(d){ $('#readme').textContent = d.body || '(empty SKILL.md)'; })
-    .catch(function(){ $('#readme').textContent = '(SKILL.md unavailable)'; });
+    .then(function(d){
+      /* renderMarkdown escapes every token before any tag is built, so this
+         innerHTML carries renderer-made tags around inert text only */
+      $('#readme').innerHTML = renderMarkdown(d.body || '(empty SKILL.md)');
+    })
+    .catch(function(){ $('#readme').innerHTML = renderMarkdown('(SKILL.md unavailable)'); });
 }
 
 function deleteChecked(){
