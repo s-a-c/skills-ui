@@ -34,8 +34,8 @@ Scope: the 0.5.1 ship gate as ratified in S-148 — all 9 should-fixes plus full
   EXPECT: G6-OK
   EVIDENCE: automatic-evidence=v1; definition-sha256=641eeb29fa9eb44dc93559b88d91d5ec0cf073368585210753567343dced8e28; exit=0; EXPECT=matched; output-sha256=6233fa6beb413a3b89a765ac4e145e64251faee409e778323811a8466b872b67; output-bytes=6; shell=/bin/sh; cwd=/Users/s-a-c/Projects/s-a-c/skills-ui/main; path=bb832fc32021/41 entries
 
-- [ ] G7: manual smoke — live page connect + token re-entry after tab close (sessionStorage expiry is the intended property)
-  EVIDENCE: pending — the one human step, by design.
+- [x] G7: manual smoke — live page connect + token re-entry after tab close (sessionStorage expiry is the intended property)
+  EVIDENCE: 2026-10-31 — the user connected the live page (https://s-a-c.github.io/skills-ui/app.html) to a real `skills-ui serve`, loaded skills including the Global scope, and confirmed the token re-entry flow after tab close; reported directly as "g7 done". The smoke surfaced two real bugs, both hotfixed post-release: the renderList empty-state scope error (`f34572d`, page live same night) and Bun's default socket idle timeout killing slow handlers (`5d7978a`, binary rides 0.5.2). A third wave of failures traced to the user's concurrent `nub update --global` churning the `skills` CLI — not skills-ui.
 
 - [x] G8: accepted-risk ledger (below) complete — every entry with reason and revisit trigger
   CHECK: grep -q "^## Accepted-risk ledger" GATES-0.5.1.md && [ "$(grep -c '^- \*\*' GATES-0.5.1.md)" -ge 8 ] && echo G8-OK
