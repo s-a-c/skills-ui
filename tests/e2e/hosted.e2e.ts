@@ -20,12 +20,22 @@ let token = "";
 let prefsDir = "";
 let emptyPrefsDir = "";
 
-function startServe(port: number, extraEnv: Record<string, string>): Promise<ChildProcessWithoutNullStreams> {
-  const child = spawn(BUN, ["run", "src/main.ts", "serve", "--port", String(port)], {
+function startServe(
+  port: number,
+  extraEnv: Record<string, string>,
+  prefsDirOverride?: string,
+  cmd = "serve" // `serve` = headless API (hosted-page tests); `web` also serves the page at /
+): Promise<ChildProcessWithoutNullStreams> {
+  const child = spawn(BUN, ["run", "src/main.ts", cmd, "--port", String(port)], {
     cwd: resolve(HERE, "../.."),
     env: {
       ...process.env,
-      SKILLS_UI_PREFS_DIR: prefsDir,
+      SKILLS_UI_PREFS_DIR: prefsDirOverride ?? prefsDir,
+      // per-serve shim state: without this every serve shares
+      // /tmp/skills-shim-state and one test's rm/install write leaks into
+      // every other serve's `ls` (the empty-list fixture only applies while
+      // the state file is absent)
+      SKILLS_SHIM_STATE: join(prefsDirOverride ?? prefsDir, "shim-state"),
       SKILLS_UI_SKILLS_BIN: resolve(HERE, "../fixtures/skills-shim.mjs"),
       SKILLS_UI_API_URL: "http://127.0.0.1:1", // registry unreachable → search degrades to []
       SKILLS_UI_HOSTED_TOKEN: "e2e-fixed-token",
@@ -65,8 +75,12 @@ test.beforeAll(async () => {
 test.afterAll(async () => {
   serve?.kill("SIGTERM");
   emptyServe?.kill("SIGTERM");
+  rmKeepServe?.kill("SIGTERM");
+  updFailServe?.kill("SIGTERM");
   if (prefsDir) rmSync(prefsDir, { recursive: true, force: true });
   if (emptyPrefsDir) rmSync(emptyPrefsDir, { recursive: true, force: true });
+  if (rmKeepPrefsDir) rmSync(rmKeepPrefsDir, { recursive: true, force: true });
+  if (updFailPrefsDir) rmSync(updFailPrefsDir, { recursive: true, force: true });
 });
 
 async function connect(page: import("@playwright/test").Page, tok = token): Promise<void> {
@@ -126,6 +140,218 @@ test.describe("hosted page → local serve", () => {
     await expect(page.locator("#connectDialog")).not.toBeVisible();
     await expect(page.locator("#listPane")).toContainText("Nothing here yet", { timeout: 15_000 });
     expect(pageErrors).toEqual([]);
+    await ctx.close();
+  });
+});
+
+/* ---------- S-163: web honesty on the pre-deploy local page ----------
+   These drive the page served by GET / on the local origin (the shipped
+   APP_JS itself), not the GitHub Pages copy, so behavior changes under
+   test land here before the hosted page is re-exported. */
+const RM_KEEP_PORT = 8399;
+const UPD_FAIL_PORT = 8400;
+const localOrigin = (port: number) => `http://127.0.0.1:${port}`;
+let rmKeepServe: ChildProcessWithoutNullStreams | null = null;
+let updFailServe: ChildProcessWithoutNullStreams | null = null;
+let rmKeepPrefsDir = "";
+let updFailPrefsDir = "";
+
+/** Keep /api/updates deterministic and network-free: an empty, zero-update answer. */
+async function quietUpdateCheck(page: import("@playwright/test").Page): Promise<void> {
+  await page.route("**/api/updates*", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ scope: "project", updates: {}, checkedCount: 0 }),
+    })
+  );
+}
+
+test.describe("local page honesty (S-163)", () => {
+  test.beforeAll(async () => {
+    rmKeepPrefsDir = mkdtempSync(join(process.env.TMPDIR ?? "/tmp", "skills-ui-e2e-rmkeep-"));
+    rmKeepServe = await startServe(
+      RM_KEEP_PORT,
+      { SKILLS_SHIM_RM_KEEP: "code-review" },
+      rmKeepPrefsDir,
+      "web"
+    );
+    updFailPrefsDir = mkdtempSync(join(process.env.TMPDIR ?? "/tmp", "skills-ui-e2e-updfail-"));
+    updFailServe = await startServe(
+      UPD_FAIL_PORT,
+      { SKILLS_SHIM_UPDATE_FAIL: "1" },
+      updFailPrefsDir,
+      "web"
+    );
+  });
+
+  test("failed remove (shim keeps the skill) toasts the failure output, never a success tone", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await quietUpdateCheck(page);
+    await page.goto(localOrigin(RM_KEEP_PORT) + "/");
+    await expect(page.locator("#listPane")).toContainText("code-review", { timeout: 15_000 });
+    await page.locator("#skillList li", { hasText: "code-review" }).click();
+    await page.locator("#removeBtn").click();
+    await page.locator("#confirmYes").click();
+    await expect(page.locator("#toasts .toast.error")).toContainText("failed: code-review");
+    await expect(page.locator("#toasts .toast.success")).toHaveCount(0);
+    // the kept skill is still installed — the refreshed list reflects reality
+    await expect(page.locator("#listPane")).toContainText("code-review");
+    await ctx.close();
+  });
+
+  test("failed bulk remove via deleteChecked toasts the failure output, never a success tone", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await quietUpdateCheck(page);
+    await page.goto(localOrigin(RM_KEEP_PORT) + "/");
+    await expect(page.locator("#listPane")).toContainText("code-review", { timeout: 15_000 });
+    await page
+      .locator("#skillList li", { hasText: "code-review" })
+      .locator("input.skill-check")
+      .check();
+    await page.locator("#deleteCheckedBtn").click();
+    await page.locator("#confirmYes").click();
+    await expect(page.locator("#toasts .toast.error")).toContainText("failed: code-review");
+    await expect(page.locator("#toasts .toast.success")).toHaveCount(0);
+    // the kept skill is still installed — the refreshed list reflects reality
+    await expect(page.locator("#listPane")).toContainText("code-review");
+    await ctx.close();
+  });
+
+  test("failed update (shim exits 1) toasts the CLI output, never a success tone", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await quietUpdateCheck(page);
+    await page.goto(localOrigin(UPD_FAIL_PORT) + "/");
+    await expect(page.locator("#listPane")).toContainText("tdd", { timeout: 15_000 });
+    await page.locator("#updateAllBtn").click();
+    await expect(page.locator("#toasts .toast.error")).toContainText("Update failed (simulated)");
+    await expect(page.locator("#toasts .toast.success")).toHaveCount(0);
+    await ctx.close();
+  });
+
+  test("auto update-check failure toasts update-check-failed with the message", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await page.route("**/api/updates*", (route) =>
+      route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "check exploded" }),
+      })
+    );
+    await page.goto(localOrigin(RM_KEEP_PORT) + "/");
+    await expect(page.locator("#toasts .toast.error")).toContainText(
+      "update check failed: check exploded",
+      { timeout: 15_000 }
+    );
+    await ctx.close();
+  });
+
+  test("forced update check with zero results toasts no-updates-available", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await quietUpdateCheck(page);
+    await page.goto(localOrigin(RM_KEEP_PORT) + "/");
+    await expect(page.locator("#listPane")).toContainText("tdd", { timeout: 15_000 });
+    await page.locator("#checkUpdatesBtn").click();
+    await expect(page.locator("#toasts .toast.success")).toContainText("no updates available");
+    await ctx.close();
+  });
+
+  test("remove seed pre-checks installed names and toasts the missing ones", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await quietUpdateCheck(page);
+    await page.addInitScript((seed) => {
+      // The serve's bootstrap script would overwrite window.__SEED__; a
+      // non-writable, non-configurable property makes that assignment a
+      // silent no-op (sloppy-mode script) so the seed survives to applySeed().
+      Object.defineProperty(window, "__SEED__", {
+        value: seed,
+        writable: false,
+        configurable: false,
+      });
+    }, { kind: "remove", skills: ["tdd", "ghost"] });
+    await page.goto(localOrigin(RM_KEEP_PORT) + "/");
+    await expect(page.locator("#selBar")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("#selCount")).toHaveText("1");
+    await expect(
+      page.locator("#skillList li", { hasText: "tdd" }).locator("input.skill-check")
+    ).toBeChecked();
+    await expect(page.locator("#toasts .toast.error")).toContainText(
+      "1 skill selected for removal \u2014 not installed: ghost"
+    );
+    await expect(page.locator("#toasts .toast.success")).toHaveCount(0);
+    await ctx.close();
+  });
+
+  test("single install success flips the result button in place (no tab re-entry)", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    let installed = false;
+    // The point of this test is the client re-render path (A6), so the API
+    // surface under it is stubbed at the network layer: /api/skills gains
+    // the skill only once /api/install has answered ok.
+    await page.route("**/*", (route) => {
+      const url = new URL(route.request().url());
+      if (url.pathname === "/api/updates") {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ scope: "project", updates: {}, checkedCount: 0 }),
+        });
+      }
+      if (url.pathname === "/api/search") {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            results: [
+              { name: "new-skill", slug: "me/skills", source: "me/skills", installs: 12, description: "A fresh skill" },
+            ],
+            adjustedQuery: null,
+          }),
+        });
+      }
+      if (url.pathname === "/api/skills") {
+        const scope = url.searchParams.get("scope") ?? "project";
+        const skills: Record<string, unknown>[] = [
+          { name: "tdd", description: "fixture", scope, agents: ["Claude Code"], path: "/tmp/tdd", source: null },
+        ];
+        if (installed) {
+          skills.push({ name: "new-skill", description: "A fresh skill", scope, agents: ["Claude Code"], path: "/tmp/new-skill", source: "me/skills" });
+        }
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ scope, skills }),
+        });
+      }
+      if (url.pathname === "/api/install") {
+        installed = true;
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ ok: true, output: "[]" }),
+        });
+      }
+      return route.continue();
+    });
+    await page.goto(localOrigin(RM_KEEP_PORT) + "/");
+    await expect(page.locator("#listPane")).toContainText("tdd", { timeout: 15_000 });
+    await page.locator('[data-tab="search"]').click();
+    await page.locator("#searchInput").fill("new-skill");
+    const btn = page.locator("#results .install-btn");
+    await expect(btn).toBeVisible({ timeout: 15_000 });
+    await expect(btn).toBeEnabled();
+    await expect(btn).toHaveText("Install");
+    await btn.click();
+    await expect(btn).toBeDisabled({ timeout: 15_000 });
+    await expect(btn).toHaveText("Installed");
+    await expect(page.locator("#results .result-chip")).toContainText("installed");
     await ctx.close();
   });
 });

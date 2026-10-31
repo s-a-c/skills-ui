@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-hPW3SJ8AKrAkRrH2BCV/ChD6PJlpBaDnmD7DzSvVN6w=' 'sha256-YX7vRnqo7vFBgKWFj480NS5W/jGg8LxvCY2LY/9fFsI='; img-src data:; connect-src http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-hPW3SJ8AKrAkRrH2BCV/ChD6PJlpBaDnmD7DzSvVN6w=' 'sha256-u/6rqROV87sQFQa15aOGtTsQXEmZD5I6z4RmKD4Ut0A='; img-src data:; connect-src http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <title>skills — 0.5.1</title>
 <style>
@@ -470,7 +470,7 @@ footer.tip{color:var(--t-textMuted);font-size:12px;padding:8px 16px 14px;border-
     <div id="selBar">
       <span class="count"><b id="selCount">0</b> selected</span>
       <button class="btn primary" id="updateCheckedBtn">Update selected</button>
-      <button class="btn danger" id="deleteCheckedBtn">Delete selected</button>
+      <button class="btn danger" id="deleteCheckedBtn">Remove selected</button>
       <button class="btn" id="clearCheckedBtn">Clear</button>
     </div>
     <ul id="skillList" role="listbox" aria-label="Skills"></ul>
@@ -708,6 +708,12 @@ function toast(text, tone){
   $('#toasts').appendChild(el);
   setTimeout(function(){ el.remove(); }, 3900);
 }
+/* CLI output headed for a toast can be long — carry a clipped summary so the
+   failed names up front stay readable. */
+function clip(s, max){
+  s = String(s == null ? '' : s);
+  return s.length > max ? s.slice(0, max) + '…' : s;
+}
 
 /* ---------- hosted connect (S-137) ---------- */
 function probeBackend(base, token, onStatus){
@@ -916,7 +922,14 @@ function deleteChecked(){
     dlg.close();
     setBusy('Removing ' + names.length + ' skill' + (names.length === 1 ? '' : 's') + '…');
     api('/api/remove', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ skills: names, global: state.scope === 'global' }) })
-      .then(function(){
+      .then(function(res){
+        if (!res.ok) {
+          // /api/remove answers HTTP 200 + ok:false when names survive the
+          // list-diff; the body's output names the failures (G2/ST3).
+          play('error');
+          toast(clip(res.output, 240) || 'Remove failed', 'error');
+          return loadSkills();
+        }
         play('success');
         toast('Removed ' + names.length + ' skill' + (names.length === 1 ? '' : 's'), 'success');
         state.checked.clear();
@@ -937,7 +950,14 @@ function openRemove(skill){
     dlg.close();
     setBusy('Removing ' + skill.name + '…');
     api('/api/remove', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ skills:[skill.name], global: skill.scope === 'global' }) })
-      .then(function(){ play('success'); toast('Removed ' + skill.name, 'success'); state.selected = null; return loadSkills(); })
+      .then(function(res){
+        if (!res.ok) {
+          play('error');
+          toast(clip(res.output, 240) || ('Remove failed for ' + skill.name), 'error');
+          return loadSkills();
+        }
+        play('success'); toast('Removed ' + skill.name, 'success'); state.selected = null; return loadSkills();
+      })
       .catch(function(e){ play('error'); toast(e.message, 'error'); })
       .finally(function(){ setBusy(null); });
   };
@@ -951,7 +971,26 @@ function applySeed(){
     renderList(); renderSelBar();
     toast(seed.skills.length + ' skill' + (seed.skills.length === 1 ? '' : 's') + ' selected for update', 'success');
   } else if (seed.kind === 'remove' && seed.skills && seed.skills.length) {
-    toast(seed.skills.length + ' skill' + (seed.skills.length === 1 ? '' : 's') + ' to remove: ' + seed.skills.join(', '), 'success');
+    // G5: pre-check the seed names against the real installed list — the old
+    // branch success-toasted and dead-ended. The checked set feeds the remove
+    // bar, so the user lands one click from the destructive action, same as
+    // the update seed above.
+    loadSkills().then(function(){
+      var found = [], notInstalled = [];
+      seed.skills.forEach(function(n){
+        if (state.skills.some(function(s){ return s.name === n; })) found.push(n);
+        else notInstalled.push(n);
+      });
+      state.checked = new Set(found);
+      renderList(); renderSelBar();
+      var msg = found.length + ' skill' + (found.length === 1 ? '' : 's') + ' selected for removal';
+      if (notInstalled.length) {
+        play('error');
+        toast(msg + ' — not installed: ' + notInstalled.join(', '), 'error');
+      } else {
+        toast(msg, 'success');
+      }
+    });
   }
 }
 
@@ -1014,7 +1053,14 @@ function updateSkills(skills, global){
   var all = !skills || !skills.length;
   setBusy(all ? 'Updating all skills…' : 'Updating ' + skills.join(', ') + '…');
   api('/api/update', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ skills: skills, global: global }) })
-    .then(function(){
+    .then(function(res){
+      if (!res.ok) {
+        // /api/update answers HTTP 200 + ok:false when the CLI exits non-zero;
+        // surface the sanitized output instead of a success-tone lie (G2/ST3).
+        play('error');
+        toast(clip(res.output, 240) || 'Update failed', 'error');
+        return loadSkills();
+      }
       play('success');
       toast(all ? 'Update finished' : 'Updated ' + skills.join(', '), 'success');
       state.checked.clear();
@@ -1036,8 +1082,14 @@ function checkForUpdates(force){
       renderList();
       if (state.selected) showDetail(state.selected);
       if (n > 0) toast(n + ' update' + (n === 1 ? '' : 's') + ' available', 'success');
+      else if (force) toast('no updates available', 'success');
     })
-    .catch(function(){ /* update check is advisory; failures stay silent */ });
+    .catch(function(e){
+      // ST4: the silent no-op catch hid check failures (and left the manual
+      // button dead after the once-per-scope auto-check) — say so instead.
+      play('error');
+      toast('update check failed: ' + (e && e.message ? e.message : String(e)), 'error');
+    });
 }
 
 /* ---------- search ---------- */
@@ -1110,7 +1162,13 @@ function renderResults(){
       var installGlobal = scopeBtn ? scopeBtn.getAttribute('data-scope') === 'global' : false;
       api('/api/install', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ source: r.source || r.slug, skill: r.name, global: installGlobal }) })
         .then(function(res){
-          if (res.ok) { play('success'); toast('Installed ' + r.name, 'success'); }
+          if (res.ok) {
+            play('success');
+            toast('Installed ' + r.name, 'success');
+            // A6: refresh the installed pools and re-render in place — the
+            // installed chip and disabled button appear without a tab re-entry.
+            refreshInstalledAll().then(renderResults);
+          }
           else { play('error'); toast('Install failed for ' + r.name, 'error'); }
         })
         .catch(function(e){ play('error'); toast(e.message, 'error'); })
@@ -1312,7 +1370,7 @@ document.addEventListener('DOMContentLoaded', function(){
   $('#filter').addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { $('#filter').value = ''; renderList(); } });
   $('#searchInput').addEventListener('input', runSearch);
   $('#updateAllBtn').addEventListener('click', function(){ updateSkills([], state.scope === 'global'); });
-  $('#checkUpdatesBtn').addEventListener('click', function(){ checkForUpdates(false); });
+  $('#checkUpdatesBtn').addEventListener('click', function(){ checkForUpdates(true); });
 
   document.querySelectorAll('[data-theme-choice]').forEach(function(b){
     b.addEventListener('click', function(){ setPrefs({ theme: b.getAttribute('data-theme-choice') }); play('confirm'); });

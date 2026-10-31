@@ -6,8 +6,10 @@
  *   ls --json [-g]       JSON array (state file, init from fixture on first call)
  *   install S --list --yes  cyan ANSI names (requires FORCE_COLOR=1 upstream)
  *   add … --json         fixture result array; exit 1 if any non-installed
- *   rm … -y              mutates state; always exits 0 (upstream quirk)
- *   update …             exits 0 with text
+ *   rm … -y              mutates state; always exits 0 (upstream quirk);
+ *                        SKILLS_SHIM_RM_KEEP="a,b" leaves those names in state
+ *   update …             exits 0 with text; SKILLS_SHIM_UPDATE_FAIL=1 prints
+ *                        a failure line and exits 1
  * Also dumps an env snapshot for sanitization assertions.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -86,13 +88,25 @@ if (args[0] === "add" || args[0] === "install" || args[0] === "a" || args[0] ===
 
 if (args[0] === "rm" || args[0] === "remove" || args[0] === "r") {
   const names = args.filter((a, i) => i > 0 && !a.startsWith("-"));
-  const list = loadState().filter((s) => !names.includes(String(s.name)));
+  // SKILLS_SHIM_RM_KEEP: names the rm branch leaves in state, so the
+  // list-diff in core remove() sees them as still-present (ok:false).
+  const keep = (process.env.SKILLS_SHIM_RM_KEEP ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const list = loadState().filter(
+    (s) => !names.includes(String(s.name)) || keep.includes(String(s.name))
+  );
   saveState(list);
   console.log(`Successfully removed ${names.length} skill(s)`);
   process.exit(0); // upstream exits 0 even on partial failure
 }
 
 if (args[0] === "update" || args[0] === "upgrade" || args[0] === "check") {
+  if (process.env.SKILLS_SHIM_UPDATE_FAIL) {
+    console.log("Update failed (simulated)");
+    process.exit(1);
+  }
   console.log("Updated skills (simulated)");
   process.exit(0);
 }
