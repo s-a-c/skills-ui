@@ -218,6 +218,7 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
 }
 
 .empty{color:var(--t-textMuted);padding:24px 18px;text-align:center;animation:rise .35s var(--ease)}
+.empty.search-error{color:var(--t-danger)}
 
 /* ---------- detail ---------- */
 .detail-title{font-size:24px;font-weight:700;margin:0 0 4px;animation:rise .3s var(--ease)}
@@ -417,6 +418,7 @@ var state = {
   checked: new Set(),
   query: '',
   results: [],
+  searchFailed: false,
   busy: false,
   sortBy: 'checked',
   updates: {},
@@ -683,6 +685,7 @@ function renderList(){
     li.setAttribute('aria-selected', String(s.name === state.selected));
     li.setAttribute('tabindex', '0');
     var outdated = state.updates[s.name] && state.updates[s.name].updateAvailable;
+    var updError = state.updates[s.name] && state.updates[s.name].error;
     li.innerHTML =
       '<div class="skill-name">' +
       '<input type="checkbox" class="skill-check" aria-label="Select ' + esc(s.name) + ' for update"' +
@@ -695,6 +698,9 @@ function renderList(){
       '<div class="chips">' + s.agents.slice(0, 4).map(function(a){
         return '<span class="chip" style="--chip:var(' + chipColor(a) + ')">' + esc(a) + '</span>';
       }).join('') + (s.agents.length > 4 ? '<span class="chip">+' + (s.agents.length - 4) + '</span>' : '') + '</div>';
+    // G4: not-checkable/check-failed skills stop being silently badge-less —
+    // the status rides the row as a tooltip (the detail pane carries the full line)
+    if (updError) li.title = 'update check: ' + updError;
     li.querySelector('.skill-check').addEventListener('click', function(ev){ ev.stopPropagation(); });
     li.querySelector('.skill-check').addEventListener('change', function(ev){
       if (ev.target.checked) state.checked.add(s.name); else state.checked.delete(s.name);
@@ -882,7 +888,9 @@ function showDetail(name){
   var skill = state.skills.filter(function(s){ return s.name === name; })[0];
   if (!skill) return;
   var pane = $('#detailPane');
-  var detailOutdated = state.updates[skill.name] && state.updates[skill.name].updateAvailable;
+  var upd = state.updates[skill.name];
+  var detailOutdated = upd && upd.updateAvailable;
+  var updateError = upd && upd.error ? upd.error : null;
   pane.innerHTML =
     '<h1 class="detail-title">' + esc(skill.name) + '</h1>' +
     '<p class="detail-source">' + esc(skill.source || 'local skill') +
@@ -895,6 +903,7 @@ function showDetail(name){
       '<dt>Scope</dt><dd>' + esc(skill.scope) + '</dd>' +
       '<dt>Agents</dt><dd>' + (skill.agents.length ? skill.agents.map(esc).join(', ') : 'not linked') + '</dd>' +
       '<dt>Path</dt><dd>' + esc(skill.path) + '</dd>' +
+      (updateError ? '<dt>Updates</dt><dd>' + esc(updateError) + '</dd>' : '') +
     '</dl>' +
     '<div class="readme" id="readme">Loading…</div>';
   $('#removeBtn').addEventListener('click', function(){ openRemove(skill); });
@@ -1095,13 +1104,14 @@ var searchTimer = null;
 function runSearch(){
   var q = $('#searchInput').value.trim();
   if (searchTimer) clearTimeout(searchTimer);
-  if (!q) { state.results = []; renderResults(); return; }
+  if (!q) { state.results = []; state.searchFailed = false; renderResults(); return; }
   searchTimer = setTimeout(function(){
     if (!state.installedAll) refreshInstalledAll();
     setBusy('Searching skills.sh…');
     api('/api/search?q=' + encodeURIComponent(q))
       .then(function(d){
         state.results = d.results;
+        state.searchFailed = !!d.failed;
         renderResults();
         if (d.adjustedQuery) toast('No exact matches — showing results for “' + d.adjustedQuery + '”', 'success');
       })
@@ -1126,6 +1136,10 @@ function renderResults(){
   var list = $('#results');
   list.innerHTML = '';
   if (!state.results.length) {
+    if (state.searchFailed) {
+      list.innerHTML = '<div class="empty search-error">search failed — skills.sh unreachable</div>';
+      return;
+    }
     list.innerHTML = '<div class="empty">' + ($('#searchInput').value.trim() ? 'No results' : 'Type to search the skills.sh registry') + '</div>';
     return;
   }

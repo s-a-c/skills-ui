@@ -477,6 +477,65 @@ describe("tui (in-memory)", () => {
     expect(frame).toContain("update available"); // detail hint — code-review is selected (A→Z first)
   });
 
+  test("S-166 F4: a failed registry search shows the failure line, never 'no results'", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    deps.search = async () => ({ results: [], adjustedQuery: null, failed: true });
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await s.mockInput.typeText("/");
+    await s.mockInput.typeText("cli");
+    await new Promise((r) => setTimeout(r, 500)); // debounce + search
+    await s.flush();
+    const frame = s.captureCharFrame();
+    expect(frame).toContain("search failed — skills.sh unreachable");
+    expect(frame).not.toContain("no results");
+  });
+
+  test("S-166 F4: a successful search clears the failure line", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    deps.search = async () => ({ results: RESULTS, adjustedQuery: null, failed: false });
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await s.mockInput.typeText("/");
+    await s.mockInput.typeText("cli");
+    await new Promise((r) => setTimeout(r, 500)); // debounce + search
+    await s.flush();
+    const frame = s.captureCharFrame();
+    expect(frame).toContain("cli-ansi"); // results render
+    expect(frame).not.toContain("search failed");
+  });
+
+  test("S-166 G4: check-status errors render in the detail line and the toast counts them", async () => {
+    const s = setup!;
+    s.resize(140, 30); // wide enough that the long error line and toast render unclipped
+    const deps = fakeDeps();
+    deps.checkUpdates = async () => ({
+      scope: "project" as const,
+      updates: {
+        "code-review": {
+          name: "code-review",
+          updateAvailable: false,
+          error: "not checkable yet (well-known digest check lands in a later 0.x)",
+          sourceType: "well-known",
+        },
+        tdd: { name: "tdd", updateAvailable: false, sourceType: "github" },
+      },
+      checkedCount: 2,
+    });
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    await s.mockInput.pressKey("c");
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 150));
+    const frame = s.captureCharFrame();
+    expect(frame).toContain("no updates available · 1 not checkable"); // toast mentions the count
+    expect(frame).toContain("check: not checkable yet"); // detail line (code-review selected, A→Z first)
+    expect(frame).not.toContain("↑"); // badge logic unchanged — an error alone is no badge
+  });
+
   test("help overlay toggles with ?", async () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());

@@ -335,6 +335,9 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
             {`${selected.agents.length} agent(s) · ${selected.scope} · ${selected.path}${model.updatesAvailable.has(selected.name) ? " · ↑ update available" : ""}`}
           </text>
         ) : null}
+        {selected && model.updateErrors.get(selected.name) ? (
+          <text fg={t.textMuted}>{`check: ${model.updateErrors.get(selected.name)}`}</text>
+        ) : null}
       </box>
     </box>
   );
@@ -415,7 +418,13 @@ function SearchBody({ model }: { model: TuiModel }): ReactNode {
             {`${resultsActive ? ARROW : " "} Results`}
           </text>
           {model.results.length === 0 ? (
-            <text fg={t.textMuted}>{model.query ? "no results" : "search the skills.sh registry"}</text>
+            <text fg={model.searchFailed ? t.danger : t.textMuted}>
+              {model.searchFailed
+                ? "search failed — skills.sh unreachable"
+                : model.query
+                  ? "no results"
+                  : "search the skills.sh registry"}
+            </text>
           ) : (
             model.results.slice(0, SEARCH_RENDER_CAP).map((r, i) => {
               const sel = resultsActive && i === model.searchSelected;

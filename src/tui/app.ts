@@ -88,7 +88,7 @@ function descriptionOf(path: string): string {
 /** Injectable surface — tests/selftest pass fakes; production uses core. */
 export interface TuiDeps {
   listInstalled(scope: "project" | "global"): Promise<InstalledSkill[]>;
-  search(query: string): Promise<{ results: SearchSkill[]; adjustedQuery: string | null }>;
+  search(query: string): Promise<{ results: SearchSkill[]; adjustedQuery: string | null; failed?: boolean }>;
   install(source: string, skills: string[], scope: "project" | "global"): Promise<{ ok: boolean; summary: string }>;
   remove(names: string[], scope: "project" | "global"): Promise<{ ok: boolean; summary: string }>;
   update(names: string[], scope: "project" | "global"): Promise<{ ok: boolean; summary: string }>;
@@ -279,8 +279,8 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     searchTimer = setTimeout(async () => {
       dispatch({ type: "busy", label: `searching "${query}"` });
       try {
-        const { results, adjustedQuery } = await deps.search(query);
-        dispatch({ type: "results", results, adjustedQuery });
+        const { results, adjustedQuery, failed } = await deps.search(query);
+        dispatch({ type: "results", results, adjustedQuery, failed });
       } catch {
         toast("search failed — check your connection", "error");
       } finally {
@@ -605,12 +605,20 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
             dispatch({ type: "busy", label: "checking for updates" });
             try {
               const result = await deps.checkUpdates(scope);
-              const names = Object.values(result.updates)
-                .filter((u) => u.updateAvailable)
-                .map((u) => u.name);
-              dispatch({ type: "updates-loaded", names });
+              const entries = Object.values(result.updates);
+              const names = entries.filter((u) => u.updateAvailable).map((u) => u.name);
+              // G4: keep the per-skill check-status errors so the detail pane
+              // can show WHY a skill is badge-less (not checkable / check failed)
+              const errors: Record<string, string> = {};
+              for (const u of entries) if (u.error) errors[u.name] = u.error;
+              dispatch({ type: "updates-loaded", names, errors });
+              const notCheckable = Object.keys(errors).length;
               toast(
-                names.length > 0 ? `${names.length} update(s) available` : "no updates available",
+                names.length > 0
+                  ? `${names.length} update(s) available`
+                  : notCheckable > 0
+                    ? `no updates available · ${notCheckable} not checkable`
+                    : "no updates available",
                 names.length > 0 ? "info" : "success"
               );
             } catch (error) {

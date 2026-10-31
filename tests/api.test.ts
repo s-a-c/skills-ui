@@ -74,6 +74,53 @@ describe("api", () => {
     expect(await res.json()).toEqual({ results: [], adjustedQuery: null });
   });
 
+  test("GET /api/search carries failed:true when the registry is unreachable (S-166 F4)", async () => {
+    const prev = process.env.SKILLS_UI_API_URL;
+    process.env.SKILLS_UI_API_URL = "http://127.0.0.1:1"; // dead port — nothing listens
+    try {
+      const base = await start();
+      const res = await fetch(`${base}/api/search?q=tdd`);
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as { results: unknown[]; adjustedQuery: string | null; failed: boolean };
+      expect(body.failed).toBe(true);
+      expect(body.results).toEqual([]);
+      expect(body.adjustedQuery).toBeNull(); // no fallback noise off a failed lookup
+    } finally {
+      if (prev === undefined) delete process.env.SKILLS_UI_API_URL;
+      else process.env.SKILLS_UI_API_URL = prev;
+    }
+  });
+
+  test("GET /api/search reports failed:false when the registry answers", async () => {
+    const registry = Bun.serve({
+      port: 0,
+      hostname: "127.0.0.1",
+      fetch: () => Response.json({ skills: [{ id: "tdd", name: "tdd", installs: 5, source: "o/r" }] }),
+    });
+    const prev = process.env.SKILLS_UI_API_URL;
+    process.env.SKILLS_UI_API_URL = `http://127.0.0.1:${registry.port}`;
+    try {
+      await (registry as unknown as { ready?: Promise<unknown> }).ready;
+      const base = await start();
+      const body = (await (await fetch(`${base}/api/search?q=tdd`)).json()) as { results: unknown[]; failed?: boolean };
+      // discriminated field: absent on success, present-and-true only on failure
+      expect(body.failed).toBeUndefined();
+      expect(body.results).toHaveLength(1);
+    } finally {
+      registry.stop(true);
+      if (prev === undefined) delete process.env.SKILLS_UI_API_URL;
+      else process.env.SKILLS_UI_API_URL = prev;
+    }
+  });
+
+  test("the served page's settings hint carries the real bound port, not 'a random port' (S-166 G9)", async () => {
+    const base = await start(); // port 0 requested → auto-assigned; the hint must show the BOUND port
+    expect(server).not.toBeNull();
+    const html = await (await fetch(`${base}/`)).text();
+    expect(html).toContain(`window.__PORT__ = ${server!.port}`);
+    expect(html).not.toContain("window.__PORT__ = 0");
+  });
+
   test("POST /api/install — 400 on bad body, 500 when add reports failure", async () => {
     const base = await start();
     expect((await fetch(`${base}/api/install`, { method: "POST", body: "{}" })).status).toBe(400);

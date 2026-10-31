@@ -10,7 +10,12 @@ import type { InstalledSkill, Scope } from "./types.ts";
 export async function listInstalled(scope: Scope): Promise<InstalledSkill[]> {
   const args = ["ls", "--json"];
   if (scope === "global") args.push("-g");
-  const { stdout } = await runSkills(args);
+  const { stdout } = await runSkills(args, {
+    // 300s, not the 120s default: concurrent consumers serialize behind the
+    // spawn queue and legitimately exceed it — a lone global scan is
+    // already ~64-72s (S-166)
+    timeoutMs: 300_000,
+  });
   let parsed: unknown;
   try {
     parsed = JSON.parse(stdout);

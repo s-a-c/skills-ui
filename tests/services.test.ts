@@ -124,9 +124,9 @@ describe("search fallback (ported logic)", () => {
     const calls: string[] = [];
     const search = async (q: string) => {
       calls.push(q);
-      if (q === "cli-an") return [{ name: "cli-ansi", slug: "cli-ansi", source: "o/r", installs: 3 }];
-      if (q === "cli-anything") return [{ name: "unrelated", slug: "u", source: "x", installs: 9 }];
-      return [];
+      if (q === "cli-an") return { results: [{ name: "cli-ansi", slug: "cli-ansi", source: "o/r", installs: 3 }], failed: false };
+      if (q === "cli-anything") return { results: [{ name: "unrelated", slug: "u", source: "x", installs: 9 }], failed: false };
+      return { results: [], failed: false };
     };
     const result = await makeSearchWithFallback(search)("cli-anything");
     expect(result.adjustedQuery).toBe("cli-an");
@@ -136,10 +136,85 @@ describe("search fallback (ported logic)", () => {
   test("fans out trailing-dash prefixes", async () => {
     const { makeSearchWithFallback } = await import("../src/core/services/search.ts");
     const search = async (q: string) =>
-      q === "cli-b" ? [{ name: "cli-beta", slug: "b", source: "o/r", installs: 1 }] : [];
+      q === "cli-b"
+        ? { results: [{ name: "cli-beta", slug: "b", source: "o/r", installs: 1 }], failed: false }
+        : { results: [], failed: false };
     const result = await makeSearchWithFallback(search)("cli-");
     expect(result.results.map((r) => r.name)).toEqual(["cli-beta"]);
     expect(result.adjustedQuery).toBe("cli-");
+  });
+});
+
+describe("search failure signal (S-166 F4)", () => {
+  test("a failed registry query short-circuits: failed:true, no fan-out, no adjustedQuery", async () => {
+    const { makeSearchWithFallback } = await import("../src/core/services/search.ts");
+    const calls: string[] = [];
+    const search = async (q: string) => {
+      calls.push(q);
+      return { results: [], failed: true };
+    };
+    const result = await makeSearchWithFallback(search)("cli-anything");
+    expect(result).toEqual({ results: [], adjustedQuery: null, failed: true });
+    expect(calls).toEqual(["cli-anything"]); // no shortening/continuation fan-out
+  });
+
+  test("searchRegistryFuzzy reports failed on a dead registry (SKILLS_UI_API_URL → dead port)", async () => {
+    const { searchRegistryFuzzy, searchWithFallback } = await import("../src/core/services/search.ts");
+    const prev = process.env.SKILLS_UI_API_URL;
+    process.env.SKILLS_UI_API_URL = "http://127.0.0.1:1"; // nothing listens here
+    try {
+      const outcome = await searchRegistryFuzzy("tdd");
+      expect(outcome).toEqual({ results: [], failed: true });
+      const result = await searchWithFallback("tdd");
+      expect(result.failed).toBe(true);
+      expect(result.results).toEqual([]);
+      expect(result.adjustedQuery).toBeNull(); // failure never manufactures fallback noise
+    } finally {
+      if (prev === undefined) delete process.env.SKILLS_UI_API_URL;
+      else process.env.SKILLS_UI_API_URL = prev;
+    }
+  });
+
+  test("searchRegistryFuzzy reports failed on an HTTP-500 registry (the !res.ok branch)", async () => {
+    const { searchRegistryFuzzy } = await import("../src/core/services/search.ts");
+    const server = Bun.serve({
+      port: 0,
+      hostname: "127.0.0.1",
+      fetch: () => new Response("boom", { status: 500 }),
+    });
+    const prev = process.env.SKILLS_UI_API_URL;
+    process.env.SKILLS_UI_API_URL = `http://127.0.0.1:${server.port}`;
+    try {
+      await (server as unknown as { ready?: Promise<unknown> }).ready;
+      const outcome = await searchRegistryFuzzy("tdd");
+      expect(outcome).toEqual({ results: [], failed: true }); // !res.ok path, not the fetch throw
+    } finally {
+      server.stop(true);
+      if (prev === undefined) delete process.env.SKILLS_UI_API_URL;
+      else process.env.SKILLS_UI_API_URL = prev;
+    }
+  });
+
+  test("searchRegistryFuzzy returns failed:false on a live registry", async () => {
+    const { searchRegistryFuzzy } = await import("../src/core/services/search.ts");
+    const server = Bun.serve({
+      port: 0,
+      hostname: "127.0.0.1",
+      fetch: () =>
+        Response.json({ skills: [{ id: "tdd", name: "tdd", installs: 5, source: "o/r" }] }),
+    });
+    const prev = process.env.SKILLS_UI_API_URL;
+    process.env.SKILLS_UI_API_URL = `http://127.0.0.1:${server.port}`;
+    try {
+      await (server as unknown as { ready?: Promise<unknown> }).ready;
+      const outcome = await searchRegistryFuzzy("tdd");
+      expect(outcome.failed).toBe(false);
+      expect(outcome.results.map((r) => r.name)).toEqual(["tdd"]);
+    } finally {
+      server.stop(true);
+      if (prev === undefined) delete process.env.SKILLS_UI_API_URL;
+      else process.env.SKILLS_UI_API_URL = prev;
+    }
   });
 });
 

@@ -174,6 +174,10 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
 }> {
   const prefs: UiPreferences = loadUiPreferences();
   const preferred = options.port ?? prefs.port ?? 0;
+  // The actually-bound port (auto-assign may rewrite a requested 0); set
+  // once the socket is up, read by GET / so the page's settings hint shows
+  // the true port instead of "a random port" (G9).
+  let boundPort = 0;
 
   const route = async (req: Request): Promise<Response> => {
     const url = new URL(req.url);
@@ -183,14 +187,14 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
     try {
       if (method === "GET" && (path === "/" || path === "/index.html")) {
         if (!options.withPage) return json({ error: "not found: headless serve mode" }, 404);
-        return new Response(renderPage(APP_VERSION, prefs, undefined, options.seed), {
+        return new Response(renderPage(APP_VERSION, prefs, boundPort || undefined, options.seed), {
           headers: {
             "content-type": "text/html; charset=utf-8",
             "cache-control": "no-store",
             // hash-pinned CSP (0.5.1 impl B) — no script-src 'unsafe-inline';
             // these two cannot go in a meta CSP, so the embedded page gets
             // them as real headers
-            "content-security-policy": pageCspFor(prefs, undefined, options.seed, false),
+            "content-security-policy": pageCspFor(prefs, boundPort || undefined, options.seed, false),
             "x-content-type-options": "nosniff",
             "referrer-policy": "no-referrer",
           },
@@ -243,8 +247,10 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
         const q = url.searchParams.get("q") ?? "";
         if (!q.trim()) return json({ results: [], adjustedQuery: null });
         if (validQuery(q) === null) return json({ error: "invalid query" }, 400);
-        const { results, adjustedQuery } = await searchWithFallback(q);
-        return json({ results, adjustedQuery });
+        const { results, adjustedQuery, failed } = await searchWithFallback(q);
+        // `failed` (F4): the registry was unreachable — surfaces must say so
+        // instead of rendering an honest-looking "no results"
+        return json({ results, adjustedQuery, failed });
       }
 
       if (method === "POST" && path === "/api/install") {
@@ -423,6 +429,7 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
 
   const port = server.port ?? 0;
   if (!port) throw new Error("failed to bind a local port");
+  boundPort = port;
   options.onReady?.({ port, fellBack });
   return {
     port,

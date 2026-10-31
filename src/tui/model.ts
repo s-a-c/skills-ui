@@ -34,6 +34,10 @@ export interface TuiModel {
   selected: number;
   checked: Set<string>;
   updatesAvailable: Set<string>;
+  /** Per-skill check-status errors from the last `c` check (G4): name →
+   * "not checkable yet (…)" / "check failed (…)". Rendered in the detail
+   * pane so not-checkable skills stop being silently badge-less. */
+  updateErrors: Map<string, string>;
   filter: string;
   filtering: boolean;
   agentFilter: Set<string>;
@@ -44,6 +48,9 @@ export interface TuiModel {
   searching: boolean;
   results: SearchSkill[];
   adjustedQuery: string | null;
+  /** True when the last completed search failed at the registry (F4) —
+   * the pane says "search failed", never an honest-looking "no results". */
+  searchFailed: boolean;
   searchSelected: number;
   searchPane: "results" | "selected";
   selectedCursor: number;
@@ -72,6 +79,7 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     selected: 0,
     checked: new Set(),
     updatesAvailable: new Set(),
+    updateErrors: new Map(),
     filter: "",
     filtering: false,
     sortCheckedFirst: true,
@@ -81,6 +89,7 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     searching: false,
     results: [],
     adjustedQuery: null,
+    searchFailed: false,
     searchSelected: 0,
     searchPane: "results",
     selectedCursor: 0,
@@ -152,7 +161,7 @@ export type Action =
   | { type: "detail-scroll"; on: boolean }
   | { type: "scope"; scope: Scope }
   | { type: "skills-loaded"; skills: InstalledSkill[] }
-  | { type: "updates-loaded"; names: string[] }
+  | { type: "updates-loaded"; names: string[]; errors?: Record<string, string> }
   | { type: "move"; delta: number }
   | { type: "home" }
   | { type: "end" }
@@ -172,7 +181,7 @@ export type Action =
   | { type: "agent-select-cancel" }
   | { type: "query"; text: string }
   | { type: "searching"; on: boolean }
-  | { type: "results"; results: SearchSkill[]; adjustedQuery?: string | null }
+  | { type: "results"; results: SearchSkill[]; adjustedQuery?: string | null; failed?: boolean }
   | { type: "search-pane"; pane: "results" | "selected" }
   | { type: "queue-toggle"; skill: SearchSkill }
   | { type: "queue-delete-at"; key: string }
@@ -192,6 +201,7 @@ export function update(model: TuiModel, action: Action): TuiModel {
     ...model,
     checked: new Set(model.checked),
     updatesAvailable: new Set(model.updatesAvailable),
+    updateErrors: new Map(model.updateErrors),
     agentFilter: new Set(model.agentFilter),
     agentSelect: model.agentSelect
       ? { ...model.agentSelect, staged: new Set(model.agentSelect.staged) }
@@ -218,6 +228,7 @@ export function update(model: TuiModel, action: Action): TuiModel {
       break;
     case "updates-loaded":
       next.updatesAvailable = new Set(action.names);
+      next.updateErrors = new Map(Object.entries(action.errors ?? {}));
       break;
     case "move": {
       if (next.tab === "search" && next.searchPane === "selected") {
@@ -328,6 +339,7 @@ export function update(model: TuiModel, action: Action): TuiModel {
     case "query":
       next.query = action.text;
       next.adjustedQuery = null; // stale until the next results arrive
+      next.searchFailed = false; // same staleness rule (F4)
       break;
     case "searching":
       next.searching = action.on;
@@ -335,6 +347,7 @@ export function update(model: TuiModel, action: Action): TuiModel {
     case "results":
       next.results = action.results;
       next.adjustedQuery = action.adjustedQuery ?? null;
+      next.searchFailed = action.failed ?? false;
       next.searchSelected = 0;
       break;
     case "search-pane":

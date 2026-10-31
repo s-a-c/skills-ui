@@ -356,6 +356,97 @@ test.describe("local page honesty (S-163)", () => {
   });
 });
 
+/* ---------- S-166: search-failure honesty + check-status rendering + port
+   truth. Same harness pattern as the S-163/S-164 blocks: the page served by
+   GET / (the shipped APP_JS itself), with the /api surface stubbed at the
+   network layer so the signals under test are exact. */
+
+const SF_PORT = 8403;
+let sfServe: ChildProcessWithoutNullStreams | null = null;
+let sfPrefsDir = "";
+
+test.describe("local page search failure + check status (S-166)", () => {
+  test.beforeAll(async () => {
+    sfPrefsDir = mkdtempSync(join(process.env.TMPDIR ?? "/tmp", "skills-ui-e2e-sf-"));
+    sfServe = await startServe(SF_PORT, {}, sfPrefsDir, "web");
+  });
+  test.afterAll(async () => {
+    sfServe?.kill("SIGTERM");
+    if (sfPrefsDir) rmSync(sfPrefsDir, { recursive: true, force: true });
+  });
+
+  test("search failure renders the failure state, never 'No results' (F4)", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await quietUpdateCheck(page);
+    await page.route("**/api/search*", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ results: [], adjustedQuery: null, failed: true }),
+      })
+    );
+    await page.goto(localOrigin(SF_PORT) + "/");
+    await expect(page.locator("#listPane")).toContainText("tdd", { timeout: 15_000 });
+    await page.locator('[data-tab="search"]').click();
+    await page.locator("#searchInput").fill("anything");
+    await expect(page.locator("#results .empty.search-error")).toHaveText(
+      "search failed — skills.sh unreachable",
+      { timeout: 15_000 }
+    );
+    await expect(page.locator("#results")).not.toContainText("No results");
+    await ctx.close();
+  });
+
+  test("check-status errors render in the detail pane and the row tooltip (G4)", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await page.route("**/api/updates*", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          scope: "project",
+          updates: {
+            tdd: {
+              name: "tdd",
+              updateAvailable: false,
+              error: "not checkable yet (generic git clone check lands in a later 0.x)",
+              sourceType: "github",
+            },
+            "code-review": {
+              name: "code-review",
+              updateAvailable: false,
+              error: "not checkable (local or missing hash)",
+              sourceType: "local",
+            },
+          },
+          checkedCount: 2,
+        }),
+      })
+    );
+    await page.goto(localOrigin(SF_PORT) + "/");
+    await expect(page.locator("#skillList li", { hasText: "tdd" })).toBeVisible({ timeout: 15_000 });
+    // the detail pane (first selected skill) carries the Updates meta row
+    await expect(page.locator("#detailPane")).toContainText("not checkable", { timeout: 15_000 });
+    await expect(page.locator("#detailPane")).toContainText("Updates", { timeout: 15_000 });
+    // row-level affordance: the check status rides the list row as a tooltip
+    await expect(
+      page.locator("#skillList li", { hasText: "tdd" })
+    ).toHaveAttribute("title", /update check: not checkable/);
+    await ctx.close();
+  });
+
+  test("settings hint shows the real bound port, not 'a random port' (G9)", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await quietUpdateCheck(page);
+    await page.goto(localOrigin(SF_PORT) + "/");
+    await expect(page.locator("#portNow")).toHaveText(`port ${SF_PORT}`, { timeout: 15_000 });
+    await ctx.close();
+  });
+});
+
 /* ---------- S-164: web semantics — Esc keeps text, honest sort, filter
    parity control, direction-call regressions. Same harness pattern as the
    S-163 block: the page served by GET / (the shipped APP_JS itself). */
