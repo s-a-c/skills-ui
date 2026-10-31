@@ -59,7 +59,7 @@ def main():
         #    list pane bordered with the filter hint in its title (S-88)
         check("startup: header at row 0", app.find("❯ Installed") == 0)
         check("startup: footer at bottom row", app.find("q quit") == app.rows - 1)
-        check("startup: filter hint in list title", app.find("f filter") >= 0)
+        check("startup: sort indicator in list title", app.find("skills·checked") == 1, f"row={app.find('skills·checked')}")
 
         # 2. g-jump: short project list -> 120-row global list in one
         #    render; nothing overlays, rows land inside the border (S-87/88)
@@ -148,7 +148,7 @@ def main():
         check("search: HOME follows back to top", r1b >= 0, f"row={r1b}")
         app.send(" ", settle=1.5)  # queue cli-ansi-001
         app.send("\t", settle=1.5)  # Tab → Selected pane
-        check("search: Selected pane active", app.find("❯ Selected (2)") >= 0)
+        check("search: install list pane active", app.find("❯ install list (2)") >= 0)
         check("search: queue cursor on first queued", app.find("❯ cli-ansi-031") >= 0)
         app.send("\x1b[F", settle=1.5)  # END in Selected pane
         check("search: END moves queue cursor to last queued", app.find("❯ cli-ansi-001") >= 0)

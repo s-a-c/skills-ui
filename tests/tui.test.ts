@@ -122,7 +122,7 @@ describe("tui (in-memory)", () => {
     await s.flush();
     await new Promise((r) => setTimeout(r, 50));
     frame = s.captureCharFrame();
-    expect(frame).toContain("delete skills");
+    expect(frame).toContain("remove skills");
     s.mockInput.pressKey("y");
     await s.flush();
     await new Promise((r) => setTimeout(r, 50));
@@ -350,7 +350,7 @@ describe("tui (in-memory)", () => {
     await s.mockInput.pressKey("r"); // focused skill (code-review, A→Z first)
     await s.flush();
     let frame = s.captureCharFrame();
-    expect(frame).toContain("delete skills");
+    expect(frame).toContain("remove skills");
     expect(frame).toContain("code-review");
     await s.mockInput.pressKey("escape"); // cancel — nothing runs
     await s.flush();
@@ -373,6 +373,93 @@ describe("tui (in-memory)", () => {
     await new Promise((r) => setTimeout(r, 100));
     expect(updated).toEqual([["code-review", "tdd"]]); // all visible names
   });
+
+  test("S-162: n and N cancel the remove confirm — nothing runs, state intact", async () => {
+    const s = setup!;
+    const removed: string[][] = [];
+    const deps = fakeDeps();
+    deps.remove = async (names) => {
+      removed.push(names);
+      return { ok: true, summary: `removed ${names.join(", ")}` };
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    await s.mockInput.pressKey(" "); // check the focused skill (code-review, A→Z first)
+    await s.flush();
+    expect(s.captureCharFrame()).toContain("✔"); // checked marker to preserve
+
+    await s.mockInput.pressKey("r"); // remove confirm
+    await s.flush();
+    expect(s.captureCharFrame()).toContain("remove skills");
+    await s.mockInput.pressKey("n"); // cancel — the y/N copy is now wired
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 50));
+    let frame = s.captureCharFrame();
+    expect(frame).not.toContain("remove skills"); // dialog closed
+    expect(frame).toContain("✔"); // checked state intact
+    expect(removed).toHaveLength(0); // nothing ran
+
+    await s.mockInput.pressKey("r"); // same again with the shift spelling
+    await s.flush();
+    expect(s.captureCharFrame()).toContain("remove skills");
+    await s.mockInput.pressKey("N", { shift: true });
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 50));
+    frame = s.captureCharFrame();
+    expect(frame).not.toContain("remove skills");
+    expect(removed).toHaveLength(0);
+  });
+
+  test("S-162: sort indicator rides the list title in both modes, fully visible at 80 cols", async () => {
+    const s = setup!;
+    // 3-digit count: the worst case for the title budget at 80 columns
+    const wide: InstalledSkill[] = Array.from({ length: 105 }, (_, i) => ({
+      name: `w${String(i + 1).padStart(3, "0")}`,
+      path: `/x/w${i}`,
+      scope: "project",
+      agents: ["Claude Code"],
+      source: null,
+      sourceUrl: null,
+      sourceType: null,
+    }));
+    const deps = fakeDeps();
+    deps.listInstalled = async () => wide;
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 400)); // settle the first load
+    s.resize(80, 24); // the fit constraint: pane inner 21, title budget 19 chars
+    await s.renderOnce();
+    await s.flush();
+    let frame = s.captureCharFrame();
+    expect(frame).toContain("105 skills·checked"); // both segments fully rendered
+    await s.mockInput.pressKey("s"); // → load order
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    await s.renderOnce();
+    frame = s.captureCharFrame();
+    expect(frame).toContain("105 skills·order");
+    expect(frame).not.toContain("skills·checked");
+  });
+
+  test("S-162: toasts queue FIFO — a second toast waits for the first's window", async () => {
+    const s = setup!;
+    await runTuiOn(s.renderer, undefined, fakeDeps());
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    await s.mockInput.pressKey("q"); // toast A: "press q again to quit"
+    await s.flush();
+    await s.mockInput.pressKey("c"); // toast B queued (also disarms the quit, S-161)
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 1000)); // well inside A's 3.5s window
+    let frame = s.captureCharFrame();
+    expect(frame).toContain("press q again to quit"); // A still shown
+    expect(frame).not.toContain("update(s) available"); // B did not clobber it
+    await new Promise((r) => setTimeout(r, 4000)); // A's window ends → B pops
+    frame = s.captureCharFrame();
+    expect(frame).toContain("update(s) available"); // B shown in its own window
+    expect(frame).not.toContain("press q again to quit");
+  }, 15000); // the FIFO window waits ~5s — well over bun's 5s default timeout
 
   test("c checks for updates: ↑ badge, detail hint, toast", async () => {
     const s = setup!;
@@ -739,7 +826,7 @@ describe("0.2.x B1 (S-69): list ops", () => {
     await runTuiOn(s.renderer, undefined, deps);
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
-    expect(s.captureCharFrame()).toContain("f filter"); // idle hint lives in the pane title
+    expect(s.captureCharFrame()).toContain("skills·checked"); // idle title: count + sort indicator
     await s.mockInput.pressKey("f");
     await s.flush();
     await s.mockInput.typeText("s0"); // filter bar now carries text
@@ -772,11 +859,11 @@ describe("0.2.x B1 (S-69): list ops", () => {
     await s.mockInput.typeText(" "); // queue it
     await s.flush();
     frame = s.captureCharFrame();
-    expect(frame).toContain("Selected (1)");
-    await s.mockInput.pressKey("\t"); // Tab → Selected pane
+    expect(frame).toContain("install list (1)");
+    await s.mockInput.pressKey("\t"); // Tab → install list pane
     await s.flush();
     frame = s.captureCharFrame();
-    expect(frame).toContain("❯ Selected (1)");
+    expect(frame).toContain("❯ install list (1)");
     await s.mockInput.pressKey("\x1b"); // Esc → command mode (queue keys live there now, S-103)
     await s.flush();
     await new Promise((r) => setTimeout(r, 50));
@@ -784,7 +871,7 @@ describe("0.2.x B1 (S-69): list ops", () => {
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
     frame = s.captureCharFrame();
-    expect(frame).toContain("Selected (0)");
+    expect(frame).toContain("install list (0)");
     expect(frame).toContain("(empty");
     await s.mockInput.pressKey("\t"); // Tab back → Results
     await s.flush();
@@ -901,12 +988,12 @@ describe("S-103 search text-entry + match highlighting", () => {
     await s.mockInput.typeText(" "); // queue cli-ansi
     await s.flush();
     let frame = s.captureCharFrame();
-    expect(frame).toContain("Selected (1)");
+    expect(frame).toContain("install list (1)");
     await s.mockInput.typeText("d"); // a letter mid-query — must NOT delete the queued item
     await new Promise((r) => setTimeout(r, 450));
     await s.flush();
     frame = s.captureCharFrame();
-    expect(frame).toContain("Selected (1)"); // queue untouched
+    expect(frame).toContain("install list (1)"); // queue untouched
     expect(frame).toContain("clid"); // the letter reached the query
     await s.mockInput.pressKey("\x1b"); // command mode
     await s.flush();
@@ -915,7 +1002,7 @@ describe("S-103 search text-entry + match highlighting", () => {
     await s.flush();
     await new Promise((r) => setTimeout(r, 100));
     frame = s.captureCharFrame();
-    expect(frame).toContain("Selected (0)");
+    expect(frame).toContain("install list (0)");
   });
 
   test("highlightSegments marks every case-insensitive occurrence", async () => {

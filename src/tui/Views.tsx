@@ -240,7 +240,10 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
       ? ` agents: ${[...model.agentFilter].sort().join(", ")} `
       : model.filter || model.filtering
         ? ` filter: ${model.filter}${model.filtering ? "▌" : ""} `
-        : ` ${visible.length} skills · f filter `;
+        // `·checked` / `·order` glued to the count: the pane fits only a
+        // 19-char title at 80 cols (measured ladder: 19 renders, 20 drops),
+        // and "N skills" must stay — S-162
+        : ` ${visible.length} skills·${model.sortCheckedFirst ? "checked" : "order"}`;
   useEffect(() => {
     refs.detailScroll = detailScrollRef.current ?? undefined;
   });
@@ -461,10 +464,10 @@ function SearchBody({ model }: { model: TuiModel }): ReactNode {
             })
           )}
           <text fg={!resultsActive ? t.primary : t.textMuted} attributes={!resultsActive ? TextAttributes.BOLD : TextAttributes.NONE}>
-            {`${!resultsActive ? ARROW : " "} Selected (${model.queue.size})`}
+            {`${!resultsActive ? ARROW : " "} install list (${model.queue.size})`}
           </text>
           {model.queue.size === 0 ? (
-            <text fg={t.textMuted}>  (empty — space or + queues from Results)</text>
+            <text fg={t.textMuted}>  (empty — space or + adds from Results)</text>
           ) : (
             [...model.queue.values()].map((r, i) => {
               const sel = !resultsActive && i === model.selectedCursor;
@@ -483,7 +486,7 @@ function SearchBody({ model }: { model: TuiModel }): ReactNode {
       </box>
       <box width="100%" flexShrink={0} flexDirection="row">
         <box flexDirection="row">
-          <text fg={t.textMuted}>space/+ queue · -/d/x remove · Tab pane · u install queued</text>
+          <text fg={t.textMuted}>space/+ add · -/d/x remove · Tab pane · u install list</text>
         </box>
       </box>
     </box>
@@ -524,7 +527,7 @@ function Footer({ model }: { model: TuiModel }): ReactNode {
   const status = model.toast
     ? model.toast.text
     : model.confirm
-      ? `${model.confirm.kind} ${model.confirm.names.join(", ")}? y/N`
+      ? `${model.confirm.kind === "delete" ? "remove" : "update"} ${model.confirm.names.join(", ")}? y/N`
       : "";
   return (
     <box width="100%" flexShrink={0} flexDirection="row" justifyContent="space-between" paddingLeft={1} paddingRight={1}>
@@ -556,7 +559,7 @@ function HelpOverlay({ model }: { model: TuiModel }): ReactNode {
     ["g | p", "global / project scope"],
     ["G", "3D skills graph (esc/G closes)"],
     ["space", "toggle check"],
-    ["u / d / r", "update / delete (checked or focused)"],
+    ["u / d / r", "update / remove (checked or focused)"],
     ["PgUp/PgDn/HOME/END", "page · top / bottom"],
     ["mouse", "wheel scrolls · click selects"],
     ["?", "this help"],
@@ -601,9 +604,9 @@ function ConfirmOverlay({ model }: { model: TuiModel }): ReactNode {
   const pop = usePopInOverlay(model.prefs, 7);
   if (!model.confirm) return null;
   return (
-    <box ref={pop.ref} position="absolute" zIndex={10} top={pop.top} left="25%" width="50%" flexDirection="column" gap={1} padding={1} border={true} borderStyle="rounded" borderColor={model.confirm.kind === "delete" ? t.danger : t.primary} backgroundColor={t.surface} title={model.confirm.kind === "delete" ? " delete skills " : " update skills "}>
+    <box ref={pop.ref} position="absolute" zIndex={10} top={pop.top} left="25%" width="50%" flexDirection="column" gap={1} padding={1} border={true} borderStyle="rounded" borderColor={model.confirm.kind === "delete" ? t.danger : t.primary} backgroundColor={t.surface} title={model.confirm.kind === "delete" ? " remove skills " : " update skills "}>
       <text fg={t.text}>{model.confirm.names.join(", ")}</text>
-      <text fg={t.textMuted}>y confirm · esc cancel</text>
+      <text fg={t.textMuted}>y confirm · n/esc cancel</text>
     </box>
   );
 }

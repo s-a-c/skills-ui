@@ -213,11 +213,27 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     for (const fn of listeners) fn();
   };
 
+  // Toast queue (ST7): the single toast slot stays, but a toast fired
+  // while one is showing waits in a FIFO pending list instead of
+  // clobbering it. When the 3.5s window ends, the next pending toast pops
+  // and gets a full window of its own; an empty queue clears the slot.
+  const TOAST_MS = 3500;
+  type ToastTone = "info" | "success" | "error";
+  const toastQueue: Array<{ text: string; tone: ToastTone }> = [];
   let toastTimer: ReturnType<typeof setTimeout> | null = null;
-  const toast = (text: string, tone: "info" | "success" | "error"): void => {
-    if (toastTimer) clearTimeout(toastTimer);
-    dispatch({ type: "toast", toast: { text, tone } });
-    toastTimer = setTimeout(() => dispatch({ type: "toast", toast: null }), 3500);
+  const showNextToast = (): void => {
+    const next = toastQueue.shift();
+    if (next) {
+      dispatch({ type: "toast", toast: next });
+      toastTimer = setTimeout(showNextToast, TOAST_MS);
+    } else {
+      dispatch({ type: "toast", toast: null });
+      toastTimer = null;
+    }
+  };
+  const toast = (text: string, tone: ToastTone): void => {
+    toastQueue.push({ text, tone });
+    if (!toastTimer) showNextToast(); // idle slot — show immediately
   };
 
   // Double-press quit (S-161): a bare `q` in command mode must not be a
@@ -293,7 +309,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       list.push(skill.name);
       bySource.set(skill.source, list);
     }
-    dispatch({ type: "busy", label: "installing queue" });
+    dispatch({ type: "busy", label: "installing list" });
     try {
       for (const [source, names] of bySource) {
         const result = await deps.install(source, names, model.scope);
@@ -311,7 +327,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     if (!model.confirm) return;
     const { kind, names } = model.confirm;
     dispatch({ type: "confirm", confirm: null });
-    dispatch({ type: "busy", label: `${kind === "delete" ? "deleting" : "updating"} ${names.length} skill(s)` });
+    dispatch({ type: "busy", label: `${kind === "delete" ? "removing" : "updating"} ${names.length} skill(s)` });
     try {
       const result = kind === "delete" ? await deps.remove(names, model.scope) : await deps.update(names, model.scope);
       toast(result.summary, result.ok ? "success" : "error");
@@ -358,7 +374,9 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
 
     if (model.confirm) {
       if (k === "y") void confirmRun();
-      else if (k === "escape") dispatch({ type: "confirm", confirm: null });
+      // n/N cancel (S-162): the y/N copy promised it; shift lands as name
+      // "n" or "N" depending on the parser, so accept both spellings
+      else if (k === "escape" || k === "n" || k === "N") dispatch({ type: "confirm", confirm: null });
       return;
     }
     if (model.help) {
@@ -691,6 +709,8 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     renderer.keyInput.off("keypress", onKey);
     process.stdout.off("resize", onStdoutResize);
     if (toastTimer) clearTimeout(toastTimer); // pending toasts must not render after teardown
+    toastTimer = null; // a stale non-null id must not delay exit or swallow a late toast
+    toastQueue.length = 0; // same for toasts still queued behind the visible one
     if (quitTimer) clearTimeout(quitTimer); // same for an armed-quit timer
     unmount?.();
   });
