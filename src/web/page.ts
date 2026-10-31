@@ -24,6 +24,38 @@ function cssVarsFor(tokens: ThemeTokens, palette: CatppuccinPalette): string {
   return [...entries, ...accents].join('\n');
 }
 
+/**
+ * Single source of truth for the installed-skill filter predicate (F1
+ * filter parity, S-164): BOTH surfaces run this match set — name, source,
+ * each agent, then description as the secondary match. The web embeds
+ * SKILL_MATCHES_SRC (this function's transpiled source) inside APP_JS and
+ * calls it from filteredSkills(); the TUI applies the identical match order
+ * inside visibleSkills (src/tui/model.ts). tests/filter-parity.test.ts runs
+ * the same fixtures through both surfaces and asserts identical results.
+ *
+ * Constraints: no backticks, no template literals, no regex literals in the
+ * body — the toString() output is interpolated verbatim into the APP_JS
+ * template literal, and node --check (page-hardening) must accept the page.
+ */
+export function skillMatches(
+  skill: { name: string; description?: string | null; source?: string | null; agents: string[] },
+  needle: string
+): boolean {
+  const q = needle.trim().toLowerCase();
+  if (!q) return true;
+  return (
+    skill.name.toLowerCase().includes(q) ||
+    (skill.source != null && skill.source.toLowerCase().includes(q)) ||
+    skill.agents.some((a) => a.toLowerCase().includes(q)) ||
+    (skill.description != null && skill.description.toLowerCase().includes(q))
+  );
+}
+
+/** skillMatches' transpiled source, interpolated into APP_JS (S-164) — one
+ *  definition, two surfaces; the parity test asserts the emitted page still
+ *  carries this exact text. */
+const SKILL_MATCHES_SRC = skillMatches.toString();
+
 const APP_CSS = `
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;padding:0;height:100%}
@@ -200,21 +232,6 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;max-height:52vh;overflow:auto;
 }
 
-function checkForUpdates(force){
-  var scope = state.scope;
-  if (!force && state.updateCheckDone[scope]) return Promise.resolve();
-  return api('/api/updates?scope=' + scope)
-    .then(function(d){
-      state.updates = d.updates || {};
-      state.updateCheckDone[scope] = true;
-      var n = Object.keys(state.updates).filter(function(k){ return state.updates[k].updateAvailable; }).length;
-      renderList();
-      if (state.selected) showDetail(state.selected);
-      if (n > 0) toast(n + ' update' + (n === 1 ? '' : 's') + ' available', 'success');
-    })
-    .catch(function(){ /* update check is advisory; failures stay silent */ });
-}
-
 /* ---------- search ---------- */
 #searchView{display:none;padding:26px 30px;overflow:auto;height:100%}
 .view-search main{grid-template-columns:1fr}
@@ -361,7 +378,7 @@ var state = {
   query: '',
   results: [],
   busy: false,
-  sortBy: 'name',
+  sortBy: 'checked',
   updates: {},
   updateCheckDone: { project: false, global: false },
   seedHold: false,
@@ -590,15 +607,18 @@ function loadSkills(){
   .finally(function(){ setBusy(null); });
 }
 
+/* Filter predicate: the transpiled source of skillMatches() from
+   src/web/page.ts — the SAME match set the TUI runs (name, source,
+   agents, description). One definition, two surfaces; the parity test
+   in tests/filter-parity.test.ts proves it. */
+${SKILL_MATCHES_SRC}
 function filteredSkills(){
   var needle = ($('#filter').value || '').trim().toLowerCase();
   var items = state.skills.filter(function(s){
     var agentOk = !state.agentFilter || state.agentFilter.size === 0 ||
       s.agents.some(function(a){ return state.agentFilter.has(a); });
     if (!agentOk) return false;
-    if (!needle) return true;
-    var hay = (s.name + ' ' + s.description + ' ' + (s.source || '')).toLowerCase();
-    return hay.indexOf(needle) >= 0;
+    return skillMatches(s, needle);
   });
   if (state.sortBy === 'checked') {
     items = items.slice().sort(function(a, b){
@@ -606,7 +626,10 @@ function filteredSkills(){
       var cb = state.checked.has(b.name) ? 0 : 1;
       return ca - cb || a.name.localeCompare(b.name);
     });
+  } else if (state.sortBy === 'name') {
+    items = items.slice().sort(function(a, b){ return a.name.localeCompare(b.name); });
   }
+  /* 'load' deliberately sorts nothing — CLI load order = state.skills order */
   return items;
 }
 function renderList(){
@@ -1140,7 +1163,7 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   });
   $('#filter').addEventListener('input', renderList);
-  $('#filter').addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { $('#filter').value = ''; renderList(); } });
+  $('#filter').addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { ev.preventDefault(); ev.target.blur(); } }); // Esc keeps the text + the applied filter
   $('#searchInput').addEventListener('input', runSearch);
   $('#updateAllBtn').addEventListener('click', function(){ updateSkills([], state.scope === 'global'); });
   $('#checkUpdatesBtn').addEventListener('click', function(){ checkForUpdates(true); });
@@ -1219,12 +1242,7 @@ document.addEventListener('DOMContentLoaded', function(){
       if ($('#agentsPop').classList.contains('open')) { closeAgentsPop(); return; }
       if ($('#settings').classList.contains('open')) { openSettings(false); return; }
       if (ev.target === $('#filter')) { ev.target.blur(); return; } // keep applied filter
-      if (ev.target === $('#searchInput')) {
-        ev.target.value = '';
-        ev.target.dispatchEvent(new Event('input'));
-        ev.target.blur();
-        return;
-      }
+      if (ev.target === $('#searchInput')) { ev.preventDefault(); ev.target.blur(); return; } // Esc keeps the query + the rendered results
       return;
     }
     if (typing) return;
@@ -1406,8 +1424,9 @@ ${APP_CSS}
       <button class="btn" id="helpBtn" title="Keyboard shortcuts (?)">?</button>
       <button class="btn" id="selectAllBtn" title="Check every skill in the filtered list">Select all</button>
       <div class="seg" role="group" aria-label="Sort order">
-        <button data-sort="name" aria-pressed="true">A–Z</button>
-        <button data-sort="checked" aria-pressed="false">Checked first</button>
+        <button data-sort="checked" aria-pressed="true">Checked first</button>
+        <button data-sort="name" aria-pressed="false">A–Z</button>
+        <button data-sort="load" aria-pressed="false">Load order</button>
       </div>
     </div>
     <div id="selBar">
@@ -1492,7 +1511,7 @@ ${APP_CSS}
 <dialog id="helpDialog">
   <h3>Keyboard shortcuts</h3>
   <table>
-    <tr><td><kbd>/</kbd></td><td>search — <kbd>esc</kbd> cancels</td></tr>
+    <tr><td><kbd>/</kbd></td><td>search — <kbd>esc</kbd> leaves the query as-is</td></tr>
     <tr><td><kbd>f</kbd></td><td>filter box — <kbd>esc</kbd> leaves it as-is (does not clear)</td></tr>
     <tr><td><kbd>g</kbd> / <kbd>p</kbd></td><td>global / project scope</td></tr>
     <tr><td><kbd>a</kbd></td><td>select agents (multi-select)</td></tr>

@@ -355,3 +355,175 @@ test.describe("local page honesty (S-163)", () => {
     await ctx.close();
   });
 });
+
+/* ---------- S-164: web semantics — Esc keeps text, honest sort, filter
+   parity control, direction-call regressions. Same harness pattern as the
+   S-163 block: the page served by GET / (the shipped APP_JS itself). */
+
+const SEM_PORT = 8401;
+let semServe: ChildProcessWithoutNullStreams | null = null;
+let semPrefsDir = "";
+
+test.describe("local page web semantics (S-164)", () => {
+  // own serve: Playwright scopes beforeAll per describe group, so the
+  // S-163 servers above never run for this block
+  test.beforeAll(async () => {
+    semPrefsDir = mkdtempSync(join(process.env.TMPDIR ?? "/tmp", "skills-ui-e2e-sem-"));
+    semServe = await startServe(SEM_PORT, {}, semPrefsDir, "web");
+  });
+  test.afterAll(async () => {
+    semServe?.kill("SIGTERM");
+    if (semPrefsDir) rmSync(semPrefsDir, { recursive: true, force: true });
+  });
+
+  test("Esc in the filter blurs but keeps the text and the applied filter", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await quietUpdateCheck(page);
+    await page.goto(localOrigin(SEM_PORT) + "/");
+    await expect(page.locator("#listPane")).toContainText("tdd", { timeout: 15_000 });
+    // "claude" matches code-review only, via its agent name — the F1 case
+    await page.locator("#filter").fill("claude");
+    await expect(page.locator("#skillList li")).toHaveCount(1);
+    await page.locator("#filter").press("Escape");
+    await expect(page.locator("#filter")).not.toBeFocused();
+    await expect(page.locator("#filter")).toHaveValue("claude");
+    await expect(page.locator("#skillList li")).toHaveCount(1); // filter still applied
+    await expect(page.locator("#skillList li", { hasText: "code-review" })).toBeVisible();
+    await expect(page.locator("#skillList li", { hasText: "tdd" })).toHaveCount(0);
+    await ctx.close();
+  });
+
+  test("Esc in search keeps the query and the rendered results", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await quietUpdateCheck(page);
+    await page.route("**/api/search*", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          results: [
+            { name: "found-skill", slug: "me/found", source: "me/found", installs: 3, description: "x" },
+          ],
+          adjustedQuery: null,
+        }),
+      })
+    );
+    await page.goto(localOrigin(SEM_PORT) + "/");
+    await expect(page.locator("#listPane")).toContainText("tdd", { timeout: 15_000 });
+    await page.locator('[data-tab="search"]').click();
+    await page.locator("#searchInput").fill("found");
+    await expect(page.locator("#results li", { hasText: "found-skill" })).toBeVisible({ timeout: 15_000 });
+    await page.locator("#searchInput").press("Escape");
+    await expect(page.locator("#searchInput")).not.toBeFocused();
+    await expect(page.locator("#searchInput")).toHaveValue("found");
+    await expect(page.locator("#results li", { hasText: "found-skill" })).toBeVisible();
+    await ctx.close();
+  });
+
+  test("sort control cycles checked-first / A–Z / load order, each labeled and each real", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    // Load order (zebra, alpha, middle) differs from A–Z, and one checked
+    // skill makes all three modes produce three different orders.
+    const fixture = [
+      { name: "zebra", description: "z", agents: ["Claude Code"], path: "/x/zebra", source: null },
+      { name: "alpha", description: "a", agents: ["Claude Code"], path: "/x/alpha", source: null },
+      { name: "middle", description: "m", agents: ["Claude Code"], path: "/x/middle", source: null },
+    ];
+    await page.route("**/*", (route) => {
+      const url = new URL(route.request().url());
+      if (url.pathname === "/api/updates") {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ scope: "project", updates: {}, checkedCount: 0 }),
+        });
+      }
+      if (url.pathname === "/api/skills") {
+        const scope = url.searchParams.get("scope") ?? "project";
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ scope, skills: fixture.map((s) => ({ ...s, scope })) }),
+        });
+      }
+      if (url.pathname === "/api/skill") {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ body: "(fixture)" }),
+        });
+      }
+      if (url.pathname.startsWith("/api/")) {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ ok: true, output: "[]" }),
+        });
+      }
+      return route.continue();
+    });
+    const names = async (): Promise<string[]> =>
+      (await page.locator("#skillList li .skill-name").allTextContents()).map((t) => t.trim());
+    await page.goto(localOrigin(SEM_PORT) + "/");
+    await expect(page.locator("#skillList li")).toHaveCount(3, { timeout: 15_000 });
+    // the ratified default flip: checked-first (A→Z tiebreak) is pressed on load
+    await expect(page.locator('[data-sort="checked"]')).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator('[data-sort="name"]')).toHaveAttribute("aria-pressed", "false");
+    await expect(page.locator('[data-sort="load"]')).toHaveAttribute("aria-pressed", "false");
+    await page.locator("#skillList li", { hasText: "middle" }).locator("input.skill-check").check();
+    await page.locator('[data-sort="checked"]').click();
+    expect(await names()).toEqual(["middle", "alpha", "zebra"]); // checked first + A→Z tiebreak
+    await page.locator('[data-sort="name"]').click();
+    await expect(page.locator('[data-sort="name"]')).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator('[data-sort="checked"]')).toHaveAttribute("aria-pressed", "false");
+    expect(await names()).toEqual(["alpha", "middle", "zebra"]); // A–Z
+    await page.locator('[data-sort="load"]').click();
+    await expect(page.locator('[data-sort="load"]')).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator('[data-sort="name"]')).toHaveAttribute("aria-pressed", "false");
+    expect(await names()).toEqual(["zebra", "alpha", "middle"]); // load order = fixture order
+    await ctx.close();
+  });
+
+  test("update all with nothing checked posts skills: [] — the whole-scope update (S4)", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await quietUpdateCheck(page);
+    let updateBody = "";
+    await page.route("**/api/update", (route) => {
+      updateBody = route.request().postData() ?? "";
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true, output: "[]" }),
+      });
+    });
+    await page.goto(localOrigin(SEM_PORT) + "/");
+    await expect(page.locator("#listPane")).toContainText("tdd", { timeout: 15_000 });
+    await expect(page.locator("#selBar")).toBeHidden(); // nothing checked
+    await page.locator("#updateAllBtn").click();
+    await expect(page.locator("#toasts .toast.success")).toContainText("Update finished", { timeout: 15_000 });
+    expect(JSON.parse(updateBody)).toEqual({ skills: [], global: false });
+    await ctx.close();
+  });
+
+  test("switching scope clears the checked set (S6)", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await quietUpdateCheck(page);
+    await page.goto(localOrigin(SEM_PORT) + "/");
+    await expect(page.locator("#listPane")).toContainText("tdd", { timeout: 15_000 });
+    await page.locator("#skillList li", { hasText: "tdd" }).locator("input.skill-check").check();
+    await expect(page.locator("#selBar")).toBeVisible();
+    await expect(page.locator("#selCount")).toHaveText("1");
+    await page.locator('[data-scope="global"]').click();
+    await expect(page.locator("#selBar")).toBeHidden(); // setScope cleared the checks
+    await page.locator('[data-scope="project"]').click();
+    await expect(page.locator("#listPane")).toContainText("tdd", { timeout: 15_000 });
+    await expect(page.locator("#skillList li", { hasText: "tdd" }).locator("input.skill-check")).not.toBeChecked();
+    await expect(page.locator("#selBar")).toBeHidden();
+    await ctx.close();
+  });
+});
