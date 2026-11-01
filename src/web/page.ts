@@ -477,7 +477,7 @@ function api(path, opts){
   var url = path;
   if (HOSTED) {
     if (!state.backend) {
-      return Promise.reject(new Error('Not connected — connect your local skills-ui serve first (Connect button, top right).'));
+      return Promise.reject(new Error('Not connected: connect your local skills-ui serve first (Connect button, top right).'));
     }
     url = state.backend + path;
     opts.headers = Object.assign({}, opts.headers, { authorization: 'Bearer ' + state.token });
@@ -571,7 +571,7 @@ function probeBackend(base, token, onStatus){
     return r.json();
   }).then(function(v){
     if (!v.capabilities || !v.capabilities.hosted) throw new Error('old-binary');
-    onStatus('Backend reachable — checking token …');
+    onStatus('Backend reachable, checking token …');
     return fetch(url + '/api/prefs', { headers: { authorization: 'Bearer ' + token } }).then(function(r2){
       if (r2.status === 401) throw new Error('bad-token');
       if (!r2.ok) throw new Error('unreachable');
@@ -583,16 +583,16 @@ function probeBackend(base, token, onStatus){
       throw new Error("This page's origin is not in serve's allowlist. Restart serve with SKILLS_UI_ALLOWED_ORIGINS including " + location.origin + ".");
     }
     if (msg === 'old-binary') {
-      throw new Error('Connected, but your skills-ui binary predates the hosted UI — update the binary and restart serve.');
+      throw new Error('Connected, but your skills-ui binary predates the hosted UI. Update the binary and restart serve.');
     }
     if (msg === 'bad-token') {
-      throw new Error('Token rejected — re-copy the Hosted-UI token line from the serve startup output.');
+      throw new Error('Token rejected: re-copy the Hosted-UI token line from the serve startup output.');
     }
     var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     if (isSafari) {
-      throw new Error('Safari blocks pages from reaching your local network — use Chrome, Edge, or Firefox 153+.');
+      throw new Error('Safari blocks pages from reaching your local network. Use Chrome, Edge, or Firefox 153+.');
     }
-    throw new Error('Cannot reach the backend. If the browser showed a local-network access prompt, choose Allow, then retry — and check the URL/port and that serve is running.');
+    throw new Error('Cannot reach the backend. If the browser showed a local-network access prompt, choose Allow, then retry, and check the URL/port and that serve is running.');
   });
 }
 function connectedDot(ok){
@@ -1114,7 +1114,7 @@ function applySeed(){
       var msg = found.length + ' skill' + (found.length === 1 ? '' : 's') + ' selected for removal';
       if (notInstalled.length) {
         play('error');
-        toast(msg + ' — not installed: ' + notInstalled.join(', '), 'error');
+        toast(msg + ' (not installed: ' + notInstalled.join(', ') + ')', 'error');
       } else {
         toast(msg, 'success');
       }
@@ -1144,7 +1144,7 @@ function showInstallSeed(seed){
       if (!names.length) { $('#seedStatus').textContent = 'No skills found in this source.'; return; }
       var chosen = new Set(preSelected.length ? names.filter(function(n){ return preSelected.indexOf(n) >= 0; }) : names);
       if (!chosen.size) chosen = new Set(names);
-      $('#seedStatus').textContent = names.length + ' skills available — pick what to install:';
+      $('#seedStatus').textContent = names.length + ' skills available, pick what to install:';
       var box = $('#seedList');
       box.innerHTML = '';
       names.forEach(function(n){
@@ -1244,7 +1244,7 @@ function runSearch(){
         state.results = d.results;
         state.searchFailed = !!d.failed;
         renderResults();
-        if (d.adjustedQuery) toast('No exact matches — showing results for “' + d.adjustedQuery + '”', 'success');
+        if (d.adjustedQuery) toast('No exact matches, showing results for “' + d.adjustedQuery + '”', 'success');
       })
       .catch(function(e){ if (seq !== searchSeq) return; play('error'); toast(e.message, 'error'); })
       .finally(function(){ if (seq === searchSeq) setBusy(null); });
@@ -1268,7 +1268,7 @@ function renderResults(){
   list.innerHTML = '';
   if (!state.results.length) {
     if (state.searchFailed) {
-      list.innerHTML = '<div class="empty search-error">search failed — skills.sh unreachable</div>';
+      list.innerHTML = '<div class="empty search-error">search failed: skills.sh unreachable</div>';
       return;
     }
     list.innerHTML = '<div class="empty">' + ($('#searchInput').value.trim() ? 'No results' : 'Type to search the skills.sh registry') + '</div>';
@@ -1580,7 +1580,7 @@ document.addEventListener('DOMContentLoaded', function(){
       if (!raw) {
         setPrefs({ port: null });
         play('confirm');
-        toast('Port cleared — next launch picks a random unused port', 'success');
+        toast('Port cleared: next launch picks a random unused port', 'success');
         return;
       }
       var n = Number(raw);
@@ -1592,7 +1592,7 @@ document.addEventListener('DOMContentLoaded', function(){
       }
       setPrefs({ port: n });
       play('confirm');
-      toast('Port ' + n + ' saved — applies on next launch', 'success');
+      toast('Port ' + n + ' saved, applies on next launch', 'success');
     });
   }
 

@@ -162,7 +162,7 @@ export const realDeps: TuiDeps = {
 
 export async function runTui(seed?: UiSeed, deps: TuiDeps = realDeps): Promise<void> {
   if (!process.stdout.isTTY) {
-    console.error("skills-ui: no TTY — run with --selftest for the in-memory check");
+    console.error("skills-ui: no TTY; run with --selftest for the in-memory check");
     process.exitCode = 1;
     return;
   }
@@ -342,7 +342,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         dispatch({ type: "results", results, adjustedQuery, failed });
       } catch {
         if (seq !== searchSeq) return; // stale failures never toast over newer state
-        toast("search failed — check your connection", "error");
+        toast("search failed: check your connection", "error");
       } finally {
         if (seq === searchSeq) dispatch({ type: "busy", label: null });
       }

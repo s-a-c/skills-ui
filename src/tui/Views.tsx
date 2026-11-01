@@ -184,7 +184,7 @@ function GraphView({ model }: { model: TuiModel }): ReactNode {
   return (
     <box ref={hostRef} width="100%" flexGrow={1} flexShrink={1} minHeight={0} border={true} borderStyle="rounded" borderColor={t.border} title={` graph · ${skillsRef.current.length} skills · esc/G close `}>
       {phase === "unavailable" ? (
-        <text fg={t.textMuted}>3D graph unavailable — requires the Bun runtime with WebGPU (@opentui/three)</text>
+        <text fg={t.textMuted}>3D graph unavailable: requires the Bun runtime with WebGPU (@opentui/three)</text>
       ) : phase === "loading" ? (
         <text fg={t.textMuted}>initializing 3D…</text>
       ) : null}
@@ -421,7 +421,7 @@ function SearchBody({ model }: { model: TuiModel }): ReactNode {
           {model.results.length === 0 ? (
             <text fg={model.searchFailed ? t.danger : t.textMuted}>
               {model.searchFailed
-                ? "search failed — skills.sh unreachable"
+                ? "search failed: skills.sh unreachable"
                 : model.query
                   ? "no results"
                   : "search the skills.sh registry"}
@@ -477,7 +477,7 @@ function SearchBody({ model }: { model: TuiModel }): ReactNode {
             {`${!resultsActive ? ARROW : " "} install list (${model.queue.size})`}
           </text>
           {model.queue.size === 0 ? (
-            <text fg={t.textMuted}>  (empty — space or + adds from Results)</text>
+            <text fg={t.textMuted}>  (empty; space or + adds from Results)</text>
           ) : (
             [...model.queue.values()].map((r, i) => {
               const sel = !resultsActive && i === model.selectedCursor;

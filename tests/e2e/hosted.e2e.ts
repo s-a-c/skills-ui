@@ -282,7 +282,7 @@ test.describe("local page honesty (S-163)", () => {
       page.locator("#skillList li", { hasText: "tdd" }).locator("input.skill-check")
     ).toBeChecked();
     await expect(page.locator("#toasts .toast.error")).toContainText(
-      "1 skill selected for removal \u2014 not installed: ghost"
+      "1 skill selected for removal (not installed: ghost)"
     );
     await expect(page.locator("#toasts .toast.success")).toHaveCount(0);
     await ctx.close();
@@ -391,7 +391,7 @@ test.describe("local page search failure + check status (S-166)", () => {
     await page.locator('[data-tab="search"]').click();
     await page.locator("#searchInput").fill("anything");
     await expect(page.locator("#results .empty.search-error")).toHaveText(
-      "search failed — skills.sh unreachable",
+      "search failed: skills.sh unreachable",
       { timeout: 15_000 }
     );
     await expect(page.locator("#results")).not.toContainText("No results");

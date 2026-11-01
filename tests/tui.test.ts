@@ -490,7 +490,7 @@ describe("tui (in-memory)", () => {
     await new Promise((r) => setTimeout(r, 500)); // debounce + search
     await s.flush();
     const frame = s.captureCharFrame();
-    expect(frame).toContain("search failed — skills.sh unreachable");
+    expect(frame).toContain("search failed: skills.sh unreachable");
     expect(frame).not.toContain("no results");
   });
 
