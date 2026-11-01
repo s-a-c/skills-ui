@@ -13,7 +13,8 @@
     "test": "bun test",
     "build": "bun run scripts/build.ts",
     "export:page": "bun run scripts/export-page.ts",
-    "pty-smoke": "uv run --with pyte python scripts/pty-smoke/smoke.py"
+    "pty-smoke": "uv run --with pyte python scripts/pty-smoke/smoke.py",
+    "perf:budget": "bun run scripts/perf/budget.ts"
   },
   "dependencies": {
     "@opentui/core": "0.7.0",

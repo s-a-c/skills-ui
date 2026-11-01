@@ -11,8 +11,13 @@
  *   update …             exits 0 with text; SKILLS_SHIM_UPDATE_FAIL=1 prints
  *                        a failure line and exits 1
  * Also dumps an env snapshot for sanitization assertions.
+ *
+ * S-177 perf harness: when SKILLS_SHIM_CALLLOG names a file, every
+ * invocation appends one JSON line {ts, args} to it — the spawn counter the
+ * perf tests and the budget script read. Env absent ⇒ byte-identical
+ * previous behavior.
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const args = process.argv.slice(2);
@@ -21,6 +26,14 @@ const stateFile = join(stateDir, "installed.json");
 const projectFixture = process.env.SKILLS_SHIM_LS_PROJECT ?? new URL("contract/ls-project.json", import.meta.url).pathname;
 const globalFixture = process.env.SKILLS_SHIM_LS_GLOBAL ?? new URL("contract/ls-global.json", import.meta.url).pathname;
 const addFixture = process.env.SKILLS_SHIM_ADD ?? new URL("contract/add.json", import.meta.url).pathname;
+
+if (process.env.SKILLS_SHIM_CALLLOG) {
+  try {
+    appendFileSync(process.env.SKILLS_SHIM_CALLLOG, JSON.stringify({ ts: Date.now(), args }) + "\n");
+  } catch {
+    // the call log must never change shim behavior
+  }
+}
 
 if (process.env.SKILLS_SHIM_SNAPSHOT) {
   mkdirSync(join(process.env.SKILLS_SHIM_SNAPSHOT, ".."), { recursive: true });
