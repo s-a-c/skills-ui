@@ -8,13 +8,14 @@ import {
   skillBody as svcSkillBody,
   update as svcUpdate,
 } from "../core/index.ts";
+import { loadDiskIndex, saveDiskIndex } from "../core/disk-index.ts";
 import { loadUiPreferences, saveUiPreferences, type UiPreferences } from "../core/prefs.ts";
 import { skillsVersion } from "../core/skills-client.ts";
 import type { InstalledSkill, SearchSkill, UpdatesResult } from "../core/services/types.ts";
 import type { UiSeed } from "../core/seed.ts";
 import { readSkillDoc } from "../core/services/skill-doc.ts";
 import { disposeAudio, playSound, type SoundKind } from "./audio.ts";
-import { applySeed, createTuiModel, tabFor, update, visibleSkills, type Action, type TuiModel } from "./model.ts";
+import { applySeed, createTuiModel, tabFor, update, type Action, type TuiModel } from "./model.ts";
 import { mountApp, type AppBridge, type RefsHolder } from "./Views.tsx";
 
 export { buildSpikeScreen, SPIKE_MARKDOWN, spikeSyntaxTokens } from "./spike.ts";
@@ -102,7 +103,12 @@ export interface TuiDeps {
 // `skills ls --json` is the load cost (~5s at 295 skills — the CLI scans
 // every agent dir); the description enrichment is ~12ms and innocent.
 // Cache per scope so g↔p switches don't re-pay the subprocess; any
-// mutation drops the cache (S-89).
+// mutation drops the cache (S-89). S-183: a fresh list also persists the
+// per-scope disk index — the SWR seed for the next first load.
+// INVARIANT (S-183): the disk index is only ever WRITTEN here, from fresh
+// subprocess truth. Mutations (install/remove/update below) NEVER read it —
+// they clear this cache and reload through this function, so every row that
+// reaches the model after a mutation came from the subprocess.
 const listCache = new Map<"project" | "global", InstalledSkill[]>();
 
 export const realDeps: TuiDeps = {
@@ -113,6 +119,7 @@ export const realDeps: TuiDeps = {
     const skills = await svcListInstalled(scope);
     const enriched = skills.map((s) => ({ ...s, description: descriptionOf(s.path) }));
     listCache.set(scope, enriched);
+    saveDiskIndex(scope, enriched); // fresh truth -> persist (S-183)
     return enriched.map((s) => ({ ...s }));
   },
   search: (query) => svcSearch(query),
@@ -251,20 +258,61 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
   };
 
   // ---- effects ----
+  // S-183 stale-response guard (the S-182 seq pattern applied to loads): a
+  // slow scope load resolving after a newer one must never overwrite the
+  // newer load's rows, busy label, or failure toast.
+  let loadSeq = 0;
+  let bodySeq = 0; // per-load detail-body token: the highest token wins the pane
   const reloadSkills = async (): Promise<void> => {
+    const seq = ++loadSeq;
+    // S-183 stale-while-revalidate: cold in-memory cache + a persisted index
+    // -> paint the persisted rows IMMEDIATELY (budget: <=300 ms to content,
+    // S-155) while the real subprocess refresh runs below; when it settles,
+    // the skills-loaded reconciliation swaps to truth (selection follows the
+    // same name, vanished checks pruned, filter untouched). The busy label
+    // keeps today's "loading" semantics — no new chrome. The index is never
+    // the basis for a mutation: see the invariant on listCache.
+    if (!listCache.has(model.scope)) {
+      const stale = loadDiskIndex(model.scope);
+      if (stale) {
+        dispatch({ type: "skills-loaded", skills: stale });
+        dispatch({ type: "splash-dismiss" }); // real content beats the splash
+        // fill the detail pane for the stale selection too (local file read,
+        // no subprocess, busy label untouched); bodySeq keeps a slow stale
+        // body from ever overwriting the fresh body fetched below — the
+        // fresh fetch's token is always higher
+        const staleSel = model.visible[model.selected];
+        if (staleSel) {
+          const staleToken = ++bodySeq;
+          void deps.skillBody(staleSel.path)
+            .then((body) => {
+              if (seq !== loadSeq || bodySeq !== staleToken) return;
+              dispatch({ type: "detail", body });
+            })
+            .catch(() => {}); // skillBody never rejects today; the shape must not rely on that
+        }
+      }
+    }
     dispatch({ type: "busy", label: "loading skills" });
     try {
-      const skills = await deps.listInstalled(model.scope);
+      const scope = model.scope;
+      const skills = await deps.listInstalled(scope);
+      if (seq !== loadSeq) return; // a newer load owns the model — drop
       dispatch({ type: "skills-loaded", skills });
-      const selected = visibleSkills(model)[model.selected];
+      const selected = model.visible[model.selected]; // rider (S-183): no recompute
+      const bodyToken = ++bodySeq;
       const body = selected ? await deps.skillBody(selected.path) : null;
+      if (seq !== loadSeq || bodySeq !== bodyToken) return; // newer load or newer body owns the pane
       dispatch({ type: "detail", body });
     } catch (error) {
+      if (seq !== loadSeq) return; // stale failures never toast over newer state
       toast(`load failed: ${error instanceof Error ? error.message : String(error)}`, "error");
     } finally {
-      dispatch({ type: "busy", label: null });
-      // success or failure, the first settled load ends the splash (S-100)
-      dispatch({ type: "splash-dismiss" });
+      if (seq === loadSeq) {
+        dispatch({ type: "busy", label: null });
+        // success or failure, the first settled load ends the splash (S-100)
+        dispatch({ type: "splash-dismiss" });
+      }
     }
   };
 
@@ -302,7 +350,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
   };
 
   const loadDetail = async (): Promise<void> => {
-    const skill = visibleSkills(model)[model.selected];
+    const skill = model.visible[model.selected]; // rider (S-183)
     if (!skill) return;
     dispatch({ type: "busy", label: `loading ${skill.name}` });
     try {
@@ -643,7 +691,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         return;
       case "r":
         if (model.tab === "installed") {
-          const skill = visibleSkills(model)[model.selected];
+          const skill = model.visible[model.selected];
           if (skill) dispatch({ type: "confirm", confirm: { kind: "delete", names: [skill.name] } });
         }
         return;
@@ -652,7 +700,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         else if (model.checked.size > 0) dispatch({ type: "confirm", confirm: { kind: "update", names: [...model.checked] } });
         else {
           // nothing checked — update everything in scope, behind the same gate
-          const names = visibleSkills(model).map((s) => s.name);
+          const names = model.visible.map((s) => s.name);
           if (names.length > 0) dispatch({ type: "confirm", confirm: { kind: "update", names } });
         }
         return;

@@ -48,6 +48,7 @@ class PtyApp:
             e = dict(os.environ)
             e["TERM"] = "xterm-256color"
             e["SKILLS_UI_PREFS_DIR"] = env.get("SKILLS_UI_PREFS_DIR", "/tmp/pty-smoke-prefs")
+            e["SKILLS_UI_CACHE_DIR"] = env.get("SKILLS_UI_CACHE_DIR", "/tmp/pty-smoke-cache")  # S-183: disk index stays out of the real ~/.cache
             # Inject the smoke `skills` binary via PATH: the renderer scrubs
             # process.env before the app resolves SKILLS_UI_SKILLS_BIN, so
             # env-var overrides silently never apply in a real terminal.

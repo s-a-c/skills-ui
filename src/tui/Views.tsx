@@ -11,7 +11,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type R
 import { useSyncExternalStore } from "react";
 import { CATPPUCCIN_LATTE, CATPPUCCIN_MOCHA, syntaxTokensFor, tokensFor } from "../core/theme.ts";
 import { sourceBadge, splashImage } from "./art.ts";
-import { visibleSkills, SEARCH_RENDER_CAP, type Action, type TuiModel } from "./model.ts";
+import { SEARCH_RENDER_CAP, type Action, type TuiModel } from "./model.ts";
 import type { SoundKind } from "./audio.ts";
 import { APP_VERSION } from "../core/version.ts";
 import type { InstalledSkill, SearchSkill, UpdatesResult, UiPreferences } from "../core/services/types.ts";
@@ -131,7 +131,7 @@ function Splash({ model }: { model: TuiModel }): ReactNode {
 function GraphView({ model }: { model: TuiModel }): ReactNode {
   const t = tokensFor(model.prefs.theme);
   const renderer = useRenderer();
-  const skillsRef = useRef(visibleSkills(model)); // snapshot at open
+  const skillsRef = useRef(model.visible); // snapshot at open (precomputed, S-183)
   const hostRef = useRef<BoxRenderable>(null);
   const [phase, setPhase] = useState<"loading" | "ready" | "unavailable">("loading");
 
@@ -229,7 +229,8 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
   const listScrollRef = useRef<ScrollBoxRenderable>(null);
   const selectedRowRef = useRef<BoxRenderable>(null);
   const detailScrollRef = useRef<ScrollBoxRenderable>(null);
-  const visible = visibleSkills(model);
+  // S-183 rider: update() computed this once per dispatch — never re-filter here
+  const visible = model.visible;
   const selected = visible[model.selected];
 
   // live filter state rides the border title (S-88 discipline). The title

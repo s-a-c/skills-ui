@@ -68,6 +68,12 @@ export interface TuiModel {
   graph: boolean;
   /** Discovered `skills` CLI version: undefined = not queried yet, null = not found. */
   skillsVersion: string | null | undefined;
+  /** Rider (S-183): the visible installed list computed by the LAST update()
+   * dispatch. update() runs the filter+sort at most once per dispatch and
+   * stores it here; render paths and app.ts read this instead of re-running
+   * visibleSkills (S-154 measured it twice per keystroke). Maintained ONLY
+   * by update()/createTuiModel — never mutate by hand. */
+  visible: InstalledSkill[];
 }
 
 export function createTuiModel(prefs: UiPreferences): TuiModel {
@@ -103,6 +109,7 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     splash: true,
     graph: false,
     skillsVersion: undefined,
+    visible: [],
   };
 }
 
@@ -123,7 +130,8 @@ export function applySeed(model: TuiModel, seed: UiSeed | undefined): void {
  * agents — description as a secondary match) intersected with the agent
  * multi-select. Checked-first then A→Z when sortCheckedFirst (the fork's
  * selection UX); load order otherwise. Returns a sorted copy — never
- * mutates the model. */
+ * mutates the model. Render paths should prefer `model.visible` (S-183
+ * rider): update() computes this once per dispatch and stores it there. */
 export function visibleSkills(model: TuiModel): InstalledSkill[] {
   const q = model.filter.trim().toLowerCase();
   const byText = q
@@ -147,8 +155,10 @@ export function visibleSkills(model: TuiModel): InstalledSkill[] {
   });
 }
 
-function clamp(model: TuiModel): void {
-  const count = model.tab === "installed" ? visibleSkills(model).length : model.results.length;
+/** Clamps the selection to the rendered rows. `visibleOf` is update()'s
+ * per-dispatch memo (S-183 rider) — this must not re-run the filter+sort. */
+function clamp(model: TuiModel, visibleOf: () => InstalledSkill[]): void {
+  const count = model.tab === "installed" ? visibleOf().length : model.results.length;
   if (model.selected >= count) model.selected = Math.max(0, count - 1);
 }
 
@@ -208,6 +218,18 @@ export function update(model: TuiModel, action: Action): TuiModel {
       : null,
     queue: new Map(model.queue),
   };
+  // Rider (S-183): at most ONE filter+sort per dispatch. The memo serves the
+  // action's own reads (clamps, check ops) AND the final `next.visible` the
+  // render path consumes; `forget()` after any mutation of the visible
+  // inputs (skills / filter / agentFilter / sortCheckedFirst / checked).
+  let memo: InstalledSkill[] | null = null;
+  const forget = (): void => {
+    memo = null;
+  };
+  const visibleOf = (): InstalledSkill[] => {
+    if (!memo) memo = visibleSkills(next);
+    return memo;
+  };
   switch (action.type) {
     case "tab":
       next.tab = action.tab;
@@ -221,11 +243,32 @@ export function update(model: TuiModel, action: Action): TuiModel {
       next.scope = action.scope;
       next.selected = 0;
       next.checked.clear();
+      forget(); // checked order input changed
       break;
-    case "skills-loaded":
+    case "skills-loaded": {
+      // S-183 swap reconciliation (the stale->fresh swap AND every fresh
+      // load share this action): keep the cursor on the same skill NAME
+      // when fresh truth still has it (the fresh checked-first sort can
+      // reshuffle indices), else the clamp below keeps today's index
+      // behavior. Seen-set prune rule: drop a checked name only when the
+      // model has actually SEEN it in a loaded list (previous skills) and
+      // the new list lacks it — checks seeded by `skills ui update/remove`
+      // before the first load have never been seen, so a stale paint whose
+      // index predates the seeded skill can never silently drop them (no
+      // lost checks); true vanishings still prune exactly where they
+      // vanish. Filter and agent filter are untouched — the view stays
+      // narrowed across the swap.
+      const selectedName = visibleOf()[next.selected]?.name;
+      const seen = new Set(next.skills.map((s) => s.name)); // names the model has shown
       next.skills = action.skills;
-      clamp(next);
+      const alive = new Set(action.skills.map((s) => s.name));
+      for (const name of next.checked) if (!alive.has(name) && seen.has(name)) next.checked.delete(name);
+      forget();
+      const at = visibleOf().findIndex((s) => s.name === selectedName);
+      if (at >= 0) next.selected = at;
+      else clamp(next, visibleOf);
       break;
+    }
     case "updates-loaded":
       next.updatesAvailable = new Set(action.names);
       next.updateErrors = new Map(Object.entries(action.errors ?? {}));
@@ -236,7 +279,7 @@ export function update(model: TuiModel, action: Action): TuiModel {
         break;
       }
       const count =
-        next.tab === "installed" ? visibleSkills(next).length : Math.min(next.results.length, SEARCH_RENDER_CAP);
+        next.tab === "installed" ? visibleOf().length : Math.min(next.results.length, SEARCH_RENDER_CAP);
       next.selected = Math.max(0, Math.min(count - 1, (next.tab === "installed" ? next.selected : next.searchSelected) + action.delta));
       if (next.tab === "search") next.searchSelected = next.selected;
       break;
@@ -253,44 +296,51 @@ export function update(model: TuiModel, action: Action): TuiModel {
         if (next.searchPane === "selected") next.selectedCursor = Math.max(0, next.queue.size - 1);
         else next.searchSelected = Math.max(0, Math.min(next.results.length, SEARCH_RENDER_CAP) - 1);
       } else {
-        next.selected = Math.max(0, visibleSkills(next).length - 1);
+        next.selected = Math.max(0, visibleOf().length - 1);
       }
       break;
     }
     case "toggle-check": {
-      const skill = visibleSkills(next)[next.selected];
+      const skill = visibleOf()[next.selected];
       if (skill) {
         if (next.checked.has(skill.name)) next.checked.delete(skill.name);
         else next.checked.add(skill.name);
       }
+      forget(); // checked order input changed (the read above was pre-toggle, as before)
       break;
     }
     case "check-all":
-      for (const s of visibleSkills(next)) next.checked.add(s.name);
+      for (const s of visibleOf()) next.checked.add(s.name);
+      forget();
       break;
     case "toggle-all-checks": {
-      const list = visibleSkills(next);
+      const list = visibleOf();
       const all = list.length > 0 && list.every((s) => next.checked.has(s.name));
       if (all) for (const s of list) next.checked.delete(s.name);
       else for (const s of list) next.checked.add(s.name);
+      forget();
       break;
     }
     case "invert-checks":
-      for (const s of visibleSkills(next)) {
+      for (const s of visibleOf()) {
         if (next.checked.has(s.name)) next.checked.delete(s.name);
         else next.checked.add(s.name);
       }
+      forget();
       break;
     case "sort-toggle":
       next.sortCheckedFirst = !next.sortCheckedFirst;
-      clamp(next);
+      forget(); // sort order input changed
+      clamp(next, visibleOf);
       break;
     case "clear-checks":
       next.checked.clear();
+      forget();
       break;
     case "filter":
       next.filter = action.text;
-      clamp(next);
+      forget(); // text filter input changed
+      clamp(next, visibleOf);
       break;
     case "filtering":
       next.filtering = action.on;
@@ -330,7 +380,8 @@ export function update(model: TuiModel, action: Action): TuiModel {
           && next.agentSelect.staged.size === next.agentSelect.agents.length;
         next.agentFilter = all ? new Set<string>() : new Set(next.agentSelect.staged);
         next.agentSelect = null;
-        clamp(next);
+        forget(); // agent filter input changed
+        clamp(next, visibleOf);
       }
       break;
     case "agent-select-cancel":
@@ -397,6 +448,7 @@ export function update(model: TuiModel, action: Action): TuiModel {
       next.prefs = action.prefs;
       break;
   }
+  next.visible = visibleOf(); // the render path's copy — no recompute (S-183 rider)
   return next;
 }
 

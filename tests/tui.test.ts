@@ -79,6 +79,7 @@ let setup: Awaited<ReturnType<typeof createTestRenderer>> | null = null;
 
 beforeEach(async () => {
   process.env.SKILLS_UI_PREFS_DIR = "/tmp/skills-ui-tui-test-prefs";
+  process.env.SKILLS_UI_CACHE_DIR = "/tmp/skills-ui-tui-test-cache"; // S-183: never the real ~/.cache
   setup = await createTestRenderer({ width: 100, height: 30 });
 });
 
@@ -86,6 +87,7 @@ afterEach(async () => {
   setup?.renderer.destroy();
   setup = null;
   delete process.env.SKILLS_UI_PREFS_DIR;
+  delete process.env.SKILLS_UI_CACHE_DIR;
 });
 
 describe("tui (in-memory)", () => {
