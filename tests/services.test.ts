@@ -218,6 +218,205 @@ describe("search failure signal (S-166 F4)", () => {
   });
 });
 
+describe("search in-flight dedup (S-182)", () => {
+  type StubSkill = { id: string; name: string; installs: number; source: string };
+
+  async function withStub(
+    handler: (q: string) => Response | Promise<Response>,
+    run: (url: string) => Promise<void>
+  ): Promise<void> {
+    const server = Bun.serve({
+      port: 0,
+      hostname: "127.0.0.1",
+      fetch: (req) => handler(new URL(req.url).searchParams.get("q") ?? ""),
+    });
+    const prev = process.env.SKILLS_UI_API_URL;
+    process.env.SKILLS_UI_API_URL = `http://127.0.0.1:${server.port}`;
+    try {
+      await (server as unknown as { ready?: Promise<unknown> }).ready;
+      await run(`http://127.0.0.1:${server.port}`);
+    } finally {
+      server.stop(true);
+      if (prev === undefined) delete process.env.SKILLS_UI_API_URL;
+      else process.env.SKILLS_UI_API_URL = prev;
+    }
+  }
+
+  const skill = (name: string, installs: number): StubSkill => ({
+    id: name,
+    name,
+    installs,
+    source: `acme/${name}`,
+  });
+
+  test("identical concurrent queries share exactly one upstream call — never two identical in flight", async () => {
+    const { searchRegistryFuzzy } = await import("../src/core/services/search.ts");
+    const requests: string[] = [];
+    await withStub(
+      async (q) => {
+        requests.push(q);
+        await Bun.sleep(30); // hold it in flight so the second caller arrives
+        return Response.json({ skills: [skill("tdd", 5)] });
+      },
+      async () => {
+        const [a, b] = await Promise.all([searchRegistryFuzzy("tdd"), searchRegistryFuzzy("tdd")]);
+        expect(requests).toEqual(["tdd"]); // one upstream call, not two
+        expect(a.results.map((r) => r.name)).toEqual(["tdd"]);
+        expect(b.results.map((r) => r.name)).toEqual(["tdd"]); // sharers get the full outcome
+        // in-flight only, NOT a cache: a settled query refires on the next call
+        const c = await searchRegistryFuzzy("tdd");
+        expect(requests).toEqual(["tdd", "tdd"]);
+        expect(c.failed).toBe(false);
+      }
+    );
+  });
+
+  test("distinct concurrent queries never collapse into one call", async () => {
+    const { searchRegistryFuzzy } = await import("../src/core/services/search.ts");
+    const requests: string[] = [];
+    await withStub(
+      async (q) => {
+        requests.push(q);
+        await Bun.sleep(30);
+        return Response.json({ skills: [skill(q, 1)] });
+      },
+      async () => {
+        await Promise.all([searchRegistryFuzzy("alpha"), searchRegistryFuzzy("beta")]);
+        expect(requests.sort()).toEqual(["alpha", "beta"]);
+      }
+    );
+  });
+
+  test("a failed shared request is not memoized: sharers all see failed, the next call refires", async () => {
+    const { searchRegistryFuzzy } = await import("../src/core/services/search.ts");
+    const requests: string[] = [];
+    let fail = true;
+    await withStub(
+      async (q) => {
+        requests.push(q);
+        await Bun.sleep(20);
+        if (fail) return new Response("boom", { status: 500 });
+        return Response.json({ skills: [skill("tdd", 5)] });
+      },
+      async () => {
+        const [a, b] = await Promise.all([searchRegistryFuzzy("tdd"), searchRegistryFuzzy("tdd")]);
+        expect(requests).toEqual(["tdd"]); // even the failing pair shares one call
+        expect(a).toEqual({ results: [], failed: true });
+        expect(b).toEqual({ results: [], failed: true });
+        fail = false;
+        const c = await searchRegistryFuzzy("tdd");
+        expect(requests).toEqual(["tdd", "tdd"]); // cleared on settle — failure never cached
+        expect(c.failed).toBe(false);
+        expect(c.results.map((r) => r.name)).toEqual(["tdd"]);
+      }
+    );
+  });
+});
+
+describe("search semantics byte-pins (S-182 — dedup must not change any result)", () => {
+  type StubSkill = { id: string; name: string; installs: number; source: string };
+
+  /** Deterministic per-query registry: `byQuery[q]` or `fallback`, and a
+   * log of every upstream query in arrival order (1 ms RTT so fan-outs
+   * overlap without reordering the assertions that read the log). */
+  async function withQueryStub(
+    byQuery: Record<string, StubSkill[]>,
+    fallback: StubSkill[],
+    run: (requests: string[]) => Promise<void>
+  ): Promise<void> {
+    const requests: string[] = [];
+    const server = Bun.serve({
+      port: 0,
+      hostname: "127.0.0.1",
+      fetch: async (req) => {
+        const q = new URL(req.url).searchParams.get("q") ?? "";
+        requests.push(q);
+        await Bun.sleep(1);
+        return Response.json({ skills: byQuery[q] ?? fallback });
+      },
+    });
+    const prev = process.env.SKILLS_UI_API_URL;
+    process.env.SKILLS_UI_API_URL = `http://127.0.0.1:${server.port}`;
+    try {
+      await (server as unknown as { ready?: Promise<unknown> }).ready;
+      await run(requests);
+    } finally {
+      server.stop(true);
+      if (prev === undefined) delete process.env.SKILLS_UI_API_URL;
+      else process.env.SKILLS_UI_API_URL = prev;
+    }
+  }
+
+  const skill = (name: string, installs: number): StubSkill => ({
+    id: name,
+    name,
+    installs,
+    source: `acme/${name}`,
+  });
+
+  test("direct hit: hyphen-free query, ungated, installs-desc order, no adjustedQuery, no failed", async () => {
+    const { searchWithFallback } = await import("../src/core/services/search.ts");
+    const fallback = [skill("alpha-tool", 30), skill("alpha-tap", 20), skill("beta-read", 10)];
+    await withQueryStub({}, fallback, async (requests) => {
+      const result = await searchWithFallback("beta");
+      expect(result).toEqual({
+        results: [
+          { name: "alpha-tool", slug: "alpha-tool", source: "acme/alpha-tool", installs: 30 },
+          { name: "alpha-tap", slug: "alpha-tap", source: "acme/alpha-tap", installs: 20 },
+          { name: "beta-read", slug: "beta-read", source: "acme/beta-read", installs: 10 },
+        ],
+        adjustedQuery: null,
+      });
+      expect(result.failed).toBeUndefined(); // discriminated: absent on success
+      expect(requests).toEqual(["beta"]); // exactly the primary call
+    });
+  });
+
+  test("miss that shortens into a hit: exact call sequence and adjustedQuery preserved", async () => {
+    const { searchWithFallback } = await import("../src/core/services/search.ts");
+    await withQueryStub(
+      { "alpha-xyz": [], "alpha-xy": [], "alpha-x": [skill("alpha-xray", 7)] },
+      [],
+      async (requests) => {
+        const result = await searchWithFallback("alpha-xyz");
+        expect(result).toEqual({
+          results: [{ name: "alpha-xray", slug: "alpha-xray", source: "acme/alpha-xray", installs: 7 }],
+          adjustedQuery: "alpha-x",
+        });
+        expect(requests).toEqual(["alpha-xyz", "alpha-xy", "alpha-x"]); // which calls fire: unchanged
+      }
+    );
+  });
+
+  test("trailing-dash fan-out hit: 36 continuations, token-filtered merge, adjustedQuery is the typed query", async () => {
+    const { searchWithFallback } = await import("../src/core/services/search.ts");
+    await withQueryStub({ "alpha-t": [skill("alpha-tool", 30)] }, [], async (requests) => {
+      const result = await searchWithFallback("alpha-");
+      expect(result).toEqual({
+        results: [{ name: "alpha-tool", slug: "alpha-tool", source: "acme/alpha-tool", installs: 30 }],
+        adjustedQuery: "alpha-",
+      });
+      const continuations = "abcdefghijklmnopqrstuvwxyz0123456789"
+        .split("")
+        .map((c) => `alpha-${c}`)
+        .sort();
+      expect(requests[0]).toBe("alpha-");
+      expect(requests.slice(1).sort()).toEqual(continuations); // all 36, no cap, no loss
+    });
+  });
+
+  test("trailing-dash fan-out miss: empty result, no adjustedQuery, no failed — all 36 still fired", async () => {
+    const { searchWithFallback } = await import("../src/core/services/search.ts");
+    await withQueryStub({}, [], async (requests) => {
+      const result = await searchWithFallback("gamma-");
+      expect(result).toEqual({ results: [], adjustedQuery: null });
+      expect(result.failed).toBeUndefined();
+      expect(requests[0]).toBe("gamma-");
+      expect(requests).toHaveLength(37); // primary + the full uncapped fan-out
+    });
+  });
+});
+
 describe("seed", () => {
   test("parses add seeds flag-aware", async () => {
     const { parseUiSeed } = await import("../src/core/seed.ts");

@@ -447,6 +447,100 @@ test.describe("local page search failure + check status (S-166)", () => {
   });
 });
 
+/* ---------- S-182: search in-flight ordering — the stale resolve/catch
+   guards. Same harness pattern as the S-166 block: the served page with
+   /api/search stubbed at the network layer, here with PER-QUERY timing
+   (slow stale 900 ms / fast fresh 50 ms) and DISJOINT payloads, so the pins
+   fail if either guard is deleted: the stale-only payload would replace the
+   fresh render, and the stale rejection would toast over the newer state. */
+
+const ORD_PORT = 8404;
+let ordServe: ChildProcessWithoutNullStreams | null = null;
+let ordPrefsDir = "";
+
+test.describe("local page search in-flight ordering (S-182)", () => {
+  test.beforeAll(async () => {
+    ordPrefsDir = mkdtempSync(join(process.env.TMPDIR ?? "/tmp", "skills-ui-e2e-ord-"));
+    ordServe = await startServe(ORD_PORT, {}, ordPrefsDir, "web");
+  });
+  test.afterAll(async () => {
+    ordServe?.kill("SIGTERM");
+    if (ordPrefsDir) rmSync(ordPrefsDir, { recursive: true, force: true });
+  });
+
+  test("a slow older search response cannot overwrite a newer render (resolve guard)", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await quietUpdateCheck(page);
+    await page.route("**/api/search*", (route) => {
+      const q = new URL(route.request().url()).searchParams.get("q") ?? "";
+      const payload =
+        q === "stale-slow"
+          ? { results: [{ name: "stale-slow-result", slug: "stale-slow-result", source: "o/r", installs: 9 }], adjustedQuery: null }
+          : { results: [{ name: "fresh-fast-result", slug: "fresh-fast-result", source: "o/r", installs: 3 }], adjustedQuery: null };
+      const delay = q === "stale-slow" ? 900 : 50;
+      setTimeout(() => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(payload) }), delay);
+    });
+    await page.goto(localOrigin(ORD_PORT) + "/");
+    await expect(page.locator("#listPane")).toContainText("tdd", { timeout: 15_000 });
+    await page.locator('[data-tab="search"]').click();
+    await page.locator("#searchInput").fill("stale-slow");
+    await page.waitForTimeout(500); // debounce (300 ms) fired; stale response in flight
+    await page.locator("#searchInput").fill("fresh-fast");
+    await expect(page.locator("#results")).toContainText("fresh-fast-result", { timeout: 15_000 });
+    await page.waitForTimeout(1_500); // past the stale response's late landing (~1200 ms)
+    await expect(page.locator("#results")).toContainText("fresh-fast-result"); // the newer render survived
+    await expect(page.locator("#results")).not.toContainText("stale-slow-result"); // the stale set never surfaced
+    await ctx.close();
+  });
+
+  test("a slow older search FAILURE cannot toast over newer state (catch guard)", async ({ browser }: { browser: Browser }) => {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await quietUpdateCheck(page);
+    await page.route("**/api/search*", (route) => {
+      const q = new URL(route.request().url()).searchParams.get("q") ?? "";
+      if (q === "stale-slow") {
+        setTimeout(
+          () => route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ ok: false, output: "boom" }) }),
+          900
+        );
+        return;
+      }
+      setTimeout(
+        () =>
+          route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify({ results: [{ name: "fresh-fast-result", slug: "fresh-fast-result", source: "o/r", installs: 3 }], adjustedQuery: null }),
+          }),
+        50
+      );
+    });
+    await page.goto(localOrigin(ORD_PORT) + "/");
+    await expect(page.locator("#listPane")).toContainText("tdd", { timeout: 15_000 });
+    await page.locator('[data-tab="search"]').click();
+    await page.locator("#searchInput").fill("stale-slow");
+    await page.waitForTimeout(500); // debounce fired; stale rejection in flight
+    await page.locator("#searchInput").fill("fresh-fast");
+    await expect(page.locator("#results")).toContainText("fresh-fast-result", { timeout: 15_000 });
+    // Sample INSIDE the transient toast's life window with a non-retrying
+    // assertion: the unguarded page toasts "HTTP 500" at ~1200 ms and the
+    // page removes it at ~5100 ms — toHaveCount(0) would auto-retry past
+    // the removal and mask the violation. Five samples span ~2.4-4.4 s,
+    // every one inside the window; the guarded page never toasts at all.
+    await page.waitForTimeout(1_500); // past the stale rejection's late landing (~1200 ms)
+    let maxErrorToasts = 0;
+    for (let i = 0; i < 5; i++) {
+      await page.waitForTimeout(400);
+      maxErrorToasts = Math.max(maxErrorToasts, await page.locator("#toasts .toast.error").count());
+    }
+    expect(maxErrorToasts).toBe(0); // no error toast over the newer state, ever
+    await expect(page.locator("#results")).toContainText("fresh-fast-result"); // the newer render survived
+    await ctx.close();
+  });
+});
+
 /* ---------- S-164: web semantics — Esc keeps text, honest sort, filter
    parity control, direction-call regressions. Same harness pattern as the
    S-163 block: the page served by GET / (the shipped APP_JS itself). */

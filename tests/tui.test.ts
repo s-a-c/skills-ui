@@ -507,6 +507,97 @@ describe("tui (in-memory)", () => {
     expect(frame).not.toContain("search failed");
   });
 
+  test("S-182: a slow older search resolving after a newer one never overwrites the newer results", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    type Deferred = {
+      query: string;
+      resolve: (v: { results: SearchSkill[]; adjustedQuery: string | null }) => void;
+    };
+    const pending: Deferred[] = [];
+    deps.search = (query: string) =>
+      new Promise<{ results: SearchSkill[]; adjustedQuery: string | null }>((resolve) => {
+        pending.push({ query, resolve });
+      });
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await s.mockInput.typeText("/");
+    await s.mockInput.typeText("old");
+    await new Promise((r) => setTimeout(r, 450)); // debounce (300 ms) fired — search("old") in flight
+    await s.mockInput.typeText("x"); // query becomes "oldx" — a newer search is scheduled
+    await new Promise((r) => setTimeout(r, 450)); // second debounce fired — search("oldx") in flight
+    expect(pending.map((p) => p.query)).toEqual(["old", "oldx"]); // both dispatched, neither answered
+    // the OLD query settles while the newer one is still pending
+    pending[0]!.resolve({
+      results: [{ name: "stale-old-result", slug: "stale-old-result", source: "o/r", installs: 9 }],
+      adjustedQuery: null,
+    });
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 150)); // settle window — the guard must drop the stale apply
+    await s.renderOnce();
+    let frame = s.captureCharFrame();
+    expect(frame).not.toContain("stale-old-result"); // dropped: the newer query owns the pane
+    // the newer query lands — its results render and survive
+    pending[1]!.resolve({
+      results: [{ name: "fresh-new-result", slug: "fresh-new-result", source: "o/r", installs: 3 }],
+      adjustedQuery: null,
+    });
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 200));
+    await s.renderOnce();
+    await waitFor(() => {
+      expect(s.captureCharFrame()).toContain("fresh-new-result");
+      return true;
+    });
+    frame = s.captureCharFrame();
+    expect(frame).toContain("fresh-new-result");
+    expect(frame).not.toContain("stale-old-result"); // the stale results never surfaced
+  });
+
+  test("S-182: a slow older search REJECTING after a newer one never toasts over newer state", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    type Deferred = {
+      query: string;
+      resolve: (v: { results: SearchSkill[]; adjustedQuery: string | null }) => void;
+      reject: (e: Error) => void;
+    };
+    const pending: Deferred[] = [];
+    deps.search = (query: string) =>
+      new Promise<{ results: SearchSkill[]; adjustedQuery: string | null }>((resolve, reject) => {
+        pending.push({ query, resolve, reject });
+      });
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await s.mockInput.typeText("/");
+    await s.mockInput.typeText("old");
+    await new Promise((r) => setTimeout(r, 450)); // debounce fired — search("old") in flight
+    await s.mockInput.typeText("x"); // "oldx" — a newer search is scheduled
+    await new Promise((r) => setTimeout(r, 450)); // second debounce fired — search("oldx") in flight
+    expect(pending.map((p) => p.query)).toEqual(["old", "oldx"]);
+    pending[0]!.reject(new Error("boom")); // the OLD query fails late, newer still pending
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 150)); // settle window — the guard must drop the stale failure
+    await s.renderOnce();
+    let frame = s.captureCharFrame();
+    expect(frame).not.toContain("search failed"); // stale rejection dropped: no toast over newer state
+    // the newer query lands — its results render and the failure never surfaced
+    pending[1]!.resolve({
+      results: [{ name: "fresh-new-result", slug: "fresh-new-result", source: "o/r", installs: 3 }],
+      adjustedQuery: null,
+    });
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 200));
+    await s.renderOnce();
+    await waitFor(() => {
+      expect(s.captureCharFrame()).toContain("fresh-new-result");
+      return true;
+    });
+    frame = s.captureCharFrame();
+    expect(frame).toContain("fresh-new-result");
+    expect(frame).not.toContain("search failed");
+  });
+
   test("S-166 G4: check-status errors render in the detail line and the toast counts them", async () => {
     const s = setup!;
     s.resize(140, 30); // wide enough that the long error line and toast render unclipped

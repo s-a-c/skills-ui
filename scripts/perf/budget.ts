@@ -416,11 +416,22 @@ async function main(): Promise<void> {
     stub = await startSearchStub({
       rttMs: 40,
       perQueryRttMs: { "stale-aaaa": 900, "aaab": 50 },
+      // S-182: DISJOINT per-query payloads. The stale query answers a
+      // stale-only set; the fresh/default answers a fresh set with NO stale
+      // marker. With one shared payload a full stale-over-fresh swap renders
+      // byte-identical content and the stale-overwrite row could never fire;
+      // with disjoint payloads the row's detector is a TRUE full-swap
+      // detector. 'stub' keeps its exact pre-S-182 row so the
+      // wrapper-overhead and dedup rows are unchanged.
       skills: [
         { id: "stub-skill", name: "stub-skill", installs: 42, source: "stub/registry" },
-        { id: "stale-aaaa-result", name: "stale-aaaa-result", installs: 2, source: "stub/registry" },
         { id: "fresh-aaab-result", name: "fresh-aaab-result", installs: 1, source: "stub/registry" },
       ],
+      perQuerySkills: {
+        "stale-aaaa": [
+          { id: "stale-aaaa-result", name: "stale-aaaa-result", installs: 2, source: "stub/registry" },
+        ],
+      },
     });
     process.env.SKILLS_UI_API_URL = stub.url; // restored from the env snapshot in finally
 
@@ -450,7 +461,7 @@ async function main(): Promise<void> {
     const inFlight = stub.maxIdenticalInFlight();
     const stubCallsForQ = stub.requests.filter((r) => r.q === "stub").length;
     observations.push(
-      `upstream search calls logged: ${stub.requests.length} total, ${stubCallsForQ} for q=stub (3 of them are the concurrent identical-search pin)`
+      `upstream search calls logged: ${stub.requests.length} total, ${stubCallsForQ} for q=stub (1 of them is the concurrent identical-search pin; S-182 deduped 3 concurrent callers onto it)`
     );
     rows.push({
       hotPath: "in-flight identical upstream search requests (3 concurrent GET /api/search?q=stub)",

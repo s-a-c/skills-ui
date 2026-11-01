@@ -269,22 +269,34 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
   };
 
   let searchTimer: ReturnType<typeof setTimeout> | null = null;
+  // S-182 stale guard: a monotonic token captured when the debounced search
+  // is dispatched and checked before anything touches the model — a slow
+  // older query resolving after a newer one can never overwrite the newer
+  // results (or clobber the newer search's busy label / failure toast).
+  let searchSeq = 0;
   const scheduleSearch = (): void => {
     if (searchTimer) clearTimeout(searchTimer);
     const query = model.query.trim();
     if (!query) {
+      searchSeq++; // clearing the query is newer state — any in-flight search is now stale
       dispatch({ type: "results", results: [] });
+      // clear only a search-owned busy slot — a non-search label (install,
+      // load) in flight must survive clearing the query (S-182 review OPTIONAL 1)
+      if (model.busy?.startsWith("searching ")) dispatch({ type: "busy", label: null });
       return;
     }
     searchTimer = setTimeout(async () => {
+      const seq = ++searchSeq; // captured at dispatch…
       dispatch({ type: "busy", label: `searching "${query}"` });
       try {
         const { results, adjustedQuery, failed } = await deps.search(query);
+        if (seq !== searchSeq) return; // …checked at resolve: stale, drop
         dispatch({ type: "results", results, adjustedQuery, failed });
       } catch {
+        if (seq !== searchSeq) return; // stale failures never toast over newer state
         toast("search failed — check your connection", "error");
       } finally {
-        dispatch({ type: "busy", label: null });
+        if (seq === searchSeq) dispatch({ type: "busy", label: null });
       }
     }, 300);
   };

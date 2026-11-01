@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
 <meta name="description" content="skills-ui: browse, install, and update agent skills for coding agents from one dashboard.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-hPW3SJ8AKrAkRrH2BCV/ChD6PJlpBaDnmD7DzSvVN6w=' 'sha256-qgBCJ7iUBev7NZugaRDBog+7mTX72uws1ccFoJz8KDY='; img-src data:; connect-src http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-hPW3SJ8AKrAkRrH2BCV/ChD6PJlpBaDnmD7DzSvVN6w=' 'sha256-Y7bjaQz0l0RMuoUJ+WGtvVilauxtt8DUhvYytS7Jzkc='; img-src data:; connect-src http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <title>skills (0.5.2)</title>
 <style>
@@ -1431,22 +1431,32 @@ function checkForUpdates(force){
 
 /* ---------- search ---------- */
 var searchTimer = null;
+var searchSeq = 0; /* S-182: monotonic token — a slow older response must never overwrite a newer render */
 function runSearch(){
   var q = $('#searchInput').value.trim();
   if (searchTimer) clearTimeout(searchTimer);
-  if (!q) { state.results = []; state.searchFailed = false; renderResults(); return; }
+  if (!q) {
+    searchSeq++; /* clearing the input is newer state — any in-flight search is now stale */
+    state.results = []; state.searchFailed = false; renderResults();
+    /* clear only a search-owned busy slot — a non-search label (install etc.)
+       in flight must survive clearing the input (S-182 review OPTIONAL 1) */
+    if (($('#busyText').textContent || '').indexOf('Searching') === 0) setBusy(null);
+    return;
+  }
   searchTimer = setTimeout(function(){
+    var seq = ++searchSeq; /* captured at dispatch… */
     if (!state.installedAll) refreshInstalledAll();
     setBusy('Searching skills.sh…');
     api('/api/search?q=' + encodeURIComponent(q))
       .then(function(d){
+        if (seq !== searchSeq) return; /* …checked at resolve: stale, drop */
         state.results = d.results;
         state.searchFailed = !!d.failed;
         renderResults();
         if (d.adjustedQuery) toast('No exact matches — showing results for “' + d.adjustedQuery + '”', 'success');
       })
-      .catch(function(e){ play('error'); toast(e.message, 'error'); })
-      .finally(function(){ setBusy(null); });
+      .catch(function(e){ if (seq !== searchSeq) return; play('error'); toast(e.message, 'error'); })
+      .finally(function(){ if (seq === searchSeq) setBusy(null); });
   }, 300);
 }
 

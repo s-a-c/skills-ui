@@ -345,7 +345,12 @@ export interface StaleOverwriteResult {
   /** the newer render happened at all */
   freshRendered: boolean;
   /** the stale response replaced the newer render — the ratified budget is
-   * "stale can't overwrite newer", so true = violation */
+   * "stale can't overwrite newer", so true = violation. Discriminated by
+   * RENDER CONTENT, not stale-marker presence (S-182): the harness stub
+   * answers every query with one shared payload, so the fresh render itself
+   * shows the stale row's marker — the stale response won only if the fresh
+   * marker is GONE while the stale one is present (the guarded page keeps
+   * the fresh render; an unguarded one swaps in the stale-only result set). */
   staleOverwrote: boolean;
   /** final visible text of #results (diagnostics) */
   finalText: string;
@@ -390,7 +395,7 @@ export async function probeStaleOverwrite(
   });
   return {
     freshRendered,
-    staleOverwrote: finalText.includes(staleMarker),
+    staleOverwrote: finalText.includes(staleMarker) && !finalText.includes(freshMarker),
     finalText: finalText.slice(0, 400),
   };
 }

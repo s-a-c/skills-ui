@@ -1222,22 +1222,32 @@ function checkForUpdates(force){
 
 /* ---------- search ---------- */
 var searchTimer = null;
+var searchSeq = 0; /* S-182: monotonic token — a slow older response must never overwrite a newer render */
 function runSearch(){
   var q = $('#searchInput').value.trim();
   if (searchTimer) clearTimeout(searchTimer);
-  if (!q) { state.results = []; state.searchFailed = false; renderResults(); return; }
+  if (!q) {
+    searchSeq++; /* clearing the input is newer state — any in-flight search is now stale */
+    state.results = []; state.searchFailed = false; renderResults();
+    /* clear only a search-owned busy slot — a non-search label (install etc.)
+       in flight must survive clearing the input (S-182 review OPTIONAL 1) */
+    if (($('#busyText').textContent || '').indexOf('Searching') === 0) setBusy(null);
+    return;
+  }
   searchTimer = setTimeout(function(){
+    var seq = ++searchSeq; /* captured at dispatch… */
     if (!state.installedAll) refreshInstalledAll();
     setBusy('Searching skills.sh…');
     api('/api/search?q=' + encodeURIComponent(q))
       .then(function(d){
+        if (seq !== searchSeq) return; /* …checked at resolve: stale, drop */
         state.results = d.results;
         state.searchFailed = !!d.failed;
         renderResults();
         if (d.adjustedQuery) toast('No exact matches — showing results for “' + d.adjustedQuery + '”', 'success');
       })
-      .catch(function(e){ play('error'); toast(e.message, 'error'); })
-      .finally(function(){ setBusy(null); });
+      .catch(function(e){ if (seq !== searchSeq) return; play('error'); toast(e.message, 'error'); })
+      .finally(function(){ if (seq === searchSeq) setBusy(null); });
   }, 300);
 }
 

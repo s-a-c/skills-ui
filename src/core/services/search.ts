@@ -27,7 +27,22 @@ export interface RegistrySearchOutcome {
   failed: boolean;
 }
 
-export async function searchRegistryFuzzy(
+/**
+ * S-182 in-flight dedup, at the level of the ACTUAL upstream fetch: both
+ * consumers (the serve's /api/search handler and the TUI, which calls
+ * searchWithFallback directly) converge on searchRegistryFuzzy, so a keyed
+ * in-flight map here collapses identical concurrent HTTP calls for both —
+ * including identical calls that arise from different composite queries'
+ * shortening chains or fan-outs intersecting. The key is the full effective
+ * query + owner, so two different queries never share. The entry is cleared
+ * on settle (success AND failure): nothing is memoized — a sequential
+ * repeat refires, and a failed outcome can never poison a later identical
+ * query. Semantics: this only collapses identical CONCURRENT calls; which
+ * calls fire for a single sequential query (and every result) is untouched.
+ */
+const inFlight = new Map<string, Promise<RegistrySearchOutcome>>();
+
+async function searchRegistryFuzzyOnce(
   query: string,
   owner?: string
 ): Promise<RegistrySearchOutcome> {
@@ -55,6 +70,20 @@ export async function searchRegistryFuzzy(
   } catch {
     return { results: [], failed: true };
   }
+}
+
+export function searchRegistryFuzzy(
+  query: string,
+  owner?: string
+): Promise<RegistrySearchOutcome> {
+  const key = JSON.stringify([query, owner ?? null]);
+  const pending = inFlight.get(key);
+  if (pending) return pending;
+  const p = searchRegistryFuzzyOnce(query, owner).finally(() => {
+    if (inFlight.get(key) === p) inFlight.delete(key);
+  });
+  inFlight.set(key, p);
+  return p;
 }
 
 export interface FallbackSearchResult {

@@ -8,6 +8,10 @@ import { SHIM, startSearchStub, type SearchStub } from "./helpers.ts";
  * S-177: the stub registry search server (fixed artificial RTT) and the
  * upstream call-count pins. Count/behavioral only — the wrapper-overhead
  * wall-clock number belongs to scripts/perf/budget.ts, not to tests.
+ *
+ * S-182: the 3-concurrent-identical pin is INVERTED from the recorded
+ * pre-dedupe baseline (3 upstream calls, 3 in flight) to the deduped
+ * contract (exactly 1 upstream call, ≤ 1 identical in flight).
  */
 
 let stateDir: string;
@@ -92,7 +96,7 @@ describe("perf: stub registry search server (fixed artificial RTT)", () => {
   });
 
   test(
-    "3 concurrent identical searches ⇒ 3 identical upstream requests in flight (baseline pin; search-dedupe inverts to ≤1)",
+    "3 concurrent identical searches ⇒ exactly 1 upstream request (S-182 in-flight dedup — inverted baseline pin)",
     async () => {
       const stub: SearchStub = await startSearchStub({ rttMs: 80 });
       const prev = process.env.SKILLS_UI_API_URL;
@@ -103,9 +107,21 @@ describe("perf: stub registry search server (fixed artificial RTT)", () => {
           Array.from({ length: 3 }, () => fetch(`${base}/api/search?q=stub`))
         );
         expect(responses.every((r) => r.status === 200)).toBe(true);
-        for (const r of responses) await r.json();
-        expect(stub.requests).toHaveLength(3); // no dedupe on main — the recorded baseline
-        expect(stub.maxIdenticalInFlight()).toBe(3);
+        const bodies = (await Promise.all(responses.map((r) => r.json()))) as Array<{
+          results: Array<{ name: string }>;
+        }>;
+        // The deduped contract: identical concurrent queries share ONE
+        // upstream call — never two identical in flight (pre-S-182 baseline,
+        // recorded at 3/3, is gone).
+        expect(stub.requests).toHaveLength(1);
+        expect(stub.requests[0]!.q).toBe("stub");
+        expect(stub.maxIdenticalInFlight()).toBe(1);
+        // Sharing the request shares nothing observable: every caller still
+        // gets the full mapped payload.
+        for (const body of bodies) {
+          expect(body.results).toHaveLength(1);
+          expect(body.results[0]!.name).toBe("stub-skill");
+        }
       } finally {
         stub.stop();
         if (prev === undefined) delete process.env.SKILLS_UI_API_URL;

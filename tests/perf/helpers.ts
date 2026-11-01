@@ -162,8 +162,17 @@ export interface SearchStubOptions {
   /** per-query RTT override (ms) — the stale-overwrite probe needs a slow
    * stale query and a fast fresh one */
   perQueryRttMs?: Record<string, number>;
-  /** registry payload returned for every query */
+  /** default registry payload — used for any query without a perQuerySkills entry */
   skills?: Array<{ id: string; name: string; installs: number; source: string }>;
+  /** S-182: per-query payload override — when the query has an entry it is
+   * answered with THAT payload, otherwise the shared default (mirrors
+   * perQueryRttMs). Disjoint payloads are what make stale-overwrite
+   * detection content-discriminating: with one shared payload a full
+   * stale-over-fresh swap renders byte-identical content. */
+  perQuerySkills?: Record<
+    string,
+    Array<{ id: string; name: string; installs: number; source: string }>
+  >;
 }
 
 /**
@@ -176,6 +185,7 @@ export interface SearchStubOptions {
 export async function startSearchStub(options: SearchStubOptions = {}): Promise<SearchStub> {
   const rttMs = options.rttMs ?? 40;
   const perQuery = options.perQueryRttMs ?? {};
+  const perQuerySkills = options.perQuerySkills ?? {};
   const skills = options.skills ?? [
     { id: "stub-skill", name: "stub-skill", installs: 42, source: "stub/registry" },
   ];
@@ -190,7 +200,7 @@ export async function startSearchStub(options: SearchStubOptions = {}): Promise<
       await Bun.sleep(perQuery[q] ?? rttMs);
       const end = performance.now() - t0;
       requests.push({ q, start, end });
-      return Response.json({ skills });
+      return Response.json({ skills: perQuerySkills[q] ?? skills });
     },
   });
   await (server as unknown as { ready?: Promise<unknown> }).ready;
