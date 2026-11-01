@@ -87,11 +87,11 @@ a{color:var(--t-primary)}
 
 /* ---------- top bar ---------- */
 header{
-  display:flex;align-items:center;gap:16px;padding:14px 22px;
+  display:flex;align-items:center;gap:16px;padding:12px 20px;
   background:var(--t-surface);border-bottom:1px solid var(--t-border);
   position:sticky;top:0;z-index:20;backdrop-filter:blur(6px);
 }
-.logo{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px}
+.logo{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.2px}
 .logo .mark{
   width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
   background:var(--a-mauve);color:var(--t-bg);
@@ -101,7 +101,7 @@ header{
 
 nav.tabs{display:flex;gap:4px;margin-left:8px;position:relative}
 .tab{
-  border:0;background:transparent;padding:8px 14px;border-radius:9px;cursor:pointer;
+  border:0;background:transparent;padding:8px 12px;border-radius:9px;cursor:pointer;
   color:var(--t-textMuted);transition:background calc(.18s * var(--motion-scale)) var(--ease),color .18s var(--ease),transform .18s var(--ease);
 }
 .tab:hover{background:var(--t-surfaceAlt);color:var(--t-text);transform:translateY(-1px)}
@@ -115,7 +115,7 @@ nav.tabs{display:flex;gap:4px;margin-left:8px;position:relative}
   display:inline-flex;border:1px solid var(--t-border);border-radius:999px;overflow:hidden;
 }
 .scope-toggle button{
-  border:0;background:transparent;padding:6px 14px;cursor:pointer;color:var(--t-textMuted);
+  border:0;background:transparent;padding:4px 12px;cursor:pointer;color:var(--t-textMuted);
   transition:background calc(.18s * var(--motion-scale)) var(--ease),color calc(.18s * var(--motion-scale)) var(--ease);
 }
 .scope-toggle button[aria-pressed="true"]{
@@ -126,7 +126,7 @@ nav.tabs{display:flex;gap:4px;margin-left:8px;position:relative}
 /* ---------- buttons ---------- */
 .btn{
   border:1px solid var(--t-border);background:var(--t-surfaceAlt);border-radius:9px;
-  padding:7px 13px;cursor:pointer;color:var(--t-text);font-weight:500;position:relative;overflow:hidden;
+  padding:8px 12px;cursor:pointer;color:var(--t-text);font-weight:500;position:relative;overflow:hidden;
   transition:transform calc(.16s * var(--motion-scale)) var(--ease),box-shadow .16s var(--ease),background .16s var(--ease),border-color .16s var(--ease);
 }
 .btn:hover{transform:translateY(-2px);box-shadow:0 4px 14px color-mix(in srgb,var(--t-primary) 30%,transparent);border-color:var(--t-primary)}
@@ -143,43 +143,45 @@ nav.tabs{display:flex;gap:4px;margin-left:8px;position:relative}
 @keyframes ripple{to{transform:scale(2.6);opacity:0}}
 
 /* ---------- layout ---------- */
-main{display:grid;grid-template-columns:minmax(320px,420px) 1fr;gap:0;height:calc(100vh - 61px)}
+/* main height tracks the header bar; 66px is the measured header height
+   after the 24b re-space (S-181) so main ends exactly at the viewport edge. */
+main{display:grid;grid-template-columns:minmax(320px,420px) 1fr;gap:0;height:calc(100vh - 66px)}
 #listPane{border-right:1px solid var(--t-border);display:flex;flex-direction:column;min-height:0}
-#detailPane{overflow:auto;overflow-x:hidden;padding:26px 30px;min-height:0}
-.filter-row{padding:14px 16px 8px;display:flex;gap:8px;align-items:center}
+#detailPane{overflow:auto;overflow-x:hidden;padding:24px 28px;min-height:0}
+.filter-row{padding:12px 16px 8px;display:flex;gap:8px;align-items:center}
 #filter{
-  width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--t-border);
+  width:100%;padding:8px 12px;border-radius:10px;border:1px solid var(--t-border);
   background:var(--t-surfaceAlt);color:var(--t-text);
   transition:border-color .18s var(--ease),box-shadow .18s var(--ease);
 }
 #filter::placeholder{color:var(--t-textMuted)}
 #filter:focus{outline:none;border-color:var(--t-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--t-primary) 25%,transparent)}
 
-#selBar{display:none;gap:10px;align-items:center;padding:0 16px 10px}
+#selBar{display:none;gap:12px;align-items:center;padding:0 16px 8px}
 #selBar .count{color:var(--t-textMuted);font-size:13px}
 .skill-check{width:15px;height:15px;accent-color:var(--t-primary);cursor:pointer;flex:none}
 #agentsWrap{position:relative}
 #agentsPop{
   position:absolute;top:calc(100% + 6px);left:0;z-index:26;width:280px;max-height:320px;overflow:auto;
-  background:var(--t-surface);border:1px solid var(--t-border);border-radius:12px;padding:10px 12px;
+  background:var(--t-surface);border:1px solid var(--t-border);border-radius:12px;padding:8px 12px;
   display:none;
 }
 #agentsPop.open{display:block}
-#agentsPop label{display:flex;gap:10px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer}
+#agentsPop label{display:flex;gap:12px;align-items:center;padding:4px 8px;border-radius:8px;cursor:pointer}
 #agentsPop label:hover{background:var(--t-surfaceAlt)}
 #agentsPop input{accent-color:var(--t-primary);width:15px;height:15px}
 #agentsPop .row-actions{display:flex;gap:8px;margin-top:8px}
-kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radius:5px;padding:1px 6px;font-size:12px}
+kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radius:5px;padding:0 4px;font-size:12px}
 #helpDialog kbd{display:inline-block;min-width:42px;text-align:center;margin-right:8px}
 #helpDialog table{border-collapse:collapse;font-size:13.5px}
-#helpDialog td{padding:4px 10px 4px 0}
-.seed-list{display:grid;gap:6px;margin:14px 0;max-height:45vh;overflow:auto}
-.seed-row{display:flex;gap:10px;align-items:center;padding:8px 12px;border:1px solid var(--t-border);border-radius:8px;cursor:pointer}
+#helpDialog td{padding:4px 8px 4px 0}
+.seed-list{display:grid;gap:8px;margin:16px 0;max-height:45vh;overflow:auto}
+.seed-row{display:flex;gap:12px;align-items:center;padding:8px 12px;border:1px solid var(--t-border);border-radius:8px;cursor:pointer}
 .seed-row:hover{background:var(--t-surfaceAlt)}
 .seed-row input{accent-color:var(--t-primary);width:15px;height:15px}
-#skillList{list-style:none;margin:0;padding:10px 12px 20px;overflow:auto;flex:1}
+#skillList{list-style:none;margin:0;padding:8px 12px 20px;overflow:auto;flex:1}
 #skillList li{
-  padding:11px 14px;border-radius:10px;cursor:pointer;position:relative;margin-bottom:4px;
+  padding:12px;border-radius:10px;cursor:pointer;position:relative;margin-bottom:4px;
   border:1px solid transparent;
   transition:background .18s var(--ease),transform calc(.18s * var(--motion-scale)) var(--ease),border-color .18s var(--ease);
 }
@@ -215,26 +217,26 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
 .dot{width:7px;height:7px;border-radius:50%;background:var(--a-green);flex:none}
 .dot.unlinked{background:var(--t-textMuted)}
 
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .chip{
-  font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;
+  font-size:11px;font-weight:600;padding:4px 8px;border-radius:999px;
   background:color-mix(in srgb,var(--chip,var(--a-blue)) 18%,transparent);
   color:var(--t-text);border:1px solid color-mix(in srgb,var(--chip,var(--a-blue)) 45%,transparent);
 }
 
-.empty{color:var(--t-textMuted);padding:24px 18px;text-align:center;animation:rise .35s var(--ease)}
+.empty{color:var(--t-textMuted);padding:24px 16px;text-align:center;animation:rise .35s var(--ease)}
 .empty.search-error{color:var(--t-danger)}
 
 /* ---------- detail ---------- */
 .detail-title{font-size:24px;font-weight:700;margin:0 0 4px;animation:rise .3s var(--ease)}
-.detail-source{color:var(--t-textMuted);margin:0 0 18px}
-.detail-actions{display:flex;gap:10px;margin:0 0 22px;flex-wrap:wrap}
-.detail-meta{display:grid;gap:6px;margin-bottom:22px;font-size:13px}
+.detail-source{color:var(--t-textMuted);margin:0 0 20px}
+.detail-actions{display:flex;gap:12px;margin:0 0 24px;flex-wrap:wrap}
+.detail-meta{display:grid;gap:8px;margin-bottom:24px;font-size:13px}
 .detail-meta dt{color:var(--t-textMuted);font-weight:600}
 .detail-meta dd{margin:0;min-width:0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;overflow-wrap:anywhere}
 .readme{
   border:1px solid var(--t-border);border-radius:12px;background:var(--t-surface);
-  padding:20px 22px;font-size:13.5px;line-height:1.65;max-height:52vh;overflow:auto;
+  padding:20px;font-size:13.5px;line-height:1.65;max-height:52vh;overflow:auto;
   overflow-wrap:break-word;
 }
 /* Rendered SKILL.md (S-165). The pane is a sidebar, not a landing page, so
@@ -253,17 +255,17 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
 .readme .md-li::marker{color:var(--t-textMuted)}
 .readme .md-pre{
   background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radius:9px;
-  padding:11px 14px;margin:.7em 0;overflow:auto;white-space:pre;
+  padding:12px;margin:.7em 0;overflow:auto;white-space:pre;
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.6;
 }
 .readme .md-codeblock{font-family:inherit}
 .readme .md-lang{
-  display:block;color:var(--t-textMuted);font-size:11px;margin:0 0 6px;
+  display:block;color:var(--t-textMuted);font-size:11px;margin:0 0 8px;
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
 }
 .readme .md-code{
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;
-  background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radius:5px;padding:.5px 5px;
+  background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radius:5px;padding:0 4px;
 }
 .readme .md-quote{
   margin:.6em 0;padding:8px 12px;border:1px solid var(--t-border);border-radius:8px;color:var(--t-textMuted);
@@ -275,22 +277,22 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
 }
 .readme .md-hr{border:0;border-top:1px solid var(--t-border);margin:1.1em 0}
 .readme .md-table{border-collapse:collapse;margin:.7em 0;font-size:12.5px;display:block;overflow:auto;max-width:100%}
-.readme .md-table th,.readme .md-table td{border:1px solid var(--t-border);padding:4px 10px;text-align:left;vertical-align:top}
+.readme .md-table th,.readme .md-table td{border:1px solid var(--t-border);padding:4px 8px;text-align:left;vertical-align:top}
 .readme .md-table th{background:var(--t-surfaceAlt);font-weight:600}
 
 /* ---------- search ---------- */
-#searchView{display:none;padding:26px 30px;overflow:auto;height:100%}
+#searchView{display:none;padding:24px 28px;overflow:auto;height:100%}
 .view-search main{grid-template-columns:1fr}
 #searchView{display:block}
-.subtabs{display:flex;gap:6px;margin:0 0 14px}
+.subtabs{display:flex;gap:8px;margin:0 0 16px}
 .subtabs button{
-  border:1px solid var(--t-border);background:transparent;border-radius:999px;padding:5px 14px;
+  border:1px solid var(--t-border);background:transparent;border-radius:999px;padding:4px 12px;
   cursor:pointer;color:var(--t-textMuted);font-weight:500;
   transition:background .16s var(--ease),border-color .16s var(--ease),color .16s var(--ease);
 }
 .subtabs button[aria-selected="true"]{background:var(--t-primary);border-color:var(--t-primary);color:var(--t-primaryText);font-weight:600}
 .subtabs button:hover:not([aria-selected="true"]){background:var(--t-surfaceAlt);color:var(--t-text)}
-#queueList{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:8px;max-width:860px}
+#queueList{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:8px;max-width:860px}
 #queueList li{
   display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--t-border);
   border-radius:12px;background:var(--t-surface);
@@ -301,28 +303,28 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
 #queueList .q-name{font-weight:600}
 #queueList .q-source{color:var(--t-textMuted);font-size:12.5px;font-family:ui-monospace,Menlo,monospace;margin-left:auto}
 #queueList .q-remove{
-  border:0;background:transparent;color:var(--t-textMuted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;
+  border:0;background:transparent;color:var(--t-textMuted);cursor:pointer;font-size:16px;padding:4px 8px;border-radius:6px;
 }
 #queueList .q-remove:hover{color:var(--t-danger);background:color-mix(in srgb,var(--t-danger) 15%,transparent)}
 .add-btn.added{background:color-mix(in srgb,var(--a-green) 18%,transparent);border-color:var(--a-green);color:var(--t-text);cursor:default}
 .add-btn.added:hover{transform:none;box-shadow:none}
-.search-row{display:flex;gap:10px;max-width:720px}
+.search-row{display:flex;gap:12px;max-width:720px}
 #searchInput{
   flex:1;padding:12px 16px;border-radius:12px;border:1px solid var(--t-border);
   background:var(--t-surfaceAlt);color:var(--t-text);font-size:15px;
   transition:border-color .18s var(--ease),box-shadow .18s var(--ease);
 }
 #searchInput:focus{outline:none;border-color:var(--t-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--t-primary) 25%,transparent)}
-#results{list-style:none;margin:22px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+#results{list-style:none;margin:24px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
 #results li{
-  border:1px solid var(--t-border);border-radius:14px;background:var(--t-surface);padding:16px 18px;
+  border:1px solid var(--t-border);border-radius:14px;background:var(--t-surface);padding:16px;
   display:flex;flex-direction:column;gap:8px;
   transition:transform calc(.2s * var(--motion-scale)) var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease);
   animation:rise calc(.4s * var(--motion-scale)) var(--ease) backwards;
   animation-delay:calc(var(--i) * 40ms * var(--motion-scale));
 }
 #results li:hover{transform:translateY(-3px);box-shadow:0 10px 26px color-mix(in srgb,var(--a-mauve) 22%,transparent);border-color:var(--t-primary)}
-.result-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.result-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 .result-name{font-weight:700}
 .result-installs{color:var(--t-textMuted);font-size:12px;white-space:nowrap}
 .result-source{color:var(--t-textMuted);font-size:12.5px;font-family:ui-monospace,Menlo,monospace}
@@ -331,7 +333,7 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
 #settings{
   position:fixed;top:0;right:0;bottom:0;width:340px;z-index:40;
   background:var(--t-surface);border-left:1px solid var(--t-border);
-  padding:22px 24px;overflow:auto;
+  padding:20px 24px;overflow:auto;
 }
 /* The closed state (off-screen + hidden) is scoped to .js, which the page
    script adds before first paint: with scripting off the drawer's content
@@ -343,10 +345,10 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
   visibility:hidden;
 }
 #settings.open{--open:1;visibility:visible;transition:transform calc(.28s * var(--motion-scale)) var(--ease),visibility 0s}
-#settings h2{margin:0 0 18px;font-size:17px;text-wrap:balance}
+#settings h2{margin:0 0 20px;font-size:17px;text-wrap:balance}
 .setting{margin-bottom:20px}
 .setting label{display:block;font-weight:600;margin-bottom:8px}
-.setting .hint{color:var(--t-textMuted);font-size:12px;margin-top:6px}
+.setting .hint{color:var(--t-textMuted);font-size:12px;margin-top:8px}
 .hint-lines span{display:block}
 .seg{display:inline-flex;border:1px solid var(--t-border);border-radius:10px;overflow:hidden;width:100%}
 .seg button{
@@ -365,26 +367,26 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
 /* ---------- modal ---------- */
 dialog{
   border:1px solid var(--t-border);border-radius:16px;background:var(--t-surface);color:var(--t-text);
-  padding:24px 26px;max-width:440px;
+  padding:24px;max-width:440px;
 }
 /* Solid scrim behind the modal (no glass): elevation by lightness. */
 dialog::backdrop{background:var(--t-backdrop)}
 dialog h3{margin:0 0 8px}
-dialog p{color:var(--t-textMuted);margin:0 0 18px}
-dialog .row{display:flex;gap:10px;justify-content:flex-end}
+dialog p{color:var(--t-textMuted);margin:0 0 20px}
+dialog .row{display:flex;gap:12px;justify-content:flex-end}
 #connectDialog{max-width:480px}
 #connectDialog label{display:block;font-size:12.5px;color:var(--t-textMuted);margin:0 0 4px}
 #connectDialog input{
-  width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--t-border);
+  width:100%;padding:8px 12px;border-radius:10px;border:1px solid var(--t-border);
   background:var(--t-surfaceAlt);color:var(--t-text);margin-bottom:12px;
 }
 #connectStatus{min-height:20px;font-size:13.5px;white-space:pre-wrap}
-#connectDialog .connect-help{font-size:12.5px;margin-top:14px}
+#connectDialog .connect-help{font-size:12.5px;margin-top:16px}
 
 /* ---------- toasts ---------- */
 #toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:50}
 .toast{
-  padding:10px 18px;border-radius:11px;font-weight:500;
+  padding:8px 16px;border-radius:11px;font-weight:500;
   background:var(--t-surfaceAlt);color:var(--t-text);border:1px solid var(--t-border);
   animation:toast-in calc(.3s * var(--motion-scale)) var(--ease),toast-out .4s ease 3.4s forwards;
 }
@@ -394,7 +396,7 @@ dialog .row{display:flex;gap:10px;justify-content:flex-end}
 .toast.success::before{background:var(--t-success)}
 .toast.error{border-color:var(--t-danger)}
 .toast.error::before{background:var(--t-danger)}
-.toast::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:9px;background:var(--t-textMuted);vertical-align:middle}
+.toast::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;background:var(--t-textMuted);vertical-align:middle}
 @keyframes toast-in{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
 @keyframes toast-out{to{opacity:0;transform:translateY(8px)}}
 
@@ -404,7 +406,7 @@ dialog .row{display:flex;gap:10px;justify-content:flex-end}
   border:1px solid color-mix(in srgb,var(--a-peach) 55%,transparent);
 }
 .result-chip{
-  font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;
+  font-size:11px;font-weight:700;padding:4px 8px;border-radius:999px;
   background:color-mix(in srgb,var(--a-green) 20%,transparent);
   border:1px solid color-mix(in srgb,var(--a-green) 50%,transparent);
 }
@@ -412,8 +414,8 @@ dialog .row{display:flex;gap:10px;justify-content:flex-end}
   animation:pulse calc(1s * var(--motion-scale)) ease-in-out infinite;margin-right:8px}
 @keyframes pulse{0%,100%{opacity:.35;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
 
-kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radius:5px;padding:1px 6px;font-size:12px}
-footer.tip{color:var(--t-textMuted);font-size:12px;padding:8px 16px 14px;border-top:1px solid var(--t-border)}
+kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radius:5px;padding:0 4px;font-size:12px}
+footer.tip{color:var(--t-textMuted);font-size:12px;padding:8px 16px 12px;border-top:1px solid var(--t-border)}
 `;
 
 const APP_JS = `
@@ -1742,7 +1744,7 @@ ${opts?.hosted ? `<meta http-equiv="Content-Security-Policy" content="${csp}">
 <style>
 /* Hallmark · skills-ui web page · built: the project · depth: polish · genre: modern-minimal · theme: the project's own catppuccin tokens */
 /* Hallmark · pre-emit critique: P3 H4 E4 S3 R4 V3 · weakest: S, a settings and registry dashboard could be any tool; this pass keeps the project's tokens and spacing instead of a re-theme */
-/* Hallmark · waive 24b · the page keeps its own spacing system · spacing is the project's own system; a page-wide re-space is a restyle pass, scheduled for 0.5.3 */
+/* Hallmark · re-space 24b: the 0.5.2 page-wide waiver is paid off · every padding/margin/gap sits on the 4px scale (S-181) · spacing values only; no color, type, or motion changes */
 [data-theme="mocha"]{
 ${cssVarsFor(THEME_TOKENS.mocha, CATPPUCCIN_MOCHA)}
   --t-crust:${CATPPUCCIN_MOCHA.crust};
@@ -1774,7 +1776,7 @@ ${APP_CSS}
   </div>
 </header>
 
-<div id="busyBar" style="display:none;padding:8px 22px;background:var(--t-surface);border-bottom:1px solid var(--t-border)">
+<div id="busyBar" style="display:none;padding:8px 20px;background:var(--t-surface);border-bottom:1px solid var(--t-border)">
   <span class="busy-dot"></span><span id="busyText"></span>
 </div>
 
@@ -1894,7 +1896,7 @@ ${APP_CSS}
     <tr><td><kbd>i</kbd> / <kbd>x</kbd></td><td>installed tab / settings drawer</td></tr>
     <tr><td><kbd>?</kbd></td><td>this help (<kbd>esc</kbd> closes)</td></tr>
   </table>
-  <div class="row" style="margin-top:14px"><button class="btn" id="helpClose">Close</button></div>
+  <div class="row" style="margin-top:16px"><button class="btn" id="helpClose">Close</button></div>
 </dialog>
 
 <dialog id="connectDialog" aria-label="Connect to your local skills-ui serve">
