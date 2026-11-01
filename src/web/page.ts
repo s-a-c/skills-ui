@@ -182,6 +182,11 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
   padding:11px 14px;border-radius:10px;cursor:pointer;position:relative;margin-bottom:4px;
   border:1px solid transparent;
   transition:background .18s var(--ease),transform calc(.18s * var(--motion-scale)) var(--ease),border-color .18s var(--ease);
+}
+/* S-180: the entrance stagger is opt-in per row (.rise-in, stamped only on
+   the first population per page load) so filter re-renders, reorders and
+   selection flips can never replay it. */
+#skillList li.rise-in{
   animation:rise calc(.35s * var(--motion-scale)) var(--ease) backwards;
   animation-delay:calc(var(--i) * 28ms * var(--motion-scale));
 }
@@ -681,49 +686,155 @@ function filteredSkills(){
   /* 'load' deliberately sorts nothing — CLI load order = state.skills order */
   return items;
 }
+/* ---------- S-180 DOM-reuse render ----------
+   Rows are keyed (scope + '/' + skill name) and persist across renders: a
+   keystroke reconciles — create missing rows, remove gone ones, refresh
+   changed content in place — instead of innerHTML='' rebuilding ~390 li
+   plus ~1.6k listeners per keystroke. The entrance stagger (.rise-in) is
+   stamped on the first population that actually paints rows per page load
+   and never re-stamped: later populations — scope switches, filter
+   renders, reorders, selection flips — replay nothing. Row-node identity
+   holds within a non-empty result set; rows filtered all the way out are
+   discarded, so widening the needle again recreates them (by design, and
+   without animation). Content refreshes are keyed off rowSignature only:
+   a needle change over the same result set touches no DOM at all. */
+var rowByKey = {};
+var listIntroPending = true;
+var filterTimer = null;
+var FILTER_DEBOUNCE_MS = 150;
+function cancelFilterRender(){
+  if (filterTimer) { clearTimeout(filterTimer); filterTimer = null; }
+}
+function scheduleFilterRender(){
+  cancelFilterRender();
+  filterTimer = setTimeout(function(){
+    filterTimer = null;
+    /* Bound the User Timing buffers: each pass emits 2 marks + 1 measure
+       and nothing else clears them, so a long session would fill the
+       finite entry buffers and silently kill instrumentation. Probes only
+       read entries with startTime >= their own t0, so clearing the three
+       names at the top of every pass is safe. */
+    performance.clearMarks('skills-ui:filter-render-start');
+    performance.clearMarks('skills-ui:filter-render-end');
+    performance.clearMeasures('skills-ui:filter-render');
+    /* S-180 perf instrumentation: standard User Timing marks around every
+       debounced render pass — the budget harness (scripts/perf) reads the
+       skills-ui:filter-render measure entry to charge the RENDER WORK,
+       excluding this debounce wait and the browser's frame pacing. Zero
+       behavioral impact; inert unless something reads the entries. */
+    performance.mark('skills-ui:filter-render-start');
+    try {
+      renderList();
+    } finally {
+      performance.mark('skills-ui:filter-render-end');
+      performance.measure('skills-ui:filter-render', 'skills-ui:filter-render-start', 'skills-ui:filter-render-end');
+    }
+  }, FILTER_DEBOUNCE_MS);
+}
+function rowKeyFor(name){ return state.scope + '/' + name; }
+function rowNameOf(li){
+  var key = li.getAttribute('data-key') || '';
+  return key.slice(state.scope.length + 1);
+}
+function rowSignature(s){
+  var upd = state.updates[s.name] || {};
+  return (s.description || '') + '|' + (s.agents || []).join(',') + '|' +
+    (upd.updateAvailable ? 'u' : '') + (upd.error ? 'e' : '') +
+    (state.checked.has(s.name) ? 'c' : '');
+}
+function rowHtml(s){
+  var outdated = state.updates[s.name] && state.updates[s.name].updateAvailable;
+  return '<div class="skill-name">' +
+    '<input type="checkbox" class="skill-check" aria-label="Select ' + esc(s.name) + ' for update"' +
+    (state.checked.has(s.name) ? ' checked' : '') + '>' +
+    '<span class="dot' + (s.agents.length ? '' : ' unlinked') + '"></span>' +
+    esc(s.name) +
+    (outdated ? '<span class="update-badge">update</span>' : '') +
+    '</div>' +
+    '<div class="skill-desc">' + esc(s.description || '') + '</div>' +
+    '<div class="chips">' + s.agents.slice(0, 4).map(function(a){
+      return '<span class="chip" style="--chip:var(' + chipColor(a) + ')">' + esc(a) + '</span>';
+    }).join('') + (s.agents.length > 4 ? '<span class="chip">+' + (s.agents.length - 4) + '</span>' : '') + '</div>';
+}
 function renderList(){
   var list = $('#skillList');
   var items = filteredSkills();
-  list.innerHTML = '';
+  var intro = listIntroPending && items.length > 0;
+  if (intro) listIntroPending = false;
+  var wanted = {};
+  items.forEach(function(s){ wanted[rowKeyFor(s.name)] = s; });
+  /* pass 1: drop rows the new result set does not contain (and any stray
+     non-row nodes) — removal, not display-hiding, so the li count is
+     exactly the match set */
+  Array.prototype.slice.call(list.children).forEach(function(node){
+    var key = node.tagName === 'LI' ? node.getAttribute('data-key') : null;
+    if (key !== null && wanted[key]) return;
+    if (key !== null) delete rowByKey[key];
+    node.remove();
+  });
+  /* pass 2: create missing rows, refresh changed content in place, keep
+     order with the fewest moves */
+  var cursor = list.firstChild;
   items.forEach(function(s, i){
-    var li = document.createElement('li');
-    li.style.setProperty('--i', i);
-    li.setAttribute('role', 'option');
-    li.setAttribute('aria-selected', String(s.name === state.selected));
-    li.setAttribute('tabindex', '0');
-    var outdated = state.updates[s.name] && state.updates[s.name].updateAvailable;
-    var updError = state.updates[s.name] && state.updates[s.name].error;
-    li.innerHTML =
-      '<div class="skill-name">' +
-      '<input type="checkbox" class="skill-check" aria-label="Select ' + esc(s.name) + ' for update"' +
-      (state.checked.has(s.name) ? ' checked' : '') + '>' +
-      '<span class="dot' + (s.agents.length ? '' : ' unlinked') + '"></span>' +
-      esc(s.name) +
-      (outdated ? '<span class="update-badge">update</span>' : '') +
-      '</div>' +
-      '<div class="skill-desc">' + esc(s.description || '') + '</div>' +
-      '<div class="chips">' + s.agents.slice(0, 4).map(function(a){
-        return '<span class="chip" style="--chip:var(' + chipColor(a) + ')">' + esc(a) + '</span>';
-      }).join('') + (s.agents.length > 4 ? '<span class="chip">+' + (s.agents.length - 4) + '</span>' : '') + '</div>';
-    // G4: not-checkable/check-failed skills stop being silently badge-less —
-    // the status rides the row as a tooltip (the detail pane carries the full line)
-    if (updError) li.title = 'update check: ' + updError;
-    li.querySelector('.skill-check').addEventListener('click', function(ev){ ev.stopPropagation(); });
-    li.querySelector('.skill-check').addEventListener('change', function(ev){
-      if (ev.target.checked) state.checked.add(s.name); else state.checked.delete(s.name);
-      renderSelBar();
-      play('select');
-    });
-    li.addEventListener('click', function(){ selectSkill(s.name); play('select'); });
-    li.addEventListener('keydown', function(ev){ if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); selectSkill(s.name); play('select'); } });
-    list.appendChild(li);
+    var key = rowKeyFor(s.name);
+    var li = rowByKey[key];
+    if (!li) {
+      li = document.createElement('li');
+      li.setAttribute('data-key', key);
+      li.style.setProperty('--i', i);
+      li.setAttribute('role', 'option');
+      li.setAttribute('tabindex', '0');
+      if (intro) li.classList.add('rise-in');
+      li.__sig = null;
+      rowByKey[key] = li;
+    }
+    var sig = rowSignature(s);
+    /* Content is needle-independent — rowHtml builds no match markup and
+       rowSignature covers every content source — so a changed needle over
+       an identical result set reconciles to zero DOM work. When match
+       highlighting ever lands, fold the needle into rowSignature instead
+       of re-rendering row content per keystroke. */
+    if (li.__sig !== sig) {
+      li.innerHTML = rowHtml(s);
+      var updError = state.updates[s.name] && state.updates[s.name].error;
+      // G4: not-checkable/check-failed skills stop being silently badge-less —
+      // the status rides the row as a tooltip (the detail pane carries the full line)
+      if (updError) li.title = 'update check: ' + updError;
+      else if (li.title) li.removeAttribute('title');
+      li.__sig = sig;
+    }
+    var selState = String(s.name === state.selected);
+    if (li.getAttribute('aria-selected') !== selState) li.setAttribute('aria-selected', selState);
+    if (li === cursor) {
+      cursor = li.nextSibling;
+    } else {
+      /* A moved node restarts CSS animations — strip the entrance class
+         before re-inserting so a reorder can never replay the stagger.
+         Only ALREADY-CONNECTED rows strip here: brand-new rows must carry
+         the class into their insertion (the first-paint cascade). cursor
+         is null on a still-empty list, so every first-population row walks
+         this branch and must keep the class. */
+      if (li.parentNode && li.classList.contains('rise-in')) li.classList.remove('rise-in');
+      list.insertBefore(li, cursor);
+    }
   });
   if (!items.length) {
     // needle lives in filteredSkills scope — read the filter here instead
     // (0.5.1 hotfix: the old out-of-scope reference threw 'needle is not
     // defined' on every empty render, blanking the list)
     var filterText = (($('#filter').value || '').trim());
-    list.innerHTML = '<div class="empty">' + (filterText ? 'No matches for “' + esc(filterText) + '”' : 'Nothing here yet') + '</div>';
+    var emptyHtml = filterText ? 'No matches for “' + esc(filterText) + '”' : 'Nothing here yet';
+    var empty = list.querySelector('.empty');
+    if (!empty) {
+      var div = document.createElement('div');
+      div.className = 'empty';
+      div.innerHTML = emptyHtml;
+      div.__sig = emptyHtml;
+      list.appendChild(div);
+    } else if (empty.__sig !== emptyHtml) {
+      empty.innerHTML = emptyHtml;
+      empty.__sig = emptyHtml;
+    }
   }
 }
 
@@ -1267,6 +1378,7 @@ function installQueue(){
 
 /* ---------- tabs, scope, settings ---------- */
 function setTab(tab){
+  cancelFilterRender(); // S-180: a pending filter render must not fire into another view
   state.tab = tab;
   document.querySelectorAll('.tab').forEach(function(t){ t.setAttribute('aria-selected', String(t.getAttribute('data-tab') === tab)); });
   var searchTab = document.querySelector('[data-tab="search"]');
@@ -1319,6 +1431,7 @@ function renderSelBar(){
   $('#selCount').textContent = n;
 }
 function setScope(scope){
+  cancelFilterRender(); // S-180: a pending filter render must not fire into the other scope
   state.checked.clear();
   renderSelBar();
   state.scope = scope;
@@ -1386,7 +1499,38 @@ document.addEventListener('DOMContentLoaded', function(){
       renderList();
     });
   });
-  $('#filter').addEventListener('input', renderList);
+  /* S-180: row events are delegated on the persistent list — row nodes are
+     reused across renders, so per-row listeners would be re-attached (or
+     dropped) on every reconcile. Semantics match the old per-row handlers:
+     a checkbox click never selects the row; its change updates the checked
+     set; Enter/Space on a row selects it. */
+  var skillListEl = $('#skillList');
+  skillListEl.addEventListener('click', function(ev){
+    if (ev.target.closest && ev.target.closest('.skill-check')) { ev.stopPropagation(); return; }
+    var li = ev.target.closest ? ev.target.closest('li[data-key]') : null;
+    if (li) { selectSkill(rowNameOf(li)); play('select'); }
+  });
+  skillListEl.addEventListener('change', function(ev){
+    var box = ev.target;
+    if (!box.classList || !box.classList.contains('skill-check')) return;
+    var li = box.closest ? box.closest('li[data-key]') : null;
+    if (!li) return;
+    var name = rowNameOf(li);
+    if (box.checked) state.checked.add(name); else state.checked.delete(name);
+    renderSelBar();
+    play('select');
+  });
+  skillListEl.addEventListener('keydown', function(ev){
+    if (ev.key !== 'Enter' && ev.key !== ' ') return;
+    var li = ev.target.closest ? ev.target.closest('li[data-key]') : null;
+    if (!li) return;
+    ev.preventDefault();
+    selectSkill(rowNameOf(li));
+    play('select');
+  });
+  /* S-180: the filter render is debounced (trailing edge) — the listener
+     only arms the timer; no filtering happens until it fires. */
+  $('#filter').addEventListener('input', scheduleFilterRender);
   $('#filter').addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { ev.preventDefault(); ev.target.blur(); } }); // Esc keeps the text + the applied filter
   $('#searchInput').addEventListener('input', runSearch);
   $('#updateAllBtn').addEventListener('click', function(){ updateSkills([], state.scope === 'global'); });

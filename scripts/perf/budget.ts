@@ -30,10 +30,14 @@
  * a harness failure.
  *
  * Wall-clock protocol: the API-timed rows (cold/warm lists, detail, search)
- * take REPS samples each (default 5) and report the MEDIAN. The
- * filter-render row is ONE sample per scenario needle (7 needles, median
- * across needles — not REPS per needle). The filter matching row is REPS
- * timed full-corpus skillMatches passes per needle, median across all
+ * take REPS samples each (default 5) and report the MEDIAN. The filter
+ * render-work row takes ONE sample per scenario needle (7 needles, median
+ * across needles — not REPS per needle); render work = the page's own
+ * skills-ui:filter-render User Timing measure (marks around every debounced
+ * render pass), EXCLUDING both the ratified debounce wait and the browser's
+ * frame pacing (perceived dispatch→render is context). The cold-global
+ * paint row is REPS fresh-serve samples, median. The filter matching row is
+ * REPS timed full-corpus skillMatches passes per needle, median across all
  * passes. Count rows (spawns, rebuilds, replays, in-flight, stale) are
  * exact. The stub registry answers every search probe with a FIXED
  * artificial RTT so the wrapper-overhead row never touches the network.
@@ -460,25 +464,44 @@ async function main(): Promise<void> {
     const context: BrowserContext = await newPerfContext(browser); // animations must RUN
     const page: Page = await context.newPage();
     await stubUpdates(page);
-    const pageServer = await freshServer(true);
-    servers.push(pageServer);
     const pageTimeout = REAL ? 300_000 : 60_000;
-    progress("opening the served page (boots the project list)…");
-    await openServedPage(page, pageServer.base, scenario.expectedProjectRows, pageTimeout);
 
-    // cold global perceived first paint — this serve has not listed global yet
-    const paintMs = await probeScopeFirstPaint(page, {
-      scope: "global",
-      markerText: scenario.globalMarker,
-      expectedRowCount: scenario.globalRowCount,
-      timeoutMs: pageTimeout,
-    });
+    // cold global perceived first paint — TRULY COLD per rep: a fresh serve
+    // (global never listed) and a fresh page load per sample, median of
+    // REPS. A single sample proved machine-noisy (±100 ms swings on this
+    // row on this machine); the median is the honest cold number.
+    const paintSamples: number[] = [];
+    for (let i = 0; i < REPS; i++) {
+      const paintServer = await freshServer(true);
+      try {
+        progress(`cold global paint rep ${i + 1}/${REPS}: opening a fresh serve + page…`);
+        await openServedPage(page, paintServer.base, scenario.expectedProjectRows, pageTimeout);
+        paintSamples.push(
+          await probeScopeFirstPaint(page, {
+            scope: "global",
+            markerText: scenario.globalMarker,
+            expectedRowCount: scenario.globalRowCount,
+            timeoutMs: pageTimeout,
+          })
+        );
+        progress(`cold global paint rep ${i + 1}/${REPS}: ${fmtMs(paintSamples[paintSamples.length - 1]!)}`);
+      } finally {
+        await paintServer.stop().catch(() => {});
+      }
+    }
     msRow(
-      "cold global perceived first paint — scope switch on the served page, cold serve",
+      "cold global perceived first paint — scope switch on a fresh serve, median of fresh-serve reps",
       "≤ 300 ms",
       300,
-      paintMs
+      median(paintSamples)
     );
+
+    // the filter probes run on their own fresh serve (fresh load starts on
+    // the project list with an empty filter)
+    const pageServer = await freshServer(true);
+    servers.push(pageServer);
+    progress("opening the served page for the filter probes…");
+    await openServedPage(page, pageServer.base, scenario.expectedProjectRows, pageTimeout);
     msRow(
       `filter matching alone — skillMatches over ${scenario.expectedProjectRows} entries, per needle pass, median`,
       "≤ 5 ms",
@@ -489,55 +512,45 @@ async function main(): Promise<void> {
       `filter matching instrument: ${matchedRows} matches counted across ${matchingSamples.length} timed full-corpus passes (liveness check; per-needle row counts are the filter probe samples below)`
     );
 
-    // back to the full project list for the filter probes
-    await page.evaluate(() =>
-      (document.querySelector('[data-scope="project"]') as HTMLElement).click()
-    );
-    await page.waitForFunction(
-      (n) => document.querySelectorAll("#skillList li").length === n,
-      scenario.expectedProjectRows,
-      { timeout: pageTimeout }
-    );
-
-    // full-list render datapoint (observation only — the render budget row
-    // is the 50 ms per-keystroke row; the 5 ms budget is matching alone,
-    // measured in-process above without touching the browser)
-    const fullRenders: number[] = [];
-    let fullListNoMutation = false;
-    for (let i = 0; i < 3; i++) {
-      const probe = await probeFilterRender(page, "");
-      if (probe.timedOut) die("filter probe: full-list content never appeared (rows lost or value diverged)");
-      if (probe.noMutation) {
-        // DOM reuse active: an empty-needle keystroke changed nothing — a
-        // legitimate outcome, there is just no render to time
-        fullListNoMutation = true;
-        break;
-      }
-      fullRenders.push(probe.durationMs);
-    }
-    observations.push(
-      fullListNoMutation || fullRenders.length === 0
-        ? "full-list render datapoint: no DOM mutation observed for an empty-needle keystroke (DOM reuse active) — nothing to time"
-        : `full-list render datapoint (context only, not a budget row — dispatch to first list mutation for an empty-needle keystroke over ${scenario.expectedProjectRows} rows): ${fmtMs(median(fullRenders))} median of ${fullRenders.length}`
-    );
-
-    // per-keystroke row: varied needles across the corpus
+    // per-needle row: the RENDER WORK of each debounced pass (first list
+    // mutation → settled). The S-155 budget "≤ 50 ms per debounced render"
+    // charges the render, not the ratified 150–200 ms debounce wait — the
+    // perceived dispatch→render value (debounce included) is reported as
+    // context. Probe window 400 ms: any legitimate debounced render of this
+    // corpus lands well inside it; a no-mutation outcome for a CHANGING
+    // needle inside that window means the render never happened.
+    const FILTER_PROBE_WINDOW_MS = 400;
     const keystrokes: number[] = [];
+    const perceived: number[] = [];
     const probeSamples: string[] = [];
     for (const value of scenario.filterProbes) {
-      const probe = await probeFilterRender(page, value);
+      const probe = await probeFilterRender(page, value, FILTER_PROBE_WINDOW_MS);
       if (probe.timedOut) die(`filter probe: content for needle "${value}" never appeared (rows lost or value diverged)`);
       if (probe.noMutation) {
-        // every scenario needle differs from the previous filter value, so a
-        // render with zero list mutations means the render never happened
-        die(`filter probe: zero DOM mutations for needle "${value}" — a changing needle must re-render`);
+        // A changing needle CAN mutate nothing: when its result set equals
+        // the previous one (e.g. "p" vs "" over this corpus — every name
+        // contains both), the keyed reconcile is a legitimate no-op. The
+        // page's own User Timing measure for this window proves the pass
+        // ran; sample its render work. No measure at all means the
+        // debounced render never fired — that is still fatal.
+        if (probe.renderWorkMs <= 0) {
+          die(`filter probe: zero DOM mutations for needle "${value}" — a changing needle must re-render`);
+        }
+        probeSamples.push(`"${value}" → ${probe.rows} rows, no DOM change, render ${fmtMs(probe.renderWorkMs)} (perceived ${fmtMs(probe.durationMs)})`);
+        keystrokes.push(probe.renderWorkMs);
+        perceived.push(probe.durationMs);
+        continue;
       }
-      keystrokes.push(probe.durationMs);
-      probeSamples.push(`"${value}" → ${probe.rows} rows in ${fmtMs(probe.durationMs)}`);
+      keystrokes.push(probe.renderWorkMs);
+      perceived.push(probe.durationMs);
+      probeSamples.push(`"${value}" → ${probe.rows} rows, render ${fmtMs(probe.renderWorkMs)} (perceived ${fmtMs(probe.durationMs)})`);
     }
     observations.push(`filter probe samples: ${probeSamples.join("; ")}`);
+    observations.push(
+      `filter perceived dispatch→render (INCLUDES the ratified debounce wait, context only — the budget row charges the render work): ${fmtMs(median(perceived))} median`
+    );
     msRow(
-      "filter render per keystroke — median over varied needles on the served page",
+      "filter render work per debounced render (User Timing measure of the pass) — median over varied needles",
       "≤ 50 ms",
       50,
       median(keystrokes)
@@ -547,8 +560,8 @@ async function main(): Promise<void> {
     // the SAME row set, so any recreation is measurable waste. A zero-mutation
     // outcome is the DOM-reuse happy path (0 rebuilds / 0 replays), not a
     // failure; a rebuild only counts MET when EVERY row kept identity.
-    await probeFilterRender(page, scenario.rebuildProbe);
-    const repeat = await probeFilterRender(page, scenario.rebuildProbe);
+    await probeFilterRender(page, scenario.rebuildProbe, FILTER_PROBE_WINDOW_MS);
+    const repeat = await probeFilterRender(page, scenario.rebuildProbe, FILTER_PROBE_WINDOW_MS);
     if (repeat.timedOut) die("filter probe: same-result keystroke content never appeared (rows lost or value diverged)");
     const rebuilt = !repeat.noMutation && repeat.preservedRows < repeat.rows;
     rows.push({

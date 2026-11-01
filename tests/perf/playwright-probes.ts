@@ -94,6 +94,20 @@ export interface FilterProbeResult {
   /** list-scoped animations that did not exist before the render — the
    * animation-replay count; always 0 when noMutation */
   freshAnimations: number;
+  /** the RENDER WORK of the debounced pass: the page's own User Timing
+   * measure (skills-ui:filter-render, marks placed around every debounced
+   * render pass) for the pass this probe triggered — the execution time of
+   * the render itself (matching + reconcile + DOM ops). Excludes BOTH the
+   * ratified debounce wait and the browser's frame pacing; `durationMs` is
+   * the perceived dispatch→first-mutation value that INCLUDES the wait.
+   * Falls back to a mutation-burst estimate on page builds without the
+   * marks. Read on no-op passes too: a legitimate reconcile-to-nothing
+   * reports its own measure (the true O(N) signature-read cost), so 0
+   * means only that no measure exists AND no mutation fired. The
+   * S-155 budget "≤ 50 ms per debounced render" is asserted against THIS
+   * number; the debounce window itself is ratified UX, reported as
+   * context, not charged to the budget. */
+  renderWorkMs: number;
   /** the observation window elapsed with ZERO list mutations while the
    * probed value held and every pre-probe row kept identity — a legitimate
    * no-mutation render (the DOM-reuse path a same-result keystroke should
@@ -123,6 +137,7 @@ export async function probeFilterRender(
         rows: number;
         preservedRows: number;
         freshAnimations: number;
+        renderWorkMs: number;
         noMutation: boolean;
         timedOut: boolean;
       }>((resolve) => {
@@ -136,13 +151,31 @@ export async function probeFilterRender(
         const animsBefore = new Set(document.getAnimations().filter(listScoped));
         let durationMs = -1;
         let byMutation = false;
+        let firstMutationAt = 0;
+        let lastMutationAt = 0;
+        let mutCount = 0;
+        // The page's own User Timing measure for the pass this probe
+        // triggered (marks land around every debounced render pass). Falls
+        // back to the mutation-burst estimate on page builds without the
+        // marks. Frame pacing and the debounce wait stay out of the number.
+        const measuredRenderWork = (): number => {
+          const entries = performance.getEntriesByName("skills-ui:filter-render");
+          for (let i = entries.length - 1; i >= 0; i--) {
+            if (entries[i]!.startTime >= t0) return entries[i]!.duration;
+          }
+          return byMutation ? Math.max(0, lastMutationAt - firstMutationAt) : 0;
+        };
         const finish = () => {
           clearTimeout(timer);
           obs.disconnect();
           // double-rAF: rendering steps must have run so freshly created
-          // CSSAnimation objects actually exist before we count them
+          // CSSAnimation objects actually exist before we count them.
+          // renderWork is the MUTATION BURST (first → last list mutation),
+          // read before this settle — frame pacing stays out of the number.
           requestAnimationFrame(() =>
             requestAnimationFrame(() => {
+              // renderWorkMs assigned at the call sites below from the
+              // burst timestamps captured by the observer
               const liAfter = Array.from(list.querySelectorAll("li"));
               let preservedRows = 0;
               for (const li of liAfter) if (liBefore.has(li)) preservedRows++;
@@ -167,6 +200,7 @@ export async function probeFilterRender(
                     rows: liAfter.length,
                     preservedRows,
                     freshAnimations: 0,
+                    renderWorkMs: measuredRenderWork(),
                     noMutation: true,
                     timedOut: false,
                   });
@@ -177,6 +211,7 @@ export async function probeFilterRender(
                   rows: liAfter.length,
                   preservedRows,
                   freshAnimations,
+                  renderWorkMs: 0,
                   noMutation: false,
                   timedOut: true,
                 });
@@ -187,17 +222,40 @@ export async function probeFilterRender(
                 rows: liAfter.length,
                 preservedRows,
                 freshAnimations,
+                renderWorkMs: measuredRenderWork(),
                 noMutation: false,
                 timedOut: false,
               });
             })
           );
         };
+        // Stay connected for the WHOLE mutation burst: lastMutationAt drives
+        // renderWorkMs, so disconnecting at the first mutation would
+        // undercount a long reconcile. The settle (double-rAF) only proceeds
+        // once the burst has been quiet for two frames — a late mutation
+        // reschedules it.
+        const scheduleSettle = (): void => {
+          const countAtSchedule = mutCount;
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => {
+              if (mutCount !== countAtSchedule) {
+                scheduleSettle();
+                return;
+              }
+              finish();
+            })
+          );
+        };
         const obs = new MutationObserver(() => {
-          if (durationMs < 0) durationMs = performance.now() - t0;
+          const now = performance.now();
+          if (durationMs < 0) {
+            firstMutationAt = now;
+            durationMs = now - t0;
+          }
+          lastMutationAt = now;
+          mutCount += 1;
           byMutation = true;
-          obs.disconnect();
-          requestAnimationFrame(() => requestAnimationFrame(finish));
+          scheduleSettle();
         });
         const timer = setTimeout(() => finish(), timeoutMs);
         const t0 = performance.now();
