@@ -68,6 +68,74 @@ describe("api", () => {
     expect((await fetch(`${base}/api/skill?name=nope`)).status).toBe(404);
   });
 
+  // S-179: detail-by-path — the server validates the caller's path as an
+  // EXACT cached-row member for the scope and reads the doc from that row;
+  // the payload is the same {name, scope, body} object the name form returns.
+  test("GET /api/skill by path — cached row served with byte-identical shape to the name form (S-179)", async () => {
+    const base = await start();
+    const list = (await (await fetch(`${base}/api/skills?scope=project`)).json()) as {
+      skills: Array<{ name: string; path: string }>;
+    };
+    const row = list.skills[0]!;
+    const byPath = await (
+      await fetch(`${base}/api/skill?scope=project&path=${encodeURIComponent(row.path)}`)
+    ).text();
+    const byName = await (
+      await fetch(`${base}/api/skill?scope=project&name=${encodeURIComponent(row.name)}`)
+    ).text();
+    expect(byPath).toEqual(byName); // literal byte-identical bodies — one shared construction tail
+    const parsed = JSON.parse(byPath) as Record<string, unknown>;
+    expect(Object.keys(parsed).sort()).toEqual(["body", "name", "scope"]);
+    expect(parsed.name).toBe(row.name);
+  });
+
+  test("GET /api/skill by path — a real on-disk path that is NOT a cached row 404s untouched (S-179)", async () => {
+    // hostile-ish probe: the file exists and is readable, but its path is not
+    // an exact member of the cached list ⇒ 404, and skillBody never reads it
+    const sneaky = join(stateDir, "sneaky");
+    mkdirSync(sneaky, { recursive: true });
+    writeFileSync(join(sneaky, "SKILL.md"), "# not a listed skill\n");
+    const base = await start();
+    const res = await fetch(`${base}/api/skill?scope=project&path=${encodeURIComponent(sneaky)}`);
+    expect(res.status).toBe(404);
+    expect(((await res.json()) as { error: string }).error).toBe("skill not found");
+  });
+
+  test("GET /api/skill — empty/absent path falls through to the name rules (S-179)", async () => {
+    const base = await start();
+    expect((await fetch(`${base}/api/skill?scope=project&path=`)).status).toBe(400); // no name ⇒ today's 400
+    const ok = await fetch(`${base}/api/skill?scope=project&path=&name=tdd`);
+    expect(ok.status).toBe(200);
+    expect(((await ok.json()) as { name: string }).name).toBe("tdd");
+  });
+
+  // S-179 review follow-up: near-miss paths must 404 — this pin is what
+  // kills prefix/suffix match mutations (a strict prefix of a cached row's
+  // path, e.g. the row's directory, is NOT that row; nor is the path with a
+  // trailing character appended).
+  test("GET /api/skill by path — prefix and near-miss variants of a cached row path 404 (S-179)", async () => {
+    const base = await start();
+    const list = (await (await fetch(`${base}/api/skills?scope=project`)).json()) as {
+      skills: Array<{ name: string; path: string }>;
+    };
+    const row = list.skills[0]!;
+    const parentDir = row.path.slice(0, row.path.lastIndexOf("/"));
+    expect((await fetch(`${base}/api/skill?scope=project&path=${encodeURIComponent(parentDir)}`)).status).toBe(404);
+    expect(
+      (await fetch(`${base}/api/skill?scope=project&path=${encodeURIComponent(row.path + "x")}`)).status
+    ).toBe(404);
+  });
+
+  // S-179 review follow-up: a present path WINS over a present name — a
+  // stale client (row path no longer listed) gets an honest 404, not a
+  // silent name fallback.
+  test("GET /api/skill — present path beats present name; unknown path + known name is 404 (S-179)", async () => {
+    const base = await start();
+    const res = await fetch(`${base}/api/skill?scope=project&path=${encodeURIComponent("/no/such/row")}&name=tdd`);
+    expect(res.status).toBe(404);
+    expect(((await res.json()) as { error: string }).error).toBe("skill not found");
+  });
+
   test("GET /api/search returns empty for empty q", async () => {
     const base = await start();
     const res = await fetch(`${base}/api/search?q=`);

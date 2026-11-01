@@ -301,17 +301,34 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
       }
 
       if (method === "GET" && path === "/api/skill") {
-        const name = url.searchParams.get("name");
-        if (!name) return json({ error: "name is required" }, 400);
-        if (!validSkillName(name)) return json({ error: "invalid skill name" }, 400);
         const scope = scopeParam(url);
-        // S-178: name lookup runs against the cached list — the first
-        // read on a fresh serve populates it (one spawn), later reads
-        // spawn nothing. (Full detail-by-path lookup is future work; this
-        // is cache-served name lookup only.)
+        // S-178/S-179: both lookup forms run against the cached list — the
+        // first read on a fresh serve populates it (one spawn), later reads
+        // spawn nothing, whichever form the client used.
         const skills = await cachedListInstalled(scope);
-        const skill = skills.find((s) => s.name === name);
-        if (!skill) return json({ error: "skill not found" }, 404);
+        // S-179 detail-by-path — SECURITY boundary: the `path` param is
+        // caller-supplied, so it is used ONLY as an exact-string membership
+        // check against the scope's cached-or-in-flight InstalledSkill rows
+        // (path is never echoed; a present path WINS over a present name,
+        // so a stale client gets an honest 404),
+        // and the doc read below happens on the matched cached row's path
+        // (string-equal to the param by that check). No substring/prefix
+        // matching and no read of any path that is not exactly a cached
+        // row's path; a non-empty path that fails the check is 404 with no
+        // file touched. Empty/absent path falls through to the cache-served
+        // name lookup — unchanged 400/404 shape.
+        const requestedPath = url.searchParams.get("path");
+        let skill: InstalledSkill | undefined;
+        if (requestedPath) {
+          skill = skills.find((s) => s.path === requestedPath);
+          if (!skill) return json({ error: "skill not found" }, 404);
+        } else {
+          const name = url.searchParams.get("name");
+          if (!name) return json({ error: "name is required" }, 400);
+          if (!validSkillName(name)) return json({ error: "invalid skill name" }, 400);
+          skill = skills.find((s) => s.name === name);
+          if (!skill) return json({ error: "skill not found" }, 404);
+        }
         const body = skillBody(skill.path);
         return json({ name: skill.name, scope: skill.scope, body: body ?? "" });
       }

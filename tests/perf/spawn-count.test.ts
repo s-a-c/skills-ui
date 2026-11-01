@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { SHIM, countShimCalls, readShimCallLog } from "./helpers.ts";
@@ -14,14 +14,18 @@ import { SHIM, countShimCalls, readShimCallLog } from "./helpers.ts";
  *   - concurrent same-scope GET /api/skills share one in-flight
  *     `skills ls --json` spawn (coalescing),
  *   - the first request for a scope populates the per-server cache; every
- *     later read on that server — list OR detail-by-name — spawns nothing
- *     (copy-on-read cache),
+ *     later read on that server — list, detail-by-name, or (S-179)
+ *     detail-by-path — spawns nothing (copy-on-read cache),
  *   - install/update mutations drop the cache, so the next list spawns
  *     exactly once again,
  *   - remove() via the API costs ≤ 2 ls total: before-set from the cache,
  *     and the post-rm verification list refreshes the cache in the same
  *     single spawn (previously two full uncached lists per removal),
  *   - the mutation-then-list behavior never resurrects pre-mutation rows.
+ *
+ * S-179 adds the detail-by-path pins: the client-supplied `path` is validated
+ * as an EXACT cached-row member (no subprocess), the doc is read from the
+ * matched row, and an unknown path is a 404 with zero extra spawns.
  *
  * Count-based only — no wall-clock asserts live in this file.
  */
@@ -139,6 +143,64 @@ describe("perf: spawn counting via shim call log (S-178 cached truth)", () => {
       const list = await fetch(`${base}/api/skills?scope=project`);
       expect(list.status).toBe(200);
       await list.json();
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(1);
+    },
+    30_000
+  );
+
+  test(
+    "S-179 detail-by-path, warm list ⇒ 0 extra spawns; unknown path ⇒ 404 with 0 extra spawns",
+    async () => {
+      const base = await start();
+      const list = await fetch(`${base}/api/skills?scope=project`);
+      const body = (await list.json()) as { skills: ListRow[] };
+      const row = body.skills[0]!;
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(1); // the warm-up spawn
+      const detail = await fetch(
+        `${base}/api/skill?scope=project&path=${encodeURIComponent(row.path)}`
+      );
+      expect(detail.status).toBe(200);
+      const detailBody = (await detail.json()) as { name: string; scope: string; body: string };
+      expect(detailBody.name).toBe(row.name);
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(1); // 0 extra
+      // a path that is not an exact cached row: 404, no subprocess
+      const miss = await fetch(
+        `${base}/api/skill?scope=project&path=${encodeURIComponent("/no/such/cached/skill")}`
+      );
+      expect(miss.status).toBe(404);
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(1); // still 0 extra
+    },
+    30_000
+  );
+
+  test(
+    "S-179 cold serve, detail-by-path first ⇒ 1 spawn (cache population), again ⇒ 0; warm name fallback ⇒ 0",
+    async () => {
+      const base = await start();
+      // the path comes straight from the shim's contract fixture so the cold
+      // detail is genuinely the FIRST request this server sees
+      const contract = JSON.parse(
+        readFileSync(new URL("../fixtures/contract/ls-project.json", import.meta.url), "utf-8")
+      ) as Array<{ name: string; path: string }>;
+      const row = contract[0]!;
+      const first = await fetch(
+        `${base}/api/skill?scope=project&path=${encodeURIComponent(row.path)}`
+      );
+      expect(first.status).toBe(200);
+      expect(((await first.json()) as { name: string }).name).toBe(row.name);
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(1); // population spawn
+      const second = await fetch(
+        `${base}/api/skill?scope=project&path=${encodeURIComponent(row.path)}`
+      );
+      expect(second.status).toBe(200);
+      await second.json();
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(1); // 0 extra
+      // the name form on the warm cache: fallback works, still 0 spawns
+      const byName = await fetch(
+        `${base}/api/skill?scope=project&name=${encodeURIComponent(row.name)}`
+      );
+      expect(byName.status).toBe(200);
+      expect(((await byName.json()) as { name: string }).name).toBe(row.name);
       expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(1);
     },
     30_000

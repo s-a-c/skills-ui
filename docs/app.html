@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
 <meta name="description" content="skills-ui: browse, install, and update agent skills for coding agents from one dashboard.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-hPW3SJ8AKrAkRrH2BCV/ChD6PJlpBaDnmD7DzSvVN6w=' 'sha256-8kCEboziGhlkm+j1nvUavCSINsJqSnGiqZ+OLLg7jns='; img-src data:; connect-src http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-hPW3SJ8AKrAkRrH2BCV/ChD6PJlpBaDnmD7DzSvVN6w=' 'sha256-6/f/u3QCF9AJBGadOXzh+TD9qXBiVFkL+Q//uzVRq4I='; img-src data:; connect-src http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <title>skills (0.5.2)</title>
 <style>
@@ -1124,7 +1124,8 @@ function showDetail(name){
     '<div class="readme" id="readme">Loading…</div>';
   $('#removeBtn').addEventListener('click', function(){ openRemove(skill); });
   $('#updateBtn').addEventListener('click', function(){ updateSkills([skill.name], skill.scope === 'global'); });
-  api('/api/skill?scope=' + skill.scope + '&name=' + encodeURIComponent(skill.name))
+  /* S-179: the row's own path rides along — the serve validates it as an exact cached-list row (name stays for older serves). */
+  api('/api/skill?scope=' + skill.scope + '&name=' + encodeURIComponent(skill.name) + '&path=' + encodeURIComponent(skill.path))
     .then(function(d){
       /* renderMarkdown escapes every token before any tag is built, so this
          innerHTML carries renderer-made tags around inert text only */

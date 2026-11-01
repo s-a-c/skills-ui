@@ -185,6 +185,9 @@ interface Scenario {
   globalRowCount: number;
   globalMarker: string;
   detailName: string;
+  /** the cached row path for the detail probe — S-179: the page sends
+   * name+path and the serve resolves by exact path match */
+  detailPath: string;
   filterProbes: string[];
   rebuildProbe: string;
   /** the project listing itself — input to the in-process matching row */
@@ -207,6 +210,7 @@ async function setupSynthetic(workDir: string): Promise<Scenario> {
     expectedProjectRows: corpus.counts.project,
     globalRowCount: corpus.counts.global,
     globalMarker: corpus.global[0]!.name,
+    detailPath: corpus.project[7]!.path,
     detailName: "perf-skill-007",
     filterProbes: ["p", "per", "perf-", "perf-skill-0", "perf-skill-1", "perf-skill-3", "perf-skill-00"],
     rebuildProbe: "perf-skill-00",
@@ -259,6 +263,7 @@ async function setupReal(): Promise<Scenario> {
     globalRowCount: global.length,
     globalMarker: globalOnly[0] ?? "",
     detailName: project[0]!.name,
+    detailPath: project[0]!.path,
     filterProbes: [
       project[0]!.name.slice(0, 1),
       project[0]!.name.slice(0, 2),
@@ -357,16 +362,18 @@ async function main(): Promise<void> {
       median(warmProject)
     );
 
+    // S-179: the probe uses the production form — the page sends name+path
+    // and the serve resolves by exact path match against the cached rows.
     const detail: number[] = [];
     for (let i = 0; i < REPS; i++) {
       const r = await timedGetJson(
-        `${warm.base}/api/skill?name=${encodeURIComponent(scenario.detailName)}&scope=project`
+        `${warm.base}/api/skill?name=${encodeURIComponent(scenario.detailName)}&path=${encodeURIComponent(scenario.detailPath)}&scope=project`
       );
       if (r.status !== 200) die(`detail rep ${i + 1}: HTTP ${r.status}`);
       detail.push(r.ms);
     }
     msRow(
-      `detail read — GET /api/skill?name=${scenario.detailName} on a live serve`,
+      `detail read — GET /api/skill (name+path, exact-path resolution) for ${scenario.detailName} on a live serve`,
       "≤ 100 ms",
       100,
       median(detail)

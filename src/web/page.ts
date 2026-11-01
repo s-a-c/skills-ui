@@ -915,7 +915,8 @@ function showDetail(name){
     '<div class="readme" id="readme">Loading…</div>';
   $('#removeBtn').addEventListener('click', function(){ openRemove(skill); });
   $('#updateBtn').addEventListener('click', function(){ updateSkills([skill.name], skill.scope === 'global'); });
-  api('/api/skill?scope=' + skill.scope + '&name=' + encodeURIComponent(skill.name))
+  /* S-179: the row's own path rides along — the serve validates it as an exact cached-list row (name stays for older serves). */
+  api('/api/skill?scope=' + skill.scope + '&name=' + encodeURIComponent(skill.name) + '&path=' + encodeURIComponent(skill.path))
     .then(function(d){
       /* renderMarkdown escapes every token before any tag is built, so this
          innerHTML carries renderer-made tags around inert text only */
