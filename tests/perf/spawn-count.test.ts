@@ -5,12 +5,25 @@ import { join } from "node:path";
 import { SHIM, countShimCalls, readShimCallLog } from "./helpers.ts";
 
 /**
- * S-177 baseline pins via the shim call log (SKILLS_SHIM_CALLLOG).
+ * S-178 serve-cache pins via the shim call log (SKILLS_SHIM_CALLLOG).
  *
- * These are INSTRUMENTATION and BASELINE asserts — count-based, no
- * wall-clock. Current main has no serve-side list cache, so N requests ⇒
- * N `skills ls` spawns; the serve-cache ticket will invert these pins
- * (N ⇒ 1) as its acceptance evidence and update them here.
+ * The S-177 baseline pins (N requests ⇒ N spawns) were inverted here by the
+ * S-178 per-server list cache + request coalescing in src/core/api.ts —
+ * these pins assert the CACHED truth:
+ *
+ *   - concurrent same-scope GET /api/skills share one in-flight
+ *     `skills ls --json` spawn (coalescing),
+ *   - the first request for a scope populates the per-server cache; every
+ *     later read on that server — list OR detail-by-name — spawns nothing
+ *     (copy-on-read cache),
+ *   - install/update mutations drop the cache, so the next list spawns
+ *     exactly once again,
+ *   - remove() via the API costs ≤ 2 ls total: before-set from the cache,
+ *     and the post-rm verification list refreshes the cache in the same
+ *     single spawn (previously two full uncached lists per removal),
+ *   - the mutation-then-list behavior never resurrects pre-mutation rows.
+ *
+ * Count-based only — no wall-clock asserts live in this file.
  */
 
 let stateDir: string;
@@ -37,6 +50,7 @@ afterEach(async () => {
   delete process.env.SKILLS_SHIM_STATE;
   delete process.env.SKILLS_UI_PREFS_DIR;
   delete process.env.SKILLS_SHIM_CALLLOG;
+  delete process.env.SKILLS_SHIM_RM_KEEP;
 });
 
 async function start(): Promise<string> {
@@ -46,47 +60,189 @@ async function start(): Promise<string> {
   return server.base;
 }
 
-describe("perf: spawn counting via shim call log", () => {
+interface ListRow {
+  name: string;
+  description: string;
+  scope: string;
+  agents: string[];
+  path: string;
+  source: string | null;
+}
+
+describe("perf: spawn counting via shim call log (S-178 cached truth)", () => {
   test(
-    "4 concurrent GET /api/skills ⇒ 4 `skills ls` spawns today (baseline pin; serve-cache inverts to 1)",
+    "8 concurrent GET /api/skills ⇒ exactly 1 `skills ls` spawn (coalesced + cached, inverts the S-177 4⇒4 baseline)",
     async () => {
       const base = await start();
       const responses = await Promise.all(
-        Array.from({ length: 4 }, () => fetch(`${base}/api/skills?scope=project`))
+        Array.from({ length: 8 }, () => fetch(`${base}/api/skills?scope=project`))
       );
       expect(responses.every((r) => r.status === 200)).toBe(true);
-      for (const r of responses) await r.json(); // drain bodies
+      const bodies = await Promise.all(responses.map((r) => r.json()));
+      const first = bodies[0] as { skills: ListRow[] };
+      for (const body of bodies) expect(body).toEqual(first); // identical rows for every concurrent reader
       const calls = readShimCallLog(callLog);
-      expect(countShimCalls(calls, ["ls", "--json"])).toBe(4);
-      expect(countShimCalls(calls)).toBe(4); // nothing else spawned
+      expect(countShimCalls(calls, ["ls", "--json"])).toBe(1);
+      expect(countShimCalls(calls)).toBe(1); // nothing else spawned
     },
     30_000
   );
 
   test(
-    "sequential GETs re-spawn every time on main — 3 requests ⇒ 3 spawns (no cache baseline pin)",
+    "8 concurrent mixed-scope GETs (4 project + 4 global) ⇒ exactly 2 spawns — one per scope (coalescing is scope-keyed)",
     async () => {
       const base = await start();
+      const responses = await Promise.all([
+        ...Array.from({ length: 4 }, () => fetch(`${base}/api/skills?scope=project`)),
+        ...Array.from({ length: 4 }, () => fetch(`${base}/api/skills?scope=global`)),
+      ]);
+      expect(responses.every((r) => r.status === 200)).toBe(true);
+      for (const r of responses) await r.json(); // drain bodies
+      const calls = readShimCallLog(callLog);
+      expect(countShimCalls(calls, ["ls", "--json"])).toBe(2); // 2-argv prefix matches both variants
+      expect(countShimCalls(calls, ["ls", "--json", "-g"])).toBe(1);
+      expect(countShimCalls(calls)).toBe(2);
+    },
+    30_000
+  );
+
+  test(
+    "N sequential GETs on one server ⇒ 1 spawn total (first populates, rest hit the cache)",
+    async () => {
+      const base = await start();
+      let first: unknown;
       for (let i = 0; i < 3; i++) {
         const res = await fetch(`${base}/api/skills?scope=project`);
         expect(res.status).toBe(200);
-        await res.json();
+        const body = await res.json();
+        if (i === 0) first = body;
+        else expect(body).toEqual(first); // cached rows identical to the populating read
       }
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(1);
+    },
+    30_000
+  );
+
+  test(
+    "detail-by-name reads locate from the cached list — first read on a fresh serve ⇒ 1 spawn, subsequent ⇒ 0",
+    async () => {
+      const base = await start();
+      let first: unknown;
+      for (let i = 0; i < 2; i++) {
+        const res = await fetch(`${base}/api/skill?name=tdd&scope=project`);
+        expect(res.status).toBe(200);
+        const body = await res.json();
+        if (i === 0) first = body;
+        else expect(body).toEqual(first);
+      }
+      // and a list read afterwards still spawns nothing
+      const list = await fetch(`${base}/api/skills?scope=project`);
+      expect(list.status).toBe(200);
+      await list.json();
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(1);
+    },
+    30_000
+  );
+
+  test(
+    "remove() via the API on a fresh serve costs exactly 2 ls (before-set + post-rm refresh); a warm-cache remove costs 1 — and the cache never shows pre-rm rows",
+    async () => {
+      const base = await start();
+      // cold-cache remove: listBefore spawns once, listAfter refresh spawns once
+      const first = await fetch(`${base}/api/remove`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills: ["tdd"] }),
+      });
+      expect(first.status).toBe(200);
+      const firstBody = (await first.json()) as { ok: boolean; output: string };
+      expect(firstBody.ok).toBe(true);
+      expect(firstBody.output).toContain("Removed: tdd");
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(2);
+      // warm-cache remove: before-set from the cache (0 spawns), one refresh
+      const second = await fetch(`${base}/api/remove`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills: ["code-review"] }),
+      });
+      expect(second.status).toBe(200);
+      const secondBody = (await second.json()) as { ok: boolean; output: string };
+      expect(secondBody.ok).toBe(true);
+      expect(secondBody.output).toContain("Removed: code-review");
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(3); // +1 only
+      // the post-remove cache serves the post-rm truth — zero extra spawns
+      const after = await fetch(`${base}/api/skills?scope=project`);
+      const body = (await after.json()) as { skills: ListRow[] };
+      expect(body.skills.map((s) => s.name)).not.toContain("tdd");
+      expect(body.skills.map((s) => s.name)).not.toContain("code-review");
       expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(3);
     },
     30_000
   );
 
   test(
-    "each detail read re-lists on main — 2 GET /api/skill ⇒ 2 spawns (baseline pin; detail cache inverts to 1)",
+    "failed remove (shim keeps the skill) still costs ≤ 2 ls and the refreshed cache keeps the kept row",
+    async () => {
+      process.env.SKILLS_SHIM_RM_KEEP = "tdd";
+      const base = await start();
+      const res = await fetch(`${base}/api/remove`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills: ["tdd"] }),
+      });
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as { ok: boolean; output: string };
+      expect(body.ok).toBe(false); // still present in the after-set → failure, exactly as uncached
+      expect(body.output).toContain("failed: tdd");
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(2); // before + refresh, no more
+      const after = await fetch(`${base}/api/skills?scope=project`);
+      const list = (await after.json()) as { skills: ListRow[] };
+      expect(list.skills.map((s) => s.name)).toContain("tdd"); // refreshed cache reflects reality
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(2);
+    },
+    30_000
+  );
+
+  test(
+    "mutation invalidates: after POST /api/install (even a failing one) the next /api/skills spawns exactly once again",
     async () => {
       const base = await start();
-      for (let i = 0; i < 2; i++) {
-        const res = await fetch(`${base}/api/skill?name=tdd&scope=project`);
-        expect(res.status).toBe(200);
-        await res.json();
-      }
-      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(2);
+      await fetch(`${base}/api/skills?scope=project`).then((r) => r.json());
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(1);
+      // add fixture has one failed entry → 500 + ok:false; invalidation is
+      // unconditional (upstream add can partially succeed)
+      const install = await fetch(`${base}/api/install`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ source: "fixture/source", skills: ["alpha", "beta"] }),
+      });
+      expect(install.status).toBe(500);
+      const res = await fetch(`${base}/api/skills?scope=project`);
+      expect(res.status).toBe(200);
+      await res.json();
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(2); // exactly one re-spawn
+    },
+    30_000
+  );
+
+  test(
+    "mutation invalidates: after POST /api/update the next /api/skills spawns exactly once again",
+    async () => {
+      const base = await start();
+      await fetch(`${base}/api/skills?scope=project`).then((r) => r.json());
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(1);
+      const update = await fetch(`${base}/api/update`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills: [] }),
+      });
+      expect(update.status).toBe(200);
+      const res = await fetch(`${base}/api/skills?scope=project`);
+      expect(res.status).toBe(200);
+      await res.json();
+      const calls = readShimCallLog(callLog);
+      expect(countShimCalls(calls, ["ls", "--json"])).toBe(2); // exactly one re-spawn
+      expect(countShimCalls(calls)).toBe(3); // ls + update + ls — nothing else
     },
     30_000
   );

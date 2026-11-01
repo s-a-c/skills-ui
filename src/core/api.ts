@@ -30,6 +30,7 @@ import {
 import type { UiSeed } from "./seed.ts";
 import { readSkillDoc } from "./services/skill-doc.ts";
 import { sanitizeMetadata } from "./services/sanitize.ts";
+import type { InstalledSkill, Scope } from "./services/types.ts";
 import { SkillsBusyError, skillsVersion } from "./skills-client.ts";
 import { APP_VERSION } from "./version.ts";
 
@@ -66,21 +67,6 @@ function json(body: unknown, status = 200): Response {
       "cache-control": "no-store",
     },
   });
-}
-
-// ---------- description enrichment (frontmatter, cached) ----------
-
-const descriptionCache = new Map<string, string>();
-
-function descriptionFor(path: string): string {
-  const cached = descriptionCache.get(path);
-  if (cached !== undefined) return cached;
-  const doc = readSkillDoc(path);
-  const match = doc?.match(/^description:\s*(.+)$/m);
-  // frontmatter descriptions are external text — sanitized at ingress
-  const description = sanitizeMetadata(match?.[1] ?? "");
-  descriptionCache.set(path, description);
-  return description;
 }
 
 // ---------- request body ----------
@@ -179,6 +165,86 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
   // the true port instead of "a random port" (G9).
   let boundPort = 0;
 
+  // ---------- serve-scoped list cache (S-178) ----------
+  //
+  // Every `GET /api/skills` used to spawn a fresh `skills ls --json`
+  // (S-153: multi-second on a small corpus, ~60 s on a real home directory;
+  // two open tabs = two concurrent spawns) and `remove()` paid two full
+  // uncached lists per removal. This mirrors the TUI's listCache
+  // (src/tui/app.ts, S-89) at the API layer:
+  //
+  //   - per-SERVER state, deliberately not a module-level map (the mistake
+  //     the original module-level descriptionCache made before S-178 moved
+  //     it per-server below): tests and the budget harness create many
+  //     servers against different shim states, and a module map would
+  //     leak rows across them;
+  //   - copy-on-read: every caller gets a fresh array and fresh row
+  //     objects, so no handler can mutate the cached listing;
+  //   - coalescing: concurrent requests for the same scope share one
+  //     in-flight `listInstalled` promise — one spawn, not N;
+  //   - invalidation: any install/remove/update drops BOTH scopes (TUI
+  //     parity: one clear() per mutation) and also drops the in-flight
+  //     entries and bumps the generation — a list already in flight when a
+  //     mutation lands must never repopulate the cache with stale rows
+  //     when it settles. Its own awaiters still receive that response
+  //     (exactly what they would have gotten without a cache); the next
+  //     request after invalidation re-spawns.
+  const listCache = new Map<Scope, InstalledSkill[]>();
+  const inFlightLists = new Map<Scope, Promise<InstalledSkill[]>>();
+  let listGeneration = 0;
+
+  const copyRows = (skills: InstalledSkill[]): InstalledSkill[] =>
+    skills.map((s) => ({ ...s, agents: [...s.agents] }));
+
+  const cachedListInstalled = async (scope: Scope): Promise<InstalledSkill[]> => {
+    const cached = listCache.get(scope);
+    if (cached) return copyRows(cached);
+    const generation = listGeneration;
+    let flight = inFlightLists.get(scope);
+    if (!flight) {
+      flight = listInstalled(scope).then((skills) => {
+        // a mutation landed while this spawn was in flight ⇒ its rows are
+        // stale — the invalidation already dropped this flight, so do not
+        // let it resurrect its listing into the cache
+        if (generation === listGeneration) listCache.set(scope, skills);
+        return skills;
+      });
+      // clear on settle (success or failure); the identity guard never
+      // drops a NEWER flight stored by a post-invalidation request
+      flight.then(
+        () => {
+          if (inFlightLists.get(scope) === flight) inFlightLists.delete(scope);
+        },
+        () => {
+          if (inFlightLists.get(scope) === flight) inFlightLists.delete(scope);
+        }
+      );
+      inFlightLists.set(scope, flight);
+    }
+    return flight.then(copyRows);
+  };
+
+  const invalidateListCache = (): void => {
+    listGeneration += 1;
+    listCache.clear();
+    inFlightLists.clear();
+  };
+
+  // ---------- description enrichment (frontmatter, cached per server) ----------
+
+  const descriptionCache = new Map<string, string>();
+
+  const descriptionFor = (path: string): string => {
+    const cached = descriptionCache.get(path);
+    if (cached !== undefined) return cached;
+    const doc = readSkillDoc(path);
+    const match = doc?.match(/^description:\s*(.+)$/m);
+    // frontmatter descriptions are external text — sanitized at ingress
+    const description = sanitizeMetadata(match?.[1] ?? "");
+    descriptionCache.set(path, description);
+    return description;
+  };
+
   const route = async (req: Request): Promise<Response> => {
     const url = new URL(req.url);
     const path = url.pathname;
@@ -217,7 +283,10 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
 
       if (method === "GET" && path === "/api/skills") {
         const scope = scopeParam(url);
-        const skills = await listInstalled(scope);
+        // S-178: served from the per-server list cache — the first request
+        // for a scope spawns one `skills ls`, concurrent requests coalesce
+        // onto it, later requests hit the cache
+        const skills = await cachedListInstalled(scope);
         return json({
           scope,
           skills: skills.map((s) => ({
@@ -236,7 +305,11 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
         if (!name) return json({ error: "name is required" }, 400);
         if (!validSkillName(name)) return json({ error: "invalid skill name" }, 400);
         const scope = scopeParam(url);
-        const skills = await listInstalled(scope);
+        // S-178: name lookup runs against the cached list — the first
+        // read on a fresh serve populates it (one spawn), later reads
+        // spawn nothing. (Full detail-by-path lookup is future work; this
+        // is cache-served name lookup only.)
+        const skills = await cachedListInstalled(scope);
         const skill = skills.find((s) => s.name === name);
         if (!skill) return json({ error: "skill not found" }, 404);
         const body = skillBody(skill.path);
@@ -275,6 +348,13 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
           skills: skillsList,
           global: body.global === true,
         });
+        // S-178: mutation ⇒ drop the list cache, failed attempts included
+        // (upstream `add` can partially succeed before reporting failure).
+        // No invalidate-on-throw guard needed here: install's throw paths
+        // are all pre-spawn (queue overflow, spawn failure) — there is no
+        // half-mutation to flush. If install ever gains a post-spawn throw,
+        // add the remove() try/catch pattern below.
+        invalidateListCache();
         const output = JSON.stringify(result.results);
         if (!result.ok) return json({ ok: false, output }, 500);
         return json({ ok: true, output });
@@ -297,7 +377,25 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
           return json({ error: "invalid skill name" }, 400);
         }
         const scope = body.global === true ? "global" : "project";
-        const result = await remove(body.skills as string[], scope);
+        // S-178: the before-set comes from the list cache (fresh spawn only
+        // on a cold cache); after `rm`, the verification list refreshes the
+        // cache in that same single spawn — previously remove() paid two
+        // full uncached lists per removal
+        let result;
+        try {
+          result = await remove(body.skills as string[], scope, {
+            listBefore: await cachedListInstalled(scope),
+            listAfter: () => {
+              invalidateListCache();
+              return cachedListInstalled(scope);
+            },
+          });
+        } catch (error) {
+          // `rm` may have half-run before failing — never serve a stale
+          // pre-rm list after an error
+          invalidateListCache();
+          throw error;
+        }
         const output =
           result.ok ? `Removed: ${result.removed.join(", ")}` :
           `Removed: ${result.removed.join(", ") || "none"} — failed: ${result.missing.join(", ")}`;
@@ -315,6 +413,9 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
         }
         const scope = body.global === true ? "global" : "project";
         const result = await update(skillsList, scope);
+        // S-178: mutation ⇒ drop the list cache (see /api/install — update's
+        // throw paths are likewise pre-spawn only, no half-mutation to flush)
+        invalidateListCache();
         return json({ ok: result.ok, output: result.output });
       }
 

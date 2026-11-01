@@ -233,14 +233,38 @@ describe("api: rate limiter", () => {
 });
 
 describe("api: serialized spawn queue", () => {
-  test("burst beyond the queue cap → 503 server busy; the rest succeed", async () => {
+  test("burst of genuinely concurrent DISTINCT spawns beyond the queue cap → 503 server busy; the rest succeed", async () => {
+    // S-178 reshaped this pin: /api/skills now coalesces concurrent
+    // same-scope requests onto ONE in-flight `skills ls` and serves later
+    // reads from the per-server cache, so a same-scope burst can no longer
+    // fill the queue (that is the fix, pinned in tests/perf/spawn-count.test.ts).
+    // The cap semantics must still bind for genuinely concurrent DISTINCT
+    // spawns — here six different CLI-spawning endpoints race one queue
+    // with cap 2; the overflow rejects fast with 503.
     process.env.SKILLS_UI_SKILLS_BIN = SLOW_SHIM;
     process.env.SKILLS_UI_SPAWN_QUEUE_CAP = "2";
     process.env.SKILLS_SHIM_DELAY_MS = "250";
     const base = await start();
-    const results = await Promise.all(
-      Array.from({ length: 6 }, () => fetch(`${base}/api/skills`).then((r) => r.status))
-    );
+    const results = await Promise.all([
+      fetch(`${base}/api/skills?scope=project`), // `ls --json` spawn
+      fetch(`${base}/api/skills?scope=global`), // `ls --json -g` — distinct scope ⇒ own flight
+      fetch(`${base}/api/source-skills?source=fixture/source`), // `install --list` spawn
+      fetch(`${base}/api/install`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ source: "fixture/source", skills: ["alpha"] }),
+      }), // `add` spawn
+      fetch(`${base}/api/install`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ source: "fixture/other", skills: ["beta"] }),
+      }), // second distinct `add` spawn
+      fetch(`${base}/api/update`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills: [] }),
+      }), // `update` spawn
+    ].map((p) => p.then((r) => r.status)));
     const busy = results.filter((s) => s === 503).length;
     const ok = results.filter((s) => s === 200).length;
     expect(busy).toBeGreaterThanOrEqual(1); // 1 running + 2 queued + overflow rejected
