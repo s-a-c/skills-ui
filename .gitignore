@@ -9,3 +9,4 @@ playwright-report/
 
 # stray compile outputs (never commit binaries at root)
 /main
+.hallmark/

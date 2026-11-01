@@ -58,14 +58,17 @@ const SKILL_MATCHES_SRC = skillMatches.toString();
 
 const APP_CSS = `
 *,*::before,*::after{box-sizing:border-box}
-html,body{margin:0;padding:0;height:100%}
+html,body{margin:0;padding:0;height:100%;overflow-x:clip}
 body{
   background:var(--t-bg);color:var(--t-text);
   font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   transition:background .35s ease,color .35s ease;
 }
 button,input,select{font:inherit;color:inherit}
-:root{--motion-scale:1;--ease:cubic-bezier(.2,.8,.2,1)}
+:root{
+  --motion-scale:1;--ease:cubic-bezier(.2,.8,.2,1);
+  --t-scrim:rgba(0,0,0,.4);--t-backdrop:rgba(0,0,0,.45);
+}
 [data-motion="off"]{--motion-scale:.001}
 @media (prefers-reduced-motion:reduce){[data-motion="auto"]{--motion-scale:.001}}
 /* Reduced motion must also stop infinite loops: iteration-count 1 turns them
@@ -91,12 +94,9 @@ header{
 .logo{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px}
 .logo .mark{
   width:26px;height:26px;border-radius:8px;display:grid;place-items:center;
-  background:linear-gradient(135deg,var(--a-mauve),var(--a-blue),var(--a-teal));
-  background-size:200% 200%;color:var(--t-crust,var(--t-bg));
-  animation:gradient-pan calc(6s * var(--motion-scale)) ease-in-out infinite;
+  background:var(--a-mauve);color:var(--t-bg);
   font-size:14px;font-weight:800;
 }
-@keyframes gradient-pan{0%,100%{background-position:0% 0%}50%{background-position:100% 100%}}
 .logo .ver{color:var(--t-textMuted);font-size:12px;font-weight:400}
 
 nav.tabs{display:flex;gap:4px;margin-left:8px;position:relative}
@@ -116,7 +116,7 @@ nav.tabs{display:flex;gap:4px;margin-left:8px;position:relative}
 }
 .scope-toggle button{
   border:0;background:transparent;padding:6px 14px;cursor:pointer;color:var(--t-textMuted);
-  transition:all calc(.18s * var(--motion-scale)) var(--ease);
+  transition:background calc(.18s * var(--motion-scale)) var(--ease),color calc(.18s * var(--motion-scale)) var(--ease);
 }
 .scope-toggle button[aria-pressed="true"]{
   background:var(--t-primary);color:var(--t-primaryText);font-weight:600;
@@ -162,7 +162,7 @@ main{display:grid;grid-template-columns:minmax(320px,420px) 1fr;gap:0;height:cal
 #agentsPop{
   position:absolute;top:calc(100% + 6px);left:0;z-index:26;width:280px;max-height:320px;overflow:auto;
   background:var(--t-surface);border:1px solid var(--t-border);border-radius:12px;padding:10px 12px;
-  box-shadow:0 16px 40px rgba(0,0,0,.3);display:none;
+  display:none;
 }
 #agentsPop.open{display:block}
 #agentsPop label{display:flex;gap:10px;align-items:center;padding:6px 8px;border-radius:8px;cursor:pointer}
@@ -237,7 +237,7 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
    tokens, code keeps the existing monospace stack distinct from prose. */
 .readme .md-h{font-weight:700;line-height:1.3;margin:1.15em 0 .4em}
 .readme .md-h:first-child{margin-top:0}
-.readme h2.md-h{font-size:16.5px}
+.readme h2.md-h{font-size:16.5px;text-wrap:balance}
 .readme h3.md-h{font-size:15px}
 .readme h4.md-h{font-size:14px}
 .readme h5.md-h{font-size:13.5px}
@@ -261,7 +261,7 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
   background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radius:5px;padding:.5px 5px;
 }
 .readme .md-quote{
-  margin:.6em 0;padding:2px 0 2px 14px;border-left:3px solid var(--t-border);color:var(--t-textMuted);
+  margin:.6em 0;padding:8px 12px;border:1px solid var(--t-border);border-radius:8px;color:var(--t-textMuted);
 }
 .readme .md-link{color:var(--t-primary);font-weight:500}
 .readme .md-link-url{
@@ -281,7 +281,7 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
 .subtabs button{
   border:1px solid var(--t-border);background:transparent;border-radius:999px;padding:5px 14px;
   cursor:pointer;color:var(--t-textMuted);font-weight:500;
-  transition:all .16s var(--ease);
+  transition:background .16s var(--ease),border-color .16s var(--ease),color .16s var(--ease);
 }
 .subtabs button[aria-selected="true"]{background:var(--t-primary);border-color:var(--t-primary);color:var(--t-primaryText);font-weight:600}
 .subtabs button:hover:not([aria-selected="true"]){background:var(--t-surfaceAlt);color:var(--t-text)}
@@ -327,27 +327,32 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
   position:fixed;top:0;right:0;bottom:0;width:340px;z-index:40;
   background:var(--t-surface);border-left:1px solid var(--t-border);
   padding:22px 24px;overflow:auto;
-  /* closed = fully off-screen; --open 0 -> 100%, 1 -> 0% */
+}
+/* The closed state (off-screen + hidden) is scoped to .js, which the page
+   script adds before first paint: with scripting off the drawer's content
+   is visible in place instead of script-dependent. JS-on behavior is
+   unchanged; --open 0 -> 100%, 1 -> 0%. */
+.js #settings{
   transform:translateX(calc((1 - var(--open,0)) * 100%));
   transition:transform calc(.28s * var(--motion-scale)) var(--ease);
-  box-shadow:-12px 0 40px rgba(0,0,0,.25);
   visibility:hidden;
 }
 #settings.open{--open:1;visibility:visible;transition:transform calc(.28s * var(--motion-scale)) var(--ease),visibility 0s}
-#settings h2{margin:0 0 18px;font-size:17px}
+#settings h2{margin:0 0 18px;font-size:17px;text-wrap:balance}
 .setting{margin-bottom:20px}
 .setting label{display:block;font-weight:600;margin-bottom:8px}
 .setting .hint{color:var(--t-textMuted);font-size:12px;margin-top:6px}
+.hint-lines span{display:block}
 .seg{display:inline-flex;border:1px solid var(--t-border);border-radius:10px;overflow:hidden;width:100%}
 .seg button{
   flex:1;border:0;background:transparent;padding:8px 4px;cursor:pointer;color:var(--t-textMuted);
-  transition:all .16s var(--ease);
+  transition:background .16s var(--ease),color .16s var(--ease);
 }
 .seg button[aria-pressed="true"]{background:var(--t-primary);color:var(--t-primaryText);font-weight:600}
 .seg button:hover:not([aria-pressed="true"]){background:var(--t-surfaceAlt);color:var(--t-text)}
 #settingsClose{position:absolute;top:16px;right:16px}
 #scrim{
-  position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:30;opacity:0;pointer-events:none;
+  position:fixed;inset:0;background:var(--t-scrim);z-index:30;opacity:0;pointer-events:none;
   transition:opacity .25s var(--ease);
 }
 #scrim.open{opacity:1;pointer-events:auto}
@@ -355,9 +360,10 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
 /* ---------- modal ---------- */
 dialog{
   border:1px solid var(--t-border);border-radius:16px;background:var(--t-surface);color:var(--t-text);
-  padding:24px 26px;max-width:440px;box-shadow:0 24px 60px rgba(0,0,0,.4);
+  padding:24px 26px;max-width:440px;
 }
-dialog::backdrop{background:rgba(0,0,0,.45);backdrop-filter:blur(2px)}
+/* Solid scrim behind the modal (no glass): elevation by lightness. */
+dialog::backdrop{background:var(--t-backdrop)}
 dialog h3{margin:0 0 8px}
 dialog p{color:var(--t-textMuted);margin:0 0 18px}
 dialog .row{display:flex;gap:10px;justify-content:flex-end}
@@ -376,7 +382,6 @@ dialog .row{display:flex;gap:10px;justify-content:flex-end}
   padding:10px 18px;border-radius:11px;font-weight:500;
   background:var(--t-surfaceAlt);color:var(--t-text);border:1px solid var(--t-border);
   animation:toast-in calc(.3s * var(--motion-scale)) var(--ease),toast-out .4s ease 3.4s forwards;
-  box-shadow:0 8px 30px rgba(0,0,0,.25);
 }
 /* Tone rides the border + dot (non-text, >=3:1); text stays var(--t-text),
    which is AA-verified on surfaceAlt — accent text there is not. */
@@ -409,6 +414,8 @@ footer.tip{color:var(--t-textMuted);font-size:12px;padding:8px 16px 14px;border-
 const APP_JS = `
 (function(){
 'use strict';
+/* Before first paint: gates the script-dependent hidden state (.js, gate 62). */
+document.documentElement.classList.add('js');
 var state = {
   prefs: window.__PREFS__,
   tab: 'installed',
@@ -1583,10 +1590,14 @@ export function renderPage(
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
+<meta name="description" content="skills-ui: browse, install, and update agent skills for coding agents from one dashboard.">
 ${opts?.hosted ? `<meta http-equiv="Content-Security-Policy" content="${csp}">
 <meta name="referrer" content="no-referrer">
-` : ""}<title>skills — ${version}</title>
+` : ""}<title>skills (${version})</title>
 <style>
+/* Hallmark · skills-ui web page · built: the project · depth: polish · genre: modern-minimal · theme: the project's own catppuccin tokens */
+/* Hallmark · pre-emit critique: P3 H4 E4 S3 R4 V3 · weakest: S, a settings and registry dashboard could be any tool; this pass keeps the project's tokens and spacing instead of a re-theme */
+/* Hallmark · waive 24b · the page keeps its own spacing system · spacing is the project's own system; a page-wide re-space is a restyle pass, scheduled for 0.5.3 */
 [data-theme="mocha"]{
 ${cssVarsFor(THEME_TOKENS.mocha, CATPPUCCIN_MOCHA)}
   --t-crust:${CATPPUCCIN_MOCHA.crust};
@@ -1641,7 +1652,7 @@ ${APP_CSS}
       <button class="btn" id="selectAllBtn" title="Check every skill in the filtered list">Select all</button>
       <div class="seg" role="group" aria-label="Sort order">
         <button data-sort="checked" aria-pressed="true">Checked first</button>
-        <button data-sort="name" aria-pressed="false">A–Z</button>
+        <button data-sort="name" aria-pressed="false">A to Z</button>
         <button data-sort="load" aria-pressed="false">Load order</button>
       </div>
     </div>
@@ -1661,7 +1672,7 @@ ${APP_CSS}
       <button data-sview="selected" aria-selected="false">Selected (<span id="qCount">0</span>)</button>
     </div>
     <div class="search-row">
-      <input id="searchInput" type="search" placeholder="Search skills.sh — try “typescript”, “react”, “testing”…" aria-label="Search the skill registry">
+      <input id="searchInput" type="search" placeholder="Search skills.sh: try “typescript”, “react”, “testing”…" aria-label="Search the skill registry">
     </div>
     <ul id="results"></ul>
     <ul id="queueList" style="display:none"></ul>
@@ -1682,7 +1693,11 @@ ${APP_CSS}
       <button data-theme-choice="mocha">Mocha (dark)</button>
       <button data-theme-choice="latte">Latte (light)</button>
     </div>
-    <p class="hint">catppuccin mocha &amp; latte · WCAG AA contrast · light-theme accents darkened just enough to pass</p>
+    <p class="hint hint-lines">
+      <span>catppuccin mocha &amp; latte</span>
+      <span>WCAG AA contrast</span>
+      <span>light-theme accents darkened just enough to pass</span>
+    </p>
   </div>
   <div class="setting">
     <label>Sound effects</label>
@@ -1706,7 +1721,7 @@ ${APP_CSS}
     <input id="portInput" type="number" min="1" max="65535" step="1" inputmode="numeric"
       placeholder="random unused port" autocomplete="off">
     <p class="hint">
-      Fixed port for future launches — empty picks a random unused one.
+      Fixed port for future launches: empty picks a random unused one.
       This session is serving on <strong id="portNow"></strong>; changes apply next launch
       (a busy port falls back to random).
     </p>
@@ -1727,19 +1742,19 @@ ${APP_CSS}
 <dialog id="helpDialog">
   <h3>Keyboard shortcuts</h3>
   <table>
-    <tr><td><kbd>/</kbd></td><td>search — <kbd>esc</kbd> leaves the query as-is</td></tr>
-    <tr><td><kbd>f</kbd></td><td>filter box — <kbd>esc</kbd> leaves it as-is (does not clear)</td></tr>
+    <tr><td><kbd>/</kbd></td><td>search (<kbd>esc</kbd> leaves the query as-is)</td></tr>
+    <tr><td><kbd>f</kbd></td><td>filter box (<kbd>esc</kbd> leaves it as-is, does not clear)</td></tr>
     <tr><td><kbd>g</kbd> / <kbd>p</kbd></td><td>global / project scope</td></tr>
     <tr><td><kbd>a</kbd></td><td>select agents (multi-select)</td></tr>
     <tr><td><kbd>i</kbd> / <kbd>x</kbd></td><td>installed tab / settings drawer</td></tr>
-    <tr><td><kbd>?</kbd></td><td>this help — <kbd>esc</kbd> closes</td></tr>
+    <tr><td><kbd>?</kbd></td><td>this help (<kbd>esc</kbd> closes)</td></tr>
   </table>
   <div class="row" style="margin-top:14px"><button class="btn" id="helpClose">Close</button></div>
 </dialog>
 
 <dialog id="connectDialog" aria-label="Connect to your local skills-ui serve">
   <h3>Connect your backend</h3>
-  <p>This is the hosted skills-ui — it talks to a <code>skills-ui serve</code> running on <b>your</b> machine. Start one in a terminal (<code>skills-ui serve --port 8123</code>) and copy the URL and <code>Hosted-UI token</code> lines it prints.</p>
+  <p>This is the hosted skills-ui: it talks to a <code>skills-ui serve</code> running on <b>your</b> machine. Start one in a terminal (<code>skills-ui serve --port 8123</code>) and copy the URL and <code>Hosted-UI token</code> lines it prints.</p>
   <label for="backendInput">Backend URL</label>
   <input id="backendInput" type="url" placeholder="http://127.0.0.1:8123" autocomplete="off" spellcheck="false">
   <label for="tokenInput">Hosted-UI token</label>
@@ -1748,7 +1763,7 @@ ${APP_CSS}
   <div class="row">
     <button class="btn primary" id="connectBtn">Connect</button>
   </div>
-  <p class="connect-help">Chrome, Edge, and Firefox 153+ will ask once for <b>local network access</b> — choose Allow. Safari currently blocks local network access entirely. Wrong token? Re-copy it from serve's startup output.</p>
+  <p class="connect-help">Chrome, Edge, and Firefox 153+ will ask once for <b>local network access</b> (choose Allow). Safari currently blocks local network access entirely. Wrong token? Re-copy it from serve’s startup output.</p>
 </dialog>
 
 <script>${bootstrap}</script>
