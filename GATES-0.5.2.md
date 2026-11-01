@@ -34,8 +34,8 @@ Scope: the S-152-ratified full checklist suite — all ten shortlist items + the
   EXPECT: G6-OK
   EVIDENCE: automatic-evidence=v1; definition-sha256=ff1fb8d6e340369e22ff023b01f13b1375a5991f3759ec22cf51b94b0ce2268e; exit=0; EXPECT=matched; output-sha256=6233fa6beb413a3b89a765ac4e145e64251faee409e778323811a8466b872b67; output-bytes=6; shell=/bin/sh; cwd=/Users/s-a-c/Projects/s-a-c/skills-ui/main; path=b4c10f371094/9 entries
 
-- [ ] G7: manual smoke — one human pass over the G4 checklist on the live page + binary (incl. a Global-scope install through the TUI honoring [g]). NOT the agent's gate: the checklist is handed to the user; evidence is their confirmation.
-  EVIDENCE: PENDING HUMAN — checklist delivered in the S-167 resolution comment.
+- [x] G7: manual smoke — one human pass over the G4 checklist on the live page + binary (incl. a Global-scope install through the TUI honoring [g]). NOT the agent's gate: the checklist is handed to the user; evidence is their confirmation.
+  EVIDENCE: 2026-11-01 — the user walked the 11-item checklist (posted in the S-167 resolution comment) against the live hosted page (https://s-a-c.github.io/skills-ui/app.html) and the 0.5.2 release, and reported "g7 done" with nothing odd flagged — a clean pass, no post-release hotfixes this cycle (unlike 0.5.1's G7). GATES-0.5.2 now 8/8; 0.5.2 complete.
 
 - [x] G8: deferred-record — every deferred matrix item + the hallmark 24b waiver listed with reasons in this ledger
   CHECK: cd /Users/s-a-c/Projects/s-a-c/skills-ui/main && grep -q "^## Deferred record" GATES-0.5.2.md && [ "$(grep -c '^- \*\*' GATES-0.5.2.md)" -ge 7 ] && echo G8-OK
