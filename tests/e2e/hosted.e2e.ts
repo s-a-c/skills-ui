@@ -97,11 +97,15 @@ test.describe("hosted page → local serve", () => {
     await expect(page.locator("#connectDialog")).toBeVisible();
     await connect(page);
     await expect(page.locator("#connectDialog")).not.toBeVisible();
-    await expect(page.locator("#connectState")).toHaveText(/connected/);
+    // S-186: aria-pressed carries the connected state. It is the one signal
+    // that is identical on the published page (which still renders the old
+    // "● connected" word) and on the icon-only page (which swaps the dot
+    // svg), so this pin survives the hosted-page redeploy either way.
+    await expect(page.locator("#connectState")).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator("#listPane")).toContainText("code-review", { timeout: 15_000 });
 
     await page.reload();
-    await expect(page.locator("#connectState")).toHaveText(/connected/, { timeout: 15_000 });
+    await expect(page.locator("#connectState")).toHaveAttribute("aria-pressed", "true", { timeout: 15_000 });
     await expect(page.locator("#connectDialog")).not.toBeVisible();
     await expect(page.locator("#listPane")).toContainText("code-review");
     await ctx.close();

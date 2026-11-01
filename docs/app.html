@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
 <meta name="description" content="skills-ui: browse, install, and update agent skills for coding agents from one dashboard.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-hPW3SJ8AKrAkRrH2BCV/ChD6PJlpBaDnmD7DzSvVN6w=' 'sha256-jQx9weAApawQAfXgDaskUL+UYAHMk3QSSfFrR0kH/qM='; img-src data:; connect-src http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-hPW3SJ8AKrAkRrH2BCV/ChD6PJlpBaDnmD7DzSvVN6w=' 'sha256-43qUfKfws6EczuxYqxMZWCZSPpogbrVTOoLo2O/VPlU='; img-src data:; connect-src http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <title>skills (0.5.3)</title>
 <style>
@@ -155,6 +155,13 @@ nav.tabs{display:flex;gap:4px;margin-left:8px;position:relative}
 }
 
 .top-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+/* S-186: below tablet width the top bar wraps instead of clipping the
+   actions (icon-only buttons made the row shorter but not short enough for
+   a 390px viewport once a selection adds two buttons). */
+@media (max-width:720px){
+  header{flex-wrap:wrap;row-gap:8px}
+  .top-actions{flex-wrap:wrap;row-gap:8px}
+}
 .scope-toggle{
   display:inline-flex;border:1px solid var(--t-border);border-radius:999px;overflow:hidden;
 }
@@ -185,11 +192,16 @@ nav.tabs{display:flex;gap:4px;margin-left:8px;position:relative}
   background:currentColor;opacity:.25;animation:ripple calc(.5s * var(--motion-scale)) ease-out forwards;
 }
 @keyframes ripple{to{transform:scale(2.6);opacity:0}}
+/* S-186: icon-only header buttons. The glyph carries the state (filled/
+   empty connect dot, sun/moon); aria-label + title carry the words; the
+   square frame keeps a 32px hit target on the 4px grid. */
+.btn.btn-icon{padding:8px;min-width:32px;min-height:32px;line-height:1;text-align:center}
+.btn.btn-icon svg{display:block}
 
 /* ---------- layout ---------- */
 /* main height tracks the header bar; 66px is the measured header height
    after the 24b re-space (S-181) so main ends exactly at the viewport edge. */
-main{display:grid;grid-template-columns:minmax(320px,420px) 1fr;gap:0;height:calc(100vh - 66px)}
+main{display:grid;grid-template-columns:minmax(min(320px,40%),35%) 1fr;gap:0;height:calc(100vh - 66px)}
 #listPane{border-right:1px solid var(--t-border);display:flex;flex-direction:column;min-height:0}
 #detailPane{overflow:auto;overflow-x:hidden;padding:24px 28px;min-height:0}
 .filter-row{padding:12px 16px 8px;display:flex;gap:8px;align-items:center}
@@ -203,6 +215,11 @@ main{display:grid;grid-template-columns:minmax(320px,420px) 1fr;gap:0;height:cal
 
 #selBar{display:none;gap:12px;align-items:center;padding:0 16px 8px}
 #selBar .count{color:var(--t-textMuted);font-size:13px}
+/* S-186: the Select all subheading, a quiet label row above the list;
+   its checkbox is the tri-state master for the FILTERED set. */
+.list-head{display:flex;align-items:center;gap:8px;padding:4px 16px;color:var(--t-textMuted);font-size:12px}
+.list-head input{width:15px;height:15px;accent-color:var(--t-primary);cursor:pointer;flex:none}
+.list-head label{cursor:pointer}
 .skill-check{width:15px;height:15px;accent-color:var(--t-primary);cursor:pointer;flex:none}
 #agentsWrap{position:relative}
 #agentsPop{
@@ -477,9 +494,11 @@ footer.tip{color:var(--t-textMuted);font-size:12px;padding:8px 16px 12px;border-
     </div>
     <button class="btn" id="checkUpdatesBtn">Check for updates</button>
     <button class="btn" id="updateAllBtn">Update all</button>
-    <button class="btn" id="connectState" style="display:none" aria-pressed="false" title="Connect to your local skills-ui serve">&#9675; connect</button>
-    <button class="btn" id="themeToggle" aria-label="Switch theme">☀ Light</button>
-    <button class="btn" id="settingsBtn" aria-haspopup="dialog">⚙ Settings</button>
+    <button class="btn primary" id="updateCheckedBtn" style="display:none">Update selected</button>
+    <button class="btn danger" id="deleteCheckedBtn" style="display:none">Remove selected</button>
+    <button class="btn btn-icon" id="connectState" style="display:none" aria-pressed="false" title="Connect to your local skills-ui serve" aria-label="Connect to your local skills-ui serve"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.25" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+    <button class="btn btn-icon" id="themeToggle" aria-label="Switch theme" title="Switch theme"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.25v2.25M8 12.5v2.25M1.25 8h2.25M12.5 8h2.25M3.35 3.35l1.6 1.6M11.05 11.05l1.6 1.6M12.65 3.35l-1.6 1.6M4.95 11.05l-1.6 1.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></button>
+    <button class="btn btn-icon" id="settingsBtn" aria-haspopup="dialog" aria-label="Settings" title="Settings"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 4h11M2.5 8h11M2.5 12h11"/><circle cx="10.5" cy="4" r="1.6" fill="currentColor" stroke="none"/><circle cx="5.5" cy="8" r="1.6" fill="currentColor" stroke="none"/><circle cx="8.5" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg></button>
   </div>
 </header>
 
@@ -503,7 +522,6 @@ footer.tip{color:var(--t-textMuted);font-size:12px;padding:8px 16px 12px;border-
         </div>
       </div>
       <button class="btn" id="helpBtn" title="Keyboard shortcuts (?)">?</button>
-      <button class="btn" id="selectAllBtn" title="Check every skill in the filtered list">Select all</button>
       <div class="seg" role="group" aria-label="Sort order">
         <button data-sort="checked" aria-pressed="true">Checked first</button>
         <button data-sort="name" aria-pressed="false">A to Z</button>
@@ -512,9 +530,11 @@ footer.tip{color:var(--t-textMuted);font-size:12px;padding:8px 16px 12px;border-
     </div>
     <div id="selBar">
       <span class="count"><b id="selCount">0</b> selected</span>
-      <button class="btn primary" id="updateCheckedBtn">Update selected</button>
-      <button class="btn danger" id="deleteCheckedBtn">Remove selected</button>
       <button class="btn" id="clearCheckedBtn">Clear</button>
+    </div>
+    <div class="list-head">
+      <input type="checkbox" id="selectAllMaster" aria-label="Select all" title="Check every skill in the filtered list">
+      <label for="selectAllMaster">Select all</label>
     </div>
     <ul id="skillList" role="listbox" aria-label="Skills"></ul>
     <footer class="tip"><kbd>click</kbd> a skill for details · <kbd>Search</kbd> tab installs from skills.sh</footer>
@@ -742,8 +762,9 @@ function applyPrefs(){
   var themeToggle = $('#themeToggle');
   if (themeToggle) {
     var light = state.prefs.theme === 'latte';
-    themeToggle.textContent = light ? '☾ Dark' : '☀ Light';
+    themeToggle.innerHTML = light ? ICONS.sun : ICONS.moon;
     themeToggle.setAttribute('aria-label', light ? 'Switch to dark theme' : 'Switch to light theme');
+    themeToggle.setAttribute('title', light ? 'Switch to dark theme' : 'Switch to light theme');
   }
   var themeBtns = document.querySelectorAll('[data-theme-choice]');
   themeBtns.forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-theme-choice') === state.prefs.theme)); });
@@ -799,10 +820,21 @@ function probeBackend(base, token, onStatus){
     throw new Error('Cannot reach the backend. If the browser showed a local-network access prompt, choose Allow, then retry, and check the URL/port and that serve is running.');
   });
 }
+/* S-186: inline SVG icon set for the icon-only header buttons. The glyph
+   carries the state (filled vs hollow connect dot, sun vs moon), the
+   accessible label + title carry the words, and everything inherits
+   currentColor so both themes read. Strings only: no backticks, no emoji
+   glyphs (sloplint 30a). */
+var ICONS = {
+  dotOn: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4" fill="currentColor"/></svg>',
+  dotOff: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.25" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  sun: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.25v2.25M8 12.5v2.25M1.25 8h2.25M12.5 8h2.25M3.35 3.35l1.6 1.6M11.05 11.05l1.6 1.6M12.65 3.35l-1.6 1.6M4.95 11.05l-1.6 1.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>',
+  moon: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M14 9.5A6 6 0 1 1 6.5 2a4.5 4.5 0 0 0 7.5 7.5z" fill="currentColor"/></svg>'
+};
 function connectedDot(ok){
   var b = $('#connectState');
   if (!b) return;
-  b.textContent = ok ? '● connected' : '○ connect';
+  b.innerHTML = ok ? ICONS.dotOn : ICONS.dotOff;
   b.setAttribute('aria-pressed', String(ok));
 }
 function tryConnect(base, token){
@@ -1047,6 +1079,7 @@ function renderList(){
       empty.__sig = emptyHtml;
     }
   }
+  syncSelectAll();
 }
 
 function selectSkill(name){
@@ -1226,7 +1259,9 @@ function showDetail(name){
     (detailOutdated ? ' · <span class="update-badge">update available</span>' : '') + '</p>' +
     '<div class="detail-actions">' +
       '<button class="btn danger" id="removeBtn">Remove…</button>' +
-      '<button class="btn" id="updateBtn">Update</button>' +
+      // S-186: Update exists only once a check ran AND this skill has an
+      // update available; before that it rendered unconditionally.
+      (detailOutdated ? '<button class="btn" id="updateBtn">Update</button>' : '') +
     '</div>' +
     '<dl class="detail-meta">' +
       '<dt>Scope</dt><dd>' + esc(skill.scope) + '</dd>' +
@@ -1236,7 +1271,7 @@ function showDetail(name){
     '</dl>' +
     '<div class="readme" id="readme">Loading…</div>';
   $('#removeBtn').addEventListener('click', function(){ openRemove(skill); });
-  $('#updateBtn').addEventListener('click', function(){ updateSkills([skill.name], skill.scope === 'global'); });
+  if (detailOutdated) $('#updateBtn').addEventListener('click', function(){ updateSkills([skill.name], skill.scope === 'global'); });
   /* S-179: the row's own path rides along — the serve validates it as an exact cached-list row (name stays for older serves). */
   api('/api/skill?scope=' + skill.scope + '&name=' + encodeURIComponent(skill.name) + '&path=' + encodeURIComponent(skill.path))
     .then(function(d){
@@ -1650,6 +1685,24 @@ function renderSelBar(){
   var n = state.checked.size;
   $('#selBar').style.display = n ? 'flex' : 'none';
   $('#selCount').textContent = n;
+  /* S-186: the selected-scope actions moved to the top bar; they show only
+     while a selection exists (they used to hide with #selBar). */
+  $('#updateCheckedBtn').style.display = n ? '' : 'none';
+  $('#deleteCheckedBtn').style.display = n ? '' : 'none';
+  syncSelectAll();
+}
+/* S-186: the Select all master mirrors the FILTERED set. Checked when every
+   filtered row is checked, indeterminate when some are, unchecked when none
+   are. Runs on every render pass and every selection change. */
+function syncSelectAll(){
+  var box = $('#selectAllMaster');
+  if (!box) return;
+  var items = filteredSkills();
+  var n = 0;
+  items.forEach(function(s){ if (state.checked.has(s.name)) n++; });
+  var all = items.length > 0 && n === items.length;
+  box.checked = all;
+  box.indeterminate = n > 0 && !all;
 }
 function setScope(scope){
   cancelFilterRender(); // S-180: a pending filter render must not fire into the other scope
@@ -1705,8 +1758,15 @@ document.addEventListener('DOMContentLoaded', function(){
     tryConnect($('#backendInput').value.trim(), $('#tokenInput').value.trim());
   });
   $('#connectState').addEventListener('click', openConnect);
-  $('#selectAllBtn').addEventListener('click', function(){
-    filteredSkills().forEach(function(s){ state.checked.add(s.name); });
+  /* S-186: the master checkbox replaces the Select all button. Semantics
+     preserved from the button for the add direction (every FILTERED row,
+     render + selection bar refreshed); all-checked now toggles off. */
+  $('#selectAllMaster').addEventListener('change', function(){
+    var items = filteredSkills();
+    var all = items.length > 0 && items.every(function(s){ return state.checked.has(s.name); });
+    items.forEach(function(s){
+      if (all) state.checked.delete(s.name); else state.checked.add(s.name);
+    });
     play('confirm');
     renderList(); renderSelBar();
   });
@@ -1738,6 +1798,14 @@ document.addEventListener('DOMContentLoaded', function(){
     if (!li) return;
     var name = rowNameOf(li);
     if (box.checked) state.checked.add(name); else state.checked.delete(name);
+    /* S-186: this handler mutates the checked set OUTSIDE renderList, so the
+       row's stored signature must follow it: rowSignature includes 'c' for a
+       checked row. A stale __sig made the next reconcile (Clear, and the
+       update/remove flows) diff two equal signatures and skip the refresh,
+       leaving boxes visually checked after state.checked.clear(). */
+    for (var si = 0; si < state.skills.length; si++) {
+      if (state.skills[si].name === name) { li.__sig = rowSignature(state.skills[si]); break; }
+    }
     renderSelBar();
     play('select');
   });

@@ -373,11 +373,17 @@ describe("S-183 stale-while-revalidate (renderer)", () => {
       const f = s.captureCharFrame();
       expect(f).toContain("delta");
       expect(f).not.toContain("loading skills"); // fully settled — fresh detail landed
+      // …and the fresh detail BODY landed too: the swap swaps selection to
+      // beta, whose body ("body of /x/beta2") is fetched by a tokened read
+      // that resolves a beat after the busy label clears. Waiting only on
+      // the label made this assertion flake under suite load (the frame
+      // showed beta's header with gamma's stale body still in the pane).
+      expect(f).toContain("body of /x/beta2");
       return true;
     });
     const frame = s.captureCharFrame();
     expect(frame).toContain("✔"); // alpha's check survived — no lost checks
-    expect(frame).not.toContain("gamma"); // gone from truth, gone from the list, check pruned
+    expect(frame).not.toContain("gamma"); // gone from truth, gone from the list AND the pane, check pruned
     // the vanished name leaves the cursor at its index (clamp is a bound, not
     // a mover) — exactly today's reload behavior, unchanged (cursor index 1)
     expect(frame).toContain("─ beta ─");
