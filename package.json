@@ -1,7 +1,7 @@
 {
   "name": "skills-ui",
-  "version": "0.5.2",
-  "description": "TUI/WebUI wrapper for the skills CLI — OpenTUI terminal app + web UI over a local HTTP API, shipped as a self-contained Bun executable.",
+  "version": "0.5.3",
+  "description": "TUI/WebUI wrapper for the skills CLI \u2014 OpenTUI terminal app + web UI over a local HTTP API, shipped as a self-contained Bun executable.",
   "type": "module",
   "license": "MIT",
   "engines": {
