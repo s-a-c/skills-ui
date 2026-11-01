@@ -102,11 +102,13 @@ export interface FilterProbeResult {
    * the perceived dispatch→first-mutation value that INCLUDES the wait.
    * Falls back to a mutation-burst estimate on page builds without the
    * marks. Read on no-op passes too: a legitimate reconcile-to-nothing
-   * reports its own measure (the true O(N) signature-read cost), so 0
-   * means only that no measure exists AND no mutation fired. The
-   * S-155 budget "≤ 50 ms per debounced render" is asserted against THIS
-   * number; the debounce window itself is ratified UX, reported as
-   * context, not charged to the budget. */
+   * reports its own measure — a REAL 0 (the pass ran and did no measurable
+   * work, e.g. a 1-row corpus narrowing within the same result set) is a
+   * valid sample. -1 means the render NEVER HAPPENED (no measure newer
+   * than the probe's t0 and no mutation) — the fatal case callers die on.
+   * The S-155 budget "≤ 50 ms per debounced render" is asserted against
+   * THIS number (clamped at 0); the debounce window itself is ratified UX,
+   * reported as context, not charged to the budget. */
   renderWorkMs: number;
   /** the observation window elapsed with ZERO list mutations while the
    * probed value held and every pre-probe row kept identity — a legitimate
@@ -158,12 +160,16 @@ export async function probeFilterRender(
         // triggered (marks land around every debounced render pass). Falls
         // back to the mutation-burst estimate on page builds without the
         // marks. Frame pacing and the debounce wait stay out of the number.
+        // Returns -1 when NO measure exists and no mutation fired — a render
+        // that never happened. A measure of 0 is legitimate (the pass ran
+        // and reconciled to a true no-op — e.g. a 1-row corpus where the
+        // needle narrows within the same result set).
         const measuredRenderWork = (): number => {
           const entries = performance.getEntriesByName("skills-ui:filter-render");
           for (let i = entries.length - 1; i >= 0; i--) {
             if (entries[i]!.startTime >= t0) return entries[i]!.duration;
           }
-          return byMutation ? Math.max(0, lastMutationAt - firstMutationAt) : 0;
+          return byMutation ? Math.max(0, lastMutationAt - firstMutationAt) : -1;
         };
         const finish = () => {
           clearTimeout(timer);

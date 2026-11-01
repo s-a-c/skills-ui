@@ -268,14 +268,19 @@ async function setupReal(): Promise<Scenario> {
     globalMarker: globalOnly[0] ?? "",
     detailName: project[0]!.name,
     detailPath: project[0]!.path,
+    // Real corpora can be TINY (the canonical gate cwd has 1 project skill):
+    // plain name slices all match the same single row, so every narrowing
+    // needle is a keyed-reconcile no-op and the render-work row never
+    // samples a set-CHANGING render. Interleave a non-matching needle so
+    // match/no-match alternates and each probe exercises a real render.
     filterProbes: [
       project[0]!.name.slice(0, 1),
-      project[0]!.name.slice(0, 2),
+      "zzz-real-no-match",
       project[0]!.name.slice(0, 3),
+      "zzz-real-no-match",
       project[0]!.name.slice(0, 5),
-      project[0]!.name.slice(0, 6),
-      project[0]!.name.slice(0, 7),
-      project[0]!.name.slice(0, 8),
+      "zzz-real-no-match",
+      project[0]!.name,
     ],
     rebuildProbe: project[0]!.name,
     projectEntries: project as ShimEntry[],
@@ -542,13 +547,15 @@ async function main(): Promise<void> {
         // the previous one (e.g. "p" vs "" over this corpus — every name
         // contains both), the keyed reconcile is a legitimate no-op. The
         // page's own User Timing measure for this window proves the pass
-        // ran; sample its render work. No measure at all means the
-        // debounced render never fired — that is still fatal.
-        if (probe.renderWorkMs <= 0) {
-          die(`filter probe: zero DOM mutations for needle "${value}" — a changing needle must re-render`);
+        // ran; sample its render work (a REAL 0 is valid — e.g. a 1-row
+        // real corpus narrowing within the same result set measures no
+        // work). No measure at all (-1) means the debounced render never
+        // fired — that is still fatal.
+        if (probe.renderWorkMs < 0) {
+          die(`filter probe: zero DOM mutations AND no render measure for needle "${value}" — the debounced render never fired`);
         }
-        probeSamples.push(`"${value}" → ${probe.rows} rows, no DOM change, render ${fmtMs(probe.renderWorkMs)} (perceived ${fmtMs(probe.durationMs)})`);
-        keystrokes.push(probe.renderWorkMs);
+        probeSamples.push(`"${value}" → ${probe.rows} rows, no DOM change, render ${fmtMs(Math.max(0, probe.renderWorkMs))} (perceived ${fmtMs(probe.durationMs)})`);
+        keystrokes.push(Math.max(0, probe.renderWorkMs));
         perceived.push(probe.durationMs);
         continue;
       }
@@ -632,8 +639,12 @@ async function main(): Promise<void> {
     const report = renderReport(scenario, date);
     console.log(report);
     if (OUT) {
-      const outPath = new URL(`./report-${date.toISOString().slice(0, 10)}.md`, import.meta.url)
-        .pathname;
+      // real and synthetic share dates: the scenario rides the filename so
+      // a same-day real run can never collide with the synthetic baseline
+      const outPath = new URL(
+        `./report-${date.toISOString().slice(0, 10)}${REAL ? "-real" : ""}.md`,
+        import.meta.url
+      ).pathname;
       if (!FORCE && existsSync(outPath)) {
         die(`--out would overwrite the existing report ${outPath} — pass --force to overwrite`);
       }
