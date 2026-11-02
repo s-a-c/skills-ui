@@ -11,6 +11,9 @@ describe("version", () => {
   });
 
   test("APP_VERSION is a semver-shaped string", () => {
-    expect(APP_VERSION).toMatch(/^\d+\.\d+\.\d+$/);
+    // 3 or 4 segments: the roadmap versions patches of patches (0.5.3.1)
+    // alongside plain patches (0.5.3) — a 3-segment-only regex failed the
+    // moment the first 4-segment release landed (S-187-era catch).
+    expect(APP_VERSION).toMatch(/^\d+\.\d+\.\d+(\.\d+)?$/);
   });
 });
