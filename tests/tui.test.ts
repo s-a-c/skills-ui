@@ -444,6 +444,46 @@ describe("tui (in-memory)", () => {
     expect(frame).not.toContain("skills·checked");
   });
 
+  test("S-187: the list title carries the CHECKED count while checks exist", async () => {
+    const s = setup!;
+    await runTuiOn(s.renderer, undefined, fakeDeps());
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    const idle = s.captureCharFrame();
+    expect(idle).toContain("2 skills·checked"); // no checks: the S-162 form
+    expect(idle).not.toContain("checked of"); // …and no checked count anywhere
+    await s.mockInput.pressKey(" "); // check the focused row (code-review, A→Z first)
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    // wrap-tolerant: assert the title substring, never frame coordinates
+    expect(s.captureCharFrame()).toContain("1 checked of 2");
+    // the fit constraint itself: 80 cols (S-162 ladder budget) must still
+    // render the checked title inside the pane
+    s.resize(80, 24);
+    await s.renderOnce();
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    expect(s.captureCharFrame()).toContain("1 checked of 2");
+    await s.mockInput.pressKey("j"); // next row
+    await s.flush();
+    await s.mockInput.pressKey(" "); // check it too
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    expect(s.captureCharFrame()).toContain("2 checked of 2"); // over the loaded list
+    await s.mockInput.pressKey(" "); // start folding the checks away
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    expect(s.captureCharFrame()).toContain("1 checked of 2");
+    await s.mockInput.pressKey("k"); // back to the first row
+    await s.flush();
+    await s.mockInput.pressKey(" "); // last check off
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 100));
+    const cleared = s.captureCharFrame();
+    expect(cleared).not.toContain("checked of"); // the count vanishes at zero checks
+    expect(cleared).toContain("2 skills·checked"); // …and the S-162 form returns
+  });
+
   test("S-162: toasts queue FIFO — a second toast waits for the first's window", async () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
@@ -1172,5 +1212,18 @@ describe("S-103 search text-entry + match highlighting", () => {
     expect(highlightSegments("nomatch", ["labs", null])).toEqual([{ text: "nomatch", match: false }]);
     // adjusted query wins only when the raw query misses
     expect(highlightSegments("cli-ansi", ["zzz", "ansi"])[1]).toEqual({ text: "ansi", match: true });
+  });
+});
+
+describe("S-187: checkedTitle 19-char pane-title ladder (review F2 table test)", () => {
+  test("boundary arithmetic: exactly 19 renders, 20 degrades, degrade path always fits", async () => {
+    const { checkedTitle } = await import("../src/tui/Views.tsx");
+    // full = 13 fixed chars + digits(checked) + digits(total)
+    expect(checkedTitle(1, 99999)).toBe(" 1 checked of 99999"); // 19 — renders
+    expect(checkedTitle(10, 99999)).toBe(" 10 checked"); // 20 — degrades, keeps the count
+    expect(checkedTitle(2, 999)).toBe(" 2 checked of 999"); // 17 — fits
+    expect(checkedTitle(1, 1)).toBe(" 1 checked of 1"); // 15 — the common case
+    // degrade path itself needs >10 digits to breach 19 — unreachable
+    expect(checkedTitle(9999999999, 1).length).toBeLessThanOrEqual(19);
   });
 });

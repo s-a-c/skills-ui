@@ -280,7 +280,7 @@ test.describe("local page honesty (S-163)", () => {
       });
     }, { kind: "remove", skills: ["tdd", "ghost"] });
     await page.goto(localOrigin(RM_KEEP_PORT) + "/");
-    await expect(page.locator("#selBar")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("#selSummary")).toBeVisible({ timeout: 15_000 });
     await expect(page.locator("#selCount")).toHaveText("1");
     await expect(
       page.locator("#skillList li", { hasText: "tdd" }).locator("input.skill-check")
@@ -691,7 +691,7 @@ test.describe("local page web semantics (S-164)", () => {
     });
     await page.goto(localOrigin(SEM_PORT) + "/");
     await expect(page.locator("#listPane")).toContainText("tdd", { timeout: 15_000 });
-    await expect(page.locator("#selBar")).toBeHidden(); // nothing checked
+    await expect(page.locator("#selSummary")).toBeHidden(); // nothing checked
     await page.locator("#updateAllBtn").click();
     await expect(page.locator("#toasts .toast.success")).toContainText("Update finished", { timeout: 15_000 });
     expect(JSON.parse(updateBody)).toEqual({ skills: [], global: false });
@@ -705,14 +705,14 @@ test.describe("local page web semantics (S-164)", () => {
     await page.goto(localOrigin(SEM_PORT) + "/");
     await expect(page.locator("#listPane")).toContainText("tdd", { timeout: 15_000 });
     await page.locator("#skillList li", { hasText: "tdd" }).locator("input.skill-check").check();
-    await expect(page.locator("#selBar")).toBeVisible();
+    await expect(page.locator("#selSummary")).toBeVisible();
     await expect(page.locator("#selCount")).toHaveText("1");
     await page.locator('[data-scope="global"]').click();
-    await expect(page.locator("#selBar")).toBeHidden(); // setScope cleared the checks
+    await expect(page.locator("#selSummary")).toBeHidden(); // setScope cleared the checks
     await page.locator('[data-scope="project"]').click();
     await expect(page.locator("#listPane")).toContainText("tdd", { timeout: 15_000 });
     await expect(page.locator("#skillList li", { hasText: "tdd" }).locator("input.skill-check")).not.toBeChecked();
-    await expect(page.locator("#selBar")).toBeHidden();
+    await expect(page.locator("#selSummary")).toBeHidden();
     await ctx.close();
   });
 });

@@ -101,7 +101,7 @@ describe("S-186 manual-smoke pins (bugs 4/5 written failing-first on 0.5.3)", ()
       await pwExpect(page!.locator("#selCount")).toHaveText("1");
       await pwExpect(row.locator("input.skill-check")).toBeChecked();
       await page!.locator("#clearCheckedBtn").click();
-      await pwExpect(page!.locator("#selBar")).toBeHidden(); // the count reset worked…
+      await pwExpect(page!.locator("#selSummary")).toBeHidden(); // the count reset worked…
       // …and the ROW must follow: the checkbox may not stay visually checked
       await pwExpect(row.locator("input.skill-check")).not.toBeChecked();
     },
@@ -247,12 +247,12 @@ describe("S-186 manual-smoke pins (bugs 4/5 written failing-first on 0.5.3)", ()
   );
 
   test(
-    "Update selected and Remove selected live in the top bar; #selBar keeps count + Clear",
+    "Update selected and Remove selected live in the top bar; the select-all line keeps count + Clear",
     async () => {
       await pwExpect(page!.locator(".top-actions #updateCheckedBtn")).toBeAttached();
       await pwExpect(page!.locator(".top-actions #deleteCheckedBtn")).toBeAttached();
-      await pwExpect(page!.locator("#selBar #updateCheckedBtn")).toHaveCount(0);
-      await pwExpect(page!.locator("#selBar #deleteCheckedBtn")).toHaveCount(0);
+      await pwExpect(page!.locator(".list-head #updateCheckedBtn")).toHaveCount(0);
+      await pwExpect(page!.locator(".list-head #deleteCheckedBtn")).toHaveCount(0);
       // hidden while nothing is selected
       await pwExpect(page!.locator("#updateCheckedBtn")).toBeHidden();
       await pwExpect(page!.locator("#deleteCheckedBtn")).toBeHidden();
@@ -260,11 +260,46 @@ describe("S-186 manual-smoke pins (bugs 4/5 written failing-first on 0.5.3)", ()
       await page!.locator("#skillList li", { hasText: "perf-skill-000" }).locator("input.skill-check").check();
       await pwExpect(page!.locator("#updateCheckedBtn")).toBeVisible();
       await pwExpect(page!.locator("#deleteCheckedBtn")).toBeVisible();
-      // and #selBar still carries the count and Clear
-      await pwExpect(page!.locator("#selBar #clearCheckedBtn")).toBeVisible();
+      // and the select-all line carries the count and Clear
+      await pwExpect(page!.locator(".list-head #clearCheckedBtn")).toBeVisible();
       await pwExpect(page!.locator("#selCount")).toHaveText("1");
       await page!.locator("#clearCheckedBtn").click();
       await pwExpect(page!.locator("#updateCheckedBtn")).toBeHidden();
+    },
+    20_000
+  );
+
+  test(
+    "S-187: the select-all line keeps its height when the selection appears and clears",
+    async () => {
+      const head = page!.locator(".list-head");
+      const rowHeight = () => head.evaluate((el) => el.getBoundingClientRect().height);
+      const rectOf = (sel: string) =>
+        page!.evaluate((q) => document.querySelector(q)!.getBoundingClientRect(), sel);
+      // bare row: the summary is hidden, the line already at its final height
+      await pwExpect(page!.locator("#selSummary")).toBeHidden();
+      const bare = await rowHeight();
+      // a selection: count + Clear appear ON the line; the line must not move
+      await page!.locator("#skillList li", { hasText: "perf-skill-000" }).locator("input.skill-check").check();
+      await pwExpect(page!.locator("#selSummary")).toBeVisible();
+      await pwExpect(page!.locator("#selCount")).toHaveText("1");
+      expect(await rowHeight()).toBe(bare);
+      // the inline Clear must fit the pane at desktop, phone, and the
+      // 320px floor widths (review F3: the 156px min track is tightest
+      // there; a 1-digit count already exercises the nowrap squeeze)
+      for (const width of [1280, 390, 320]) {
+        await page!.setViewportSize({ width, height: 800 });
+        const overflow = await page!.evaluate(() => document.documentElement.scrollWidth);
+        expect(overflow).toBeLessThanOrEqual(width);
+        const pane = await rectOf("#listPane");
+        const clear = await rectOf("#clearCheckedBtn");
+        expect(clear.right).toBeLessThanOrEqual(pane.right);
+      }
+      await page!.setViewportSize({ width: 1280, height: 800 });
+      // clearing folds the summary away; the line height is identical again
+      await page!.locator("#clearCheckedBtn").click();
+      await pwExpect(page!.locator("#selSummary")).toBeHidden();
+      expect(await rowHeight()).toBe(bare);
     },
     20_000
   );

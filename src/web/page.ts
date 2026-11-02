@@ -169,13 +169,37 @@ main{display:grid;grid-template-columns:minmax(min(320px,40%),35%) 1fr;gap:0;hei
 #filter::placeholder{color:var(--t-textMuted)}
 #filter:focus{outline:none;border-color:var(--t-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--t-primary) 25%,transparent)}
 
-#selBar{display:none;gap:12px;align-items:center;padding:0 16px 8px}
-#selBar .count{color:var(--t-textMuted);font-size:13px}
 /* S-186: the Select all subheading, a quiet label row above the list;
-   its checkbox is the tri-state master for the FILTERED set. */
-.list-head{display:flex;align-items:center;gap:8px;padding:4px 16px;color:var(--t-textMuted);font-size:12px}
+   its checkbox is the tri-state master for the FILTERED set. S-187: the
+   selection summary (count + Clear) joined this line, right-aligned; the
+   row is permanent and the summary shows or hides as inline content sized
+   inside the text line the label already sets, so the row height never
+   changes when a selection appears or clears. */
+.list-head{display:flex;align-items:center;gap:8px;padding:4px 16px;color:var(--t-textMuted);font-size:12px;white-space:nowrap}
 .list-head input{width:15px;height:15px;accent-color:var(--t-primary);cursor:pointer;flex:none}
-.list-head label{cursor:pointer}
+.list-head label{cursor:pointer;flex:none}
+.sel-summary{margin-left:auto;display:none;align-items:center;gap:8px;flex:none}
+.sel-summary.on{display:inline-flex}
+.sel-summary .count{color:var(--t-textMuted)}
+/* the inline Clear must fit the line the master checkbox already sizes:
+   12px text on a 1.2 leading stays under the label line box, so showing
+   it can never grow the row */
+.sel-summary .btn{font-size:12px;line-height:1.2;padding:0 8px;border-radius:6px}
+@media (max-width:560px){
+  .list-head{gap:4px;padding:4px 8px}
+  .sel-summary{gap:4px}
+  .sel-summary .sel-word{display:none}
+  .sel-summary .btn{padding:0 4px}
+}
+/* S-187 review F3: at the 320px floor the pane track bottoms out at 156px
+   (128px content) and the full line (checkbox + "Select all" + count +
+   Clear) overflows it by ~12px. Below 480px the master's text hides — a
+   bare header checkbox is the standard select-all affordance; the words
+   stay on the input's aria-label + title, and the label keeps its hit
+   area around the checkbox. */
+@media (max-width:480px){
+  .list-head label[for="selectAllMaster"]{font-size:0}
+}
 .skill-check{width:15px;height:15px;accent-color:var(--t-primary);cursor:pointer;flex:none}
 #agentsWrap{position:relative}
 #agentsPop{
@@ -1093,7 +1117,7 @@ function deleteChecked(){
         play('success');
         toast('Removed ' + names.length + ' skill' + (names.length === 1 ? '' : 's'), 'success');
         state.checked.clear();
-        renderSelBar();
+        renderSelSummary();
         state.selected = null;
         return loadSkills();
       })
@@ -1127,9 +1151,26 @@ function applySeed(){
   var seed = window.__SEED__ || { kind: 'none' };
   if (seed.kind === 'add' && seed.source) showInstallSeed(seed);
   else if (seed.kind === 'update' && seed.skills && seed.skills.length) {
-    state.checked = new Set(seed.skills);
-    renderList(); renderSelBar();
-    toast(seed.skills.length + ' skill' + (seed.skills.length === 1 ? '' : 's') + ' selected for update', 'success');
+    // S-187 parity (review F1): intersect the seed names with the real
+    // installed list — same G5 discipline as the remove seed below. The
+    // TUI prunes model.checked on every skills-loaded (model.ts), so an
+    // unfiltered web set diverged on stale/externally-removed names.
+    loadSkills().then(function(){
+      var found = [], notInstalled = [];
+      seed.skills.forEach(function(n){
+        if (state.skills.some(function(s){ return s.name === n; })) found.push(n);
+        else notInstalled.push(n);
+      });
+      state.checked = new Set(found);
+      renderList(); renderSelSummary();
+      var msg = found.length + ' skill' + (found.length === 1 ? '' : 's') + ' selected for update';
+      if (notInstalled.length) {
+        play('error');
+        toast(msg + ' (not installed: ' + notInstalled.join(', ') + ')', 'error');
+      } else {
+        toast(msg, 'success');
+      }
+    });
   } else if (seed.kind === 'remove' && seed.skills && seed.skills.length) {
     // G5: pre-check the seed names against the real installed list — the old
     // branch success-toasted and dead-ended. The checked set feeds the remove
@@ -1142,7 +1183,7 @@ function applySeed(){
         else notInstalled.push(n);
       });
       state.checked = new Set(found);
-      renderList(); renderSelBar();
+      renderList(); renderSelSummary();
       var msg = found.length + ' skill' + (found.length === 1 ? '' : 's') + ' selected for removal';
       if (notInstalled.length) {
         play('error');
@@ -1224,7 +1265,7 @@ function updateSkills(skills, global){
       play('success');
       toast(all ? 'Update finished' : 'Updated ' + skills.join(', '), 'success');
       state.checked.clear();
-      renderSelBar();
+      renderSelSummary();
       return loadSkills();
     })
     .catch(function(e){ play('error'); toast(e.message, 'error'); })
@@ -1453,7 +1494,7 @@ function renderAgentsPop(){
       if (!state.agentFilter) state.agentFilter = new Set(uniqueAgents());
       if (ev.target.checked) state.agentFilter.add(a); else state.agentFilter.delete(a);
       if (state.agentFilter.size === uniqueAgents().length) state.agentFilter = null;
-      renderList(); renderSelBar();
+      renderList(); renderSelSummary();
     });
     list.appendChild(row);
   });
@@ -1469,12 +1510,14 @@ function toggleAgentsPop(){
 }
 function closeAgentsPop(){ $('#agentsPop').classList.remove('open'); }
 
-function renderSelBar(){
+function renderSelSummary(){
   var n = state.checked.size;
-  $('#selBar').style.display = n ? 'flex' : 'none';
+  /* S-187: count + Clear ride the Select all line (right-aligned); the row
+     itself is permanent, so only the summary shows or hides. */
+  $('#selSummary').classList.toggle('on', n > 0);
   $('#selCount').textContent = n;
-  /* S-186: the selected-scope actions moved to the top bar; they show only
-     while a selection exists (they used to hide with #selBar). */
+  /* S-186: the selected-scope actions live in the top bar; they show only
+     while a selection exists. */
   $('#updateCheckedBtn').style.display = n ? '' : 'none';
   $('#deleteCheckedBtn').style.display = n ? '' : 'none';
   syncSelectAll();
@@ -1495,7 +1538,7 @@ function syncSelectAll(){
 function setScope(scope){
   cancelFilterRender(); // S-180: a pending filter render must not fire into the other scope
   state.checked.clear();
-  renderSelBar();
+  renderSelSummary();
   state.scope = scope;
   document.querySelectorAll('[data-scope]').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-scope') === scope)); });
   play('select');
@@ -1530,14 +1573,14 @@ document.addEventListener('DOMContentLoaded', function(){
   });
   $('#deleteCheckedBtn').addEventListener('click', deleteChecked);
   $('#clearCheckedBtn').addEventListener('click', function(){
-    state.checked.clear(); renderList(); renderSelBar();
+    state.checked.clear(); renderList(); renderSelSummary();
   });
   $('#agentsBtn').addEventListener('click', function(){ toggleAgentsPop(); });
   $('#agentsAll').addEventListener('click', function(){
-    state.agentFilter = null; renderAgentsPop(); renderList(); renderSelBar();
+    state.agentFilter = null; renderAgentsPop(); renderList(); renderSelSummary();
   });
   $('#agentsClear').addEventListener('click', function(){
-    state.agentFilter = new Set(); renderAgentsPop(); renderList(); renderSelBar();
+    state.agentFilter = new Set(); renderAgentsPop(); renderList(); renderSelSummary();
   });
   $('#agentsDone').addEventListener('click', function(){ closeAgentsPop(); });
   $('#helpBtn').addEventListener('click', function(){ $('#helpDialog').showModal(); });
@@ -1556,7 +1599,7 @@ document.addEventListener('DOMContentLoaded', function(){
       if (all) state.checked.delete(s.name); else state.checked.add(s.name);
     });
     play('confirm');
-    renderList(); renderSelBar();
+    renderList(); renderSelSummary();
   });
   document.querySelectorAll('[data-sort]').forEach(function(b){
     b.addEventListener('click', function(){
@@ -1594,7 +1637,7 @@ document.addEventListener('DOMContentLoaded', function(){
     for (var si = 0; si < state.skills.length; si++) {
       if (state.skills[si].name === name) { li.__sig = rowSignature(state.skills[si]); break; }
     }
-    renderSelBar();
+    renderSelSummary();
     play('select');
   });
   skillListEl.addEventListener('keydown', function(ev){
@@ -1678,7 +1721,7 @@ document.addEventListener('DOMContentLoaded', function(){
     setTimeout(function(){ rip.remove(); }, 550);
   });
 
-  renderSelBar();
+  renderSelSummary();
   document.addEventListener('keydown', function(ev){
     var key = ev.key;
     var typing = /^(input|textarea|select)$/i.test((ev.target.tagName || ''));
@@ -1879,13 +1922,13 @@ ${APP_CSS}
         <button data-sort="load" aria-pressed="false">Load order</button>
       </div>
     </div>
-    <div id="selBar">
-      <span class="count"><b id="selCount">0</b> selected</span>
-      <button class="btn" id="clearCheckedBtn">Clear</button>
-    </div>
     <div class="list-head">
       <input type="checkbox" id="selectAllMaster" aria-label="Select all" title="Check every skill in the filtered list">
       <label for="selectAllMaster">Select all</label>
+      <span id="selSummary" class="sel-summary">
+        <span class="count"><b id="selCount">0</b> <span class="sel-word">selected</span></span>
+        <button class="btn" id="clearCheckedBtn">Clear</button>
+      </span>
     </div>
     <ul id="skillList" role="listbox" aria-label="Skills"></ul>
     <footer class="tip"><kbd>click</kbd> a skill for details · <kbd>Search</kbd> tab installs from skills.sh</footer>

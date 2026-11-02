@@ -215,6 +215,14 @@ function Header({ model }: { model: TuiModel }): ReactNode {
   );
 }
 
+/* S-187: the checked count in the list title. The pane fits a 19-char
+   title at 80 cols (S-162 ladder: 19 renders, 20 drops) — past that keep
+   the checked count and drop the total rather than lose the title. */
+export function checkedTitle(checked: number, total: number): string {
+  const full = ` ${checked} checked of ${total}`;
+  return full.length <= 19 ? full : ` ${checked} checked`;
+}
+
 function InstalledBody({ model }: { model: TuiModel }): ReactNode {
   const t = tokensFor(model.prefs.theme);
   const { dispatch, loadDetail, refs } = useApp();
@@ -236,15 +244,21 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
   // live filter state rides the border title (S-88 discipline). The title
   // prop alone carries it — pty-smoke's filter-typing check guards this
   // path (the S-92 spike anomaly never reproduced on the shipped tree).
+  // S-187: while checks exist the title surfaces the CHECKED count (over
+  // the loaded list — model.checked is pruned to it on every refresh);
+  // with none it stays the S-162 count + sort form.
+  const checkedCount = model.checked.size;
   const listTitle =
     model.agentFilter.size > 0
       ? ` agents: ${[...model.agentFilter].sort().join(", ")} `
       : model.filter || model.filtering
         ? ` filter: ${model.filter}${model.filtering ? "▌" : ""} `
-        // `·checked` / `·order` glued to the count: the pane fits only a
-        // 19-char title at 80 cols (measured ladder: 19 renders, 20 drops),
-        // and "N skills" must stay — S-162
-        : ` ${visible.length} skills·${model.sortCheckedFirst ? "checked" : "order"}`;
+        : checkedCount > 0
+          ? checkedTitle(checkedCount, visible.length)
+          // `·checked` / `·order` glued to the count: the pane fits only a
+          // 19-char title at 80 cols (measured ladder: 19 renders, 20 drops),
+          // and "N skills" must stay — S-162
+          : ` ${visible.length} skills·${model.sortCheckedFirst ? "checked" : "order"}`;
   useEffect(() => {
     refs.detailScroll = detailScrollRef.current ?? undefined;
   });
