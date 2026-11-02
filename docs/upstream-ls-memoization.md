@@ -1,8 +1,9 @@
 # Upstream memo: `skills ls` re-parses every SKILL.md per agent dir per pass (S-153)
 
-**Status:** draft for filing upstream — filing it is the human's job, not
-skills-ui's. This document only carries the evidence and the proposed fix in
-one place so it can be pasted into an upstream issue verbatim.
+**Status:** FILED upstream 2026-11-02 as
+[vercel-labs/skills#2644](https://github.com/vercel-labs/skills/issues/2644)
+(cross-linked from #1389). This document is the source copy; the filed body
+lives in `docs/upstream-issue-draft.md`.
 
 **Upstream repo:** vercel-labs/skills (`skills` CLI). Observed on 1.7.4,
 macOS (arm64), a real home directory with ~26 agent dirs and ~300 skills.
