@@ -1,0 +1,4 @@
+0e71822600a4ca0cf8d98ae0fadc335aefd588982f8efec2e1ed3d108b74a143  skills-ui-0.5.3.1-darwin-arm64
+6ba9e2107cf8e67987e02d040ec9f3b5cf45cf653c0155d2f4b25f27aba0adde  skills-ui-0.5.3.1-darwin-x64
+22e4e8476d377414c8aaf066f23b016a3a3f32fda7038bfb3919a227f8e3d10d  skills-ui-0.5.3.1-linux-arm64
+78c7e8e0bd049495bec5bb4d5b6b0f137bd9fc1598593a1e4628c89be84a7f24  skills-ui-0.5.3.1-linux-x64

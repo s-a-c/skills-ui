@@ -81,8 +81,12 @@ console.log("done");
 // skills-ui-*/checksums-* files from OTHER versions (build intermediates like
 // entitlements.plist stay) and rewrite the checksum manifest so it always
 // matches exactly what is on disk — `shasum -a 256 -c checksums-<ver>.txt`
-// from dist/ verifies the set.
-const versionedName = /^(?:skills-ui|checksums)-(\d+\.\d+\.\d+)/;
+// from dist/ verifies the set. The version captures 3 OR 4 segments
+// (0.5.3 and 0.5.3.1): a 3-segment regex mis-reads a 4-segment filename
+// (captures "0.5.3" from "0.5.3.1-darwin-arm64") and the prune pass then
+// deletes the CURRENT release's just-built binaries (S-187, first
+// 4-segment release).
+const versionedName = /^(?:skills-ui|checksums)-(\d+\.\d+\.\d+(?:\.\d+)?)((?:-[a-z0-9-]+)?)(?:\.[a-z]+)?$/;
 for (const name of readdirSync("dist").sort()) {
   const match = versionedName.exec(name);
   if (name === "skills-ui" || (match && match[1] !== pkg.version)) {
