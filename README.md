@@ -5,10 +5,20 @@
 ## What it is
 
 - A single binary (`bun build --compile`) embedding the Bun runtime and OpenTUI's native core.
-- Three entry modes: `skills-ui` (terminal UI) · `skills-ui --web` (local web UI) · `skills-ui serve` (headless HTTP API).
+- Three entry modes: `skills-ui` (terminal UI) · `skills-ui --web` (local web UI) · `skills-ui serve` (headless HTTP API) — plus a **hosted zero-install page** at [s-a-c.github.io/skills-ui](https://s-a-c.github.io/skills-ui/app.html) that talks to your local `serve` over an authenticated loopback connection (Chrome/Edge/Firefox 153+; Safari blocks local network access).
 - Wraps the **stock** `skills` CLI via subprocess (`ls --json`, `add --json -y`, `rm -y`, `update -y`) — nothing of `skills` is bundled or imported; it is discovered at runtime (`SKILLS_UI_SKILLS_BIN` → `PATH`).
 - Talks to the public skills.sh registry directly for search.
 - Rich terminal UI: markdown (tree-sitter), images (kitty/sixel/blocks), 3D graph view (`@opentui/three`), synthesized audio, catppuccin latte|mocha theming with WCAG-verified contrast.
+
+## Performance (0.5.3)
+
+Every hot path is measured against ratified budgets (`bun run perf:budget`, committed harness). On a real 300-skill corpus:
+
+- the serve API caches per scope and coalesces concurrent reads — a warm global list is a **0.1 ms** cache hit where the stock CLI's `ls` scan costs tens of seconds per fresh run; detail reads resolve by exact path with **zero** subprocesses;
+- the TUI paints a persisted index instantly on first load (**~0.5 ms** on a real 300-entry index) and revalidates behind it — no more blank minute on your first `g`;
+- the web filter reconciles keyed rows instead of rebuilding the list per keystroke; search dedupes identical in-flight registry calls and stale responses can never overwrite newer results.
+
+The remaining wall is upstream: `skills ls` itself re-parses every SKILL.md once per agent dir per canonical skill on large home directories ([vercel-labs/skills#2644](https://github.com/vercel-labs/skills/issues/2644)) — skills-ui caches around it, it can't fix it.
 
 ## Requirements
 
@@ -20,7 +30,7 @@
 Pinned to a signed release tag (recommended — the installer script and the checksum manifest both come from the tag's tree, so `git tag -v` covers what verifies your binary):
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/s-a-c/skills-ui/v0.5.1/scripts/install.sh | sh -s v0.5.1
+curl -fsSL https://raw.githubusercontent.com/s-a-c/skills-ui/v0.5.3.1/scripts/install.sh | sh -s v0.5.3.1
 ```
 
 Rolling latest from `main` (unpinned script):
@@ -48,7 +58,9 @@ mise install            # bun 1.4.4
 bun install
 bun run dev             # terminal app
 bun run selftest        # in-memory renderer smoke test — no TTY needed
-bun test                # 36 tests: services (skills shim) · API · TUI snapshots
+bun test                # 230 tests: services (skills shim) · API · web page pins · TUI · perf budgets
+bun run pty-smoke       # real-pty smoke over the compiled flows
+bun run perf:budget     # the 0.5.3 budget harness (--real for the live corpus, never in CI)
 bun run build           # compiled binary → dist/ (host target)
 bun run build --all     # darwin-x64/arm64 + linux-x64/arm64 matrix
 ```
