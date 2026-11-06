@@ -475,7 +475,6 @@ describe("tui (in-memory)", () => {
     expect(idle).not.toContain("↑");
     await s.mockInput.pressKey("c");
     const checked = await waitForFrame(s, (f) => f.includes("↑") && f.includes("1 update(s) available"));
-    expect(checked).toContain("↑"); // badge on code-review's row
     expect(checked).toContain("update available"); // detail hint — code-review is selected (A→Z first)
   });
 
@@ -597,7 +596,6 @@ describe("tui (in-memory)", () => {
     await waitForFrame(s, (f) => f.includes("tdd") && f.includes("code-review")); // settled list
     await s.mockInput.pressKey("c");
     const frame = await waitForFrame(s, (f) => f.includes("no updates available · 1 not checkable"));
-    expect(frame).toContain("no updates available · 1 not checkable"); // toast mentions the count
     expect(frame).toContain("check: not checkable yet"); // detail line (code-review selected, A→Z first)
     expect(frame).not.toContain("↑"); // badge logic unchanged — an error alone is no badge
   });
