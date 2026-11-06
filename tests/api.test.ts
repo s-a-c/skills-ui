@@ -417,7 +417,7 @@ describe("api", () => {
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ source: "fixture/repo", skills }),
         });
-      for (const skills of [null, "tdd", [1], [null], ["* ", "alpha"], ["*/*"], ["--dry-run"], [""], ["", "alpha"]]) {
+      for (const skills of [null, "tdd", [1], [null], ["* ", "alpha"], ["* "], ["*/*"], ["--dry-run"], [""], ["", "alpha"]]) {
         const res = await send(skills);
         expect(res.status).toBe(400);
       }

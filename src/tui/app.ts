@@ -786,7 +786,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         return;
       default:
         // fork UX: typing a printable char on the installed list starts the
-        // text filter directly (the agent overlay owns `f`)
+        // text filter directly (the agent overlay owns `a`; `f` opens this filter)
         if (model.tab === "installed" && k.length === 1 && /[a-z0-9\-_/.]/i.test(k)) {
           dispatch({ type: "filtering", on: true });
           dispatch({ type: "filter", text: model.filter + k });
