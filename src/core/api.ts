@@ -188,7 +188,11 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
   //     mutation lands must never repopulate the cache with stale rows
   //     when it settles. Its own awaiters still receive that response
   //     (exactly what they would have gotten without a cache); the next
-  //     request after invalidation re-spawns.
+  //     request after invalidation re-spawns. The same bump governs the
+  //     description enrichment (S-201): every invalidation clears the
+  //     description cache too, and enrichment reads/writes are
+  //     generation-guarded so a late pre-mutation response cannot repopulate
+  //     the CURRENT shared enrichment.
   const listCache = new Map<Scope, InstalledSkill[]>();
   const inFlightLists = new Map<Scope, Promise<InstalledSkill[]>>();
   let listGeneration = 0;
@@ -225,23 +229,37 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
   };
 
   const invalidateListCache = (): void => {
+    // S-201: description enrichment is tied to the same generation — a
+    // mutation drops the cached descriptions along with the rows, so the
+    // next list re-reads the SKILL.md files instead of serving stale
+    // frontmatter for a changed skill.
     listGeneration += 1;
     listCache.clear();
     inFlightLists.clear();
+    descriptionCache.clear();
   };
 
   // ---------- description enrichment (frontmatter, cached per server) ----------
+  //
+  // S-201: the cache is keyed by path alone, so it is only valid for the
+  // list generation a caller captured. Callers pass the generation they
+  // captured BEFORE awaiting the list; only a caller whose generation is
+  // still current may read or repopulate the cache. An old awaiter (a list
+  // already in flight when a mutation landed) still gets its own response —
+  // enriched from the file at response time — but a stale generation can
+  // never read into, or write over, the CURRENT shared enrichment.
 
   const descriptionCache = new Map<string, string>();
 
-  const descriptionFor = (path: string): string => {
-    const cached = descriptionCache.get(path);
+  const descriptionFor = (path: string, generation: number): string => {
+    const current = generation === listGeneration;
+    const cached = current ? descriptionCache.get(path) : undefined;
     if (cached !== undefined) return cached;
     const doc = readSkillDoc(path);
     const match = doc?.match(/^description:\s*(.+)$/m);
     // frontmatter descriptions are external text — sanitized at ingress
     const description = sanitizeMetadata(match?.[1] ?? "");
-    descriptionCache.set(path, description);
+    if (current) descriptionCache.set(path, description);
     return description;
   };
 
@@ -283,6 +301,11 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
 
       if (method === "GET" && path === "/api/skills") {
         const scope = scopeParam(url);
+        // S-201: capture the generation BEFORE awaiting the list — a request
+        // whose flight is overtaken by a mutation must not read or repopulate
+        // the description cache (its own stale response is still served,
+        // enriched from the files at response time).
+        const generation = listGeneration;
         // S-178: served from the per-server list cache — the first request
         // for a scope spawns one `skills ls`, concurrent requests coalesce
         // onto it, later requests hit the cache
@@ -291,7 +314,7 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
           scope,
           skills: skills.map((s) => ({
             name: s.name,
-            description: descriptionFor(s.path),
+            description: descriptionFor(s.path, generation),
             scope: s.scope,
             agents: s.agents,
             path: s.path,

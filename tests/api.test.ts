@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, mkdirSync, writeFileSync, chmodSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { APP_VERSION } from "../src/core/version.ts";
-import { readShimCallLog } from "./perf/helpers.ts";
+import { resetSkillsBinCache } from "../src/core/skills-client.ts";
+import { buildSyntheticCorpus, countShimCalls, readShimCallLog } from "./perf/helpers.ts";
 import { createWorkspaceFixture } from "./helpers/audit-state.ts";
 
 const SHIM = new URL("fixtures/skills-shim.mjs", import.meta.url).pathname;
@@ -441,6 +442,243 @@ describe("api", () => {
       const body = (await res.json()) as { ok: boolean; output: string };
       expect(body.ok).toBe(false);
       expect(body.output).toContain("failed");
+    });
+  });
+
+  // S-201 (finding HTTP-3): the description enrichment cache was keyed by
+  // path only, so after a wrapper-owned mutation (update/install/remove) the
+  // list kept serving STALE cached descriptions while /api/skill detail
+  // already showed the fresh body. These pins run the real server over real
+  // fixture SKILL.md files (workspace fixture from tests/helpers/audit-state.ts
+  // owns .agents/tmp fixtures and env; the shared stateDir fixture variable is
+  // rebound under that owned root, not the system tmpdir), bind
+  // SKILLS_SHIM_LS_PROJECT to a synthetic corpus before start(), and require
+  // the list description to track the file after every mutation kind —
+  // including failed/partial ones — and after a pre-mutation list request
+  // held at the subprocess boundary settles late.
+  describe("api: description enrichment invalidated with list generation (S-201)", () => {
+    let fixture: ReturnType<typeof createWorkspaceFixture>;
+    let restoreEnv: () => void;
+    let callLog: string;
+    let savedEnv: Array<[string, string | undefined]>;
+
+    // env keys these tests set directly — saved and restored after each test
+    const MUTABLE_ENV_KEYS = [
+      "SKILLS_SHIM_LS_PROJECT",
+      "SKILLS_SHIM_UPDATE_FAIL",
+      "SKILLS_SHIM_HOLD_DIR",
+      "SKILLS_SHIM_REAL_BIN",
+    ];
+
+    beforeEach(() => {
+      fixture = createWorkspaceFixture();
+      // rebind the shared fixture variables under the owned workspace root
+      // (.agents/tmp), NOT the system tmpdir
+      stateDir = fixture.root;
+      prefsDir = join(fixture.root, "prefs");
+      savedEnv = MUTABLE_ENV_KEYS.map((k) => [k, process.env[k]] as [string, string | undefined]);
+      restoreEnv = fixture.activate(); // workspace-owned env before start()
+      callLog = fixture.env.SKILLS_SHIM_CALLLOG;
+      resetSkillsBinCache(); // SKILLS_UI_SKILLS_BIN may change per test below
+    });
+
+    afterEach(async () => {
+      await server?.stop();
+      server = null;
+      for (const [key, value] of savedEnv) {
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
+      restoreEnv();
+      fixture.cleanup();
+      resetSkillsBinCache();
+    });
+
+    const docFor = (name: string, description: string, body: string): string =>
+      `---\nname: ${name}\ndescription: ${description}\n---\n${body}`;
+    const OLD_DOC = (name: string): string => docFor(name, "OLD_DESCRIPTION", "OLD_BODY");
+
+    type List = { skills: Array<{ name: string; description: string }> };
+    const listDescription = async (base: string, name: string): Promise<string | undefined> => {
+      const body = (await (await fetch(`${base}/api/skills`)).json()) as List;
+      return body.skills.find((s) => s.name === name)?.description;
+    };
+
+    test("mutation refreshes list description and detail body", async () => {
+      const corpus = buildSyntheticCorpus(stateDir, 2, 0);
+      process.env.SKILLS_SHIM_LS_PROJECT = corpus.projectFixture;
+      const skill = corpus.project[0]!, skillDoc = join(skill.path, "SKILL.md");
+      writeFileSync(skillDoc, OLD_DOC(skill.name));
+      const base = await start();
+      expect(await listDescription(base, skill.name)).toBe("OLD_DESCRIPTION");
+      expect(countShimCalls(readShimCallLog(callLog), ["ls", "--json"])).toBe(1); // warm cache
+      writeFileSync(skillDoc, docFor(skill.name, "NEW_DESCRIPTION", "NEW_BODY"));
+      const changed = await fetch(`${base}/api/update`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills: [skill.name] }),
+      });
+      expect(changed.status).toBe(200);
+      expect(await listDescription(base, skill.name)).toBe("NEW_DESCRIPTION");
+      const detail = (await (
+        await fetch(`${base}/api/skill?name=${encodeURIComponent(skill.name)}`)
+      ).json()) as { body: string };
+      expect(detail.body).toContain("NEW_BODY");
+      const calls = readShimCallLog(callLog);
+      expect(countShimCalls(calls, ["update", "-p", "-y", skill.name])).toBe(1);
+      expect(countShimCalls(calls, ["ls", "--json"])).toBe(2); // warm + post-update; detail served from the refreshed cache
+    });
+
+    test("install — even a partially failing install refreshes list descriptions", async () => {
+      const corpus = buildSyntheticCorpus(stateDir, 2, 0);
+      process.env.SKILLS_SHIM_LS_PROJECT = corpus.projectFixture;
+      const skill = corpus.project[0]!, skillDoc = join(skill.path, "SKILL.md");
+      writeFileSync(skillDoc, OLD_DOC(skill.name));
+      const base = await start();
+      expect(await listDescription(base, skill.name)).toBe("OLD_DESCRIPTION");
+      writeFileSync(skillDoc, docFor(skill.name, "NEW_DESCRIPTION", "NEW_BODY"));
+      // contract add fixture has one failed entry → 500 + ok:false; the
+      // invalidation is unconditional (upstream add can partially succeed)
+      const res = await fetch(`${base}/api/install`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ source: "fixture/source", skills: ["alpha", "beta"] }),
+      });
+      expect(res.status).toBe(500);
+      expect(((await res.json()) as { ok: boolean }).ok).toBe(false);
+      expect(await listDescription(base, skill.name)).toBe("NEW_DESCRIPTION");
+      const calls = readShimCallLog(callLog);
+      expect(countShimCalls(calls, ["ls", "--json"])).toBe(2); // warm + post-install; no extra spawns
+    });
+
+    test("remove refreshes the surviving rows' descriptions", async () => {
+      const corpus = buildSyntheticCorpus(stateDir, 2, 0);
+      process.env.SKILLS_SHIM_LS_PROJECT = corpus.projectFixture;
+      const victim = corpus.project[0]!;
+      const survivor = corpus.project[1]!;
+      writeFileSync(join(survivor.path, "SKILL.md"), OLD_DOC(survivor.name));
+      const base = await start();
+      expect(await listDescription(base, survivor.name)).toBe("OLD_DESCRIPTION"); // warm cache
+      writeFileSync(
+        join(survivor.path, "SKILL.md"),
+        docFor(survivor.name, "NEW_DESCRIPTION", "NEW_BODY")
+      );
+      const res = await fetch(`${base}/api/remove`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills: [victim.name] }),
+      });
+      expect(res.status).toBe(200);
+      expect(((await res.json()) as { ok: boolean }).ok).toBe(true);
+      const body = (await (await fetch(`${base}/api/skills`)).json()) as List;
+      expect(body.skills.map((s) => s.name)).not.toContain(victim.name);
+      expect(body.skills.find((s) => s.name === survivor.name)?.description).toBe("NEW_DESCRIPTION");
+      const calls = readShimCallLog(callLog);
+      expect(countShimCalls(calls, ["ls", "--json"])).toBe(2); // warm + post-rm refresh; no extra spawns
+    });
+
+    test("a failed update still refreshes list descriptions", async () => {
+      const corpus = buildSyntheticCorpus(stateDir, 2, 0);
+      process.env.SKILLS_SHIM_LS_PROJECT = corpus.projectFixture;
+      const skill = corpus.project[0]!, skillDoc = join(skill.path, "SKILL.md");
+      writeFileSync(skillDoc, OLD_DOC(skill.name));
+      const base = await start();
+      expect(await listDescription(base, skill.name)).toBe("OLD_DESCRIPTION");
+      writeFileSync(skillDoc, docFor(skill.name, "NEW_DESCRIPTION", "NEW_BODY"));
+      process.env.SKILLS_SHIM_UPDATE_FAIL = "1";
+      const res = await fetch(`${base}/api/update`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills: [skill.name] }),
+      });
+      expect(res.status).toBe(200);
+      expect(((await res.json()) as { ok: boolean }).ok).toBe(false); // failure reported honestly…
+      expect(await listDescription(base, skill.name)).toBe("NEW_DESCRIPTION"); // …and enrichment still dropped
+      const calls = readShimCallLog(callLog);
+      expect(countShimCalls(calls, ["ls", "--json"])).toBe(2); // warm + post-update; no extra spawns
+    });
+
+    test("a pre-mutation list held at the subprocess boundary settles late and never repopulates shared enrichment", async () => {
+      // holder wrapper around the real fixture shim: while the hold marker
+      // exists, the spawned `skills` child parks BEFORE doing any work — the
+      // hold is at the real subprocess boundary, not a service mock
+      const holdDir = join(fixture.root, "hold");
+      mkdirSync(holdDir, { recursive: true });
+      const holdMarker = join(holdDir, "hold-ls");
+      const heldMarker = join(holdDir, "held");
+      writeFileSync(holdMarker, "1");
+      const holder = join(fixture.root, "held-skills-shim.mjs");
+      writeFileSync(
+        holder,
+        [
+          "#!/usr/bin/env -S bun",
+          'import { existsSync, writeFileSync } from "node:fs";',
+          'import { join } from "node:path";',
+          "const args = process.argv.slice(2);",
+          "const holdDir = process.env.SKILLS_SHIM_HOLD_DIR;",
+          'if (holdDir && existsSync(join(holdDir, "hold-ls"))) {',
+          '  writeFileSync(join(holdDir, "held"), JSON.stringify(args));',
+          '  while (existsSync(join(holdDir, "hold-ls"))) await Bun.sleep(5);',
+          "}",
+          "const real = process.env.SKILLS_SHIM_REAL_BIN;",
+          "const proc = Bun.spawnSync([process.execPath, real, ...args], { stdin: 'ignore', stdout: 'pipe', stderr: 'pipe' });",
+          "process.stdout.write(proc.stdout);",
+          "process.stderr.write(proc.stderr);",
+          "process.exit(proc.exitCode ?? 0);",
+          "",
+        ].join("\n")
+      );
+      chmodSync(holder, 0o755);
+      process.env.SKILLS_SHIM_HOLD_DIR = holdDir;
+      process.env.SKILLS_SHIM_REAL_BIN = SHIM; // the real fixture shim, exec'd by the holder
+      process.env.SKILLS_UI_SKILLS_BIN = holder; // the server spawns the holder
+      resetSkillsBinCache();
+
+      const corpus = buildSyntheticCorpus(stateDir, 2, 0);
+      process.env.SKILLS_SHIM_LS_PROJECT = corpus.projectFixture;
+      const skill = corpus.project[0]!, skillDoc = join(skill.path, "SKILL.md");
+      writeFileSync(skillDoc, OLD_DOC(skill.name));
+      const base = await start();
+
+      // the mutation spawn is parked inside the holder (queue slot taken)
+      const changed = fetch(`${base}/api/update`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills: [skill.name] }),
+      });
+      const deadline = Date.now() + 10_000;
+      while (!existsSync(heldMarker)) {
+        if (Date.now() > deadline) throw new Error("holder never parked the update spawn");
+        await Bun.sleep(5);
+      }
+
+      // the list request arrives while the mutation is in flight: it captures
+      // the PRE-mutation generation, and its `ls` queues behind the held
+      // update at the subprocess boundary
+      const staleList = fetch(`${base}/api/skills?scope=project`);
+      writeFileSync(skillDoc, docFor(skill.name, "NEW_DESCRIPTION", "NEW_BODY"));
+
+      // release: invalidation lands, THEN the queued pre-mutation ls runs
+      rmSync(holdMarker);
+      expect((await changed).status).toBe(200);
+      const stale = await staleList; // the old awaiter receives its own response
+      expect(stale.status).toBe(200);
+      const staleBody = (await stale.json()) as List;
+      expect(staleBody.skills.find((s) => s.name === skill.name)).toBeDefined();
+
+      // the file changes AGAIN afterwards with no mutation in between — no
+      // invalidation runs, so only the generation guard keeps a stale
+      // awaiter's enrichment write out of the CURRENT shared cache
+      writeFileSync(skillDoc, docFor(skill.name, "FINAL_DESCRIPTION", "FINAL_BODY"));
+
+      const body = (await (await fetch(`${base}/api/skills?scope=project`)).json()) as List;
+      expect(body.skills.find((s) => s.name === skill.name)?.description).toBe("FINAL_DESCRIPTION");
+
+      const calls = readShimCallLog(callLog);
+      expect(countShimCalls(calls, ["update", "-p", "-y", skill.name])).toBe(1);
+      // exactly two ls: the late pre-mutation flight + the fresh read. A
+      // third would mean the stale flight resurrected the list cache.
+      expect(countShimCalls(calls, ["ls", "--json"])).toBe(2);
     });
   });
 
