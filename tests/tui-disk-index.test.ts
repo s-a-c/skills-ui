@@ -1,16 +1,18 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
+import { basename, join } from "node:path";
 import { createTestRenderer } from "@opentui/core/testing";
 import { realDeps, runTuiOn, type TuiDeps } from "../src/tui/app.ts";
 import { waitForFrame } from "../src/tui/renderer-ready.ts";
-import { deferred } from "./helpers/audit-state.ts";
+import { createWorkspaceFixture, deferred } from "./helpers/audit-state.ts";
 import {
   DISK_INDEX_VERSION,
+  TMP_SWEEP_MIN_AGE_MS,
   diskIndexPath,
   loadDiskIndex,
   normalizeDiskIndex,
+  projectIdentity,
   saveDiskIndex,
 } from "../src/core/disk-index.ts";
 import { resetSkillsBinCache } from "../src/core/skills-client.ts";
@@ -57,7 +59,15 @@ function writeIndexFile(dir: string, scope: Scope, content: string): void {
 }
 
 function writeIndex(dir: string, scope: Scope, skills: InstalledSkill[]): void {
-  writeIndexFile(dir, scope, JSON.stringify({ version: DISK_INDEX_VERSION, savedAt: "2026-11-01T00:00:00.000Z", skills }));
+  const envelope: Record<string, unknown> = {
+    version: DISK_INDEX_VERSION,
+    savedAt: "2026-11-01T00:00:00.000Z",
+    skills,
+  };
+  // S-196: project envelopes carry the canonical root (the loader checks it);
+  // global envelopes never do — the cache is shared across projects.
+  if (scope === "project") envelope.projectRoot = projectIdentity();
+  writeIndexFile(dir, scope, JSON.stringify(envelope));
 }
 
 /** Deferred-fake list source (the S-182 test pattern): every call is held
@@ -93,11 +103,26 @@ async function waitFor(fn: () => void, timeoutMs = 4000): Promise<void> {
   }
 }
 
+let fixture: ReturnType<typeof createWorkspaceFixture> | null = null;
+let restoreEnv: (() => void) | null = null;
 let cacheDir = "";
+let projectA = "";
+let projectB = "";
+let originalCwd = "";
 let setup: Awaited<ReturnType<typeof createTestRenderer>> | null = null;
 
 beforeEach(async () => {
-  cacheDir = mkdtempSync(join(tmpdir(), "skills-ui-disk-index-"));
+  originalCwd = process.cwd();
+  fixture = createWorkspaceFixture();
+  cacheDir = join(fixture.root, "cache");
+  projectA = join(fixture.root, "project-a");
+  projectB = join(fixture.root, "project-b");
+  mkdirSync(cacheDir, { recursive: true });
+  mkdirSync(projectA, { recursive: true });
+  mkdirSync(projectB, { recursive: true });
+  restoreEnv = fixture.activate();
+  // S-196: diskIndexDir gives SKILLS_UI_CACHE_DIR precedence over dirOverride —
+  // the fixture MATCHES cacheDir, so the override argument governs either way
   process.env.SKILLS_UI_CACHE_DIR = cacheDir;
   process.env.SKILLS_UI_PREFS_DIR = join(cacheDir, "prefs");
   setup = await createTestRenderer({ width: 100, height: 30 });
@@ -106,12 +131,16 @@ beforeEach(async () => {
 afterEach(async () => {
   setup?.renderer.destroy();
   setup = null;
+  process.chdir(originalCwd); // restore cwd BEFORE cleanup
+  restoreEnv?.();
+  restoreEnv = null;
   delete process.env.SKILLS_UI_CACHE_DIR;
   delete process.env.SKILLS_UI_PREFS_DIR;
   delete process.env.SKILLS_UI_SKILLS_BIN;
   delete process.env.SKILLS_SHIM_STATE;
   resetSkillsBinCache();
-  rmSync(cacheDir, { recursive: true, force: true });
+  fixture?.cleanup();
+  fixture = null;
 });
 
 describe("disk index (unit)", () => {
@@ -122,14 +151,19 @@ describe("disk index (unit)", () => {
   });
 
   test("truncated JSON is ignored (regenerate, never throw)", () => {
-    writeIndexFile(cacheDir, "project", JSON.stringify({ version: 1, savedAt: "x", skills: [{ name: "al" }] }).slice(0, -4));
+    writeIndexFile(
+      cacheDir,
+      "project",
+      JSON.stringify({ version: DISK_INDEX_VERSION, savedAt: "x", projectRoot: projectIdentity(), skills: [{ name: "al" }] }).slice(0, -4)
+    );
     expect(loadDiskIndex("project", cacheDir)).toBeNull();
   });
 
   test("wrong version and non-object content are ignored", () => {
     writeIndex(cacheDir, "project", STALE);
     const raw = readFileSync(diskIndexPath("project", cacheDir), "utf-8");
-    writeIndexFile(cacheDir, "project", raw.replace('"version":1', '"version":99'));
+    // format check independent of the version literal: flip the CURRENT version
+    writeIndexFile(cacheDir, "project", raw.replace(`"version":${DISK_INDEX_VERSION}`, `"version":${DISK_INDEX_VERSION + 99}`));
     expect(loadDiskIndex("project", cacheDir)).toBeNull();
     writeIndexFile(cacheDir, "project", "[]");
     expect(loadDiskIndex("project", cacheDir)).toBeNull();
@@ -141,6 +175,7 @@ describe("disk index (unit)", () => {
     const hostile = {
       version: DISK_INDEX_VERSION,
       savedAt: "2026-11-01T00:00:00.000Z",
+      projectRoot: projectIdentity(),
       skills: [
         { name: 123, path: "/x/a", scope: "project", agents: [], source: null, sourceUrl: null, sourceType: null },
         { name: "ok", path: "/x/ok", scope: "project", agents: ["Claude Code"], source: null, sourceUrl: null, sourceType: null },
@@ -162,20 +197,175 @@ describe("disk index (unit)", () => {
   });
 
   test("empty or missing skills array counts as partial — ignored", () => {
-    writeIndexFile(cacheDir, "project", JSON.stringify({ version: DISK_INDEX_VERSION, savedAt: "x", skills: [] }));
+    writeIndexFile(cacheDir, "project", JSON.stringify({ version: DISK_INDEX_VERSION, savedAt: "x", projectRoot: projectIdentity(), skills: [] }));
     expect(loadDiskIndex("project", cacheDir)).toBeNull();
-    writeIndexFile(cacheDir, "project", JSON.stringify({ version: DISK_INDEX_VERSION, savedAt: "x" }));
+    writeIndexFile(cacheDir, "project", JSON.stringify({ version: DISK_INDEX_VERSION, savedAt: "x", projectRoot: projectIdentity() }));
     expect(loadDiskIndex("project", cacheDir)).toBeNull();
   });
 
   test("absurdly oversized content is skipped before parsing", () => {
-    writeIndexFile(cacheDir, "project", `{"version":1,"pad":"${"x".repeat(17_000_000)}"}`);
+    writeIndexFile(cacheDir, "project", `{"version":${DISK_INDEX_VERSION},"pad":"${"x".repeat(17_000_000)}"}`);
     expect(loadDiskIndex("project", cacheDir)).toBeNull();
   });
 
   test("atomic write leaves exactly the index file — no tmp residue", () => {
     saveDiskIndex("project", STALE, cacheDir);
-    expect(readdirSync(cacheDir)).toEqual(["index-project.json"]);
+    // identity check, not a hardcoded name: the project file is hash-suffixed (S-196)
+    expect(readdirSync(cacheDir)).toEqual([basename(diskIndexPath("project", cacheDir))]);
+  });
+});
+
+describe("S-196 project disk persistence partitions by canonical directory", () => {
+  test("a project cannot load another project disk index", () => {
+    const original = process.cwd();
+    try {
+      process.chdir(projectA);
+      saveDiskIndex("project", [entry("only-a")], cacheDir);
+      const aPath = diskIndexPath("project", cacheDir);
+      process.chdir(projectB);
+      expect(diskIndexPath("project", cacheDir)).not.toBe(aPath);
+      expect(loadDiskIndex("project", cacheDir)).toBeNull();
+    } finally {
+      process.chdir(original);
+    }
+  });
+
+  test("A→B→A: each project round-trips only its own index", () => {
+    const original = process.cwd();
+    try {
+      process.chdir(projectA);
+      saveDiskIndex("project", [entry("only-a")], cacheDir);
+      const aPath = diskIndexPath("project", cacheDir);
+      process.chdir(projectB);
+      saveDiskIndex("project", [entry("only-b")], cacheDir); // distinct file; A untouched
+      const bPath = diskIndexPath("project", cacheDir);
+      expect(bPath).not.toBe(aPath);
+      expect((loadDiskIndex("project", cacheDir) ?? []).map((s) => s.name)).toEqual(["only-b"]);
+      process.chdir(projectA);
+      expect((loadDiskIndex("project", cacheDir) ?? []).map((s) => s.name)).toEqual(["only-a"]);
+      expect(existsSync(bPath)).toBeTrue(); // B's file survived A's reload — no cross-clobbering
+    } finally {
+      process.chdir(original);
+    }
+  });
+
+  test("two processes in the same canonical directory share one identity (restart parity)", () => {
+    // a child process chdir'd into project A saves through the real module;
+    // a second child process in the SAME directory reads its own rows back,
+    // while the parent (a third identity) never sees project A's file
+    const moduleUrl = new URL("../src/core/disk-index.ts", import.meta.url).href;
+    const env = { ...process.env, SKILLS_UI_CACHE_DIR: cacheDir };
+    const saved = spawnSync(
+      process.execPath,
+      ["-e", `const {saveDiskIndex} = await import(${JSON.stringify(moduleUrl)});\nsaveDiskIndex("project", ${JSON.stringify([entry("only-a")])});`],
+      { cwd: projectA, env, encoding: "utf-8" }
+    );
+    expect({ status: saved.status, stderr: saved.stderr }).toEqual({ status: 0, stderr: "" });
+    const aPath = diskIndexPath("project", cacheDir); // parent cwd = a third identity
+    expect(existsSync(aPath)).toBeFalse(); // the parent's identity has no file
+    const read = spawnSync(
+      process.execPath,
+      [
+        "-e",
+        `const {loadDiskIndex} = await import(${JSON.stringify(moduleUrl)});\nconsole.log(JSON.stringify((loadDiskIndex("project") ?? []).map((s) => s.name)));`,
+      ],
+      { cwd: projectA, env, encoding: "utf-8" }
+    );
+    expect({ status: read.status, stderr: read.stderr }).toEqual({ status: 0, stderr: "" });
+    expect(read.stdout.trim()).toBe(JSON.stringify(["only-a"]));
+  });
+
+  test("a symlink alias of the project resolves to the same canonical identity", () => {
+    const original = process.cwd();
+    try {
+      process.chdir(projectA);
+      saveDiskIndex("project", [entry("only-a")], cacheDir);
+      const aPath = diskIndexPath("project", cacheDir);
+      const alias = join(fixture!.root, "project-a-alias");
+      symlinkSync(projectA, alias, "dir");
+      process.chdir(alias);
+      expect(diskIndexPath("project", cacheDir)).toBe(aPath); // realpath, not the alias path
+      expect((loadDiskIndex("project", cacheDir) ?? []).map((s) => s.name)).toEqual(["only-a"]);
+    } finally {
+      process.chdir(original);
+    }
+  });
+
+  test("the global cache stays shared across projects (unsuffixed, cross-project)", () => {
+    const original = process.cwd();
+    try {
+      process.chdir(projectA);
+      saveDiskIndex("global", [entry("shared-global", "global")], cacheDir);
+      expect(basename(diskIndexPath("global", cacheDir))).toBe("index-global.json"); // one shared file
+      process.chdir(projectB);
+      expect((loadDiskIndex("global", cacheDir) ?? []).map((s) => s.name)).toEqual(["shared-global"]);
+    } finally {
+      process.chdir(original);
+    }
+  });
+
+  test("a project envelope claiming another project's root is rejected even at the right filename", () => {
+    writeIndexFile(
+      cacheDir,
+      "project",
+      JSON.stringify({
+        version: DISK_INDEX_VERSION,
+        savedAt: "2026-11-01T00:00:00.000Z",
+        projectRoot: "/some/other/project", // foreign root at the CURRENT filename (collision defense)
+        skills: STALE,
+      })
+    );
+    expect(loadDiskIndex("project", cacheDir)).toBeNull();
+  });
+
+  test("a version-2 project envelope without projectRoot is rejected (clean break, no legacy reads)", () => {
+    writeIndexFile(
+      cacheDir,
+      "project",
+      JSON.stringify({ version: DISK_INDEX_VERSION, savedAt: "2026-11-01T00:00:00.000Z", skills: STALE })
+    );
+    expect(loadDiskIndex("project", cacheDir)).toBeNull();
+  });
+
+  test("an unavailable cwd is rejected without throwing — load null, save skipped", () => {
+    const doomed = join(fixture!.root, "doomed-cwd");
+    mkdirSync(doomed, { recursive: true });
+    const original = process.cwd();
+    process.chdir(doomed);
+    rmSync(doomed, { recursive: true }); // cwd now points at a deleted directory
+    try {
+      expect(loadDiskIndex("project", cacheDir)).toBeNull(); // identity unverifiable ⇒ null, never a throw
+      saveDiskIndex("project", [entry("lost")], cacheDir); // best-effort: silently skipped
+      expect(loadDiskIndex("global", cacheDir)).toBeNull(); // global path is cwd-independent; the dir is empty
+    } finally {
+      process.chdir(original);
+    }
+    expect(readdirSync(cacheDir)).toEqual([]); // the skipped save left nothing behind
+  });
+
+  test("the sweep ages out stale per-project index files; fresh ones and the global file survive", () => {
+    const original = process.cwd();
+    try {
+      process.chdir(projectA);
+      saveDiskIndex("project", [entry("stale-a")], cacheDir);
+      const aPath = diskIndexPath("project", cacheDir);
+      saveDiskIndex("global", [entry("shared-global", "global")], cacheDir);
+      const globalPath = diskIndexPath("global", cacheDir);
+      const legacy = join(cacheDir, "index-project.json"); // pre-partition litter (v1 name)
+      writeFileSync(legacy, JSON.stringify({ version: 1, savedAt: "x", skills: [entry("prehistoric")] }));
+      const longAgo = new Date(Date.now() - 2 * TMP_SWEEP_MIN_AGE_MS); // relative to the mechanism, not a literal
+      utimesSync(aPath, longAgo, longAgo);
+      utimesSync(globalPath, longAgo, longAgo); // global is old too — but out of the sweep's scope
+      utimesSync(legacy, longAgo, longAgo);
+      process.chdir(projectB);
+      saveDiskIndex("project", [entry("fresh-b")], cacheDir); // B's save triggers the sweeps
+      expect(existsSync(aPath)).toBeFalse(); // stale per-project file aged out — bounded growth
+      expect(existsSync(legacy)).toBeFalse(); // pre-partition litter ages out too
+      expect(existsSync(globalPath)).toBeTrue(); // the sweep never touches the shared global file
+      expect(existsSync(diskIndexPath("project", cacheDir))).toBeTrue(); // the saving project keeps its file
+    } finally {
+      process.chdir(original);
+    }
   });
 });
 
@@ -190,6 +380,58 @@ describe("S-183 rider (pure model)", () => {
     m = update(m, { type: "move", delta: 2 }); // selection -> c
     m = update(m, { type: "toggle-check" }); // checks c; memo must be invalidated
     expect(m.visible.map((s) => s.name)).toEqual(["c", "a", "b"]);
+  });
+});
+
+// NOTE: these renderer tests must run while app.ts's module-level listCache
+// is still EMPTY (they precede the S-183 renderer describe below, whose
+// "mutations act on fresh truth" test populates it through the real shim
+// load — a warm in-memory cache would skip the disk-index stale branch
+// entirely and both observations would be vacuous).
+describe("S-196 partition & failed refresh (renderer)", () => {
+  test("the renderer paints only the matching project while the listing is pending", async () => {
+    const s = setup!;
+    const original = process.cwd();
+    try {
+      process.chdir(projectA);
+      writeIndex(cacheDir, "project", [entry("project-a-row")]); // ANOTHER project's persisted rows
+    } finally {
+      process.chdir(original);
+    }
+    writeIndex(cacheDir, "project", STALE); // THIS project's persisted rows (current cwd)
+    const { deps, resolveAll } = deferredListDeps();
+    void runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    // pending: only THIS project's stale rows paint — the other project's
+    // rows are nowhere in the frame while the listing is held open
+    await waitForFrame(s, (f) => f.includes("alpha") && f.includes("loading skills") && !f.includes("project-a-row"));
+    resolveAll(FRESH);
+    const settled = await waitForFrame(s, (f) => f.includes("delta") && !f.includes("loading skills"));
+    expect(settled).not.toContain("project-a-row"); // the other project's index never surfaced
+  });
+
+  test("a failed refresh keeps the persisted rows painted and the index untouched", async () => {
+    const s = setup!;
+    writeIndex(cacheDir, "project", STALE);
+    const deps: TuiDeps = {
+      ...realDeps,
+      listInstalled: async () => {
+        throw new Error("refresh exploded"); // the subprocess refresh fails
+      },
+      skillBody: async (path) => `body of ${path}`,
+      savePrefs: () => {},
+      play: async () => {},
+    };
+    await runTuiOn(s.renderer, undefined, deps); // startup: stale paint, then the failure surfaces
+    // settle-proof: rows AND the failure toast AND the stale body pane are on
+    // screen with busy cleared — the refresh failed, not the paint
+    const settled = await waitForFrame(
+      s,
+      (f) => f.includes("alpha") && f.includes("load failed") && f.includes("body of /x/alpha") && !f.includes("loading skills")
+    );
+    expect(settled).toContain("body of /x/alpha"); // stale detail pane still filled
+    // the failed refresh never rewrote the index — still loads, still this project's truth
+    expect((loadDiskIndex("project", cacheDir) ?? []).map((sk) => sk.name)).toEqual(["alpha", "beta", "gamma"]);
   });
 });
 
@@ -396,7 +638,7 @@ describe("S-183 stale-while-revalidate (renderer)", () => {
     // stale index with a ghost the subprocess does not know about
     writeIndex(cacheDir, "project", [...STALE, entry("ghost-skill")]);
     const SHIM = new URL("fixtures/skills-shim.mjs", import.meta.url).pathname;
-    const stateDir = mkdtempSync(join(tmpdir(), "skills-ui-disk-index-shim-"));
+    const stateDir = mkdtempSync(join(fixture!.root, "skills-ui-disk-index-shim-"));
     process.env.SKILLS_UI_SKILLS_BIN = SHIM;
     process.env.SKILLS_SHIM_STATE = stateDir;
     resetSkillsBinCache();

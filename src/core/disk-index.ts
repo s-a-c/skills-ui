@@ -1,4 +1,5 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, renameSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import type { InstalledSkill, Scope } from "./services/types.ts";
@@ -8,6 +9,15 @@ import type { InstalledSkill, Scope } from "./services/types.ts";
  * installed list (`~/.cache/skills-ui/index-<scope>.json`), written whenever
  * a FRESH list lands so the next session's first scope load can paint
  * instantly while the real subprocess refresh runs.
+ *
+ * S-196 partition: the project-scope index belongs to one CANONICAL project.
+ * Its filename carries a sha256 suffix of the cwd's realpath and its envelope
+ * carries that root as `projectRoot` — dual identity, so two projects never
+ * share a file or a load, a symlink alias of a project is the same identity,
+ * and a path-hash collision cannot leak another project's rows. The global
+ * scope stays unsuffixed: one cache shared across projects. Version bumped
+ * to 2 with a clean break — a project envelope without a matching
+ * projectRoot is never read (no legacy compatibility for project scopes).
  *
  * Contract (S-183):
  *  - The index is NEVER trusted as the basis for a mutation — install/remove/
@@ -25,14 +35,17 @@ import type { InstalledSkill, Scope } from "./services/types.ts";
  * TUI owns the SWR orchestration on top of it.
  */
 
-export const DISK_INDEX_VERSION = 1;
+export const DISK_INDEX_VERSION = 2;
 
 /** ~300 enriched skills is a few hundred KB; anything past this is not ours. */
 const MAX_INDEX_BYTES = 16_000_000;
 
-/** How long a tmp file must sit untouched before the litter sweep removes it
- * (a concurrent writer's in-flight tmp is never pulled out from under it). */
-const TMP_SWEEP_MIN_AGE_MS = 60_000;
+/** How long a tmp file (or an untouched per-project index, S-196) must sit
+ * before the sweeps remove it — a concurrent writer's in-flight tmp and a
+ * concurrently-running project's just-written index are never pulled out
+ * from under their owners. Exported so tests can age files relative to the
+ * mechanism instead of hardcoding the number. */
+export const TMP_SWEEP_MIN_AGE_MS = 60_000;
 
 /** Best-effort sweep of crash litter: tmp files from killed writers, scoped
  * to this index's prefix so one scope's save never touches another's. */
@@ -49,6 +62,26 @@ function sweepStaleTmp(dir: string, prefix: string): void {
   }
 }
 
+/** S-196 bounded growth: hash-suffixed filenames mean every distinct project
+ * root ever visited leaves its own `index-project-<hash>.json` behind. This
+ * sweep ages those out with the same min-age mechanism as tmp litter (a
+ * concurrently-running project's fresh file is never pulled out from under
+ * it) and also retires the pre-partition `index-project.json` legacy file.
+ * Only project-scope saves trigger it — that is where the growth happens. */
+function sweepStaleProjectIndexes(dir: string, keep: string): void {
+  try {
+    for (const name of readdirSync(dir)) {
+      if (!name.startsWith("index-project") || !name.endsWith(".json")) continue;
+      const full = join(dir, name);
+      if (full === keep) continue;
+      if (Date.now() - statSync(full).mtimeMs < TMP_SWEEP_MIN_AGE_MS) continue;
+      unlinkSync(full);
+    }
+  } catch {
+    // bounded-growth sweep is best-effort by contract
+  }
+}
+
 const CACHE_DIR_ENV = "SKILLS_UI_CACHE_DIR";
 
 /** Resolved cache dir: env override first (tests MUST use it — never the
@@ -59,14 +92,32 @@ export function diskIndexDir(dirOverride?: string): string {
   return join(homedir(), ".cache", "skills-ui");
 }
 
+/** Canonical project identity: the cwd's realpath, so a symlink alias of a
+ * project hashes to the same identity as the real path (S-196). Throws when
+ * the cwd is unavailable (deleted/unreadable); load/save treat that as "no
+ * identity" (null / skip), never a crash. */
+export function projectIdentity(): string {
+  return realpathSync(process.cwd());
+}
+
 export function diskIndexPath(scope: Scope, dirOverride?: string): string {
-  return join(diskIndexDir(dirOverride), `index-${scope}.json`);
+  // Dual identity (S-196): the hash-suffixed filename partitions projects
+  // cheaply; the envelope's projectRoot (checked at load) defends against
+  // path-hash collisions. Global scope stays unsuffixed — one shared file.
+  const suffix =
+    scope === "project"
+      ? "-" + createHash("sha256").update(projectIdentity()).digest("hex")
+      : "";
+  return join(diskIndexDir(dirOverride), `index-${scope}${suffix}.json`);
 }
 
 export interface PersistedIndex {
   version: number;
   savedAt: string;
   skills: InstalledSkill[];
+  /** Canonical project root (S-196) — project scope only. Global envelopes
+   * never carry it: the global cache is shared across projects. */
+  projectRoot?: string;
 }
 
 function isScope(value: unknown): value is Scope {
@@ -116,6 +167,22 @@ export function normalizeDiskIndex(content: string, scope: Scope): PersistedInde
   if (raw.version !== DISK_INDEX_VERSION) return null;
   if (typeof raw.savedAt !== "string") return null;
   if (!Array.isArray(raw.skills) || raw.skills.length === 0) return null;
+  // S-196: project envelopes are partitioned by canonical directory. A
+  // foreign root (hash collision or hand-copied file), a missing root (the
+  // S-183 shape — clean break, no legacy reads), or an unverifiable cwd is
+  // rejected; a global envelope must not claim a project root at all.
+  if (scope === "project") {
+    if (typeof raw.projectRoot !== "string" || raw.projectRoot === "") return null;
+    let identity: string;
+    try {
+      identity = projectIdentity();
+    } catch {
+      return null; // cwd unverifiable ⇒ ownership unprovable — reject, never throw
+    }
+    if (raw.projectRoot !== identity) return null;
+  } else if (raw.projectRoot !== undefined) {
+    return null;
+  }
   const skills: InstalledSkill[] = [];
   for (const entry of raw.skills) {
     const skill = normalizeEntry(entry, scope);
@@ -145,8 +212,14 @@ export function loadDiskIndex(scope: Scope, dirOverride?: string): InstalledSkil
  * effort by contract: any error is swallowed — a failed cache write must
  * never take the TUI down. */
 export function saveDiskIndex(scope: Scope, skills: InstalledSkill[], dirOverride?: string): void {
-  const path = diskIndexPath(scope, dirOverride);
+  let path: string;
+  try {
+    path = diskIndexPath(scope, dirOverride);
+  } catch {
+    return; // no resolvable path (unavailable project cwd) ⇒ skip the save, never throw
+  }
   sweepStaleTmp(dirname(path), basename(path)); // opportunistic crash-litter cleanup
+  if (scope === "project") sweepStaleProjectIndexes(dirname(path), path); // S-196 bounded growth
   // per-pid tmp name: two writers never interleave into one tmp file, so the
   // rename always publishes a whole file
   const tmp = `${path}.${process.pid}.tmp`;
@@ -156,6 +229,7 @@ export function saveDiskIndex(scope: Scope, skills: InstalledSkill[], dirOverrid
       savedAt: new Date().toISOString(),
       skills: skills.map((s) => ({ ...s })),
     };
+    if (scope === "project") index.projectRoot = projectIdentity();
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(tmp, JSON.stringify(index));
     renameSync(tmp, path); // same-dir rename: atomic on POSIX — no torn reads
