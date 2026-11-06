@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
 <meta name="description" content="skills-ui: browse, install, and update agent skills for coding agents from one dashboard.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-hPW3SJ8AKrAkRrH2BCV/ChD6PJlpBaDnmD7DzSvVN6w=' 'sha256-8xOeQRpg/DOGBls2W0Iwnm5k+fzYWecZuJ3wrAwUwH4='; img-src data:; connect-src http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-hPW3SJ8AKrAkRrH2BCV/ChD6PJlpBaDnmD7DzSvVN6w=' 'sha256-iUFH+p3d6OoEVywNMDWFXW8YZ6s6PyrYmS+TGIYNa9Q='; img-src data:; connect-src http://127.0.0.1:* http://localhost:*; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <title>skills (0.5.3.1)</title>
 <style>
@@ -677,14 +677,19 @@ var state = {
   scope: 'project',
   skills: [],
   selected: null,
+  selectedPath: null,
   checked: new Set(),
   query: '',
   results: [],
   searchFailed: false,
   busy: false,
   sortBy: 'checked',
-  updates: {},
+  /* UI-07: update-check results are scope-keyed — same-name project/global
+     rows are different rows, so each scope caches its own record and the
+     render readers always see state.updates[state.scope]. */
+  updates: { project: {}, global: {} },
   updateCheckDone: { project: false, global: false },
+  updateCheckSeq: { project: 0, global: 0 },
   seedHold: false,
   queue: [],
   sview: 'results',
@@ -863,7 +868,7 @@ function connectedDot(ok){
 }
 function tryConnect(base, token){
   if (!base || !token) { $('#connectStatus').textContent = 'Both the backend URL and the token are needed.'; return; }
-  $('#connectBtn').disabled = true;
+  setSemanticDisabled($('#connectBtn'), true);
   probeBackend(base, token, function(s){ $('#connectStatus').textContent = s; })
     .then(function(v){
       state.backend = base.replace(/\/+$/, '');
@@ -876,7 +881,7 @@ function tryConnect(base, token){
       boot();
     })
     .catch(function(e){ $('#connectStatus').textContent = e.message || String(e); connectedDot(false); })
-    .finally(function(){ $('#connectBtn').disabled = false; });
+    .finally(function(){ setSemanticDisabled($('#connectBtn'), false); });
 }
 function openConnect(){
   var savedBase = state.backend, savedToken = state.token;
@@ -889,10 +894,28 @@ function openConnect(){
 }
 
 /* ---------- busy ---------- */
+/* UI-05 (S-206): ONE writer owns every .btn disabled state. state.busy is
+   transient; data-semantic-disabled records independent reasons (already
+   installed in this scope, already in the install list, connection probe in
+   flight). Syncing recomputes disabled = busy OR semantic, so a busy reset
+   can never re-enable a semantically disabled control, and every .btn
+   created mid-flight (results, detail actions, seed actions) is reconciled
+   by syncing after it is attached. Busy itself is never stored as a
+   semantic reason — the attribute only ever describes an independent one. */
+function syncButtonDisabled(button){
+  button.disabled = state.busy ||
+    button.getAttribute('data-semantic-disabled') === 'true';
+}
+function setSemanticDisabled(button, disabled){
+  button.setAttribute('data-semantic-disabled', String(!!disabled));
+  syncButtonDisabled(button);
+}
+function syncButtons(root){
+  root.querySelectorAll('.btn').forEach(syncButtonDisabled);
+}
 function setBusy(label){
   state.busy = !!label;
-  var btns = document.querySelectorAll('.btn');
-  btns.forEach(function(b){ b.disabled = state.busy; });
+  syncButtons(document);
   var bar = $('#busyBar');
   bar.style.display = label ? 'block' : 'none';
   $('#busyText').textContent = label || '';
@@ -907,20 +930,22 @@ function chipColor(name){
 }
 
 /* ---------- installed list ---------- */
+var skillsLoadSeq=0;
 function loadSkills(){
+  var scope=state.scope,seq=++skillsLoadSeq;
+  function owns(){return seq===skillsLoadSeq&&scope===state.scope;}
   setBusy('Loading skills…');
-  return api('/api/skills?scope=' + state.scope).then(function(data){
-    state.skills = data.skills;
-    renderList();
-    if (!data.skills.length) {
-      $('#detailPane').innerHTML = '<div class="empty">No ' + state.scope + ' skills installed.<br>Open the <b>Search</b> tab to install one.</div>';
-    } else if (!state.seedHold && (state.selected == null || !data.skills.some(function(s){ return s.name === state.selected; }))) {
+  return api('/api/skills?scope='+scope).then(function(data){
+    if(!owns())return;
+    state.skills=data.skills;renderList();
+    if(!data.skills.length){
+      detailSeq++; /* S-204: the empty pane replaces any detail still in flight */
+      $('#detailPane').innerHTML='<div class="empty">No '+scope+' skills installed.<br>Open the <b>Search</b> tab to install one.</div>';
+    }else if(!state.seedHold&&(state.selected==null||!data.skills.some(function(s){return s.name===state.selected;}))){
       selectSkill(data.skills[0].name);
-    } else if (!state.seedHold) {
-      showDetail(state.selected);
-    }
-  }).catch(function(e){ toast(e.message, 'error'); })
-  .finally(function(){ setBusy(null); });
+    }else if(!state.seedHold){showDetail(state.selected);}
+  }).catch(function(e){if(owns())toast(e.message,'error');})
+    .finally(function(){if(owns())setBusy(null);});
 }
 
 /* Filter predicate: the transpiled source of skillMatches() from
@@ -1003,14 +1028,17 @@ function rowNameOf(li){
   var key = li.getAttribute('data-key') || '';
   return key.slice(state.scope.length + 1);
 }
+/* UI-07: every update-status reader sees ONLY the current scope's record —
+   the same name in the other scope is a different row with different state. */
+function scopeUpdates(){ return state.updates[state.scope] || {}; }
 function rowSignature(s){
-  var upd = state.updates[s.name] || {};
+  var upd = scopeUpdates()[s.name] || {};
   return (s.description || '') + '|' + (s.agents || []).join(',') + '|' +
     (upd.updateAvailable ? 'u' : '') + (upd.error ? 'e' : '') +
     (state.checked.has(s.name) ? 'c' : '');
 }
 function rowHtml(s){
-  var outdated = state.updates[s.name] && state.updates[s.name].updateAvailable;
+  var outdated = scopeUpdates()[s.name] && scopeUpdates()[s.name].updateAvailable;
   return '<div class="skill-name">' +
     '<input type="checkbox" class="skill-check" aria-label="Select ' + esc(s.name) + ' for update"' +
     (state.checked.has(s.name) ? ' checked' : '') + '>' +
@@ -1063,7 +1091,7 @@ function renderList(){
        of re-rendering row content per keystroke. */
     if (li.__sig !== sig) {
       li.innerHTML = rowHtml(s);
-      var updError = state.updates[s.name] && state.updates[s.name].error;
+      var updError = scopeUpdates()[s.name] && scopeUpdates()[s.name].error;
       // G4: not-checkable/check-failed skills stop being silently badge-less —
       // the status rides the row as a tooltip (the detail pane carries the full line)
       if (updError) li.title = 'update check: ' + updError;
@@ -1108,6 +1136,8 @@ function renderList(){
 
 function selectSkill(name){
   state.selected = name;
+  var selected = state.skills.filter(function(s){ return s.name === name; })[0];
+  state.selectedPath = selected ? selected.path : null;
   renderList();
   showDetail(name);
 }
@@ -1270,11 +1300,16 @@ function renderMarkdown(md){
   return out.join('\n');
 }
 
+var detailSeq=0; /* S-204: generation counter — the detail that started last owns the pane */
 function showDetail(name){
+  /* Bump FIRST (even when no skill matches): superseding a selection — or
+     landing on a selection that no longer exists — must orphan any detail
+     response already in flight. */
+  var seq = ++detailSeq, scope = state.scope;
   var skill = state.skills.filter(function(s){ return s.name === name; })[0];
   if (!skill) return;
   var pane = $('#detailPane');
-  var upd = state.updates[skill.name];
+  var upd = scopeUpdates()[skill.name];
   var detailOutdated = upd && upd.updateAvailable;
   var updateError = upd && upd.error ? upd.error : null;
   pane.innerHTML =
@@ -1294,16 +1329,34 @@ function showDetail(name){
       (updateError ? '<dt>Updates</dt><dd>' + esc(updateError) + '</dd>' : '') +
     '</dl>' +
     '<div class="readme" id="readme">Loading…</div>';
+  /* S-204: capture THIS pane's readme node and the row's identity — a late
+     response may only paint when it still belongs to the current selection.
+     Record the rendered row's path here too: loadSkills re-invokes showDetail
+     for a KEPT name whose row (and path) the fresh list may have replaced,
+     and selectSkill alone would leave state.selectedPath pointing at the
+     old row. */
+  var readme = $('#readme'), capturedPath = skill.path;
+  state.selectedPath = skill.path;
+  function ownsDetail(){
+    return seq === detailSeq && scope === state.scope &&
+      state.selected === skill.name && readme && readme.isConnected &&
+      capturedPath === state.selectedPath;
+  }
   $('#removeBtn').addEventListener('click', function(){ openRemove(skill); });
   if (detailOutdated) $('#updateBtn').addEventListener('click', function(){ updateSkills([skill.name], skill.scope === 'global'); });
+  syncButtons(pane); /* UI-05: detail actions created mid-busy must not miss the busy disable */
   /* S-179: the row's own path rides along — the serve validates it as an exact cached-list row (name stays for older serves). */
   api('/api/skill?scope=' + skill.scope + '&name=' + encodeURIComponent(skill.name) + '&path=' + encodeURIComponent(skill.path))
     .then(function(d){
+      if (!ownsDetail()) return;
       /* renderMarkdown escapes every token before any tag is built, so this
          innerHTML carries renderer-made tags around inert text only */
-      $('#readme').innerHTML = renderMarkdown(d.body || '(empty SKILL.md)');
+      readme.innerHTML = renderMarkdown(d.body || '(empty SKILL.md)');
     })
-    .catch(function(){ $('#readme').innerHTML = renderMarkdown('(SKILL.md unavailable)'); });
+    .catch(function(){
+      if (!ownsDetail()) return;
+      readme.innerHTML = renderMarkdown('(SKILL.md unavailable)');
+    });
 }
 
 function deleteChecked(){
@@ -1331,6 +1384,7 @@ function deleteChecked(){
         state.checked.clear();
         renderSelSummary();
         state.selected = null;
+        state.selectedPath = null;
         return loadSkills();
       })
       .catch(function(e){ play('error'); toast(e.message, 'error'); })
@@ -1352,7 +1406,7 @@ function openRemove(skill){
           toast(clip(res.output, 240) || ('Remove failed for ' + skill.name), 'error');
           return loadSkills();
         }
-        play('success'); toast('Removed ' + skill.name, 'success'); state.selected = null; return loadSkills();
+        play('success'); toast('Removed ' + skill.name, 'success'); state.selected = null; state.selectedPath = null; return loadSkills();
       })
       .catch(function(e){ play('error'); toast(e.message, 'error'); })
       .finally(function(){ setBusy(null); });
@@ -1409,6 +1463,7 @@ function applySeed(){
 
 function showInstallSeed(seed){
   state.seedHold = true;
+  detailSeq++; /* S-204: the seed pane replaces any detail still in flight */
   var pane = $('#detailPane');
   pane.innerHTML =
     '<h1 class="detail-title">Install from ' + esc(seed.source) + '</h1>' +
@@ -1419,6 +1474,7 @@ function showInstallSeed(seed){
       '<button class="btn" id="seedInstallAll">Install all</button>' +
       '<button class="btn" id="seedCancel">Cancel</button>' +
     '</div>';
+  syncButtons(pane); /* UI-05: seed actions created mid-busy must not miss the busy disable */
   var closeSeed = function(){ state.seedHold = false; loadSkills(); };
   $('#seedCancel').addEventListener('click', closeSeed);
   var preSelected = seed.skills || [];
@@ -1487,11 +1543,18 @@ function updateSkills(skills, global){
 function checkForUpdates(force){
   var scope = state.scope;
   if (!force && state.updateCheckDone[scope]) return Promise.resolve();
+  /* UI-07: the token is captured (and bumped) per scope at dispatch — only
+     the LATEST request for that scope may store, and a response that lands
+     after the view moved on may only fill its own scope's cache. */
+  var seq = ++state.updateCheckSeq[scope];
   return api('/api/updates?scope=' + scope)
     .then(function(d){
-      state.updates = d.updates || {};
+      if (seq !== state.updateCheckSeq[scope]) return; // a newer check for this scope owns the record
+      state.updates[scope] = d.updates || {};
       state.updateCheckDone[scope] = true;
-      var n = Object.keys(state.updates).filter(function(k){ return state.updates[k].updateAvailable; }).length;
+      if (state.scope !== scope) return; // cache without visible effects
+      var updates = state.updates[scope];
+      var n = Object.keys(updates).filter(function(k){ return updates[k].updateAvailable; }).length;
       renderList();
       if (state.selected) showDetail(state.selected);
       if (n > 0) toast(n + ' update' + (n === 1 ? '' : 's') + ' available', 'success');
@@ -1500,6 +1563,9 @@ function checkForUpdates(force){
     .catch(function(e){
       // ST4: the silent no-op catch hid check failures (and left the manual
       // button dead after the once-per-scope auto-check) — say so instead.
+      // UI-07: but only for the CURRENT owner — a stale or post-switch
+      // failure says nothing about the view now on screen.
+      if (seq !== state.updateCheckSeq[scope] || state.scope !== scope) return;
       play('error');
       toast('update check failed: ' + (e && e.message ? e.message : String(e)), 'error');
     });
@@ -1572,9 +1638,11 @@ function renderResults(){
       '<span class="result-installs">' + esc(String(r.installs)) + ' installs</span></div>' +
       '<span class="result-source">' + esc(r.source || r.slug) + '</span>' +
       '<div style="display:flex;gap:8px">' +
-      '<button class="btn add-btn' + (inQueue ? ' added' : '') + '"' + (inQueue ? ' disabled title="Already in your install list"' : '') + '>' +
+      /* UI-05: inQueue/sameScope are independent reasons recorded as
+         semantic markers; the writer reconciles busy on top at append. */
+      '<button class="btn add-btn' + (inQueue ? ' added' : '') + '"' + (inQueue ? ' data-semantic-disabled="true" title="Already in your install list"' : '') + '>' +
       (inQueue ? '✓ In list' : '+ Add to list') + '</button>' +
-      '<button class="btn primary install-btn"' + (sameScope ? ' disabled title="Already installed in ' + esc(state.scope) + ' scope"' : '') + '>' +
+      '<button class="btn primary install-btn"' + (sameScope ? ' data-semantic-disabled="true" title="Already installed in ' + esc(state.scope) + ' scope"' : '') + '>' +
       (sameScope ? 'Installed' : 'Install') + '</button></div>';
     li.querySelector('.add-btn').addEventListener('click', function(){
       if (state.queue.some(function(q){ return q.key === qk; })) return;
@@ -1603,6 +1671,7 @@ function renderResults(){
         .finally(function(){ setBusy(null); });
     });
     list.appendChild(li);
+    syncButtons(li); /* UI-05: newly attached .btn nodes inherit busy/semantic state */
   });
 }
 
@@ -1652,6 +1721,10 @@ function installQueue(){
   var entries = Array.from(groups.entries());
   var total = state.queue.length;
   var done = 0, failed = 0;
+  /* S-202: capture the scope ONCE before the next() recursion — the scope
+     toggle stays usable while the list installs, so every request body must
+     carry the start-of-batch scope, never the live state.scope. */
+  var installGlobally = state.scope === 'global';
   var next = function(){
     if (!entries.length) {
       state.queue = [];
@@ -1664,7 +1737,7 @@ function installQueue(){
     }
     var entry = entries.shift();
     setBusy('Installing ' + entry[1].join(', ') + '…');
-    api('/api/install', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ source: entry[0], skills: entry[1], global: state.scope === 'global' }) })
+    api('/api/install', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ source: entry[0], skills: entry[1], global: installGlobally }) })
       .then(function(res){ if (res.ok) done += entry[1].length; else failed += entry[1].length; })
       .catch(function(){ failed += entry[1].length; })
       .finally(function(){ setBusy(null); next(); });
@@ -1751,6 +1824,7 @@ function setScope(scope){
   cancelFilterRender(); // S-180: a pending filter render must not fire into the other scope
   state.checked.clear();
   renderSelSummary();
+  detailSeq++; /* S-204: a scope switch orphans any detail still in flight */
   state.scope = scope;
   document.querySelectorAll('[data-scope]').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-scope') === scope)); });
   play('select');
@@ -1853,6 +1927,12 @@ document.addEventListener('DOMContentLoaded', function(){
     play('select');
   });
   skillListEl.addEventListener('keydown', function(ev){
+    /* UI-06 (S-207): an interactive descendant (the row checkbox) owns its own
+       keys — Space must reach the NATIVE checkbox toggle, so the delegated
+       row handler returns before its preventDefault and the existing change
+       handler above keeps owning the checked summary. */
+    if (ev.target instanceof Element &&
+        ev.target.closest('input,button,a,select,textarea,[contenteditable]')) return;
     if (ev.key !== 'Enter' && ev.key !== ' ') return;
     var li = ev.target.closest ? ev.target.closest('li[data-key]') : null;
     if (!li) return;
