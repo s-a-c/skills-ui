@@ -726,10 +726,14 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         return;
       case "u":
         if (model.tab === "search") void runQueue();
-        else if (model.checked.size > 0) dispatch({ type: "confirm", confirm: { kind: "update", names: [...model.checked] } });
         else {
-          // nothing checked — update everything in scope, behind the same gate
-          const names = model.visible.map((s) => s.name);
+          // S-203 (UI-02): an explicit checked selection owns the operation;
+          // with nothing checked, update the WHOLE loaded scope (model.skills),
+          // never just the filtered rows (model.visible) — parity with the
+          // browser's deliberate whole-scope update (POST /api/update with
+          // omitted or [] skills). Same confirmation gate as any update.
+          const names =
+            model.checked.size > 0 ? [...model.checked] : model.skills.map((skill) => skill.name);
           if (names.length > 0) dispatch({ type: "confirm", confirm: { kind: "update", names } });
         }
         return;

@@ -480,9 +480,117 @@ describe("tui (in-memory)", () => {
     await waitForFrame(s, (f) => f.includes("update skills"));
     await s.mockInput.pressKey("y");
     await waitFor(() => {
-      expect(updated).toEqual([["code-review", "tdd"]]); // all visible names
+      // the whole loaded scope (S-203) — which names, not their wire order
+      expect(updated.map((names) => [...names].sort())).toEqual([["code-review", "tdd"]]);
       return true;
     });
+  });
+
+  // S-203 / UI-02: with nothing checked, `u` updates the WHOLE loaded scope
+  // (model.skills), never just the filtered rows (model.visible) — parity with
+  // the browser's deliberate whole-scope update (POST /api/update with omitted
+  // or [] skills is pinned whole-scope in api.test.ts, "omitted skills and
+  // explicit [] stay deliberate whole-scope updates"). An explicit checked
+  // selection keeps its selected-only behavior.
+  test("update all includes a filtered-out installed skill", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    const updated: string[][] = [];
+    deps.update = async (names) => {
+      updated.push(names);
+      return { ok: true, summary: "updated" };
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await waitForFrame(s, (f) => f.includes("code-review") && f.includes("tdd"));
+    await s.mockInput.pressKey("f"); // 't' is a bound key — enter the text filter first
+    await s.flush();
+    await s.mockInput.typeText("tdd"); // filters code-review out of the visible rows
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("filter: tdd")); // the existing filter border title
+    s.mockInput.pressEscape(); // exit text mode, keep the filter text
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 50)); // Escape protocol: let the parser close the bare ESC before the next key
+    await s.mockInput.pressKey("u"); // nothing checked → update all
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("update skills"));
+    await s.mockInput.pressKey("y");
+    await waitFor(() => updated.length === 1);
+    expect(updated[0]!.sort()).toEqual(["code-review", "tdd"]);
+  });
+
+  test("update all with a zero-row filter still updates the whole loaded scope", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    const updated: string[][] = [];
+    deps.update = async (names) => {
+      updated.push(names);
+      return { ok: true, summary: "updated" };
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await waitForFrame(s, (f) => f.includes("code-review") && f.includes("tdd"));
+    await s.mockInput.pressKey("f");
+    await s.flush();
+    await s.mockInput.typeText("zzz"); // matches no row — zero visible
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("filter: zzz"));
+    s.mockInput.pressEscape(); // exit text mode, keep the filter text
+    await s.flush();
+    await new Promise((r) => setTimeout(r, 50)); // Escape protocol: let the parser close the bare ESC before the next key
+    await s.mockInput.pressKey("u"); // nothing checked, nothing visible — still the whole scope
+    await s.flush();
+    // bounded under bun's 5s per-test timeout so a regression (the old silent
+    // no-op) fails INSIDE this test, not as an abandoned poll after teardown
+    await waitForFrame(s, (f) => f.includes("update skills"), 2000); // the confirm still opens
+    await s.mockInput.pressKey("y");
+    await waitFor(() => updated.length === 1);
+    expect(updated[0]!.sort()).toEqual(["code-review", "tdd"]);
+  });
+
+  test("update all with an agent filter includes the filtered-out skill", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    const updated: string[][] = [];
+    deps.update = async (names) => {
+      updated.push(names);
+      return { ok: true, summary: "updated" };
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await waitForFrame(s, (f) => f.includes("code-review") && f.includes("tdd"));
+    await s.mockInput.pressKey("a"); // agent overlay
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("filter by agent"));
+    await s.mockInput.pressKey(" "); // stage the first agent (Claude Code — tdd's only agent)
+    await s.flush();
+    await s.mockInput.pressKey("\r"); // apply → code-review (Cursor) filtered out
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("agents:") && !f.includes("filter by agent"));
+    await s.mockInput.pressKey("u"); // nothing checked → whole loaded scope despite the filter
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("update skills"));
+    await s.mockInput.pressKey("y");
+    await waitFor(() => updated.length === 1);
+    expect(updated[0]!.sort()).toEqual(["code-review", "tdd"]);
+  });
+
+  test("u with an explicit selection updates only the checked skills", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    const updated: string[][] = [];
+    deps.update = async (names) => {
+      updated.push(names);
+      return { ok: true, summary: "updated" };
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await waitForFrame(s, (f) => f.includes("code-review") && f.includes("tdd"));
+    await s.mockInput.pressKey(" "); // check the focused row (code-review, A→Z first)
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("✔"));
+    await s.mockInput.pressKey("u"); // an explicit selection owns the operation
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("update skills"));
+    await s.mockInput.pressKey("y");
+    await waitFor(() => updated.length === 1);
+    expect(updated[0]).toEqual(["code-review"]); // selected-only, never widened
   });
 
   test("S-162: n and N cancel the remove confirm — nothing runs, state intact", async () => {
