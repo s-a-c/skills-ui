@@ -700,20 +700,21 @@ function chipColor(name){
 }
 
 /* ---------- installed list ---------- */
+var skillsLoadSeq=0;
 function loadSkills(){
+  var scope=state.scope,seq=++skillsLoadSeq;
+  function owns(){return seq===skillsLoadSeq&&scope===state.scope;}
   setBusy('Loading skills…');
-  return api('/api/skills?scope=' + state.scope).then(function(data){
-    state.skills = data.skills;
-    renderList();
-    if (!data.skills.length) {
-      $('#detailPane').innerHTML = '<div class="empty">No ' + state.scope + ' skills installed.<br>Open the <b>Search</b> tab to install one.</div>';
-    } else if (!state.seedHold && (state.selected == null || !data.skills.some(function(s){ return s.name === state.selected; }))) {
+  return api('/api/skills?scope='+scope).then(function(data){
+    if(!owns())return;
+    state.skills=data.skills;renderList();
+    if(!data.skills.length){
+      $('#detailPane').innerHTML='<div class="empty">No '+scope+' skills installed.<br>Open the <b>Search</b> tab to install one.</div>';
+    }else if(!state.seedHold&&(state.selected==null||!data.skills.some(function(s){return s.name===state.selected;}))){
       selectSkill(data.skills[0].name);
-    } else if (!state.seedHold) {
-      showDetail(state.selected);
-    }
-  }).catch(function(e){ toast(e.message, 'error'); })
-  .finally(function(){ setBusy(null); });
+    }else if(!state.seedHold){showDetail(state.selected);}
+  }).catch(function(e){if(owns())toast(e.message,'error');})
+    .finally(function(){if(owns())setBusy(null);});
 }
 
 /* Filter predicate: the transpiled source of skillMatches() from

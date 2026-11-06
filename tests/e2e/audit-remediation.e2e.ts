@@ -110,3 +110,68 @@ test('browser seed install all sends the singleton wildcard',async({browser})=>{
     expect(pageErrors).toEqual([]);
   }finally{await context.close();}
 });
+
+// S-205 (UI-04): a held /api/skills response for the OLD scope must never
+// replace the rows of the NEWLY selected scope — the load that started last
+// owns the list until superseded.
+test('late global rows cannot replace newer project rows', async ({ browser }) => {
+  const { page, context } = await openAuditPage(browser, origin);
+  const gate = deferred<void>(), started = deferred<void>();
+  await page.route('**/api/skills?scope=global', async route => {
+    started.resolve(); await gate.promise;
+    await route.fulfill({ json: { scope: 'global', skills: [row('global-only', 'global')] } });
+  });
+  await page.locator('[data-scope="global"]').click(); await started.promise;
+  await page.locator('[data-scope="project"]').click();
+  await expect(page.locator('#skillList')).toContainText('alpha');
+  const response = page.waitForResponse('**/api/skills?scope=global');
+  gate.resolve(); await settleResponse(page, await response);
+  await expect(page.locator('#skillList')).not.toContainText('global-only');
+  await expect(page.locator('#skillList')).toContainText('alpha');
+  await context.close();
+});
+
+// S-205 sequencing, same scope: two reloads of ONE scope where the earlier
+// response lands after the later one — the latest load must stay in charge.
+test('late same-scope rows cannot replace a newer reload',async({browser})=>{
+  const {page,context,pageErrors}=await openAuditPage(browser,origin);
+  const firstGate=deferred<void>(),firstStarted=deferred<void>(),secondStarted=deferred<void>();
+  let calls=0;
+  await page.route('**/api/skills?scope=project',async route=>{
+    calls++;
+    if(calls===1){firstStarted.resolve();await firstGate.promise;
+      await route.fulfill({json:{scope:'project',skills:[row('stale-one','project'),row('stale-two','project')]}});}
+    else{secondStarted.resolve();
+      await route.fulfill({json:{scope:'project',skills:[row('alpha','project'),row('beta','project'),row('fresh','project')]}});}
+  });
+  try{
+    await page.locator('[data-scope="project"]').click();await firstStarted.promise;
+    const second=page.waitForResponse('**/api/skills?scope=project');
+    await page.locator('[data-scope="project"]').click();await secondStarted.promise;
+    await settleResponse(page,await second);
+    await expect(page.locator('#skillList')).toContainText('fresh');
+    const stale=page.waitForResponse('**/api/skills?scope=project');
+    firstGate.resolve();await settleResponse(page,await stale);
+    await expect(page.locator('#skillList')).not.toContainText('stale-one');
+    await expect(page.locator('#skillList')).toContainText('alpha');
+    await expect(page.locator('#skillList')).toContainText('fresh');
+    expect(pageErrors).toEqual([]);
+  }finally{firstGate.resolve();await context.close();}
+});
+
+// S-205 empty lists: an empty scope renders the honest empty state and
+// switching back restores the rows without leaking the stale selection.
+test('empty scope renders the empty state and recovers on switch back',async({browser})=>{
+  const {page,context,pageErrors}=await openAuditPage(browser,origin);
+  await page.route('**/api/skills?scope=global',route=>route.fulfill({json:{scope:'global',skills:[]}}));
+  try{
+    await page.locator('[data-scope="global"]').click();
+    await expect(page.locator('#detailPane')).toContainText('No global skills installed');
+    const back=page.waitForResponse('**/api/skills?scope=project');
+    await page.locator('[data-scope="project"]').click();
+    await settleResponse(page,await back);
+    await expect(page.locator('#detailPane')).not.toContainText('No global skills installed');
+    await expect(page.locator('#skillList')).toContainText('alpha');
+    expect(pageErrors).toEqual([]);
+  }finally{await context.close();}
+});
