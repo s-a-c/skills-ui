@@ -9,6 +9,7 @@ import {
   skillBody,
   update,
 } from "./index.ts";
+import { InvalidLockFileError } from "./services/locks.ts";
 import {
   bearerMatches,
   corsHeaders,
@@ -476,7 +477,18 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
 
       if (method === "GET" && path === "/api/updates") {
         const scope = scopeParam(url);
-        return json(await checkForUpdates(scope));
+        try {
+          return json(await checkForUpdates(scope));
+        } catch (error) {
+          // CORE-03 (S-197): container-level lock corruption (malformed
+          // JSON, root array, skills:null/array) is a controlled client-state
+          // error — report 400 {error:'invalid skills lock file'}, never the
+          // generic 500.
+          if (error instanceof InvalidLockFileError) {
+            return json({ error: "invalid skills lock file" }, 400);
+          }
+          throw error;
+        }
       }
 
       if (method === "GET" && path === "/api/prefs") {

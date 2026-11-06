@@ -11,6 +11,13 @@ import type { Scope, UpdatesResult } from "./types.ts";
  * digest groups and throwaway shallow clones for generic git sources are
  * not checked yet and report `not checkable yet`; they land in a later
  * 0.x. Local/missing-hash entries report `not checkable` like upstream.
+ *
+ * CORE-03 (S-197): entries that failed lock shape validation surface here as
+ * visible per-entry diagnostics on the EXISTING UpdatesResult error shape
+ * (sourceType:'unknown', error:message) — a broken sibling never silently
+ * vanishes from the report. The updates dictionary is null-prototype so an
+ * externally controlled entry name (e.g. "__proto__") cannot mutate
+ * Object.prototype.
  */
 
 interface TreeEntry {
@@ -54,8 +61,11 @@ function treeHashFor(tree: TreeEntry[], skillPath: string): string | null {
 }
 
 export async function checkForUpdates(scope: Scope): Promise<UpdatesResult> {
-  const { skills: entries } = readLock(scope);
-  const result: UpdatesResult["updates"] = {};
+  const lock = readLock(scope);
+  const { skills: entries } = lock;
+  // Null-prototype: entry names come from the lock file — assignment of a
+  // "__proto__" key must create an own property, not set a prototype.
+  const result = Object.create(null) as UpdatesResult["updates"];
   const status = (
     name: string,
     sourceType: string,
@@ -64,6 +74,11 @@ export async function checkForUpdates(scope: Scope): Promise<UpdatesResult> {
   ) => {
     result[name] = { name, updateAvailable, error, sourceType };
   };
+
+  // Per-entry diagnostics from the lock reader: visible errors, not ghosts.
+  for (const [name, message] of Object.entries(lock.diagnostics ?? {})) {
+    status(name, "unknown", false, message);
+  }
 
   const githubGroups = new Map<string, Array<{ name: string; source: string; ref?: string; skillPath?: string; skillFolderHash?: string; sourceType: string }>>();
   for (const [name, entry] of Object.entries(entries)) {
