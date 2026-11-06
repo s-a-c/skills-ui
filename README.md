@@ -58,7 +58,7 @@ mise install            # bun 1.4.4
 bun install --frozen-lockfile
 bun run dev             # terminal app
 bun run selftest        # in-memory renderer smoke test — no TTY needed
-bun test                # 230 tests: services (skills shim) · API · web page pins · TUI · perf budgets
+bun test                # full suite: services (skills shim) · API · web page pins · TUI · perf budgets
 bun run pty-smoke       # real-pty smoke over the compiled flows
 bun run perf:budget     # the 0.5.3 budget harness (--real for the live corpus, never in CI)
 bun run build           # compiled binary → dist/ (host target)

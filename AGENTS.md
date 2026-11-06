@@ -18,7 +18,13 @@ implied, breaking changes allowed at any minor.
 - Layout: `src/core/` (services, skills-client, prefs, theme) · `src/core/api.ts`
   (HTTP API) · `src/web/` (WebUI) · `src/tui/` (terminal app) · `src/main.ts`
   (entry) · `scripts/build.ts` (compile).
-- Current state: milestone 0.0.x complete, 36 tests green.
+
+Current behavior and delivery scope are maintained in README.md and the Linear
+project. Run bun test and bun run selftest for current verification status; do
+not infer health from a historical count. Active decision maps are issues
+labelled wayfinder:map in the skills-ui Linear project. The final adversarial
+audit records baseline failures; the remediation map and implementation plan
+own their follow-up.
 
 ## Environment variables
 
@@ -40,7 +46,7 @@ the `SKILLS_UI_` prefix.
 ```sh
 bun run dev        # terminal app
 bun run selftest   # in-memory renderer smoke test, no TTY
-bun test           # full suite (36 tests)
+bun test           # full suite
 bun run build      # compiled binary → dist/ (--all for the target matrix)
 ```
 
@@ -60,12 +66,11 @@ https://linear.app/s-a-c/project/skills-ui-521f0931af82
   canonical project-management docs; `ROADMAP.md` here mirrors the Roadmap
   document.
 - **Milestones**: 0.1.x – 0.5.x.
-- **Wayfinder**: maps are issues labelled `wayfinder:map` (current:
-  "skills-ui 0.1.x route (wayfinder map)", S-57). Tickets are child issues
-  labelled `wayfinder:<research|prototype|grilling|task>` with native blocking
-  relations. Work at most one ticket per session; claim by assigning first;
-  record resolutions as a comment, close the ticket, and append the gist to the
-  map's Decisions so far.
+- **Wayfinder**: maps are issues labelled `wayfinder:map`. Tickets are child
+  issues labelled `wayfinder:<research|prototype|grilling|task>` with native
+  blocking relations. Work at most one ticket per session; claim by assigning
+  first; record resolutions as a comment, close the ticket, and append the
+  gist to the map's Decisions so far.
 
 ## Agent skills
 
