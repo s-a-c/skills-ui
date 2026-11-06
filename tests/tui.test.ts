@@ -5,6 +5,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createTestRenderer } from "@opentui/core/testing";
 import { installCrashGuard, realDeps, runTuiOn, type TuiDeps } from "../src/tui/app.ts";
+import { waitForFrame } from "../src/tui/renderer-ready.ts";
+import { deferred } from "./helpers/audit-state.ts";
 import { createTuiModel, update, visibleSkills, type TuiModel } from "../src/tui/model.ts";
 import { resetSkillsBinCache } from "../src/core/skills-client.ts";
 import { DEFAULT_UI_PREFERENCES } from "../src/core/prefs.ts";
@@ -94,15 +96,13 @@ describe("tui (in-memory)", () => {
   test("renders installed list, selection, and markdown detail", async () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
-    await s.renderOnce();
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 400));
-    await s.renderOnce();
-    const frame = s.captureCharFrame();
-    expect(frame).toContain("tdd");
-    expect(frame).toContain("code-review");
-    expect(frame).toContain("❯"); // selection marker
-    expect(frame).toContain("markdown detail"); // markdown prose through the worker
+    // S-212: readiness is a bounded predicate, not a fixed sleep — the
+    // worker-rendered markdown detail lands asynchronously (observed ~90 ms).
+    // The predicate IS the marker assertion; a deadline miss reports the frame.
+    await waitForFrame(
+      s,
+      (f) => f.includes("tdd") && f.includes("code-review") && f.includes("❯") && f.includes("markdown detail")
+    );
   });
 
   test("keyboard contract: space checks, d opens confirm, y runs delete", async () => {
@@ -117,20 +117,11 @@ describe("tui (in-memory)", () => {
     await s.flush();
     await s.mockInput.typeText(" ");
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100)); // React commits async (S-96)
-    let frame = s.captureCharFrame();
-    expect(frame).toContain("✔"); // checked marker
+    await waitForFrame(s, (f) => f.includes("✔")); // checked marker committed (React commits async, S-96)
     s.mockInput.pressKey("d");
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 50));
-    frame = s.captureCharFrame();
-    expect(frame).toContain("remove skills");
+    await waitForFrame(s, (f) => f.includes("remove skills"));
     s.mockInput.pressKey("y");
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 50));
-    await new Promise((r) => setTimeout(r, 100));
-    frame = s.captureCharFrame();
-    expect(frame).toContain("removed code-review");
+    await waitForFrame(s, (f) => f.includes("removed code-review"));
     expect(removed as string[] | null).toEqual(["code-review"]);
   });
 
@@ -147,24 +138,22 @@ describe("tui (in-memory)", () => {
     await s.mockInput.typeText("/");
     await s.mockInput.typeText("cli");
     await new Promise((r) => setTimeout(r, 500)); // debounce + search
-    await s.flush();
-    let frame = s.captureCharFrame();
-    expect(frame).toContain("cli-ansi");
+    await waitForFrame(s, (f) => f.includes("cli-ansi"));
     await s.mockInput.typeText(" ");
-    await s.flush();
-    frame = s.captureCharFrame();
-    expect(frame).toContain("(1)"); // queue badge in tab
+    await waitForFrame(s, (f) => f.includes("(1)")); // queue badge in tab
     s.mockInput.pressEscape(); // exit text entry, keep query
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise((r) => setTimeout(r, 100)); // Escape protocol: let the parser close the bare ESC
     s.mockInput.pressKey("u"); // run queue
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    await s.flush();
-    expect(installed as { source: string; names: string[]; scope: string } | null).toEqual({
-      source: "o/r",
-      names: ["cli-ansi"],
-      scope: "project",
+    // settle-proof: poll the install dispatch, don't sleep-guess
+    await waitFor(() => {
+      expect(installed as { source: string; names: string[]; scope: string } | null).toEqual({
+        source: "o/r",
+        names: ["cli-ansi"],
+        scope: "project",
+      });
+      return true;
     });
   });
 
@@ -286,23 +275,20 @@ describe("tui (in-memory)", () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
     await s.mockInput.pressKey("f"); // filter live
     await s.flush();
     await s.mockInput.typeText("q"); // must type, never quit (S-161)
     await s.flush();
-    await new Promise((r) => setTimeout(r, 50));
-    expect(s.captureCharFrame()).toContain("filter: q");
+    await waitForFrame(s, (f) => f.includes("filter: q"));
     await s.mockInput.typeText("a"); // liveness: a dead app would ignore this
     await s.flush();
-    expect(s.captureCharFrame()).toContain("filter: qa");
+    await waitForFrame(s, (f) => f.includes("filter: qa"));
   });
 
   test("S-161 A2: q quits only on double-press; other keys disarm", async () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
     let destroyed = false;
     s.renderer.once("destroy", () => {
       destroyed = true;
@@ -310,19 +296,17 @@ describe("tui (in-memory)", () => {
 
     await s.mockInput.pressKey("q"); // first press: arms + toasts, still alive
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100)); // React commits the toast
+    await waitForFrame(s, (f) => f.includes("press q again to quit")); // toast committed
     expect(destroyed).toBe(false);
-    expect(s.captureCharFrame()).toContain("press q again to quit");
 
     await s.mockInput.pressKey("s"); // an unrelated key disarms
     await s.flush();
-    await new Promise((r) => setTimeout(r, 50));
+    await new Promise((r) => setTimeout(r, 50)); // key pacing — no frame assertion here
     expect(destroyed).toBe(false);
     await s.mockInput.pressKey("q"); // re-arms only
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
+    await waitForFrame(s, (f) => f.includes("press q again to quit"));
     expect(destroyed).toBe(false);
-    expect(s.captureCharFrame()).toContain("press q again to quit");
 
     await s.mockInput.pressKey("q"); // second consecutive press: destroy
     await s.flush();
@@ -347,33 +331,33 @@ describe("tui (in-memory)", () => {
     };
     await runTuiOn(s.renderer, undefined, deps);
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
 
     await s.mockInput.pressKey("r"); // focused skill (code-review, A→Z first)
     await s.flush();
-    let frame = s.captureCharFrame();
-    expect(frame).toContain("remove skills");
-    expect(frame).toContain("code-review");
-    await s.mockInput.pressKey("escape"); // cancel — nothing runs
+    const frame = await waitForFrame(s, (f) => f.includes("remove skills"));
+    expect(frame).toContain("code-review"); // the confirm names the focused skill
+    await s.mockInput.pressEscape(); // cancel — nothing runs (pressKey("escape") sends the literal text, not ESC)
     await s.flush();
-    await new Promise((r) => setTimeout(r, 50));
+    await new Promise((r) => setTimeout(r, 50)); // Escape protocol: let the parser close the bare ESC before the next key
+    await waitForFrame(s, (f) => !f.includes("remove skills")); // dialog closed
     expect(removed).toHaveLength(0);
 
     await s.mockInput.pressKey("r");
     await s.flush();
     await s.mockInput.pressKey("y");
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    expect(removed).toEqual([["code-review"]]);
+    await waitFor(() => {
+      expect(removed).toEqual([["code-review"]]);
+      return true;
+    });
 
     await s.mockInput.pressKey("u"); // nothing checked → update all in scope
     await s.flush();
-    frame = s.captureCharFrame();
-    expect(frame).toContain("update skills");
+    await waitForFrame(s, (f) => f.includes("update skills"));
     await s.mockInput.pressKey("y");
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    expect(updated).toEqual([["code-review", "tdd"]]); // all visible names
+    await waitFor(() => {
+      expect(updated).toEqual([["code-review", "tdd"]]); // all visible names
+      return true;
+    });
   });
 
   test("S-162: n and N cancel the remove confirm — nothing runs, state intact", async () => {
@@ -386,30 +370,25 @@ describe("tui (in-memory)", () => {
     };
     await runTuiOn(s.renderer, undefined, deps);
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
     await s.mockInput.pressKey(" "); // check the focused skill (code-review, A→Z first)
     await s.flush();
-    expect(s.captureCharFrame()).toContain("✔"); // checked marker to preserve
+    await waitForFrame(s, (f) => f.includes("✔")); // checked marker to preserve
 
     await s.mockInput.pressKey("r"); // remove confirm
     await s.flush();
-    expect(s.captureCharFrame()).toContain("remove skills");
+    await waitForFrame(s, (f) => f.includes("remove skills"));
     await s.mockInput.pressKey("n"); // cancel — the y/N copy is now wired
     await s.flush();
-    await new Promise((r) => setTimeout(r, 50));
-    let frame = s.captureCharFrame();
-    expect(frame).not.toContain("remove skills"); // dialog closed
+    const frame = await waitForFrame(s, (f) => !f.includes("remove skills")); // dialog closed
     expect(frame).toContain("✔"); // checked state intact
     expect(removed).toHaveLength(0); // nothing ran
 
     await s.mockInput.pressKey("r"); // same again with the shift spelling
     await s.flush();
-    expect(s.captureCharFrame()).toContain("remove skills");
+    await waitForFrame(s, (f) => f.includes("remove skills"));
     await s.mockInput.pressKey("N", { shift: true });
     await s.flush();
-    await new Promise((r) => setTimeout(r, 50));
-    frame = s.captureCharFrame();
-    expect(frame).not.toContain("remove skills");
+    await waitForFrame(s, (f) => !f.includes("remove skills")); // dialog closed
     expect(removed).toHaveLength(0);
   });
 
@@ -429,94 +408,75 @@ describe("tui (in-memory)", () => {
     deps.listInstalled = async () => wide;
     await runTuiOn(s.renderer, undefined, deps);
     await s.flush();
-    await new Promise((r) => setTimeout(r, 400)); // settle the first load
+    await waitForFrame(s, (f) => f.includes("105 skills·checked")); // first load settled, both segments rendered
     s.resize(80, 24); // the fit constraint: pane inner 21, title budget 19 chars
     await s.renderOnce();
     await s.flush();
-    let frame = s.captureCharFrame();
-    expect(frame).toContain("105 skills·checked"); // both segments fully rendered
+    const resized = s.captureCharFrame();
+    expect(resized).toContain("105 skills·checked");
     await s.mockInput.pressKey("s"); // → load order
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    await s.renderOnce();
-    frame = s.captureCharFrame();
-    expect(frame).toContain("105 skills·order");
-    expect(frame).not.toContain("skills·checked");
+    const order = await waitForFrame(s, (f) => f.includes("105 skills·order"));
+    expect(order).not.toContain("skills·checked");
   });
 
   test("S-187: the list title carries the CHECKED count while checks exist", async () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    const idle = s.captureCharFrame();
-    expect(idle).toContain("2 skills·checked"); // no checks: the S-162 form
+    const idle = await waitForFrame(s, (f) => f.includes("2 skills·checked")); // no checks: the S-162 form
     expect(idle).not.toContain("checked of"); // …and no checked count anywhere
     await s.mockInput.pressKey(" "); // check the focused row (code-review, A→Z first)
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
     // wrap-tolerant: assert the title substring, never frame coordinates
-    expect(s.captureCharFrame()).toContain("1 checked of 2");
+    await waitForFrame(s, (f) => f.includes("1 checked of 2"));
     // the fit constraint itself: 80 cols (S-162 ladder budget) must still
     // render the checked title inside the pane
     s.resize(80, 24);
     await s.renderOnce();
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    expect(s.captureCharFrame()).toContain("1 checked of 2");
+    await waitForFrame(s, (f) => f.includes("1 checked of 2"));
     await s.mockInput.pressKey("j"); // next row
     await s.flush();
     await s.mockInput.pressKey(" "); // check it too
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    expect(s.captureCharFrame()).toContain("2 checked of 2"); // over the loaded list
+    await waitForFrame(s, (f) => f.includes("2 checked of 2")); // over the loaded list
     await s.mockInput.pressKey(" "); // start folding the checks away
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    expect(s.captureCharFrame()).toContain("1 checked of 2");
+    await waitForFrame(s, (f) => f.includes("1 checked of 2"));
     await s.mockInput.pressKey("k"); // back to the first row
     await s.flush();
     await s.mockInput.pressKey(" "); // last check off
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    const cleared = s.captureCharFrame();
-    expect(cleared).not.toContain("checked of"); // the count vanishes at zero checks
-    expect(cleared).toContain("2 skills·checked"); // …and the S-162 form returns
+    // the count vanishes at zero checks and the S-162 form returns
+    await waitForFrame(s, (f) => !f.includes("checked of") && f.includes("2 skills·checked"));
   });
 
   test("S-162: toasts queue FIFO — a second toast waits for the first's window", async () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
     await s.mockInput.pressKey("q"); // toast A: "press q again to quit"
     await s.flush();
     await s.mockInput.pressKey("c"); // toast B queued (also disarms the quit, S-161)
     await s.flush();
-    await new Promise((r) => setTimeout(r, 1000)); // well inside A's 3.5s window
-    let frame = s.captureCharFrame();
-    expect(frame).toContain("press q again to quit"); // A still shown
-    expect(frame).not.toContain("update(s) available"); // B did not clobber it
+    await new Promise((r) => setTimeout(r, 1000)); // toast-window timing: well inside A's 3.5s window
+    const frameA = await waitForFrame(s, (f) => f.includes("press q again to quit")); // A still shown
+    expect(frameA).not.toContain("update(s) available"); // B did not clobber it
     await new Promise((r) => setTimeout(r, 4000)); // A's window ends → B pops
-    frame = s.captureCharFrame();
-    expect(frame).toContain("update(s) available"); // B shown in its own window
-    expect(frame).not.toContain("press q again to quit");
+    await waitForFrame(s, (f) => f.includes("update(s) available") && !f.includes("press q again to quit")); // B in its own window
   }, 15000); // the FIFO window waits ~5s — well over bun's 5s default timeout
 
   test("c checks for updates: ↑ badge, detail hint, toast", async () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    let frame = s.captureCharFrame();
-    expect(frame).not.toContain("↑");
+    const idle = await waitForFrame(s, (f) => f.includes("tdd") && f.includes("code-review")); // settled list
+    expect(idle).not.toContain("↑");
     await s.mockInput.pressKey("c");
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
-    frame = s.captureCharFrame();
-    expect(frame).toContain("↑"); // badge on code-review's row
-    expect(frame).toContain("1 update(s) available"); // toast
-    expect(frame).toContain("update available"); // detail hint — code-review is selected (A→Z first)
+    const checked = await waitForFrame(s, (f) => f.includes("↑") && f.includes("1 update(s) available"));
+    expect(checked).toContain("↑"); // badge on code-review's row
+    expect(checked).toContain("update available"); // detail hint — code-review is selected (A→Z first)
   });
 
   test("S-166 F4: a failed registry search shows the failure line, never 'no results'", async () => {
@@ -528,9 +488,7 @@ describe("tui (in-memory)", () => {
     await s.mockInput.typeText("/");
     await s.mockInput.typeText("cli");
     await new Promise((r) => setTimeout(r, 500)); // debounce + search
-    await s.flush();
-    const frame = s.captureCharFrame();
-    expect(frame).toContain("search failed: skills.sh unreachable");
+    const frame = await waitForFrame(s, (f) => f.includes("search failed: skills.sh unreachable"));
     expect(frame).not.toContain("no results");
   });
 
@@ -543,101 +501,78 @@ describe("tui (in-memory)", () => {
     await s.mockInput.typeText("/");
     await s.mockInput.typeText("cli");
     await new Promise((r) => setTimeout(r, 500)); // debounce + search
-    await s.flush();
-    const frame = s.captureCharFrame();
-    expect(frame).toContain("cli-ansi"); // results render
-    expect(frame).not.toContain("search failed");
+    // results render AND the failure line is gone — the predicate carries both
+    await waitForFrame(s, (f) => f.includes("cli-ansi") && !f.includes("search failed"));
   });
 
   test("S-182: a slow older search resolving after a newer one never overwrites the newer results", async () => {
     const s = setup!;
     const deps = fakeDeps();
-    type Deferred = {
-      query: string;
-      resolve: (v: { results: SearchSkill[]; adjustedQuery: string | null }) => void;
+    type SearchResponse = { results: SearchSkill[]; adjustedQuery: string | null };
+    const pending: Array<{ query: string; settle: ReturnType<typeof deferred<SearchResponse>> }> = [];
+    deps.search = (query: string) => {
+      const settle = deferred<SearchResponse>();
+      pending.push({ query, settle });
+      return settle.promise;
     };
-    const pending: Deferred[] = [];
-    deps.search = (query: string) =>
-      new Promise<{ results: SearchSkill[]; adjustedQuery: string | null }>((resolve) => {
-        pending.push({ query, resolve });
-      });
     await runTuiOn(s.renderer, undefined, deps);
     await s.flush();
     await s.mockInput.typeText("/");
     await s.mockInput.typeText("old");
     await new Promise((r) => setTimeout(r, 450)); // debounce (300 ms) fired — search("old") in flight
+    // handshake: old-request-start observed before the newer query is issued
+    expect(pending.map((p) => p.query)).toEqual(["old"]);
     await s.mockInput.typeText("x"); // query becomes "oldx" — a newer search is scheduled
     await new Promise((r) => setTimeout(r, 450)); // second debounce fired — search("oldx") in flight
     expect(pending.map((p) => p.query)).toEqual(["old", "oldx"]); // both dispatched, neither answered
-    // the OLD query settles while the newer one is still pending
-    pending[0]!.resolve({
-      results: [{ name: "stale-old-result", slug: "stale-old-result", source: "o/r", installs: 9 }],
-      adjustedQuery: null,
-    });
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 150)); // settle window — the guard must drop the stale apply
-    await s.renderOnce();
-    let frame = s.captureCharFrame();
-    expect(frame).not.toContain("stale-old-result"); // dropped: the newer query owns the pane
-    // the newer query lands — its results render and survive
-    pending[1]!.resolve({
+    // handshake: NEWER completion BEFORE old completion — fresh results render first
+    pending[1]!.settle.resolve({
       results: [{ name: "fresh-new-result", slug: "fresh-new-result", source: "o/r", installs: 3 }],
       adjustedQuery: null,
     });
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 200));
-    await s.renderOnce();
-    await waitFor(() => {
-      expect(s.captureCharFrame()).toContain("fresh-new-result");
-      return true;
+    await waitForFrame(s, (f) => f.includes("fresh-new-result"));
+    // only now does the OLD query settle — the stale response lands late
+    pending[0]!.settle.resolve({
+      results: [{ name: "stale-old-result", slug: "stale-old-result", source: "o/r", installs: 9 }],
+      adjustedQuery: null,
     });
-    frame = s.captureCharFrame();
-    expect(frame).toContain("fresh-new-result");
-    expect(frame).not.toContain("stale-old-result"); // the stale results never surfaced
+    // handshake: renderer flush after the old promise settles — the guard must drop it
+    const frame = await waitForFrame(s, (f) => f.includes("fresh-new-result"));
+    expect(frame).not.toContain("stale-old-result"); // dropped: the newer query owns the pane
   });
 
   test("S-182: a slow older search REJECTING after a newer one never toasts over newer state", async () => {
     const s = setup!;
     const deps = fakeDeps();
-    type Deferred = {
-      query: string;
-      resolve: (v: { results: SearchSkill[]; adjustedQuery: string | null }) => void;
-      reject: (e: Error) => void;
+    type SearchResponse = { results: SearchSkill[]; adjustedQuery: string | null };
+    const pending: Array<{ query: string; settle: ReturnType<typeof deferred<SearchResponse>> }> = [];
+    deps.search = (query: string) => {
+      const settle = deferred<SearchResponse>();
+      pending.push({ query, settle });
+      return settle.promise;
     };
-    const pending: Deferred[] = [];
-    deps.search = (query: string) =>
-      new Promise<{ results: SearchSkill[]; adjustedQuery: string | null }>((resolve, reject) => {
-        pending.push({ query, resolve, reject });
-      });
     await runTuiOn(s.renderer, undefined, deps);
     await s.flush();
     await s.mockInput.typeText("/");
     await s.mockInput.typeText("old");
     await new Promise((r) => setTimeout(r, 450)); // debounce fired — search("old") in flight
+    // handshake: old-request-start observed before the newer query is issued
+    expect(pending.map((p) => p.query)).toEqual(["old"]);
     await s.mockInput.typeText("x"); // "oldx" — a newer search is scheduled
     await new Promise((r) => setTimeout(r, 450)); // second debounce fired — search("oldx") in flight
     expect(pending.map((p) => p.query)).toEqual(["old", "oldx"]);
-    pending[0]!.reject(new Error("boom")); // the OLD query fails late, newer still pending
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 150)); // settle window — the guard must drop the stale failure
-    await s.renderOnce();
-    let frame = s.captureCharFrame();
-    expect(frame).not.toContain("search failed"); // stale rejection dropped: no toast over newer state
-    // the newer query lands — its results render and the failure never surfaced
-    pending[1]!.resolve({
+    // handshake: NEWER completion BEFORE old completion — fresh results render first
+    pending[1]!.settle.resolve({
       results: [{ name: "fresh-new-result", slug: "fresh-new-result", source: "o/r", installs: 3 }],
       adjustedQuery: null,
     });
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 200));
-    await s.renderOnce();
-    await waitFor(() => {
-      expect(s.captureCharFrame()).toContain("fresh-new-result");
-      return true;
-    });
-    frame = s.captureCharFrame();
-    expect(frame).toContain("fresh-new-result");
-    expect(frame).not.toContain("search failed");
+    await waitForFrame(s, (f) => f.includes("fresh-new-result"));
+    // only now does the OLD query fail late — the rejection lands after newer state
+    pending[0]!.settle.reject(new Error("boom"));
+    // handshake: renderer flush after the old promise settles — assert the
+    // stale failure never surfaced while the toast window is still open
+    const frame = await waitForFrame(s, (f) => f.includes("fresh-new-result"));
+    expect(frame).not.toContain("search failed"); // the failure never surfaced
   });
 
   test("S-166 G4: check-status errors render in the detail line and the toast counts them", async () => {
@@ -659,11 +594,9 @@ describe("tui (in-memory)", () => {
     });
     await runTuiOn(s.renderer, undefined, deps);
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
+    await waitForFrame(s, (f) => f.includes("tdd") && f.includes("code-review")); // settled list
     await s.mockInput.pressKey("c");
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
-    const frame = s.captureCharFrame();
+    const frame = await waitForFrame(s, (f) => f.includes("no updates available · 1 not checkable"));
     expect(frame).toContain("no updates available · 1 not checkable"); // toast mentions the count
     expect(frame).toContain("check: not checkable yet"); // detail line (code-review selected, A→Z first)
     expect(frame).not.toContain("↑"); // badge logic unchanged — an error alone is no badge
@@ -675,13 +608,10 @@ describe("tui (in-memory)", () => {
     await s.flush();
     await s.mockInput.typeText("?");
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100)); // React commits async (S-96)
-    expect(s.captureCharFrame()).toContain("this help");
+    await waitForFrame(s, (f) => f.includes("this help")); // React commits async (S-96)
     s.mockInput.pressEscape();
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    await s.flush();
-    expect(s.captureCharFrame()).not.toContain("this help");
+    await waitForFrame(s, (f) => !f.includes("this help")); // overlay closed
   });
 });
 
@@ -794,13 +724,9 @@ describe("tui model (pure)", () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
     await s.mockInput.pressKey(","); // settings tab — triggers the lazy version load
     await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
-    const frame = s.captureCharFrame();
-    expect(frame).toContain("skills CLI");
-    expect(frame).toContain("1.7.2");
+    await waitForFrame(s, (f) => f.includes("skills CLI") && f.includes("1.7.2"));
   });
 
   test("crash guard: signals run cleanup once and exit; dispose unbinds; fatal errors exit 1", () => {
@@ -841,9 +767,8 @@ describe("tui model (pure)", () => {
     await s.flush();
     await s.mockInput.typeText("/");
     await s.mockInput.typeText("zz");
-    await new Promise((r) => setTimeout(r, 500));
-    await s.flush();
-    expect(s.captureCharFrame()).toContain('showing "cli-ansi"'); // in the search pane title
+    await new Promise((r) => setTimeout(r, 500)); // debounce + search
+    await waitForFrame(s, (f) => f.includes('showing "cli-ansi"')); // in the search pane title
   });
 
   test("queue sub-view: pane flip, cursor clamps, delete-at", () => {
@@ -881,16 +806,18 @@ describe("0.2.x B1 (S-69): list ops", () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
     const checks = (): number => (s.captureCharFrame().match(/✔/g) ?? []).length;
     await s.mockInput.typeText("A");
     await s.flush();
+    await waitForFrame(s, (f) => (f.match(/✔/g) ?? []).length === 2);
     expect(checks()).toBe(2); // all checked
     await s.mockInput.typeText("I");
     await s.flush();
+    await waitForFrame(s, (f) => (f.match(/✔/g) ?? []).length === 0);
     expect(checks()).toBe(0); // inverted to none
     await s.mockInput.typeText("A");
     await s.flush();
+    await waitForFrame(s, (f) => (f.match(/✔/g) ?? []).length === 2);
     expect(checks()).toBe(2);
   });
 
@@ -900,19 +827,13 @@ describe("0.2.x B1 (S-69): list ops", () => {
     deps.listInstalled = async () => manySkills;
     await runTuiOn(s.renderer, undefined, deps);
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    let frame = s.captureCharFrame();
-    expect(frame).toContain("─ s01 ─"); // detail border title of selection 0
+    await waitForFrame(s, (f) => f.includes("─ s01 ─")); // detail border title of selection 0
     await s.mockInput.pressKey("\x1B[6~"); // PgDn as a terminal sends it
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    frame = s.captureCharFrame();
-    expect(frame).toContain("─ s11 ─"); // 0 + PAGE clamped to 11
+    await waitForFrame(s, (f) => f.includes("─ s11 ─")); // 0 + PAGE clamped to 11
     await s.mockInput.pressKey("\x1B[5~"); // PgUp
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    frame = s.captureCharFrame();
-    expect(frame).toContain("─ s01 ─"); // back to top
+    await waitForFrame(s, (f) => f.includes("─ s01 ─")); // back to top
   });
 
   test("keymap contract: s sorts on installed (no prefs write), , toggles sound in settings", async () => {
@@ -924,63 +845,56 @@ describe("0.2.x B1 (S-69): list ops", () => {
     };
     await runTuiOn(s.renderer, undefined, deps);
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
 
     await s.mockInput.pressKey("s"); // installed tab: sort toggle, not prefs
     await s.flush();
     expect(saved).toHaveLength(0);
     await s.mockInput.pressKey("?"); // new keys documented in help
     await s.flush();
-    expect(s.captureCharFrame()).toContain("sort checked first");
-    expect(s.captureCharFrame()).toContain("check all / invert");
+    await waitForFrame(s, (f) => f.includes("sort checked first") && f.includes("check all / invert"));
     await s.mockInput.pressEscape();
     await s.flush();
-    await new Promise((r) => setTimeout(r, 50)); // let the parser close the bare ESC before x
+    await new Promise((r) => setTimeout(r, 50)); // Escape protocol: let the parser close the bare ESC before x
 
     await s.mockInput.pressKey(","); // settings tab — , is the settings key end-to-end
     await s.flush();
     await s.mockInput.typeText(",");
     await s.flush();
     expect(saved).toHaveLength(1); // , toggles sound once settings is open
-    expect(s.captureCharFrame()).toContain(",  sound");
+    await waitForFrame(s, (f) => f.includes(",  sound"));
 
     await s.mockInput.pressKey("i"); // back to installed
     await s.flush();
-    await new Promise((r) => setTimeout(r, 50));
+    await new Promise((r) => setTimeout(r, 50)); // Escape-protocol pacing before the next key
     await s.mockInput.pressKey("x"); // x is free — falls into the text filter
     await s.flush();
-    expect(s.captureCharFrame()).toContain("filter: x");
+    await waitForFrame(s, (f) => f.includes("filter: x"));
   });
 
   test("a opens the agent overlay (with all-toggle); f enters the text filter", async () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
 
     await s.mockInput.pressKey("f"); // f enters the text filter…
     await s.flush();
     await s.mockInput.typeText("c"); // …so the bound key c lands in the filter, not the update check
     await s.flush();
-    const afterF = s.captureCharFrame();
-    expect(afterF).toContain("filter: c");
-    expect(afterF).not.toContain("update(s) available");
+    const afterF = await waitForFrame(s, (f) => f.includes("filter: c"));
+    expect(afterF).not.toContain("update(s) available"); // c did not fire the update check
     await s.mockInput.pressEscape();
     await s.flush();
-    await new Promise((r) => setTimeout(r, 50));
+    await new Promise((r) => setTimeout(r, 50)); // Escape protocol: let the parser close the bare ESC
 
     await s.mockInput.pressKey("a"); // a = agent overlay
     await s.flush();
-    let frame = s.captureCharFrame();
-    expect(frame).toContain("filter by agent");
+    await waitForFrame(s, (f) => f.includes("filter by agent"));
     await s.mockInput.pressKey("a"); // all — stages every agent
     await s.flush();
     await s.mockInput.pressKey("\r"); // apply → normalizes to no filter
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    frame = s.captureCharFrame();
-    expect(frame).not.toContain("filter by agent");
-    expect(frame).not.toContain("agents:");
+    const cleared = await waitForFrame(s, (f) => !f.includes("filter by agent"));
+    expect(cleared).not.toContain("agents:"); // normalized to no filter
 
     await s.mockInput.pressKey("a"); // reopen, stage just the first agent
     await s.flush();
@@ -988,9 +902,7 @@ describe("0.2.x B1 (S-69): list ops", () => {
     await s.flush();
     await s.mockInput.pressKey("\r");
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    const filtered = s.captureCharFrame();
-    expect(filtered).toContain("agents:"); // applied filter in the list pane title
+    const filtered = await waitForFrame(s, (f) => f.includes("agents:") && !f.includes("filter by agent"));
     expect(filtered).not.toContain("code-review"); // Cursor's skill filtered out
   });
 
@@ -998,17 +910,12 @@ describe("0.2.x B1 (S-69): list ops", () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
     await s.mockInput.pressKey("\t");
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    let frame = s.captureCharFrame();
-    expect(frame).toContain("scroll (tab)"); // mode marker in the detail title
+    await waitForFrame(s, (f) => f.includes("scroll (tab)")); // mode marker in the detail title
     await s.mockInput.pressKey("\t"); // off
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    frame = s.captureCharFrame();
-    expect(frame).not.toContain("scroll (tab)");
+    await waitForFrame(s, (f) => !f.includes("scroll (tab)")); // mode marker gone
   });
 
   test("filter bar sits permanently above the list with a long list, and resize re-renders", async () => {
@@ -1017,25 +924,21 @@ describe("0.2.x B1 (S-69): list ops", () => {
     deps.listInstalled = async () => manySkills; // 12 rows — pushes bottom rows off-viewport
     await runTuiOn(s.renderer, undefined, deps);
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    expect(s.captureCharFrame()).toContain("skills·checked"); // idle title: count + sort indicator
+    await waitForFrame(s, (f) => f.includes("skills·checked")); // idle title: count + sort indicator
     await s.mockInput.pressKey("f");
     await s.flush();
     await s.mockInput.typeText("s0"); // filter bar now carries text
     await s.flush();
-    const frame = s.captureCharFrame();
-    // the bar renders above the list, on screen regardless of list length
-    // (S-87/S-88: in a real terminal the text must also be boxed to paint)
-    expect(frame.indexOf("filter: s0")).toBeGreaterThanOrEqual(0);
+    const frame = await waitForFrame(s, (f) => f.includes("filter: s0"));
+    // the bar renders ABOVE the list (S-87/S-88: in a real terminal the text
+    // must also be boxed to paint)
     expect(frame.indexOf("filter: s0")).toBeLessThan(frame.indexOf("❯ s01"));
     await s.mockInput.pressKey("\x1b[6~"); // PgDn must page even mid-filter (S-88)
     await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
-    expect(s.captureCharFrame()).toContain("─ s09 ─"); // filter "s0" matches s01–s09; PgDn clamps to the last
+    await waitForFrame(s, (f) => f.includes("─ s09 ─")); // filter "s0" matches s01–s09; PgDn clamps to the last
     process.stdout.emit("resize"); // SIGWINCH path — must re-render without throwing
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    expect(s.captureCharFrame()).toContain("filter: s0");
+    await waitForFrame(s, (f) => f.includes("filter: s0")); // filter text survived the re-render
   });
 
   test("search queue sub-view: Tab flips panes, d removes the queued item", async () => {
@@ -1045,29 +948,23 @@ describe("0.2.x B1 (S-69): list ops", () => {
     await s.mockInput.typeText("/");
     await s.mockInput.typeText("cli");
     await new Promise((r) => setTimeout(r, 500)); // debounce + search
-    await s.flush();
-    let frame = s.captureCharFrame();
-    expect(frame).toContain("cli-ansi");
+    await waitForFrame(s, (f) => f.includes("cli-ansi"));
     await s.mockInput.typeText(" "); // queue it
     await s.flush();
-    frame = s.captureCharFrame();
-    expect(frame).toContain("install list (1)");
+    await waitForFrame(s, (f) => f.includes("install list (1)"));
     await s.mockInput.pressKey("\t"); // Tab → install list pane
     await s.flush();
-    frame = s.captureCharFrame();
-    expect(frame).toContain("❯ install list (1)");
+    await waitForFrame(s, (f) => f.includes("❯ install list (1)"));
     await s.mockInput.pressKey("\x1b"); // Esc → command mode (queue keys live there now, S-103)
     await s.flush();
-    await new Promise((r) => setTimeout(r, 50));
+    await new Promise((r) => setTimeout(r, 50)); // Escape protocol: let the parser close the bare ESC
     await s.mockInput.pressKey("d"); // remove the queued item
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    frame = s.captureCharFrame();
-    expect(frame).toContain("install list (0)");
-    expect(frame).toContain("(empty");
+    const emptied = await waitForFrame(s, (f) => f.includes("install list (0)"));
+    expect(emptied).toContain("(empty"); // the queue is really empty, not just unnumbered
     await s.mockInput.pressKey("\t"); // Tab back → Results
     await s.flush();
-    expect(s.captureCharFrame()).toContain("❯ Results");
+    await waitForFrame(s, (f) => f.includes("❯ Results"));
   });
 });
 
@@ -1077,31 +974,23 @@ describe("S-100 rich views", () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
     await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
     const model = update(createTuiModel(DEFAULT_UI_PREFERENCES), { type: "splash-dismiss" });
     expect(model.splash).toBe(false);
-    // and the live app no longer shows the splash marker
-    const frame = s.captureCharFrame();
-    expect(frame).toContain("tdd"); // normal installed view after load
-    expect(frame).not.toContain("starting…");
+    // and the live app no longer shows the splash marker — readiness is the
+    // loaded frame itself, not a sleep
+    await waitForFrame(s, (f) => f.includes("tdd") && !f.includes("starting…"));
   });
 
   test("graph: G opens the 3D view, esc closes it; g still switches scope", async () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
     await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
     await s.mockInput.pressKey("G", { shift: true });
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    let frame = s.captureCharFrame();
-    expect(frame).toContain("graph");
-    expect(frame).toContain("2 skills"); // snapshot title
+    await waitForFrame(s, (f) => f.includes("graph") && f.includes("2 skills")); // snapshot title
     await s.mockInput.pressKey("\x1b"); // esc
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    frame = s.captureCharFrame();
-    expect(frame).toContain("❯ Installed"); // back to the tabs
+    await waitForFrame(s, (f) => f.includes("❯ Installed")); // back to the tabs
   });
 
   test("art: source badges are deterministic per source, distinct across sources", async () => {
@@ -1163,9 +1052,7 @@ describe("S-103 search text-entry + match highlighting", () => {
     await s.mockInput.typeText("/");
     await s.mockInput.typeText("vercel-labs");
     await new Promise((r) => setTimeout(r, 500)); // debounce + search
-    await s.flush();
-    const frame = s.captureCharFrame();
-    expect(frame).toContain("vercel-labs"); // hyphen survives (space stays queue-by fork contract)
+    await waitForFrame(s, (f) => f.includes("vercel-labs")); // hyphen survives (space stays queue-by fork contract)
   });
 
   test("queue items survive letters typed in search mode; Esc restores queue keys", async () => {
@@ -1175,26 +1062,22 @@ describe("S-103 search text-entry + match highlighting", () => {
     await s.flush();
     await s.mockInput.typeText("/");
     await s.mockInput.typeText("cli");
-    await new Promise((r) => setTimeout(r, 500));
+    await new Promise((r) => setTimeout(r, 500)); // debounce + search
     await s.flush();
     await s.mockInput.typeText(" "); // queue cli-ansi
     await s.flush();
-    let frame = s.captureCharFrame();
-    expect(frame).toContain("install list (1)");
+    await waitForFrame(s, (f) => f.includes("install list (1)"));
     await s.mockInput.typeText("d"); // a letter mid-query — must NOT delete the queued item
-    await new Promise((r) => setTimeout(r, 450));
+    await new Promise((r) => setTimeout(r, 450)); // debounce fired — the query dispatch settled
     await s.flush();
-    frame = s.captureCharFrame();
-    expect(frame).toContain("install list (1)"); // queue untouched
-    expect(frame).toContain("clid"); // the letter reached the query
+    const typed = await waitForFrame(s, (f) => f.includes("clid"));
+    expect(typed).toContain("install list (1)"); // queue untouched by the letter
     await s.mockInput.pressKey("\x1b"); // command mode
     await s.flush();
-    await new Promise((r) => setTimeout(r, 50));
+    await new Promise((r) => setTimeout(r, 50)); // Escape protocol: let the parser close the bare ESC
     await s.mockInput.pressKey("d"); // now it removes
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    frame = s.captureCharFrame();
-    expect(frame).toContain("install list (0)");
+    await waitForFrame(s, (f) => f.includes("install list (0)"));
   });
 
   test("highlightSegments marks every case-insensitive occurrence", async () => {

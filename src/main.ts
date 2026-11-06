@@ -31,18 +31,18 @@ function parsePortArg(args: string[]): { port: number | null; rest: string[] } {
 
 async function selftest(): Promise<void> {
   const { createTestRenderer } = await import("@opentui/core/testing");
+  const { waitForFrame } = await import("./tui/renderer-ready.ts");
   const setup = await createTestRenderer({ width: 80, height: 30 });
   try {
     setup.renderer.root.add(buildSpikeScreen(setup.renderer));
-    await setup.renderOnce();
-    await setup.flush();
-    await new Promise((r) => setTimeout(r, 500));
-    await setup.renderOnce();
-    const frame = setup.captureCharFrame();
-    const mustContain = ["skills-ui", "wrapper", "ls --json", "catppuccin"];
-    const missing = mustContain.filter((s) => !frame.includes(s));
-    if (missing.length > 0) {
-      console.error("SELFTEST FAIL — frame missing: " + missing.join(", "));
+    // S-212: poll for the worker-rendered markers with a deadline instead of
+    // a fixed sleep — the worker commits land asynchronously (observed
+    // ~20–190 ms in the bounded probe); a deadline miss surfaces the frame.
+    const markers = ["skills-ui", "wrapper", "ls --json", "catppuccin"];
+    try {
+      await waitForFrame(setup, (frame) => markers.every((marker) => frame.includes(marker)));
+    } catch (error) {
+      console.error("SELFTEST FAIL — " + (error instanceof Error ? error.message : String(error)));
       process.exitCode = 1;
       return;
     }

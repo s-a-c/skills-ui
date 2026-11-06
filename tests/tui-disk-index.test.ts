@@ -4,6 +4,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createTestRenderer } from "@opentui/core/testing";
 import { realDeps, runTuiOn, type TuiDeps } from "../src/tui/app.ts";
+import { waitForFrame } from "../src/tui/renderer-ready.ts";
+import { deferred } from "./helpers/audit-state.ts";
 import {
   DISK_INDEX_VERSION,
   diskIndexPath,
@@ -59,20 +61,22 @@ function writeIndex(dir: string, scope: Scope, skills: InstalledSkill[]): void {
 }
 
 /** Deferred-fake list source (the S-182 test pattern): every call is held
- * open until the test resolves it — nothing resolves on its own. */
+ * open until the test resolves it — nothing resolves on its own. A missing
+ * resolver is a failure at the release site, never an optional chain. */
 function deferredListDeps(): { deps: TuiDeps; resolveAll: (skills: InstalledSkill[]) => void } {
-  const pending: Array<(v: InstalledSkill[]) => void> = [];
+  const pending: Array<ReturnType<typeof deferred<InstalledSkill[]>>> = [];
   const deps: TuiDeps = {
     ...realDeps,
-    listInstalled: () =>
-      new Promise<InstalledSkill[]>((resolve) => {
-        pending.push(resolve);
-      }),
+    listInstalled: () => {
+      const settle = deferred<InstalledSkill[]>();
+      pending.push(settle);
+      return settle.promise;
+    },
     skillBody: async (path) => `body of ${path}`,
     savePrefs: () => {},
     play: async () => {},
   };
-  return { deps, resolveAll: (skills) => pending.splice(0).forEach((resolve) => resolve(skills)) };
+  return { deps, resolveAll: (skills) => pending.splice(0).forEach((settle) => settle.resolve(skills)) };
 }
 
 /** Poll until `fn` stops throwing (the tui.test.ts settle-proof pattern). */
@@ -199,30 +203,23 @@ describe("S-183 stale-while-revalidate (renderer)", () => {
       startupSettled = true;
     }); // startup awaits the deferred — do not await here
     await s.flush();
-    await new Promise((r) => setTimeout(r, 150)); // ANSI settle
-    await s.renderOnce();
-    let frame = s.captureCharFrame();
-    // the list source is still pending — these rows can only be the disk index
-    expect(startupSettled).toBe(false); // the subprocess has NOT resolved
-    expect(frame).toContain("alpha"); // stale rows on screen
-    expect(frame).toContain("3 skills"); // real content, real count
-    expect(frame).toContain("body of /x/alpha"); // stale detail fetch filled the pane
-    expect(frame).not.toContain("starting…"); // real content beat the splash
-    expect(frame).toContain("loading skills"); // refresh in flight — existing busy vocabulary
+    // handshake: poll the STALE paint while the source is still pending —
+    // readiness is the frame itself, not a sleep
+    await waitForFrame(
+      s,
+      (f) => f.includes("alpha") && f.includes("3 skills") && f.includes("body of /x/alpha") && f.includes("loading skills") && !f.includes("starting…")
+    );
+    // the list source is still pending — these rows can only be the disk index.
+    // The predicate carries the stale-paint markers (alpha rows, real count,
+    // filled detail pane, busy label, splash beaten); a deadline miss reports
+    // the frame.
+    expect(startupSettled).toBe(false); // request-start observed, nothing released yet
 
-    resolveAll(FRESH); // subprocess truth lands
+    resolveAll(FRESH); // subprocess truth lands (released only after request-start was observed)
     // settle-proof: the swap is done only when the busy label cleared —
     // that lands in the finally, AFTER the fresh detail body dispatch
-    await waitFor(() => {
-      const f = s.captureCharFrame();
-      expect(f).not.toContain("gamma"); // swapped to truth
-      expect(f).not.toContain("loading skills");
-      return true;
-    });
-    frame = s.captureCharFrame();
-    expect(frame).toContain("delta");
-    expect(frame).not.toContain("gamma");
-    expect(frame).not.toContain("loading skills"); // busy cleared on settle
+    const settled = await waitForFrame(s, (f) => f.includes("delta") && !f.includes("loading skills"));
+    expect(settled).not.toContain("gamma"); // swapped to truth
   });
 
   test("first `g` paints the persisted GLOBAL index before its subprocess resolves", async () => {
@@ -245,35 +242,27 @@ describe("S-183 stale-while-revalidate (renderer)", () => {
       play: async () => {},
     };
     await runTuiOn(s.renderer, undefined, deps); // startup: project
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
-    expect(s.captureCharFrame()).toContain("delta"); // project rows
+    await waitForFrame(s, (f) => f.includes("delta")); // project rows settled
 
     await s.mockInput.pressKey("g"); // first global load this session
     await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
-    await s.renderOnce();
-    let frame = s.captureCharFrame();
-    expect(resolveGlobal).not.toBeNull(); // the subprocess call went out...
-    expect(frame).toContain("galpha"); // ...but the PERSISTED rows painted first
-    expect(frame).toContain("gbeta");
-    expect(frame).toContain("loading skills"); // refresh in flight, existing vocabulary
-    expect(frame).toContain("body of /g/alpha"); // stale detail filled from the index
+    // handshake: the request went out AND the persisted rows painted first —
+    // observed before anything is released. The predicate carries the
+    // persisted-rows-before-subprocess markers.
+    await waitForFrame(
+      s,
+      (f) => f.includes("galpha") && f.includes("gbeta") && f.includes("loading skills") && f.includes("body of /g/alpha")
+    );
+    if (!resolveGlobal) throw new Error("global list load was never dispatched"); // a missing resolver is a failure
 
-    resolveGlobal?.([
+    resolveGlobal([
       { name: "galpha", path: "/g/alpha2", scope: "global", agents: ["Claude Code"], source: null, sourceUrl: null, sourceType: null },
       { name: "gdelta", path: "/g/delta", scope: "global", agents: [], source: null, sourceUrl: null, sourceType: null },
     ]); // truth lands
-    await waitFor(() => {
-      const f = s.captureCharFrame();
-      expect(f).toContain("gdelta");
-      expect(f).not.toContain("loading skills"); // fully settled (finally ran)
-      return true;
-    });
-    frame = s.captureCharFrame();
-    expect(frame).toContain("galpha"); // still present in truth
-    expect(frame).not.toContain("gbeta"); // swapped off the stale rows
-    expect(frame).not.toContain("loading skills");
+    // fully settled (finally ran) — truth swapped in, busy cleared
+    const settled = await waitForFrame(s, (f) => f.includes("gdelta") && !f.includes("loading skills"));
+    expect(settled).toContain("galpha"); // still present in truth
+    expect(settled).not.toContain("gbeta"); // swapped off the stale rows
   });
 
   test("a seeded check survives the stale paint even when the index predates the skill", async () => {
@@ -293,29 +282,22 @@ describe("S-183 stale-while-revalidate (renderer)", () => {
     // `skills ui update newer-skill` seeds the check BEFORE any load
     void runTuiOn(s.renderer, { kind: "update", skills: ["newer-skill"] }, deps);
     await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
-    let frame = s.captureCharFrame();
-    expect(frame).not.toContain("newer-skill"); // the stale index predates it
+    // handshake: stale paint observed while the fresh load is held pending
+    const staleFrame = await waitForFrame(s, (f) => f.includes("alpha") && f.includes("loading skills"));
+    expect(staleFrame).not.toContain("newer-skill"); // the stale index predates it
+    if (!resolveOnce) throw new Error("fresh list load was never dispatched"); // a missing resolver is a failure
 
-    resolveOnce?.([
+    resolveOnce([
       { name: "alpha", path: "/x/alpha", scope: "project", agents: ["Claude Code"], source: null, sourceUrl: null, sourceType: null },
       { name: "newer-skill", path: "/x/newer", scope: "project", agents: ["Claude Code"], source: null, sourceUrl: null, sourceType: null },
     ]); // fresh truth HAS the seeded skill
-    await waitFor(() => {
-      const f = s.captureCharFrame();
-      expect(f).toContain("newer-skill");
-      expect(f).not.toContain("loading skills"); // fully settled
-      return true;
-    });
-    frame = s.captureCharFrame();
-    expect(frame).toContain("✔"); // the seeded check made it to fresh truth's rows
+    // fully settled: newer-skill rendered WITH its seeded check, busy cleared
+    await waitForFrame(s, (f) => f.includes("newer-skill") && f.includes("✔") && !f.includes("loading skills"));
     await s.mockInput.pressKey("d"); // the delete gate reads model.checked
     await s.flush();
-    await new Promise((r) => setTimeout(r, 100));
-    frame = s.captureCharFrame();
-    expect(frame).toContain("remove skills");
-    expect(frame).toContain("newer-skill"); // still checked — the prune never touched it
-    await s.mockInput.pressKey("escape"); // cancel; nothing runs
+    // the confirm names newer-skill — still checked, the prune never touched it
+    await waitForFrame(s, (f) => f.includes("remove skills") && f.includes("newer-skill"));
+    await s.mockInput.pressEscape(); // cancel; nothing runs (pressKey("escape") sends the literal text, not ESC)
   });
 
   test("swap reconciles: selection follows the same NAME even when truth reshuffles indices", async () => {
@@ -324,25 +306,21 @@ describe("S-183 stale-while-revalidate (renderer)", () => {
     const { deps, resolveAll } = deferredListDeps();
     void runTuiOn(s.renderer, undefined, deps);
     await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
+    // handshake: stale paint observed while the list source is held pending
+    await waitForFrame(s, (f) => f.includes("beta") && f.includes("loading skills"));
     await s.mockInput.pressKey("j"); // selection -> beta (stale rows: index 1)
     await s.flush();
-    await new Promise((r) => setTimeout(r, 80));
+    // the pre-swap selection state is observed before anything is released
+    await waitForFrame(s, (f) => f.includes("─ beta ─"));
 
     // fresh truth inserts "aarv" (sorts first) — beta's index shifts 1 -> 2.
     // Index-preserving behavior would park the cursor on alpha; name-follow
     // must keep it on beta.
     const reshuffled = [entry("aarv"), ...FRESH];
     resolveAll(reshuffled);
-    await waitFor(() => {
-      const f = s.captureCharFrame();
-      expect(f).toContain("aarv");
-      expect(f).not.toContain("loading skills"); // fully settled
-      return true;
-    });
-    const frame = s.captureCharFrame();
-    expect(frame).toContain("─ beta ─"); // followed the name to its NEW index
-    expect(frame).not.toContain("─ alpha ─"); // not parked at the old index
+    const settled = await waitForFrame(s, (f) => f.includes("aarv") && !f.includes("loading skills"));
+    expect(settled).toContain("─ beta ─"); // followed the name to its NEW index
+    expect(settled).not.toContain("─ alpha ─"); // not parked at the old index
   });
 
   test("swap reconciles: surviving checks survive; vanished checks are pruned; index behavior unchanged", async () => {
@@ -351,43 +329,34 @@ describe("S-183 stale-while-revalidate (renderer)", () => {
     const { deps, resolveAll } = deferredListDeps();
     void runTuiOn(s.renderer, undefined, deps);
     await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
+    // handshake: stale paint observed while the list source is held pending
+    await waitForFrame(s, (f) => f.includes("alpha") && f.includes("loading skills"));
     await s.mockInput.pressKey(" "); // check alpha (already first — no resort, cursor stays)
     await s.flush();
-    await new Promise((r) => setTimeout(r, 80));
+    await waitForFrame(s, (f) => f.includes("✔")); // check observed before moving on
     await s.mockInput.pressKey("j");
     await s.mockInput.pressKey("j"); // -> gamma
     await s.flush();
-    await new Promise((r) => setTimeout(r, 80));
     await s.mockInput.pressKey(" "); // check gamma (vanishes in fresh truth)
     await s.flush();
-    await new Promise((r) => setTimeout(r, 80));
     // checking gamma re-sorts checked-first [alpha, gamma, beta]; the cursor
     // (index-stable) is now on beta — step up onto gamma
     await s.mockInput.pressKey("k");
     await s.flush();
-    await new Promise((r) => setTimeout(r, 80));
+    // the pre-swap selection state (gamma focused) is observed before release
+    await waitForFrame(s, (f) => f.includes("─ gamma ─"));
 
     resolveAll(FRESH); // gamma gone, alpha kept
-    await waitFor(() => {
-      const f = s.captureCharFrame();
-      expect(f).toContain("delta");
-      expect(f).not.toContain("loading skills"); // fully settled — fresh detail landed
-      // …and the fresh detail BODY landed too: the swap swaps selection to
-      // beta, whose body ("body of /x/beta2") is fetched by a tokened read
-      // that resolves a beat after the busy label clears. Waiting only on
-      // the label made this assertion flake under suite load (the frame
-      // showed beta's header with gamma's stale body still in the pane).
-      expect(f).toContain("body of /x/beta2");
-      return true;
-    });
-    const frame = s.captureCharFrame();
-    expect(frame).toContain("✔"); // alpha's check survived — no lost checks
-    expect(frame).not.toContain("gamma"); // gone from truth, gone from the list AND the pane, check pruned
+    const settled = await waitForFrame(
+      s,
+      (f) => f.includes("delta") && !f.includes("loading skills") && f.includes("body of /x/beta2")
+    );
+    expect(settled).toContain("✔"); // alpha's check survived — no lost checks
+    expect(settled).not.toContain("gamma"); // gone from truth, gone from the list AND the pane, check pruned
     // the vanished name leaves the cursor at its index (clamp is a bound, not
     // a mover) — exactly today's reload behavior, unchanged (cursor index 1)
-    expect(frame).toContain("─ beta ─");
-    expect(frame).not.toContain("─ gamma ─");
+    expect(settled).toContain("─ beta ─");
+    expect(settled).not.toContain("─ gamma ─");
   });
 
   test("swap keeps the live filter narrowed", async () => {
@@ -396,24 +365,18 @@ describe("S-183 stale-while-revalidate (renderer)", () => {
     const { deps, resolveAll } = deferredListDeps();
     void runTuiOn(s.renderer, undefined, deps);
     await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
+    // handshake: stale paint observed while the list source is held pending
+    await waitForFrame(s, (f) => f.includes("alpha") && f.includes("loading skills"));
     await s.mockInput.pressKey("f"); // filter live
     await s.mockInput.typeText("al"); // matches alpha (name) only
     await s.flush();
-    await new Promise((r) => setTimeout(r, 80));
-    expect(s.captureCharFrame()).toContain("filter: al");
+    await waitForFrame(s, (f) => f.includes("filter: al"));
 
     resolveAll(FRESH);
-    await waitFor(() => {
-      const f = s.captureCharFrame();
-      expect(f).toContain("─ alpha ─");
-      expect(f).not.toContain("loading skills"); // fully settled
-      return true;
-    });
-    const frame = s.captureCharFrame();
-    expect(frame).toContain("filter: al"); // filter survived the swap
-    expect(frame).not.toContain("beta"); // still narrowed to alpha
-    expect(frame).not.toContain("delta");
+    const settled = await waitForFrame(s, (f) => f.includes("─ alpha ─") && !f.includes("loading skills"));
+    expect(settled).toContain("filter: al"); // filter survived the swap
+    expect(settled).not.toContain("beta"); // still narrowed to alpha
+    expect(settled).not.toContain("delta");
   });
 
   test("a corrupt index is ignored — the TUI loads fresh and never crashes", async () => {
@@ -423,11 +386,9 @@ describe("S-183 stale-while-revalidate (renderer)", () => {
     deps.listInstalled = async () => FRESH; // fresh truth resolves immediately
     await runTuiOn(s.renderer, undefined, deps);
     await s.flush();
-    await new Promise((r) => setTimeout(r, 200));
-    await s.renderOnce();
-    const frame = s.captureCharFrame();
-    expect(frame).toContain("alpha"); // fresh truth rendered
-    expect(frame).not.toContain("ghost-skill"); // the torn file never surfaced
+    // fresh truth rendered; the torn file never surfaced — the predicate
+    // carries both
+    await waitForFrame(s, (f) => f.includes("alpha") && !f.includes("ghost-skill") && !f.includes("loading skills"));
   });
 
   test("mutations act on fresh truth, never the index — and rewrite it from truth", async () => {
@@ -443,23 +404,21 @@ describe("S-183 stale-while-revalidate (renderer)", () => {
       const deps: TuiDeps = { ...realDeps, skillBody: async () => null, savePrefs: () => {}, play: async () => {} };
       await runTuiOn(s.renderer, undefined, deps); // startup load: fresh truth (tdd, code-review)
       await s.flush();
-      await new Promise((r) => setTimeout(r, 400)); // subprocess + shim settle
+      // readiness is the frame: fresh rows rendered and the load settled —
+      // which is also the guarantee the index was regenerated from truth
+      await waitForFrame(s, (f) => f.includes("tdd") && f.includes("code-review") && !f.includes("loading skills"));
       // the fresh load REGENERATED the index from truth — ghost gone
       expect((loadDiskIndex("project", cacheDir) ?? []).map((k) => k.name)).toEqual(["tdd", "code-review"]);
 
       await s.mockInput.pressKey("r"); // remove focused (code-review, A→Z first)
       await s.flush();
-      await new Promise((r) => setTimeout(r, 100));
-      expect(s.captureCharFrame()).toContain("remove skills");
+      await waitForFrame(s, (f) => f.includes("remove skills"));
       await s.mockInput.pressKey("y");
-      await waitFor(() => {
-        expect(s.captureCharFrame()).not.toContain("code-review"); // fresh rows after the mutation reload
-        return true;
-      });
+      const settled = await waitForFrame(s, (f) => !f.includes("code-review") && !f.includes("loading skills"));
       // the reload went back to the SUBPROCESS (shim rm mutated its state);
       // the index was rewritten from that truth, never read from the stale file
       expect((loadDiskIndex("project", cacheDir) ?? []).map((k) => k.name)).toEqual(["tdd"]);
-      expect(s.captureCharFrame()).toContain("tdd");
+      expect(settled).toContain("tdd");
     } finally {
       delete process.env.SKILLS_UI_SKILLS_BIN;
       delete process.env.SKILLS_SHIM_STATE;
@@ -485,20 +444,20 @@ describe("S-183 stale-while-revalidate (renderer)", () => {
     };
     await runTuiOn(s.renderer, undefined, deps); // startup: project settles
     await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
-    await s.mockInput.pressKey("g"); // global load dispatched, held pending
+    await waitForFrame(s, (f) => f.includes("alpha") && !f.includes("loading skills")); // project rows settled
+
+    await s.mockInput.pressKey("g"); // OLD global load dispatched, held pending
     await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
-    await s.mockInput.pressKey("p"); // newer load — resolves immediately
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 150));
-    resolveGlobal?.([entry("global-only-skill", "global")]); // OLD load settles LAST
-    await s.flush();
-    await new Promise((r) => setTimeout(r, 200));
-    await s.renderOnce();
-    const frame = s.captureCharFrame();
+    // handshake 1: old-request-start observed BEFORE switching back
+    if (!resolveGlobal) throw new Error("global scope load was never dispatched"); // a missing resolver is a failure
+    await waitForFrame(s, (f) => f.includes("loading skills")); // old load in flight
+    await s.mockInput.pressKey("p"); // NEWER load — resolves immediately
+    // handshake 2: newer completion observed BEFORE old completion
+    await waitForFrame(s, (f) => f.includes("alpha") && !f.includes("loading skills"));
+    resolveGlobal([entry("global-only-skill", "global")]); // OLD load settles LAST
+    // handshake 3: renderer flush after the old promise settles — the seq guard must drop it
+    const frame = await waitForFrame(s, (f) => f.includes("alpha") && !f.includes("loading skills"));
     expect(frame).not.toContain("global-only-skill"); // stale load dropped by the seq guard
-    expect(frame).toContain("alpha"); // the newer project rows survive
   });
 
   test("persisted-index load timing (log-only): 300 entries, median of 50 in-process reads", () => {
