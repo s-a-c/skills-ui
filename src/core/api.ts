@@ -421,15 +421,25 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
 
       if (method === "POST" && path === "/api/update") {
         const body = await readJsonBody(req);
-        const skillsList =
-          Array.isArray(body.skills) && body.skills.every((s) => typeof s === "string")
-            ? (body.skills as string[])
-            : [];
-        if (!skillsList.every((s) => validSkillName(s) !== null)) {
+        // S-200: a PRESENT `skills` must be an array of strings — any other
+        // shape is a client bug and must 400 before any spawn, never widen to
+        // a whole-scope update. An ABSENT `skills` (or an explicit []) stays
+        // the deliberate whole-scope operation; valid names keep the
+        // validSkillName rejection below.
+        const supplied = Object.hasOwn(body, "skills");
+        if (
+          supplied &&
+          (!Array.isArray(body.skills) ||
+            !body.skills.every((value: unknown) => typeof value === "string"))
+        ) {
+          return json({ error: "skills must be an array of strings" }, 400);
+        }
+        const names: string[] = supplied ? body.skills as string[] : [];
+        if (!names.every((s) => validSkillName(s) !== null)) {
           return json({ error: "invalid skill name" }, 400);
         }
         const scope = body.global === true ? "global" : "project";
-        const result = await update(skillsList, scope);
+        const result = await update(names, scope);
         // S-178: mutation ⇒ drop the list cache (see /api/install — update's
         // throw paths are likewise pre-spawn only, no half-mutation to flush)
         invalidateListCache();

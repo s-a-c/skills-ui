@@ -309,6 +309,32 @@ describe("perf: spawn counting via shim call log (S-178 cached truth)", () => {
     30_000
   );
 
+  test(
+    "S-200: malformed update selection ⇒ 400 and zero spawns; a selected name ⇒ exactly one update spawn carrying the name",
+    async () => {
+      const base = await start();
+      for (const skills of [null, "tdd", ["tdd", null], [1], {}]) {
+        const res = await fetch(`${base}/api/update`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ skills }),
+        });
+        expect(res.status).toBe(400);
+      }
+      expect(readShimCallLog(callLog)).toEqual([]); // rejection is pre-spawn: nothing ran at all
+      const selected = await fetch(`${base}/api/update`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills: ["tdd"] }),
+      });
+      expect(selected.status).toBe(200);
+      const calls = readShimCallLog(callLog);
+      expect(countShimCalls(calls, ["update", "-p", "-y", "tdd"])).toBe(1);
+      expect(countShimCalls(calls)).toBe(1); // the selection update is the only spawn
+    },
+    30_000
+  );
+
   test("call log is opt-in: without SKILLS_SHIM_CALLLOG no log file is written", async () => {
     delete process.env.SKILLS_SHIM_CALLLOG;
     const base = await start();

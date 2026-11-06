@@ -3,6 +3,8 @@ import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { APP_VERSION } from "../src/core/version.ts";
+import { readShimCallLog } from "./perf/helpers.ts";
+import { createWorkspaceFixture } from "./helpers/audit-state.ts";
 
 const SHIM = new URL("fixtures/skills-shim.mjs", import.meta.url).pathname;
 
@@ -239,6 +241,84 @@ describe("api", () => {
     const body = (await res.json()) as { ok: boolean; output: string };
     expect(body.ok).toBe(true);
     expect(body.output).toContain("Updated");
+  });
+
+  // S-200 (finding HTTP-2): a malformed `skills` value in POST /api/update
+  // used to widen silently into a whole-scope update. These pins run the real
+  // server against the opt-in CLI shim call log (workspace fixture from
+  // tests/helpers/audit-state.ts owns .agents/tmp fixtures and env) and
+  // require rejection BEFORE any spawn — while an omitted `skills` and an
+  // explicit [] remain the deliberate whole-scope operations.
+  describe("api: POST /api/update selection validation (S-200)", () => {
+    let fixture: ReturnType<typeof createWorkspaceFixture>;
+    let restoreEnv: () => void;
+    let callLog: string;
+
+    beforeEach(() => {
+      fixture = createWorkspaceFixture();
+      restoreEnv = fixture.activate(); // sets SKILLS_SHIM_CALLLOG before start()
+      callLog = fixture.env.SKILLS_SHIM_CALLLOG;
+    });
+
+    afterEach(async () => {
+      await server?.stop();
+      server = null;
+      restoreEnv();
+      fixture.cleanup();
+    });
+
+    test("malformed update selection never widens to all skills", async () => {
+      const base = await start(); // existing api.test.ts helper
+      for (const skills of [null, "tdd", ["tdd", null], [1], {}]) {
+        const response = await fetch(base + "/api/update", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ skills }),
+        });
+        expect(response.status).toBe(400);
+      }
+      expect(readShimCallLog(callLog).filter((c) => c.args[0] === "update")).toEqual([]);
+    });
+
+    test("omitted skills and explicit [] stay deliberate whole-scope updates", async () => {
+      const base = await start();
+      const omitted = await fetch(`${base}/api/update`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      expect(omitted.status).toBe(200);
+      const emptied = await fetch(`${base}/api/update`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills: [] }),
+      });
+      expect(emptied.status).toBe(200);
+      const updates = readShimCallLog(callLog).filter((c) => c.args[0] === "update");
+      expect(updates).toHaveLength(2);
+      for (const call of updates) {
+        expect(call.args).toEqual(["update", "-p", "-y"]); // no names ⇒ whole scope, unchanged
+      }
+    });
+
+    test("selected names still reach update; option-shaped names still 400 before spawning", async () => {
+      const base = await start();
+      const selected = await fetch(`${base}/api/update`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills: ["tdd"] }),
+      });
+      expect(selected.status).toBe(200);
+      const optionShaped = await fetch(`${base}/api/update`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills: ["--dry-run"] }),
+      });
+      expect(optionShaped.status).toBe(400);
+      const updates = readShimCallLog(callLog).filter((c) => c.args[0] === "update");
+      expect(updates).toHaveLength(1); // the 400 name spawned nothing
+      expect(updates[0]!.args).toEqual(["update", "-p", "-y", "tdd"]); // selection passed through intact
+    });
   });
 
   test("GET/PUT /api/prefs roundtrip", async () => {

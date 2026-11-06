@@ -184,6 +184,25 @@ describe("api: boundary validation", () => {
     }
   });
 
+  // S-200: shape validation is separate from name validation — a present
+  // `skills` that is not an array of strings is a client bug and 400s at the
+  // boundary (previously it coerced to [] and silently widened to a
+  // whole-scope update). Omitted/[] stay valid whole-scope requests.
+  test("update rejects a present-but-malformed skills shape before spawning (S-200)", async () => {
+    const base = await start();
+    for (const skills of [null, "tdd", ["tdd", null], [1], {}]) {
+      const res = await fetch(`${base}/api/update`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills }),
+      });
+      expect(res.status).toBe(400);
+      expect(((await res.json()) as { error: string }).error).toBe(
+        "skills must be an array of strings"
+      );
+    }
+  });
+
   test("search rejects control characters and oversize queries", async () => {
     const base = await start();
     const res = await fetch(`${base}/api/search?q=${encodeURIComponent("a\u001bb")}`);
