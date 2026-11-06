@@ -18,6 +18,14 @@ import type { Scope, UpdatesResult } from "./types.ts";
  * vanishes from the report. The updates dictionary is null-prototype so an
  * externally controlled entry name (e.g. "__proto__") cannot mutate
  * Object.prototype.
+ *
+ * CORE-04 (S-198): incomplete or absent tree evidence is inconclusive, never
+ * an unqualified current result. fetchRepoTree returns null for a truncated
+ * trees payload (or missing/malformed completeness metadata) — a partial
+ * tree must not let unobserved paths report as current. A requested folder
+ * missing from a COMPLETE tree is an explicit inconclusive error row (the
+ * folder may have been removed upstream), distinct from the fetch-failure
+ * text.
  */
 
 interface TreeEntry {
@@ -25,6 +33,12 @@ interface TreeEntry {
   sha: string;
   type: string;
 }
+
+const record = (v: unknown): v is Record<string, unknown> =>
+  v !== null && typeof v === "object" && !Array.isArray(v);
+
+const isTreeEntry = (v: unknown): v is TreeEntry =>
+  record(v) && typeof v.path === "string" && typeof v.sha === "string" && typeof v.type === "string";
 
 export async function fetchRepoTree(source: string, ref?: string): Promise<TreeEntry[] | null> {
   // CORE-01 (S-195): an omitted ref must still request an explicit tree
@@ -50,8 +64,20 @@ export async function fetchRepoTree(source: string, ref?: string): Promise<TreeE
     signal: AbortSignal.timeout(10_000),
   });
   if (!res.ok) return null;
-  const data = (await res.json()) as { tree?: TreeEntry[] };
-  return data.tree ?? null;
+  // CORE-04 (S-198): completeness is part of the evidence. Only an
+  // explicitly truncated:false payload with well-formed tree entries counts
+  // as a complete tree; truncation, missing completeness metadata, or
+  // malformed nodes are inconclusive (null). This is the bounded remedy —
+  // no second (non-recursive subtree) request path for large repositories.
+  const data: unknown = await res.json();
+  if (
+    !record(data) ||
+    data.truncated !== false ||
+    !Array.isArray(data.tree) ||
+    !data.tree.every(isTreeEntry)
+  )
+    return null;
+  return data.tree;
 }
 
 function treeHashFor(tree: TreeEntry[], skillPath: string): string | null {
@@ -111,7 +137,19 @@ export async function checkForUpdates(scope: Scope): Promise<UpdatesResult> {
           continue;
         }
         const latest = treeHashFor(tree, item.skillPath!);
-        status(item.name, "github", latest !== null && latest !== item.skillFolderHash);
+        // CORE-04 (S-198): absent from a COMPLETE tree is inconclusive —
+        // the folder may have been removed upstream — never an unqualified
+        // current result. Text is distinct from the fetch-failure case.
+        if (latest === null) {
+          status(
+            item.name,
+            item.sourceType,
+            false,
+            "update status inconclusive: folder absent from complete tree"
+          );
+          continue;
+        }
+        status(item.name, "github", latest !== item.skillFolderHash);
       }
     })
   );

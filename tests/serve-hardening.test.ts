@@ -96,10 +96,13 @@ describe("unit: updates-check URL encoding + timeout", () => {
     const originalFetch = globalThis.fetch;
     let capturedUrl = "";
     let capturedSignal: unknown = null;
+    // CORE-04 (S-198): the mocked payload is COMPLETE (explicit
+    // truncated:false) — a payload without completeness metadata is
+    // inconclusive (null), so the pin must declare completeness.
     globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
       capturedUrl = String(input);
       capturedSignal = init?.signal ?? null;
-      return new Response(JSON.stringify({ tree: [] }), { status: 200 });
+      return new Response(JSON.stringify({ tree: [], truncated: false }), { status: 200 });
     }) as typeof fetch;
     try {
       const { fetchRepoTree } = await import("../src/core/services/updates-check.ts");
@@ -130,6 +133,41 @@ describe("unit: updates-check URL encoding + timeout", () => {
     try {
       expect(await fetchRepoTree('fixture/repo')).not.toBeNull();
       expect(requested).toBe('https://api.github.com/repos/fixture/repo/git/trees/HEAD?recursive=1');
+    } finally { globalThis.fetch = old; }
+  });
+
+  // CORE-04 (S-198): completeness metadata is part of the evidence — only an
+  // explicit truncated:false payload with well-formed entries is a usable
+  // tree; truncation, missing/malformed completeness shape, or malformed
+  // nodes are inconclusive (null), never a partial tree.
+  test('a truncated or malformed trees payload is null, never a partial tree', async () => {
+    const old = globalThis.fetch;
+    const payloads: unknown[] = [
+      { tree: [{ path: 'skills/demo', type: 'tree', sha: 'x' }], truncated: true },
+      { tree: [{ path: 'skills/demo', type: 'tree', sha: 'x' }] }, // completeness missing
+      { tree: [{ path: 'skills/demo', type: 'tree', sha: 'x' }], truncated: 'false' }, // wrong type
+      { tree: [{ path: 7, type: 'tree', sha: 'x' }], truncated: false }, // malformed node
+      { tree: ['skills/demo'], truncated: false }, // node not an object
+      { tree: {}, truncated: false }, // tree not an array
+      ['nope'], // payload not an object
+    ];
+    for (const payload of payloads) {
+      globalThis.fetch = (async () => Response.json(payload)) as typeof fetch;
+      try {
+        expect(await fetchRepoTree('fixture/repo')).toBeNull();
+      } finally { globalThis.fetch = old; }
+    }
+  });
+
+  test('an explicitly complete trees payload still returns its entries', async () => {
+    const old = globalThis.fetch;
+    globalThis.fetch = (async () =>
+      Response.json({ tree: [{ path: 'skills/demo', type: 'tree', sha: 'changed' }], truncated: false })
+    ) as typeof fetch;
+    try {
+      expect(await fetchRepoTree('fixture/repo')).toEqual([
+        { path: 'skills/demo', type: 'tree', sha: 'changed' },
+      ]);
     } finally { globalThis.fetch = old; }
   });
 });

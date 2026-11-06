@@ -13,6 +13,12 @@ import { createWorkspaceFixture } from "./helpers/audit-state.ts";
  * 400, never a generic 500. Seam: exported readLock against real disposable
  * JSON files (workspace fixture under owned .agents/tmp) plus checkForUpdates
  * at the upstream HTTP boundary (globalThis.fetch replaced, restored).
+ *
+ * CORE-04 (S-198): incomplete or absent GitHub tree evidence is inconclusive
+ * — a truncated trees response (or a requested folder missing from a COMPLETE
+ * tree) must never surface as an unqualified current result. Complete GitHub
+ * fixtures in this file declare `truncated: false` explicitly; payloads
+ * without that metadata are inconclusive by design.
  */
 
 let fixture: ReturnType<typeof createWorkspaceFixture>;
@@ -163,7 +169,10 @@ describe("locks: checkForUpdates diagnostics (CORE-03 / S-197)", () => {
       })
     );
     globalThis.fetch = (async (_input: string | URL | Request, _init?: RequestInit) =>
-      Response.json({ tree: [{ path: "skills/good", type: "tree", sha: "new" }] })
+      Response.json({
+        tree: [{ path: "skills/good", type: "tree", sha: "new" }],
+        truncated: false,
+      })
     ) as typeof fetch;
     try {
       const result = await checkForUpdates("project");
@@ -215,10 +224,14 @@ describe("locks: GET /api/updates seam (CORE-03 / S-197)", () => {
       JSON.stringify({ skills: { good: GOOD_ENTRY } })
     );
     // Stub only the upstream GitHub call; loopback requests to the server
-    // under test must still reach the real HTTP client.
+    // under test must still reach the real HTTP client. Complete fixture:
+    // truncated:false is explicit (CORE-04).
     globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
       if (String(input).startsWith("http://127.0.0.1")) return originalFetch(input, init);
-      return Response.json({ tree: [{ path: "skills/good", type: "tree", sha: "new" }] });
+      return Response.json({
+        tree: [{ path: "skills/good", type: "tree", sha: "new" }],
+        truncated: false,
+      });
     }) as typeof fetch;
     const server = await startServer();
     try {
@@ -231,6 +244,159 @@ describe("locks: GET /api/updates seam (CORE-03 / S-197)", () => {
       expect(body.updates.good?.sourceType).toBe("github");
     } finally {
       await server.stop();
+    }
+  });
+});
+
+describe("locks: inconclusive tree evidence (CORE-04 / S-198)", () => {
+  // Valid demo GitHub entry (sourceUrl is optional in this reader): every
+  // test here writes a real lock fixture before invoking checkForUpdates —
+  // no real lock files, fixture cwd restored by the shared afterEach.
+  const DEMO_ENTRY = {
+    source: "fixture/repo",
+    sourceType: "github",
+    skillPath: "skills/demo",
+    skillFolderHash: "oldhash",
+  };
+
+  function writeLock(entries: Record<string, unknown>) {
+    writeFileSync(join(root, "skills-lock.json"), JSON.stringify({ skills: entries }));
+  }
+
+  test("truncated tree never establishes a current skill", async () => {
+    writeLock({ demo: DEMO_ENTRY });
+    globalThis.fetch = (async () => Response.json({ tree: [], truncated: true })) as typeof fetch;
+    try {
+      const result = await checkForUpdates("project");
+      expect(result.updates.demo.error).toBeTruthy();
+      expect(result.updates.demo.updateAvailable).toBe(false);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test("a complete changed tree still reports the update (control)", async () => {
+    writeLock({ demo: DEMO_ENTRY });
+    globalThis.fetch = (async () =>
+      Response.json({
+        tree: [{ path: "skills/demo", type: "tree", sha: "newhash" }],
+        truncated: false,
+      })
+    ) as typeof fetch;
+    try {
+      const result = await checkForUpdates("project");
+      expect(result.updates.demo.updateAvailable).toBe(true);
+      expect(result.updates.demo.error).toBeUndefined();
+      expect(result.updates.demo.sourceType).toBe("github");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test("a complete tree with an unchanged hash still reports current without error (control)", async () => {
+    writeLock({ demo: DEMO_ENTRY });
+    globalThis.fetch = (async () =>
+      Response.json({
+        tree: [{ path: "skills/demo", type: "tree", sha: "oldhash" }],
+        truncated: false,
+      })
+    ) as typeof fetch;
+    try {
+      const result = await checkForUpdates("project");
+      expect(result.updates.demo.updateAvailable).toBe(false);
+      expect(result.updates.demo.error).toBeUndefined();
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test("a requested folder absent from a complete tree is inconclusive, not current", async () => {
+    writeLock({ demo: DEMO_ENTRY });
+    globalThis.fetch = (async () =>
+      Response.json({
+        tree: [{ path: "elsewhere/thing", type: "tree", sha: "unrelated" }],
+        truncated: false,
+      })
+    ) as typeof fetch;
+    try {
+      const result = await checkForUpdates("project");
+      expect(result.updates.demo.updateAvailable).toBe(false);
+      expect(result.updates.demo.error).toBe(
+        "update status inconclusive: folder absent from complete tree"
+      );
+      expect(result.updates.demo.sourceType).toBe("github");
+      // The inconclusive row must never be confused with a fetch failure.
+      expect(result.updates.demo.error).not.toContain("repo not found");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test("truncated evidence reports the fetch-failure text, distinct from absent-folder inconclusive", async () => {
+    writeLock({ demo: DEMO_ENTRY });
+    globalThis.fetch = (async () => Response.json({ tree: [], truncated: true })) as typeof fetch;
+    try {
+      const result = await checkForUpdates("project");
+      expect(result.updates.demo.updateAvailable).toBe(false);
+      // fetchRepoTree returns null for truncated payloads; the existing
+      // null-tree row carries the fetch-failure text — a different string
+      // from the complete-tree absent-folder inconclusive row above.
+      expect(result.updates.demo.error).toBe("check failed (repo not found or rate limited)");
+      expect(result.updates.demo.error).not.toContain("folder absent from complete tree");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test("malformed tree nodes make the check inconclusive at the seam", async () => {
+    writeLock({ demo: DEMO_ENTRY });
+    globalThis.fetch = (async () =>
+      Response.json({
+        tree: [{ path: "skills/demo", type: "tree" }], // node missing sha
+        truncated: false,
+      })
+    ) as typeof fetch;
+    try {
+      const result = await checkForUpdates("project");
+      expect(result.updates.demo.updateAvailable).toBe(false);
+      expect(result.updates.demo.error).toBe("check failed (repo not found or rate limited)");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test("completeness metadata missing from the payload is inconclusive at the seam", async () => {
+    writeLock({ demo: DEMO_ENTRY });
+    globalThis.fetch = (async () =>
+      Response.json({ tree: [{ path: "skills/demo", type: "tree", sha: "oldhash" }] })
+    ) as typeof fetch;
+    try {
+      const result = await checkForUpdates("project");
+      expect(result.updates.demo.updateAvailable).toBe(false);
+      expect(result.updates.demo.error).toBeTruthy();
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  test("encoded and slash-normalized lock paths still match a complete tree", async () => {
+    // treeHashFor strips a leading "./" and a trailing "/" before matching,
+    // so the lockfile-controlled path shape survives normalization; the
+    // segment-wise URL encoding of the source itself stays pinned in
+    // tests/serve-hardening.test.ts ("a b/c d" → "a%20b/c%20d").
+    writeLock({ demo: { ...DEMO_ENTRY, skillPath: "./skills/demo/" } });
+    globalThis.fetch = (async () =>
+      Response.json({
+        tree: [{ path: "skills/demo", type: "tree", sha: "newhash" }],
+        truncated: false,
+      })
+    ) as typeof fetch;
+    try {
+      const result = await checkForUpdates("project");
+      expect(result.updates.demo.updateAvailable).toBe(true);
+      expect(result.updates.demo.error).toBeUndefined();
+    } finally {
+      globalThis.fetch = originalFetch;
     }
   });
 });
