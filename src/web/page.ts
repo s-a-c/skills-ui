@@ -470,6 +470,7 @@ var state = {
   scope: 'project',
   skills: [],
   selected: null,
+  selectedPath: null,
   checked: new Set(),
   query: '',
   results: [],
@@ -709,6 +710,7 @@ function loadSkills(){
     if(!owns())return;
     state.skills=data.skills;renderList();
     if(!data.skills.length){
+      detailSeq++; /* S-204: the empty pane replaces any detail still in flight */
       $('#detailPane').innerHTML='<div class="empty">No '+scope+' skills installed.<br>Open the <b>Search</b> tab to install one.</div>';
     }else if(!state.seedHold&&(state.selected==null||!data.skills.some(function(s){return s.name===state.selected;}))){
       selectSkill(data.skills[0].name);
@@ -897,6 +899,8 @@ function renderList(){
 
 function selectSkill(name){
   state.selected = name;
+  var selected = state.skills.filter(function(s){ return s.name === name; })[0];
+  state.selectedPath = selected ? selected.path : null;
   renderList();
   showDetail(name);
 }
@@ -1059,7 +1063,12 @@ function renderMarkdown(md){
   return out.join('\\n');
 }
 
+var detailSeq=0; /* S-204: generation counter — the detail that started last owns the pane */
 function showDetail(name){
+  /* Bump FIRST (even when no skill matches): superseding a selection — or
+     landing on a selection that no longer exists — must orphan any detail
+     response already in flight. */
+  var seq = ++detailSeq, scope = state.scope;
   var skill = state.skills.filter(function(s){ return s.name === name; })[0];
   if (!skill) return;
   var pane = $('#detailPane');
@@ -1083,16 +1092,33 @@ function showDetail(name){
       (updateError ? '<dt>Updates</dt><dd>' + esc(updateError) + '</dd>' : '') +
     '</dl>' +
     '<div class="readme" id="readme">Loading…</div>';
+  /* S-204: capture THIS pane's readme node and the row's identity — a late
+     response may only paint when it still belongs to the current selection.
+     Record the rendered row's path here too: loadSkills re-invokes showDetail
+     for a KEPT name whose row (and path) the fresh list may have replaced,
+     and selectSkill alone would leave state.selectedPath pointing at the
+     old row. */
+  var readme = $('#readme'), capturedPath = skill.path;
+  state.selectedPath = skill.path;
+  function ownsDetail(){
+    return seq === detailSeq && scope === state.scope &&
+      state.selected === skill.name && readme && readme.isConnected &&
+      capturedPath === state.selectedPath;
+  }
   $('#removeBtn').addEventListener('click', function(){ openRemove(skill); });
   if (detailOutdated) $('#updateBtn').addEventListener('click', function(){ updateSkills([skill.name], skill.scope === 'global'); });
   /* S-179: the row's own path rides along — the serve validates it as an exact cached-list row (name stays for older serves). */
   api('/api/skill?scope=' + skill.scope + '&name=' + encodeURIComponent(skill.name) + '&path=' + encodeURIComponent(skill.path))
     .then(function(d){
+      if (!ownsDetail()) return;
       /* renderMarkdown escapes every token before any tag is built, so this
          innerHTML carries renderer-made tags around inert text only */
-      $('#readme').innerHTML = renderMarkdown(d.body || '(empty SKILL.md)');
+      readme.innerHTML = renderMarkdown(d.body || '(empty SKILL.md)');
     })
-    .catch(function(){ $('#readme').innerHTML = renderMarkdown('(SKILL.md unavailable)'); });
+    .catch(function(){
+      if (!ownsDetail()) return;
+      readme.innerHTML = renderMarkdown('(SKILL.md unavailable)');
+    });
 }
 
 function deleteChecked(){
@@ -1120,6 +1146,7 @@ function deleteChecked(){
         state.checked.clear();
         renderSelSummary();
         state.selected = null;
+        state.selectedPath = null;
         return loadSkills();
       })
       .catch(function(e){ play('error'); toast(e.message, 'error'); })
@@ -1141,7 +1168,7 @@ function openRemove(skill){
           toast(clip(res.output, 240) || ('Remove failed for ' + skill.name), 'error');
           return loadSkills();
         }
-        play('success'); toast('Removed ' + skill.name, 'success'); state.selected = null; return loadSkills();
+        play('success'); toast('Removed ' + skill.name, 'success'); state.selected = null; state.selectedPath = null; return loadSkills();
       })
       .catch(function(e){ play('error'); toast(e.message, 'error'); })
       .finally(function(){ setBusy(null); });
@@ -1198,6 +1225,7 @@ function applySeed(){
 
 function showInstallSeed(seed){
   state.seedHold = true;
+  detailSeq++; /* S-204: the seed pane replaces any detail still in flight */
   var pane = $('#detailPane');
   pane.innerHTML =
     '<h1 class="detail-title">Install from ' + esc(seed.source) + '</h1>' +
@@ -1544,6 +1572,7 @@ function setScope(scope){
   cancelFilterRender(); // S-180: a pending filter render must not fire into the other scope
   state.checked.clear();
   renderSelSummary();
+  detailSeq++; /* S-204: a scope switch orphans any detail still in flight */
   state.scope = scope;
   document.querySelectorAll('[data-scope]').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-scope') === scope)); });
   play('select');

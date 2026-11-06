@@ -175,3 +175,132 @@ test('empty scope renders the empty state and recovers on switch back',async({br
     expect(pageErrors).toEqual([]);
   }finally{await context.close();}
 });
+
+// S-204 (UI-03): a held /api/skill response for a PREVIOUSLY selected row
+// must never paint its body under the NEWLY selected row's title — the
+// detail that started last owns the pane until superseded.
+test('late beta detail cannot replace selected alpha', async ({ browser }) => {
+  const { page, context } = await openAuditPage(browser, origin);
+  const gate = deferred<void>(), started = deferred<void>();
+  await page.route('**/api/skill?*', async route => {
+    const u = new URL(route.request().url());
+    if (u.searchParams.get('name') !== 'beta') return route.fallback();
+    started.resolve(); await gate.promise;
+    await route.fulfill({ json: { body: 'STALE_BETA' } });
+  });
+  await page.locator('#skillList li', { hasText: 'beta' }).click(); await started.promise;
+  await page.locator('#skillList li', { hasText: 'alpha' }).click();
+  await expect(page.locator('#readme')).toContainText('BODY_alpha');
+  const response = page.waitForResponse(r => r.url().includes('/api/skill?') && r.url().includes('beta'));
+  gate.resolve(); await settleResponse(page, await response);
+  await expect(page.locator('.detail-title')).toHaveText('alpha');
+  await expect(page.locator('#readme')).toContainText('BODY_alpha');
+  await context.close();
+});
+
+// S-204 stale FAILURE: a held /api/skill response that fails for a
+// previously selected row must not paint '(SKILL.md unavailable)' into the
+// NEWLY selected row's readme either — the guard covers the error path.
+test('failed stale detail cannot replace selected alpha', async ({ browser }) => {
+  const { page, context, pageErrors } = await openAuditPage(browser, origin);
+  const gate = deferred<void>(), started = deferred<void>();
+  await page.route('**/api/skill?*', async route => {
+    const u = new URL(route.request().url());
+    if (u.searchParams.get('name') !== 'beta') return route.fallback();
+    started.resolve(); await gate.promise;
+    await route.fulfill({ status: 500, json: { error: 'boom' } });
+  });
+  try{
+    await page.locator('#skillList li', { hasText: 'beta' }).click(); await started.promise;
+    await page.locator('#skillList li', { hasText: 'alpha' }).click();
+    await expect(page.locator('#readme')).toContainText('BODY_alpha');
+    const response = page.waitForResponse(r => r.url().includes('/api/skill?') && r.url().includes('beta'));
+    gate.resolve(); await settleResponse(page, await response);
+    await expect(page.locator('.detail-title')).toHaveText('alpha');
+    await expect(page.locator('#readme')).toContainText('BODY_alpha');
+    await expect(page.locator('#readme')).not.toContainText('unavailable');
+    expect(pageErrors).toEqual([]);
+  }finally{gate.resolve();await context.close();}
+});
+
+// S-204 scope invalidation: a held detail for the old scope must not paint
+// after the scope switched — the pane then belongs to the new scope's row
+// (here the kept name 'beta' re-resolves to the global row with its body).
+test('stale detail cannot paint after a scope switch', async ({ browser }) => {
+  const { page, context, pageErrors } = await openAuditPage(browser, origin);
+  const gate = deferred<void>(), started = deferred<void>();
+  await page.route('**/api/skill?*', async route => {
+    const u = new URL(route.request().url());
+    if (u.searchParams.get('name') !== 'beta' || u.searchParams.get('scope') !== 'project') return route.fallback();
+    started.resolve(); await gate.promise;
+    await route.fulfill({ json: { body: 'STALE_BETA' } });
+  });
+  try{
+    await page.locator('#skillList li', { hasText: 'beta' }).click(); await started.promise;
+    await page.locator('[data-scope="global"]').click();
+    await expect(page.locator('.detail-title')).toHaveText('beta');
+    await expect(page.locator('#readme')).toContainText('BODY_beta');
+    const response = page.waitForResponse(r => r.url().includes('/api/skill?') &&
+      r.url().includes('name=beta') && r.url().includes('scope=project'));
+    gate.resolve(); await settleResponse(page, await response);
+    await expect(page.locator('.detail-title')).toHaveText('beta');
+    await expect(page.locator('#readme')).toContainText('BODY_beta');
+    await expect(page.locator('#readme')).not.toContainText('STALE_BETA');
+    await expect(page.locator('.detail-meta')).toContainText('/fixture/global/beta');
+    await expect(page.locator('.detail-meta')).not.toContainText('/fixture/project/beta');
+    expect(pageErrors).toEqual([]);
+  }finally{gate.resolve();await context.close();}
+});
+
+// S-204 empty-pane invalidation: a held detail must not resurrect a readme
+// inside the empty state the newer scope load just rendered.
+test('stale detail cannot paint into the empty pane', async ({ browser }) => {
+  const { page, context, pageErrors } = await openAuditPage(browser, origin);
+  const gate = deferred<void>(), started = deferred<void>();
+  await page.route('**/api/skills?scope=global', route => route.fulfill({ json: { scope: 'global', skills: [] } }));
+  await page.route('**/api/skill?*', async route => {
+    const u = new URL(route.request().url());
+    if (u.searchParams.get('name') !== 'beta') return route.fallback();
+    started.resolve(); await gate.promise;
+    await route.fulfill({ json: { body: 'STALE_BETA' } });
+  });
+  try{
+    await page.locator('#skillList li', { hasText: 'beta' }).click(); await started.promise;
+    await page.locator('[data-scope="global"]').click();
+    await expect(page.locator('#detailPane')).toContainText('No global skills installed');
+    const response = page.waitForResponse(r => r.url().includes('/api/skill?') && r.url().includes('beta'));
+    gate.resolve(); await settleResponse(page, await response);
+    await expect(page.locator('#detailPane')).toContainText('No global skills installed');
+    await expect(page.locator('#detailPane')).not.toContainText('STALE_BETA');
+    await expect(page.locator('#readme')).toHaveCount(0);
+    expect(pageErrors).toEqual([]);
+  }finally{gate.resolve();await context.close();}
+});
+
+// S-204 identity: the same NAME in both scopes is still two different rows —
+// the late project-alpha response carries the OLD path, the pane now belongs
+// to the global-alpha row, so name equality alone must not let it paint.
+test('late same-name detail cannot replace a distinct-path selection', async ({ browser }) => {
+  const { page, context, pageErrors } = await openAuditPage(browser, origin);
+  const gate = deferred<void>(), started = deferred<void>();
+  await page.route('**/api/skill?*', async route => {
+    const u = new URL(route.request().url());
+    if (u.searchParams.get('path') !== '/fixture/project/alpha') return route.fallback();
+    started.resolve(); await gate.promise;
+    await route.fulfill({ json: { body: 'STALE_PROJECT_ALPHA' } });
+  });
+  try{
+    await page.locator('#skillList li', { hasText: 'alpha' }).click(); await started.promise;
+    await page.locator('[data-scope="global"]').click();
+    await expect(page.locator('#readme')).toContainText('BODY_alpha');
+    const response = page.waitForResponse(r => r.url().includes('/api/skill?') &&
+      r.url().includes('name=alpha') && r.url().includes('scope=project'));
+    gate.resolve(); await settleResponse(page, await response);
+    await expect(page.locator('.detail-title')).toHaveText('alpha');
+    await expect(page.locator('#readme')).toContainText('BODY_alpha');
+    await expect(page.locator('#readme')).not.toContainText('STALE_PROJECT_ALPHA');
+    await expect(page.locator('.detail-meta')).toContainText('/fixture/global/alpha');
+    await expect(page.locator('.detail-meta')).not.toContainText('/fixture/project/alpha');
+    expect(pageErrors).toEqual([]);
+  }finally{gate.resolve();await context.close();}
+});
