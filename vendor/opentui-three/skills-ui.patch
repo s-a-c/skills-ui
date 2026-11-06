@@ -1,0 +1,117 @@
+# skills-ui semantic patch — @opentui/three 0.7.0 -> 0.7.0-skills-ui.1
+#
+# Base: published npm artifact three-0.7.0.tgz
+#   sha512-74N07wyogkUtNB7Py7u6D83SwpqS2YSWB36fGEV2hhMyosOKRTPNrOymFPAUKe3xZK1ghr5iZo8Ew0Pu522Qgg==
+#   registry gitHead: 85339b24a1056b09bc729f488c99d6cfbe3a6125
+# ADR: https://linear.app/s-a-c/document/adr-preserve-graph-behavior-with-a-pinned-jimp-free-opentui-three-fork-844f7dd0c653
+# See README.skills-ui.md for the full provenance/regeneration record.
+# Apply with: patch -p1 -d vendor/opentui-three < vendor/opentui-three/skills-ui.patch
+---
+--- a/package.json
++++ b/package.json
+@@ -4,7 +4,7 @@
+   "main": "index.js",
+   "types": "index.d.ts",
+   "type": "module",
+-  "version": "0.7.0",
++  "version": "0.7.0-skills-ui.1",
+   "description": "Three.js WebGPU renderer for OpenTUI",
+   "license": "MIT",
+   "repository": {
+@@ -29,7 +29,6 @@
+   },
+   "dependencies": {
+     "@opentui/core": "0.7.0",
+-    "jimp": "1.6.1",
+     "three": "0.177.0"
+   },
+   "optionalDependencies": {
+--- a/index.js
++++ b/index.js
+@@ -285,56 +285,8 @@
+   setSuperSample(superSample) {
+     this.superSample = superSample;
+   }
+-  async saveToFile(filePath) {
+-    const { Jimp } = await import("jimp");
+-    const bytesPerPixel = 4;
+-    const unalignedBytesPerRow = this.width * bytesPerPixel;
+-    const alignedBytesPerRow = Math.ceil(unalignedBytesPerRow / 256) * 256;
+-    const textureBufferSize = alignedBytesPerRow * this.height;
+-    if (!this.screenshotGPUBuffer || this.screenshotGPUBuffer.size !== textureBufferSize) {
+-      if (this.screenshotGPUBuffer) {
+-        this.screenshotGPUBuffer.destroy();
+-      }
+-      this.screenshotGPUBuffer = this.device.createBuffer({
+-        label: "Screenshot GPU Buffer",
+-        size: textureBufferSize,
+-        usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST
+-      });
+-    }
+-    const texture = this.gpuCanvasContext.getCurrentTexture();
+-    const commandEncoder = this.device.createCommandEncoder({ label: "Screenshot Command Encoder" });
+-    commandEncoder.copyTextureToBuffer({ texture }, { buffer: this.screenshotGPUBuffer, bytesPerRow: alignedBytesPerRow, rowsPerImage: this.height }, { width: this.width, height: this.height });
+-    const commandBuffer = commandEncoder.finish();
+-    this.device.queue.submit([commandBuffer]);
+-    await this.screenshotGPUBuffer.mapAsync(GPUMapMode.READ);
+-    const resultBuffer = this.screenshotGPUBuffer.getMappedRange();
+-    const pixelData = new Uint8Array(resultBuffer);
+-    const contextFormat = texture.format;
+-    const isBGRA = contextFormat === "bgra8unorm";
+-    const imageData = new Uint8Array(this.width * this.height * 4);
+-    for (let y = 0;y < this.height; y++) {
+-      const srcOffset = y * alignedBytesPerRow;
+-      const dstOffset = y * this.width * 4;
+-      if (isBGRA) {
+-        for (let x = 0;x < this.width; x++) {
+-          const srcPixelOffset = srcOffset + x * 4;
+-          const dstPixelOffset = dstOffset + x * 4;
+-          imageData[dstPixelOffset] = pixelData[srcPixelOffset + 2];
+-          imageData[dstPixelOffset + 1] = pixelData[srcPixelOffset + 1];
+-          imageData[dstPixelOffset + 2] = pixelData[srcPixelOffset];
+-          imageData[dstPixelOffset + 3] = pixelData[srcPixelOffset + 3];
+-        }
+-      } else {
+-        imageData.set(pixelData.subarray(srcOffset, srcOffset + this.width * 4), dstOffset);
+-      }
+-    }
+-    const image = new Jimp({
+-      data: Buffer.from(imageData),
+-      width: this.width,
+-      height: this.height
+-    });
+-    await image.write(filePath);
+-    this.screenshotGPUBuffer.unmap();
++  async saveToFile() {
++    throw new Error('Image file export is not included in the skills-ui graph adapter');
+   }
+   async initComputePipeline() {
+     if (this.computePipeline)
+@@ -955,25 +907,8 @@
+ import { Color as Color2, DataTexture, NearestFilter, ClampToEdgeWrapping, RGBAFormat, UnsignedByteType } from "three";
+ 
+ class TextureUtils {
+-  static async loadTextureFromFile(path) {
+-    try {
+-      const { Jimp } = await import("jimp");
+-      const buffer = await readFile(path);
+-      const image = await Jimp.read(buffer);
+-      image.flip({ horizontal: false, vertical: true });
+-      const texture = new DataTexture(image.bitmap.data, image.bitmap.width, image.bitmap.height, RGBAFormat, UnsignedByteType);
+-      texture.needsUpdate = true;
+-      texture.format = RGBAFormat;
+-      texture.magFilter = NearestFilter;
+-      texture.minFilter = NearestFilter;
+-      texture.wrapS = ClampToEdgeWrapping;
+-      texture.wrapT = ClampToEdgeWrapping;
+-      texture.flipY = false;
+-      return texture;
+-    } catch (error) {
+-      console.error(`Failed to load texture from ${path}:`, error);
+-      return null;
+-    }
++  static async loadTextureFromFile() {
++    throw new Error('Image file loading is not included in the skills-ui graph adapter');
+   }
+   static async fromFile(path) {
+     return this.loadTextureFromFile(path);

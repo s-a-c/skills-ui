@@ -20,7 +20,7 @@
     "@opentui/core": "0.7.0",
     "@opentui/keymap": "0.7.0",
     "@opentui/react": "0.7.0",
-    "@opentui/three": "0.7.0",
+    "@opentui/three": "file:vendor/opentui-three",
     "react": "19"
   },
   "devDependencies": {

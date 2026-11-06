@@ -31,4 +31,21 @@ describe("image renderable", () => {
       setup.renderer.destroy();
     }
   });
+
+  test("vendored @opentui/three: file-image utilities are pinned unsupported (S-228 / DEP-01)", async () => {
+    // The skills-ui fork of @opentui/three (vendor/opentui-three, ADR:
+    // preserve-graph-behavior-with-a-pinned-jimp-free-opentui-three-fork)
+    // replaced the two Jimp-consuming bodies with explicit unsupported-
+    // operation throws; the app never calls either. Pin both throws so a
+    // future upstream re-pin cannot silently restore the Jimp chain.
+    const { CLICanvas, TextureUtils } = await import("@opentui/three");
+    await expect(
+      // prototype call: the mandated stub throws before touching `this`,
+      // so no constructed canvas is needed
+      CLICanvas.prototype.saveToFile.call(null, "unused.png")
+    ).rejects.toThrow("Image file export is not included in the skills-ui graph adapter");
+    await expect(TextureUtils.loadTextureFromFile("unused.png")).rejects.toThrow(
+      "Image file loading is not included in the skills-ui graph adapter"
+    );
+  });
 });
