@@ -369,10 +369,14 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       list.push(skill.name);
       bySource.set(skill.source, list);
     }
+    // S-202: capture the scope ONCE, before any await — a scope switch
+    // mid-batch (the g/p keys stay usable while busy) must not re-scope the
+    // remaining groups; the whole list installs in its starting scope.
+    const scope = model.scope;
     dispatch({ type: "busy", label: "installing list" });
     try {
       for (const [source, names] of bySource) {
-        const result = await deps.install(source, names, model.scope);
+        const result = await deps.install(source, names, scope);
         toast(`${source}: ${result.summary}`, result.ok ? "success" : "error");
         await deps.play(result.ok ? "success" : "error", model.prefs);
       }

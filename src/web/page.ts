@@ -1440,6 +1440,10 @@ function installQueue(){
   var entries = Array.from(groups.entries());
   var total = state.queue.length;
   var done = 0, failed = 0;
+  /* S-202: capture the scope ONCE before the next() recursion — the scope
+     toggle stays usable while the list installs, so every request body must
+     carry the start-of-batch scope, never the live state.scope. */
+  var installGlobally = state.scope === 'global';
   var next = function(){
     if (!entries.length) {
       state.queue = [];
@@ -1452,7 +1456,7 @@ function installQueue(){
     }
     var entry = entries.shift();
     setBusy('Installing ' + entry[1].join(', ') + '…');
-    api('/api/install', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ source: entry[0], skills: entry[1], global: state.scope === 'global' }) })
+    api('/api/install', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ source: entry[0], skills: entry[1], global: installGlobally }) })
       .then(function(res){ if (res.ok) done += entry[1].length; else failed += entry[1].length; })
       .catch(function(){ failed += entry[1].length; })
       .finally(function(){ setBusy(null); next(); });

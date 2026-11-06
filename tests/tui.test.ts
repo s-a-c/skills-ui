@@ -209,6 +209,131 @@ describe("tui (in-memory)", () => {
     ]);
   });
 
+  test("install list keeps one scope across source groups", async () => {
+    const s = setup!;
+    const first = deferred<void>();
+    const started = deferred<void>();
+    const calls: Array<{ source: string; scope: string }> = [];
+    const deps = fakeDeps();
+    deps.search = async () => ({
+      results: [
+        { name: "new-one", slug: "new-one", source: "one/repo", installs: 1 },
+        { name: "new-two", slug: "new-two", source: "two/repo", installs: 1 },
+      ],
+      adjustedQuery: null,
+    });
+    deps.install = async (source, _names, scope) => {
+      calls.push({ source, scope });
+      if (calls.length === 1) {
+        started.resolve(); // request-start handshake: the first group IS in flight
+        await first.promise; // hold it so the scope switch lands mid-batch
+      }
+      return { ok: true, summary: source };
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.mockInput.typeText("/");
+    await s.mockInput.typeText("new");
+    await waitForFrame(s, (f) => f.includes("new-one") && f.includes("new-two"));
+    await s.mockInput.typeText(" ");
+    s.mockInput.pressEscape(); // exit text entry, keep the query
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("new-one") && f.includes("(1)"));
+    await new Promise((resolve) => setTimeout(resolve, 100)); // documented Escape settle, not readiness
+    await s.mockInput.pressKey("j"); // cursor → new-two
+    await s.mockInput.typeText(" ");
+    await waitForFrame(s, (f) => f.includes("(2)"));
+    await s.mockInput.pressKey("u"); // run the queue
+    await started.promise; // old request started before the switch
+    await s.mockInput.pressKey("g"); // scope → global mid-batch
+    await s.flush();
+    first.resolve(); // newer completion arrives while the old request is held
+    await waitFor(() => calls.length === 2);
+    expect(calls.map((c) => c.scope)).toEqual(["project", "project"]);
+  });
+
+  test("install list keeps one scope across source groups (global → project)", async () => {
+    const s = setup!;
+    const first = deferred<void>();
+    const started = deferred<void>();
+    const calls: Array<{ source: string; scope: string }> = [];
+    const deps = fakeDeps();
+    deps.search = async () => ({
+      results: [
+        { name: "new-one", slug: "new-one", source: "one/repo", installs: 1 },
+        { name: "new-two", slug: "new-two", source: "two/repo", installs: 1 },
+      ],
+      adjustedQuery: null,
+    });
+    deps.install = async (source, _names, scope) => {
+      calls.push({ source, scope });
+      if (calls.length === 1) {
+        started.resolve(); // request-start handshake: the first group IS in flight
+        await first.promise; // hold it so the scope switch lands mid-batch
+      }
+      return { ok: true, summary: source };
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await s.mockInput.pressKey("g"); // start the batch in global scope
+    await s.flush();
+    await new Promise((resolve) => setTimeout(resolve, 100)); // let the reload settle
+    await s.mockInput.typeText("/");
+    await s.mockInput.typeText("new");
+    await waitForFrame(s, (f) => f.includes("new-one") && f.includes("new-two"));
+    await s.mockInput.typeText(" "); // queue new-one
+    s.mockInput.pressEscape(); // exit text entry, keep the query
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("new-one") && f.includes("(1)"));
+    await new Promise((resolve) => setTimeout(resolve, 100)); // documented Escape settle, not readiness
+    await s.mockInput.pressKey("j"); // cursor → new-two
+    await s.mockInput.typeText(" "); // queue new-two
+    await waitForFrame(s, (f) => f.includes("(2)"));
+    await s.mockInput.pressKey("u"); // run the queue
+    await started.promise; // old request started before the switch
+    await s.mockInput.pressKey("p"); // scope → project mid-batch
+    await s.flush();
+    first.resolve(); // newer completion arrives while the old request is held
+    await waitFor(() => calls.length === 2);
+    expect(calls.map((c) => c.scope)).toEqual(["global", "global"]);
+  });
+
+  test("install list retains per-source output on partial failure", async () => {
+    const s = setup!;
+    const calls: Array<{ source: string; ok: boolean }> = [];
+    const deps = fakeDeps();
+    deps.search = async () => ({
+      results: [
+        { name: "new-one", slug: "new-one", source: "one/repo", installs: 1 },
+        { name: "new-two", slug: "new-two", source: "two/repo", installs: 1 },
+      ],
+      adjustedQuery: null,
+    });
+    deps.install = async (source, _names, _scope) => {
+      const ok = source === "two/repo"; // only the second group succeeds
+      calls.push({ source, ok });
+      return ok ? { ok: true, summary: "ok" } : { ok: false, summary: "denied" };
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.mockInput.typeText("/");
+    await s.mockInput.typeText("new");
+    await waitForFrame(s, (f) => f.includes("new-one") && f.includes("new-two"));
+    await s.mockInput.typeText(" "); // queue new-one
+    s.mockInput.pressEscape(); // exit text entry, keep the query
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("new-one") && f.includes("(1)"));
+    await new Promise((resolve) => setTimeout(resolve, 100)); // documented Escape settle, not readiness
+    await s.mockInput.pressKey("j"); // cursor → new-two
+    await s.mockInput.typeText(" "); // queue new-two
+    await waitForFrame(s, (f) => f.includes("(2)"));
+    await s.mockInput.pressKey("u"); // run the queue
+    await waitFor(() => calls.length === 2); // a failed first group must not abort the batch
+    await waitForFrame(s, (f) => f.includes("one/repo: denied")); // error honesty — per-source output kept
+    // the success toast queues behind the failure (TOAST_MS) — per-source output
+    // retained, batch cleaned up (busy cleared), no swallowed failure
+    await waitForFrame(s, (f) => f.includes("two/repo: ok") && !f.includes("installing list"));
+    expect(calls.map((c) => c.ok)).toEqual([false, true]);
+  }, 15000);
+
   test("S-161 G1: skills-shim snapshot — --global only when scope is global", async () => {
     const s = setup!;
     const SHIM = new URL("fixtures/skills-shim.mjs", import.meta.url).pathname;
