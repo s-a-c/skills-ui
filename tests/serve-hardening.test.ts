@@ -172,6 +172,37 @@ describe("api: boundary validation", () => {
     expect(res2.status).toBe(400);
   });
 
+  // S-199: the seed flow's "Install all" singleton wildcard skills:["*"] is
+  // exempt from the shared name charset on POST /api/install ONLY — the
+  // exemption must stay singleton-only. Mixed lists (either order, doubled),
+  // option-shaped entries, and invalid names still 400 at this boundary.
+  test("install wildcard exemption stays singleton-only (S-199)", async () => {
+    const base = await start();
+    for (const skills of [["*", "tdd"], ["tdd", "*"], ["*", "*"], ["* ", "x"], ["--all"], ["--dry-run"], ["", "ok"], ["bad\u0007name"]]) {
+      const res = await fetch(`${base}/api/install`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ source: "https://good.example/repo", skills }),
+      });
+      expect(res.status).toBe(400);
+    }
+  });
+
+  // S-199: the wildcard itself stays invalid for every OTHER consumer of the
+  // shared validSkillName — detail lookups, remove, and update keep 400ing.
+  test("the wildcard stays invalid outside /api/install (S-199 exemption is install-only)", async () => {
+    const base = await start();
+    expect((await fetch(`${base}/api/skill?name=${encodeURIComponent("*")}`)).status).toBe(400);
+    for (const path of ["/api/remove", "/api/update"]) {
+      const res = await fetch(`${base}${path}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ skills: ["*"] }),
+      });
+      expect(res.status).toBe(400);
+    }
+  });
+
   test("remove and update reject hostile skill names", async () => {
     const base = await start();
     for (const path of ["/api/remove", "/api/update"]) {

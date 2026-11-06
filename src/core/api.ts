@@ -357,7 +357,12 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
           skillsList = body.skills as string[];
         }
         if (!skillsList) return json({ error: "skill or skills is required" }, 400);
-        if (!skillsList.every((s) => validSkillName(s) !== null)) {
+        // S-199: the seed flow's "Install all" sends exactly skills:["*"] —
+        // install() maps that singleton to `add <source> --all` (services/
+        // install.ts). Only the SINGLETON wildcard bypasses the strict shared
+        // name charset here; mixed lists and option-shaped entries still 400.
+        const installAll = skillsList.length === 1 && skillsList[0] === "*";
+        if (!installAll && !skillsList.every((s) => validSkillName(s) !== null)) {
           return json({ error: "invalid skill name" }, 400);
         }
         const result = await install({

@@ -321,6 +321,129 @@ describe("api", () => {
     });
   });
 
+  // S-199 (finding HTTP-1): the seed flow's "Install all" button posts
+  // exactly skills:["*"] — install() maps that singleton wildcard to
+  // `add <source> --all` (services/install.ts). The shared validSkillName
+  // charset stays strict everywhere else; POST /api/install alone exempts
+  // the SINGLETON wildcard, and these pins run the real server against the
+  // opt-in CLI shim call log (workspace fixture from
+  // tests/helpers/audit-state.ts owns .agents/tmp fixtures and env) with a
+  // successful SKILLS_SHIM_ADD fixture so acceptance requires HTTP 200 +
+  // ok:true, not merely a different error.
+  describe("api: POST /api/install singleton wildcard (S-199)", () => {
+    let fixture: ReturnType<typeof createWorkspaceFixture>;
+    let restoreEnv: () => void;
+    let callLog: string;
+
+    beforeEach(() => {
+      fixture = createWorkspaceFixture();
+      // successful add fixture: every entry installed ⇒ shim exits 0 ⇒ the
+      // wildcard acceptance below must see 200 + ok:true, not another error
+      writeFileSync(
+        join(fixture.root, "add-ok.json"),
+        JSON.stringify([
+          {
+            name: "alpha",
+            status: "installed",
+            source: "fixture/repo",
+            ref: null,
+            hash: null,
+            path: "/tmp/skills-shim-state/alpha",
+            scope: "project",
+            agents: ["claude-code"],
+            mode: "copy",
+            security: null,
+          },
+        ])
+      );
+      process.env.SKILLS_SHIM_ADD = join(fixture.root, "add-ok.json");
+      restoreEnv = fixture.activate(); // sets SKILLS_SHIM_CALLLOG before start()
+      callLog = fixture.env.SKILLS_SHIM_CALLLOG;
+    });
+
+    afterEach(async () => {
+      await server?.stop();
+      server = null;
+      delete process.env.SKILLS_SHIM_ADD; // restore the fixture-owned env key
+      restoreEnv();
+      fixture.cleanup();
+    });
+
+    test('install all accepts singleton wildcard but rejects mixed lists', async () => {
+      const base = await start();
+      const send = (skills: unknown) => fetch(base + '/api/install', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ source: 'fixture/repo', skills })
+      });
+      const success=await send(['*']);
+      expect(success.status).toBe(200);
+      expect((await success.json()).ok).toBe(true);
+      expect((await send(['*', 'tdd'])).status).toBe(400);
+      expect((await send(['--all'])).status).toBe(400);
+      const call = readShimCallLog(callLog).find(c => c.args[0] === 'add');
+      expect(call?.args).toContain('--all');
+      expect(call?.args).not.toContain('--skill');
+    });
+
+    test("only the wildcard request reaches the CLI; ordinary and empty lists keep their argv", async () => {
+      const base = await start();
+      const send = (skills: unknown) =>
+        fetch(base + "/api/install", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ source: "fixture/repo", skills }),
+        });
+      expect((await send(["*"])).status).toBe(200);
+      expect((await send(["alpha", "beta"])).status).toBe(200); // ordinary list unchanged
+      expect((await send(["*", "tdd"])).status).toBe(400);
+      expect((await send([])).status).toBe(200); // empty list: unchanged pass-through
+      const adds = readShimCallLog(callLog).filter((c) => c.args[0] === "add");
+      expect(adds).toHaveLength(3); // the mixed list 400'd before any spawn
+      expect(adds[0]!.args).toContain("--all"); // singleton ⇒ --all, no --skill
+      expect(adds[0]!.args).not.toContain("--skill");
+      expect(adds[1]!.args.filter((a) => a === "--skill")).toHaveLength(2);
+      expect(adds[1]!.args).toContain("alpha");
+      expect(adds[1]!.args).toContain("beta");
+      expect(adds[2]!.args).not.toContain("--all"); // empty list spawns neither flag
+      expect(adds[2]!.args).not.toContain("--skill");
+    });
+
+    test("empty, malformed, and option-shaped selections keep their boundary verdicts", async () => {
+      const base = await start();
+      const send = (skills: unknown) =>
+        fetch(base + "/api/install", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ source: "fixture/repo", skills }),
+        });
+      for (const skills of [null, "tdd", [1], [null], ["* ", "alpha"], ["*/*"], ["--dry-run"], [""], ["", "alpha"]]) {
+        const res = await send(skills);
+        expect(res.status).toBe(400);
+      }
+      // every rejection above happened BEFORE the CLI: no add spawn at all
+      expect(readShimCallLog(callLog).filter((c) => c.args[0] === "add")).toEqual([]);
+    });
+
+    test("wildcard install still reports CLI failure honestly (S-199)", async () => {
+      // failed add fixture: the wildcard path must surface ok:false, not lie
+      writeFileSync(
+        join(fixture.root, "add-failed.json"),
+        JSON.stringify([{ name: "alpha", status: "failed", error: "simulated wildcard failure" }])
+      );
+      process.env.SKILLS_SHIM_ADD = join(fixture.root, "add-failed.json");
+      const base = await start();
+      const res = await fetch(base + "/api/install", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ source: "fixture/repo", skills: ["*"] }),
+      });
+      expect(res.status).toBe(500);
+      const body = (await res.json()) as { ok: boolean; output: string };
+      expect(body.ok).toBe(false);
+      expect(body.output).toContain("failed");
+    });
+  });
+
   test("GET/PUT /api/prefs roundtrip", async () => {
     const base = await start();
     const initial = (await (await fetch(`${base}/api/prefs`)).json()) as Record<string, unknown>;
