@@ -36,7 +36,7 @@ const TARGETS: Target[] = [
 const args = process.argv.slice(2);
 const all = args.includes("--all");
 const requested = args.filter((a, i) => args[i - 1] === "--target");
-const host = process.platform === "darwin" && process.arch === "arm64" ? "darwin-arm64" : null;
+const host = process.platform + "-" + process.arch;
 
 let selected: Target[];
 if (all) selected = TARGETS;
@@ -44,7 +44,8 @@ else if (requested.length > 0) selected = TARGETS.filter((t) => requested.includ
 else selected = TARGETS.filter((t) => t.name === host);
 
 if (selected.length === 0) {
-  console.error(`no matching targets (known: ${TARGETS.map((t) => t.name).join(", ")})`);
+  const reason = requested.length > 0 ? `requested: ${requested.join(", ")}` : `host: ${host}`;
+  console.error(`no matching targets (${reason}; known: ${TARGETS.map((t) => t.name).join(", ")})`);
   process.exit(1);
 }
 
@@ -65,7 +66,11 @@ for (const target of selected) {
   // used to be identical Mach-O arm64).
   const defineFlags = Object.entries(target.define ?? {}).flatMap(([k, v]) => ["--define", `${k}=${v}`]);
   const versionDefine = ["--define", `__APP_VERSION__=${JSON.stringify(pkg.version)}`];
-  const targetFlag = target.name === "darwin-arm64" ? [] : ["--target", `bun-${target.name}`];
+  // DIST-2 / S-210: every requested target gets an explicit --target, including
+  // darwin-arm64. The old darwin-arm64 exception compiled for the running host
+  // instead, so an x64 Bun under Rosetta silently emitted x86_64 Mach-O under
+  // the darwin-arm64 outfile name.
+  const targetFlag = ["--target", `bun-${target.name}`];
   await $`bun build --compile ${targetFlag} src/main.ts --outfile ${outfile} ${versionDefine} ${defineFlags}`.quiet();
   if (target.codesign) {
     await $`codesign --sign - --force --entitlements ${ENTITLEMENTS} ${outfile}`.quiet();
