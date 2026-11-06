@@ -240,6 +240,10 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
   // S-183 rider: update() computed this once per dispatch — never re-filter here
   const visible = model.visible;
   const selected = visible[model.selected];
+  // UI-07: every update-status read is the CURRENT scope's projection — a
+  // same-name row in the other scope never inherits this scope's badge/error.
+  const updatesAvailable = model.updatesAvailable[model.scope];
+  const updateErrors = model.updateErrors[model.scope];
 
   // live filter state rides the border title (S-88 discipline). The title
   // prop alone carries it — pty-smoke's filter-typing check guards this
@@ -323,7 +327,7 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
                     {skill.name}
                   </text>
                   {skill.source ? <text fg={sel ? t.selectionText : t.textMuted}>{skill.source}</text> : null}
-                  {model.updatesAvailable.has(skill.name) ? <text fg={t.success}>↑</text> : null}
+                  {updatesAvailable.has(skill.name) ? <text fg={t.success}>↑</text> : null}
                 </box>
               );
             })
@@ -347,11 +351,11 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
         </scrollbox>
         {selected ? (
           <text fg={t.textMuted}>
-            {`${selected.agents.length} agent(s) · ${selected.scope} · ${selected.path}${model.updatesAvailable.has(selected.name) ? " · ↑ update available" : ""}`}
+            {`${selected.agents.length} agent(s) · ${selected.scope} · ${selected.path}${updatesAvailable.has(selected.name) ? " · ↑ update available" : ""}`}
           </text>
         ) : null}
-        {selected && model.updateErrors.get(selected.name) ? (
-          <text fg={t.textMuted}>{`check: ${model.updateErrors.get(selected.name)}`}</text>
+        {selected && updateErrors.get(selected.name) ? (
+          <text fg={t.textMuted}>{`check: ${updateErrors.get(selected.name)}`}</text>
         ) : null}
       </box>
     </box>

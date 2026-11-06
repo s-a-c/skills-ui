@@ -33,11 +33,16 @@ export interface TuiModel {
   skills: InstalledSkill[];
   selected: number;
   checked: Set<string>;
-  updatesAvailable: Set<string>;
-  /** Per-skill check-status errors from the last `c` check (G4): name →
-   * "not checkable yet (…)" / "check failed (…)". Rendered in the detail
-   * pane so not-checkable skills stop being silently badge-less. */
-  updateErrors: Map<string, string>;
+  /** Per-scope update-check results (UI-07): scope → names with an update
+   * available. Same-name project/global rows are DIFFERENT rows — a project
+   * result must never badge the global one (and vice versa). Records are
+   * retained across scope switches; views read the model.scope projection. */
+  updatesAvailable: Record<Scope, Set<string>>;
+  /** Per-scope per-skill check-status errors from the last `c` check in that
+   * scope (G4 + UI-07): name → "not checkable yet (…)" / "check failed (…)".
+   * Rendered in the detail pane so not-checkable skills stop being silently
+   * badge-less. */
+  updateErrors: Record<Scope, Map<string, string>>;
   filter: string;
   filtering: boolean;
   agentFilter: Set<string>;
@@ -84,8 +89,8 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     skills: [],
     selected: 0,
     checked: new Set(),
-    updatesAvailable: new Set(),
-    updateErrors: new Map(),
+    updatesAvailable: { project: new Set(), global: new Set() },
+    updateErrors: { project: new Map(), global: new Map() },
     filter: "",
     filtering: false,
     sortCheckedFirst: true,
@@ -171,7 +176,7 @@ export type Action =
   | { type: "detail-scroll"; on: boolean }
   | { type: "scope"; scope: Scope }
   | { type: "skills-loaded"; skills: InstalledSkill[] }
-  | { type: "updates-loaded"; names: string[]; errors?: Record<string, string> }
+  | { type: "updates-loaded"; scope: Scope; names: string[]; errors?: Record<string, string> }
   | { type: "move"; delta: number }
   | { type: "home" }
   | { type: "end" }
@@ -210,8 +215,16 @@ export function update(model: TuiModel, action: Action): TuiModel {
   const next: TuiModel = {
     ...model,
     checked: new Set(model.checked),
-    updatesAvailable: new Set(model.updatesAvailable),
-    updateErrors: new Map(model.updateErrors),
+    // UI-07: both scope records are copied so a result for one scope can
+    // never bleed into the other (or into the previous model state).
+    updatesAvailable: {
+      project: new Set(model.updatesAvailable.project),
+      global: new Set(model.updatesAvailable.global),
+    },
+    updateErrors: {
+      project: new Map(model.updateErrors.project),
+      global: new Map(model.updateErrors.global),
+    },
     agentFilter: new Set(model.agentFilter),
     agentSelect: model.agentSelect
       ? { ...model.agentSelect, staged: new Set(model.agentSelect.staged) }
@@ -270,8 +283,11 @@ export function update(model: TuiModel, action: Action): TuiModel {
       break;
     }
     case "updates-loaded":
-      next.updatesAvailable = new Set(action.names);
-      next.updateErrors = new Map(Object.entries(action.errors ?? {}));
+      // UI-07: store into the action's OWN scope only — a late (or simply
+      // same-named) result for one scope must never replace the other
+      // scope's record; Views reads the model.scope projection.
+      next.updatesAvailable[action.scope] = new Set(action.names);
+      next.updateErrors[action.scope] = new Map(Object.entries(action.errors ?? {}));
       break;
     case "move": {
       if (next.tab === "search" && next.searchPane === "selected") {

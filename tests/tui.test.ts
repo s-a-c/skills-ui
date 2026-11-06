@@ -725,6 +725,150 @@ describe("tui (in-memory)", () => {
     expect(frame).not.toContain("↑"); // badge logic unchanged — an error alone is no badge
   });
 
+  // UI-07 seam: a project check HELD across a scope switch must not paint its
+  // badge (or toast) onto the same-name global row — and its result must still
+  // land in the PROJECT record so the state survives the round trip. Task-4
+  // handshake discipline: old-start before the switch, completion before the
+  // release, settled global view before the late completion is observed.
+  test("UI-07: a held project check completing after a scope switch never badges the global row", async () => {
+    const s = setup!;
+    const gate = deferred<void>(), started = deferred<void>();
+    const deps = fakeDeps();
+    deps.checkUpdates = (scope) => {
+      if (scope === "project") {
+        started.resolve(); // request-start handshake: the check IS in flight
+        return gate.promise.then(() => ({
+          scope: "project" as const,
+          updates: {
+            "code-review": { name: "code-review", updateAvailable: true, sourceType: "github" },
+            tdd: { name: "tdd", updateAvailable: false, sourceType: "github" },
+          },
+          checkedCount: 2,
+        }));
+      }
+      return { scope: "global" as const, updates: {}, checkedCount: 2 };
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("tdd") && f.includes("code-review")); // settled list
+    await s.mockInput.pressKey("c");
+    await started.promise; // old-start BEFORE the switch
+    await s.mockInput.pressKey("g"); // scope → global while the check is held
+    await waitForFrame(s, (f) => f.includes("[g] global") && !f.includes("loading skills")); // settled global view
+    gate.resolve(); // completion AFTER the switch (microtask-sync before the next captured frame)
+    const frame = await waitForFrame(s, (f) => f.includes("[g] global"));
+    expect(frame).not.toContain("↑"); // the global rows show no project badge
+    expect(frame).not.toContain("update(s) available"); // and no project toast over the global view
+    // project state is retained: back to project — the badge renders again
+    await s.mockInput.pressKey("p");
+    const back = await waitForFrame(s, (f) => f.includes("[p] project") && f.includes("↑"));
+    expect(back).toContain("update available"); // detail hint rides the retained project record
+  });
+
+  // UI-07 reverse order: the mirrored direction — a GLOBAL check held across
+  // the switch to project must not badge the project rows, and the global
+  // cache must survive the round trip.
+  test("UI-07 reverse: a held global check completing in project scope never badges the project row", async () => {
+    const s = setup!;
+    const gate = deferred<void>(), started = deferred<void>();
+    const deps = fakeDeps();
+    deps.checkUpdates = (scope) => {
+      if (scope === "global") {
+        started.resolve();
+        return gate.promise.then(() => ({
+          scope: "global" as const,
+          updates: { "code-review": { name: "code-review", updateAvailable: true, sourceType: "github" } },
+          checkedCount: 1,
+        }));
+      }
+      return { scope: "project" as const, updates: {}, checkedCount: 2 };
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("tdd") && f.includes("code-review"));
+    await s.mockInput.pressKey("g"); // scope → global
+    await waitForFrame(s, (f) => f.includes("[g] global") && !f.includes("loading skills"));
+    await s.mockInput.pressKey("c");
+    await started.promise; // global check in flight BEFORE the switch
+    await s.mockInput.pressKey("p"); // scope → project while held
+    await waitForFrame(s, (f) => f.includes("[p] project") && !f.includes("loading skills"));
+    gate.resolve(); // completion AFTER the switch
+    const frame = await waitForFrame(s, (f) => f.includes("[p] project"));
+    expect(frame).not.toContain("↑"); // project rows show no global badge
+    expect(frame).not.toContain("update(s) available");
+    await s.mockInput.pressKey("g"); // back to global — the cached state is retained
+    const back = await waitForFrame(s, (f) => f.includes("[g] global") && f.includes("↑"));
+    expect(back).toContain("update available");
+  });
+
+  // UI-07 late FAILURE: a held check that rejects after the scope switch must
+  // not toast its failure over the other scope's view, and the failed scope's
+  // record must stay untouched.
+  test("UI-07: a late project check failure never toasts over the global view", async () => {
+    const s = setup!;
+    const gate = deferred<void>(), started = deferred<void>();
+    const deps = fakeDeps();
+    deps.checkUpdates = (scope) => {
+      if (scope === "project") {
+        started.resolve();
+        return gate.promise.then(() => {
+          throw new Error("boom");
+        });
+      }
+      return { scope: "global" as const, updates: {}, checkedCount: 2 };
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("tdd") && f.includes("code-review"));
+    await s.mockInput.pressKey("c");
+    await started.promise;
+    await s.mockInput.pressKey("g"); // scope → global while the check is held
+    await waitForFrame(s, (f) => f.includes("[g] global") && !f.includes("loading skills"));
+    gate.resolve(); // the rejection lands after the switch
+    const frame = await waitForFrame(s, (f) => f.includes("[g] global"));
+    expect(frame).not.toContain("update check failed"); // suppressed over the other scope
+    expect(frame).not.toContain("↑");
+    await s.mockInput.pressKey("p"); // the project record stays untouched
+    const back = await waitForFrame(s, (f) => f.includes("[p] project"));
+    expect(back).not.toContain("↑");
+  });
+
+  // UI-07 newer same-scope check: two in-flight checks for ONE scope — the
+  // earlier result settling after the newer one must be dropped entirely.
+  test("UI-07: a newer same-scope check rejects the stale earlier result", async () => {
+    const s = setup!;
+    type CheckResult = Awaited<ReturnType<TuiDeps["checkUpdates"]>>;
+    const pending: Array<ReturnType<typeof deferred<CheckResult>>> = [];
+    const deps = fakeDeps();
+    deps.checkUpdates = (scope) => {
+      const settle = deferred<CheckResult>();
+      pending.push(settle);
+      return settle.promise.then((r) => ({ ...r, scope }));
+    };
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("tdd") && f.includes("code-review"));
+    await s.mockInput.pressKey("c"); // check #1 dispatched
+    await s.mockInput.pressKey("c"); // check #2 dispatched — the newer owner
+    expect(pending).toHaveLength(2); // handshake: both in flight, neither answered
+    // newer completes FIRST: no updates available
+    pending[1]!.resolve({
+      scope: "project",
+      updates: {},
+      checkedCount: 2,
+    });
+    await waitForFrame(s, (f) => f.includes("no updates available")); // #2's verdict rendered
+    // only now does the STALE earlier check settle with a badge result
+    pending[0]!.resolve({
+      scope: "project",
+      updates: { "code-review": { name: "code-review", updateAvailable: true, sourceType: "github" } },
+      checkedCount: 2,
+    });
+    // the stale result must be dropped — the newer check owns the record
+    const frame = await waitForFrame(s, (f) => f.includes("no updates available"));
+    expect(frame).not.toContain("↑");
+  });
+
   test("help overlay toggles with ?", async () => {
     const s = setup!;
     await runTuiOn(s.renderer, undefined, fakeDeps());
@@ -911,6 +1055,32 @@ describe("tui model (pure)", () => {
     m = update(m, { type: "search-pane", pane: "results" });
     m = update(m, { type: "move", delta: 1 }); // results cursor moves again
     expect(m.searchSelected).toBe(1);
+  });
+
+  // UI-07: update-check state is scope-keyed — each scope stores its own
+  // record, the other scope's record is never touched, and clones stay
+  // isolated (a new result for one scope can't bleed into the base model).
+  test("updates-loaded is scope-keyed: per-scope records, clone isolation", () => {
+    let m = update(base(), {
+      type: "updates-loaded",
+      scope: "project",
+      names: ["alpha"],
+      errors: { alpha: "check failed (boom)" },
+    });
+    expect(m.updatesAvailable.project.has("alpha")).toBe(true);
+    expect(m.updatesAvailable.global.size).toBe(0);
+    expect(m.updateErrors.project.get("alpha")).toBe("check failed (boom)");
+    expect(m.updateErrors.global.size).toBe(0);
+    m = update(m, { type: "updates-loaded", scope: "global", names: ["beta"] });
+    expect(m.updatesAvailable.project.has("alpha")).toBe(true); // project retained
+    expect(m.updatesAvailable.global.has("beta")).toBe(true);
+    expect(m.updateErrors.project.get("alpha")).toBe("check failed (boom)"); // errors scoped too
+    const prev = m;
+    m = update(m, { type: "updates-loaded", scope: "project", names: [] });
+    expect(prev.updatesAvailable.project.has("alpha")).toBe(true); // base untouched
+    expect(m.updatesAvailable.project.size).toBe(0);
+    expect(m.updatesAvailable.global.has("beta")).toBe(true); // other scope untouched
+    expect(m.updateErrors.project.get("alpha")).toBeUndefined(); // errors replaced per scope
   });
 });
 

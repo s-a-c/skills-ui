@@ -263,6 +263,11 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
   // newer load's rows, busy label, or failure toast.
   let loadSeq = 0;
   let bodySeq = 0; // per-load detail-body token: the highest token wins the pane
+  // UI-07 check-specific busy owner: a monotonic token per update check — a
+  // completing check may touch the busy label only while its token is still
+  // the latest check (mirrors the skillsLoadSeq/loadSeq guard above; the
+  // label itself stays the single busy slot).
+  let checkBusySeq = 0;
   const reloadSkills = async (): Promise<void> => {
     const seq = ++loadSeq;
     // S-183 stale-while-revalidate: cold in-memory cache + a persisted index
@@ -665,30 +670,50 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       case "c":
         if (model.tab === "installed") {
           void (async () => {
+            // UI-07: capture scope AND sequence BEFORE the await — the
+            // completion stores into the captured scope's record only, and
+            // only the latest check owns the busy label and the toasts.
             const scope = model.scope;
+            const seq = ++checkBusySeq;
             dispatch({ type: "busy", label: "checking for updates" });
             try {
               const result = await deps.checkUpdates(scope);
+              if (seq !== checkBusySeq) return; // a newer check owns the model — drop
               const entries = Object.values(result.updates);
               const names = entries.filter((u) => u.updateAvailable).map((u) => u.name);
               // G4: keep the per-skill check-status errors so the detail pane
               // can show WHY a skill is badge-less (not checkable / check failed)
               const errors: Record<string, string> = {};
               for (const u of entries) if (u.error) errors[u.name] = u.error;
-              dispatch({ type: "updates-loaded", names, errors });
-              const notCheckable = Object.keys(errors).length;
-              toast(
-                names.length > 0
-                  ? `${names.length} update(s) available`
-                  : notCheckable > 0
-                    ? `no updates available · ${notCheckable} not checkable`
-                    : "no updates available",
-                names.length > 0 ? "info" : "success"
-              );
+              // the result always populates ITS OWN scope's record — a
+              // completion that lands after a scope switch still fills the
+              // captured scope's cache
+              dispatch({ type: "updates-loaded", scope, names, errors });
+              // the toast is a visible effect of the CURRENT view — a check
+              // completing after a scope switch stays cache-only
+              if (scope === model.scope) {
+                const notCheckable = Object.keys(errors).length;
+                toast(
+                  names.length > 0
+                    ? `${names.length} update(s) available`
+                    : notCheckable > 0
+                      ? `no updates available · ${notCheckable} not checkable`
+                      : "no updates available",
+                  names.length > 0 ? "info" : "success"
+                );
+              }
             } catch (error) {
+              // stale failures never toast over newer state, and a failure
+              // for another scope says nothing about the current view
+              if (seq !== checkBusySeq || scope !== model.scope) return;
               toast(`update check failed: ${error instanceof Error ? error.message : String(error)}`, "error");
             } finally {
-              dispatch({ type: "busy", label: null });
+              // UI-07 busy ownership: only the latest check may clear, and
+              // only while no other operation has since taken the label
+              // (reload/install/search own their own slots).
+              if (seq === checkBusySeq && model.busy === "checking for updates") {
+                dispatch({ type: "busy", label: null });
+              }
             }
           })();
         }

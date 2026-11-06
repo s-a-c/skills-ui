@@ -304,3 +304,111 @@ test('late same-name detail cannot replace a distinct-path selection', async ({ 
     expect(pageErrors).toEqual([]);
   }finally{gate.resolve();await context.close();}
 });
+
+// UI-07 (S-208): update-check results are scope-keyed — a project badge must
+// never survive onto a same-name global row.
+test('project update status never leaks into a global row',async({browser})=>{
+  const {page,context}=await openAuditPage(browser,origin);
+  await page.route('**/api/updates?scope=project',route=>route.fulfill({json:{
+    scope:'project',updates:{alpha:{name:'alpha',sourceType:'github',updateAvailable:true}},checkedCount:1
+  }}));
+  await page.locator('#checkUpdatesBtn').click();
+  await expect(page.locator('#skillList li',{hasText:'alpha'}).locator('.update-badge')).toBeVisible();
+  const switched=page.waitForResponse('**/api/skills?scope=global');
+  await page.locator('[data-scope="global"]').click();await settleResponse(page,await switched);
+  await expect(page.locator('#skillList li',{hasText:'alpha'}).locator('.update-badge')).toHaveCount(0);
+  await context.close();
+});
+
+// UI-07 reverse order + retention: a global check's badge must not paint on
+// the project row, and each scope's cached status must survive the round trip.
+test('global update status stays scoped and survives a round trip',async({browser})=>{
+  const {page,context,pageErrors}=await openAuditPage(browser,origin);
+  await page.route('**/api/updates?scope=global',route=>route.fulfill({json:{
+    scope:'global',updates:{alpha:{name:'alpha',sourceType:'github',updateAvailable:true}},checkedCount:1
+  }}));
+  try{
+    const toGlobal=page.waitForResponse('**/api/skills?scope=global');
+    await page.locator('[data-scope="global"]').click();
+    await settleResponse(page,await toGlobal);
+    await page.locator('#checkUpdatesBtn').click();
+    await expect(page.locator('#skillList li',{hasText:'alpha'}).locator('.update-badge')).toBeVisible();
+    const toProject=page.waitForResponse('**/api/skills?scope=project');
+    await page.locator('[data-scope="project"]').click();await settleResponse(page,await toProject);
+    await expect(page.locator('#skillList li',{hasText:'alpha'}).locator('.update-badge')).toHaveCount(0);
+    const backToGlobal=page.waitForResponse('**/api/skills?scope=global');
+    await page.locator('[data-scope="global"]').click();await settleResponse(page,await backToGlobal);
+    await expect(page.locator('#skillList li',{hasText:'alpha'}).locator('.update-badge')).toBeVisible();
+    expect(pageErrors).toEqual([]);
+  }finally{await context.close();}
+});
+
+// UI-07 late FAILURE: a held project check that fails after the scope switch
+// must not toast over the global view (nothing to cache — no visible effect).
+test('a late failed update check cannot toast over the switched scope',async({browser})=>{
+  const {page,context,pageErrors}=await openAuditPage(browser,origin);
+  const gate=deferred<void>(),started=deferred<void>();
+  await page.route('**/api/updates?scope=project',async route=>{
+    started.resolve();await gate.promise;
+    await route.fulfill({status:500,json:{error:'boom'}});
+  });
+  try{
+    await page.locator('#checkUpdatesBtn').click();await started.promise;
+    const switched=page.waitForResponse('**/api/skills?scope=global');
+    await page.locator('[data-scope="global"]').click();await settleResponse(page,await switched);
+    const stale=page.waitForResponse('**/api/updates?scope=project');
+    gate.resolve();await settleResponse(page,await stale);
+    // short window: the toast self-removes after 3.9s, well inside the default
+    // 5s retry — the bound keeps the absence assertion from passing vacuously
+    await expect(page.locator('.toast',{hasText:'update check failed'})).toHaveCount(0,{timeout:500});
+    await expect(page.locator('#skillList li',{hasText:'alpha'}).locator('.update-badge')).toHaveCount(0);
+    expect(pageErrors).toEqual([]);
+  }finally{gate.resolve();await context.close();}
+});
+
+// UI-07 newer same-scope check: two overlapping checks for ONE scope — the
+// earlier result settling after the newer one must be dropped entirely.
+test('a newer same-scope update check rejects the stale earlier result',async({browser})=>{
+  const {page,context,pageErrors}=await openAuditPage(browser,origin);
+  const firstGate=deferred<void>(),firstStarted=deferred<void>(),secondStarted=deferred<void>();
+  let calls=0;
+  await page.route('**/api/updates?scope=project',async route=>{
+    calls++;
+    if(calls===1){firstStarted.resolve();await firstGate.promise;
+      await route.fulfill({json:{scope:'project',updates:{alpha:{name:'alpha',sourceType:'github',updateAvailable:true}},checkedCount:1}});}
+    else{secondStarted.resolve();
+      await route.fulfill({json:{scope:'project',updates:{},checkedCount:1}});}
+  });
+  try{
+    await page.locator('#checkUpdatesBtn').click();await firstStarted.promise;
+    const second=page.waitForResponse('**/api/updates?scope=project');
+    await page.locator('#checkUpdatesBtn').click();await secondStarted.promise;
+    await settleResponse(page,await second);
+    await expect(page.locator('#skillList li',{hasText:'alpha'}).locator('.update-badge')).toHaveCount(0);
+    const stale=page.waitForResponse('**/api/updates?scope=project');
+    firstGate.resolve();await settleResponse(page,await stale);
+    await expect(page.locator('#skillList li',{hasText:'alpha'}).locator('.update-badge')).toHaveCount(0);
+    expect(pageErrors).toEqual([]);
+  }finally{firstGate.resolve();await context.close();}
+});
+
+// UI-07 honest current-scope failure: a manual global check that fails still
+// reports in the global view, while the project badge stays out of global rows.
+test('a global check failure reports honestly while project status stays scoped',async({browser})=>{
+  const {page,context,pageErrors}=await openAuditPage(browser,origin);
+  await page.route('**/api/updates?scope=project',route=>route.fulfill({json:{
+    scope:'project',updates:{alpha:{name:'alpha',sourceType:'github',updateAvailable:true}},checkedCount:1
+  }}));
+  await page.route('**/api/updates?scope=global',route=>route.fulfill({status:500,json:{error:'boom'}}));
+  try{
+    await page.locator('#checkUpdatesBtn').click();
+    await expect(page.locator('#skillList li',{hasText:'alpha'}).locator('.update-badge')).toBeVisible();
+    const switched=page.waitForResponse('**/api/skills?scope=global');
+    await page.locator('[data-scope="global"]').click();await settleResponse(page,await switched);
+    await expect(page.locator('#skillList li',{hasText:'alpha'}).locator('.update-badge')).toHaveCount(0);
+    await page.locator('#checkUpdatesBtn').click();
+    await expect(page.locator('.toast',{hasText:'update check failed'})).toBeVisible();
+    await expect(page.locator('#skillList li',{hasText:'alpha'}).locator('.update-badge')).toHaveCount(0);
+    expect(pageErrors).toEqual([]);
+  }finally{await context.close();}
+});

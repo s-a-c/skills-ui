@@ -477,8 +477,12 @@ var state = {
   searchFailed: false,
   busy: false,
   sortBy: 'checked',
-  updates: {},
+  /* UI-07: update-check results are scope-keyed — same-name project/global
+     rows are different rows, so each scope caches its own record and the
+     render readers always see state.updates[state.scope]. */
+  updates: { project: {}, global: {} },
   updateCheckDone: { project: false, global: false },
+  updateCheckSeq: { project: 0, global: 0 },
   seedHold: false,
   queue: [],
   sview: 'results',
@@ -794,14 +798,17 @@ function rowNameOf(li){
   var key = li.getAttribute('data-key') || '';
   return key.slice(state.scope.length + 1);
 }
+/* UI-07: every update-status reader sees ONLY the current scope's record —
+   the same name in the other scope is a different row with different state. */
+function scopeUpdates(){ return state.updates[state.scope] || {}; }
 function rowSignature(s){
-  var upd = state.updates[s.name] || {};
+  var upd = scopeUpdates()[s.name] || {};
   return (s.description || '') + '|' + (s.agents || []).join(',') + '|' +
     (upd.updateAvailable ? 'u' : '') + (upd.error ? 'e' : '') +
     (state.checked.has(s.name) ? 'c' : '');
 }
 function rowHtml(s){
-  var outdated = state.updates[s.name] && state.updates[s.name].updateAvailable;
+  var outdated = scopeUpdates()[s.name] && scopeUpdates()[s.name].updateAvailable;
   return '<div class="skill-name">' +
     '<input type="checkbox" class="skill-check" aria-label="Select ' + esc(s.name) + ' for update"' +
     (state.checked.has(s.name) ? ' checked' : '') + '>' +
@@ -854,7 +861,7 @@ function renderList(){
        of re-rendering row content per keystroke. */
     if (li.__sig !== sig) {
       li.innerHTML = rowHtml(s);
-      var updError = state.updates[s.name] && state.updates[s.name].error;
+      var updError = scopeUpdates()[s.name] && scopeUpdates()[s.name].error;
       // G4: not-checkable/check-failed skills stop being silently badge-less —
       // the status rides the row as a tooltip (the detail pane carries the full line)
       if (updError) li.title = 'update check: ' + updError;
@@ -1072,7 +1079,7 @@ function showDetail(name){
   var skill = state.skills.filter(function(s){ return s.name === name; })[0];
   if (!skill) return;
   var pane = $('#detailPane');
-  var upd = state.updates[skill.name];
+  var upd = scopeUpdates()[skill.name];
   var detailOutdated = upd && upd.updateAvailable;
   var updateError = upd && upd.error ? upd.error : null;
   pane.innerHTML =
@@ -1304,11 +1311,18 @@ function updateSkills(skills, global){
 function checkForUpdates(force){
   var scope = state.scope;
   if (!force && state.updateCheckDone[scope]) return Promise.resolve();
+  /* UI-07: the token is captured (and bumped) per scope at dispatch — only
+     the LATEST request for that scope may store, and a response that lands
+     after the view moved on may only fill its own scope's cache. */
+  var seq = ++state.updateCheckSeq[scope];
   return api('/api/updates?scope=' + scope)
     .then(function(d){
-      state.updates = d.updates || {};
+      if (seq !== state.updateCheckSeq[scope]) return; // a newer check for this scope owns the record
+      state.updates[scope] = d.updates || {};
       state.updateCheckDone[scope] = true;
-      var n = Object.keys(state.updates).filter(function(k){ return state.updates[k].updateAvailable; }).length;
+      if (state.scope !== scope) return; // cache without visible effects
+      var updates = state.updates[scope];
+      var n = Object.keys(updates).filter(function(k){ return updates[k].updateAvailable; }).length;
       renderList();
       if (state.selected) showDetail(state.selected);
       if (n > 0) toast(n + ' update' + (n === 1 ? '' : 's') + ' available', 'success');
@@ -1317,6 +1331,9 @@ function checkForUpdates(force){
     .catch(function(e){
       // ST4: the silent no-op catch hid check failures (and left the manual
       // button dead after the once-per-scope auto-check) — say so instead.
+      // UI-07: but only for the CURRENT owner — a stale or post-switch
+      // failure says nothing about the view now on screen.
+      if (seq !== state.updateCheckSeq[scope] || state.scope !== scope) return;
       play('error');
       toast('update check failed: ' + (e && e.message ? e.message : String(e)), 'error');
     });
