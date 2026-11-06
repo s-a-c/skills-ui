@@ -412,3 +412,154 @@ test('a global check failure reports honestly while project status stays scoped'
     expect(pageErrors).toEqual([]);
   }finally{await context.close();}
 });
+
+// UI-05 (S-206): a busy reset must not re-enable a semantically disabled
+// control — the "Installed" result button keeps its reason through the held
+// update work, and results re-created mid-flight must inherit the busy state
+// too (one writer owns disabled: busy OR semantic marker).
+test('Installed stays disabled after held update work finishes',async({browser})=>{
+  const {page,context}=await openAuditPage(browser,origin);
+  const hold=deferred<void>(),started=deferred<void>();
+  await page.route('**/api/search?*',route=>route.fulfill({json:{results:[
+    {name:'alpha',slug:'alpha',source:'fixture/repo',installs:1}
+  ],adjustedQuery:null}}));
+  await page.route('**/api/update',async route=>{
+    started.resolve();await hold.promise;await route.fulfill({json:{ok:true,output:'updated fixture'}});
+  });
+  await page.locator('[data-tab="search"]').click();
+  await page.locator('#searchInput').fill('alpha');
+  const installed=page.locator('#results .install-btn').filter({hasText:'Installed'});
+  await expect(installed).toBeDisabled();
+  await page.locator('[data-tab="installed"]').click();
+  await page.locator('#updateAllBtn').click();await started.promise;
+  await page.locator('[data-tab="search"]').click();await expect(installed).toBeDisabled();
+  const refreshed=page.waitForResponse('**/api/skills?scope=project');
+  hold.resolve();await settleResponse(page,await refreshed);
+  await expect(installed).toBeDisabled();
+  await context.close();
+});
+
+// UI-05 (S-206): the in-list reason is independent of busy — a busy reset
+// must keep the queued row's button disabled while an eligible button
+// returns to usable, including for results re-created mid-flight.
+test('in-list reason survives busy end and eligible buttons recover',async({browser})=>{
+  const {page,context,pageErrors}=await openAuditPage(browser,origin);
+  const updateHold=deferred<void>(),updateStarted=deferred<void>();
+  const listHold=deferred<void>(),listStarted=deferred<void>();
+  let skillCalls=0;
+  // project-skill call plan after openAuditPage: #1 the search tab's
+  // refreshInstalledAll, #2 the installed tab's loadSkills (HELD — keeps the
+  // update busy alive while results are re-created), #3 its refresh again,
+  // #4 the held update's own completion load.
+  await page.route('**/api/skills?scope=project',async route=>{
+    skillCalls++;
+    if(skillCalls===2){listStarted.resolve();await listHold.promise;}
+    await route.fulfill({json:{scope:'project',skills:[row('alpha','project'),row('beta','project')]}});
+  });
+  await page.route('**/api/update',async route=>{
+    updateStarted.resolve();await updateHold.promise;
+    await route.fulfill({json:{ok:true,output:'updated fixture'}});
+  });
+  try{
+    await page.locator('[data-tab="search"]').click();
+    await page.locator('#searchInput').fill('new');
+    const adds=page.locator('#results .add-btn');
+    await expect(adds).toHaveCount(2);
+    await adds.nth(0).click();
+    const inList=page.locator('#results .add-btn',{hasText:'In list'});
+    const eligible=page.locator('#results .install-btn').nth(1);
+    await expect(inList).toBeDisabled();
+    await expect(eligible).toBeEnabled();
+    await page.locator('#updateAllBtn').click();await updateStarted.promise;
+    await page.locator('[data-tab="installed"]').click();await listStarted.promise;
+    await page.locator('[data-tab="search"]').click(); // results re-created mid-flight
+    await expect(inList).toBeDisabled(); // fresh nodes: busy AND the marker hold
+    await expect(eligible).toBeDisabled(); // busy alone holds the eligible row
+    const refreshed=page.waitForResponse('**/api/skills?scope=project');
+    updateHold.resolve();listHold.resolve();
+    await settleResponse(page,await refreshed);
+    await expect(inList).toBeDisabled(); // the semantic reason outlives busy
+    await expect(eligible).toBeEnabled(); // busy alone never persists
+    expect(pageErrors).toEqual([]);
+  }finally{updateHold.resolve();listHold.resolve();await context.close();}
+});
+
+// UI-05 (S-206): a detail pane opened mid-flight creates its action buttons
+// DURING busy — the writer must hold them, then release them with busy.
+test('detail actions created during busy hold and recover with it',async({browser})=>{
+  const {page,context,pageErrors}=await openAuditPage(browser,origin);
+  const hold=deferred<void>(),started=deferred<void>();
+  await page.route('**/api/update',async route=>{
+    started.resolve();await hold.promise;await route.fulfill({json:{ok:true,output:'updated fixture'}});
+  });
+  try{
+    await page.locator('#updateAllBtn').click();await started.promise;
+    await page.locator('#skillList li',{hasText:'beta'}).click();
+    await expect(page.locator('.detail-title')).toHaveText('beta');
+    const remove=page.locator('#removeBtn');
+    await expect(remove).toBeDisabled(); // created mid-busy: held by the writer
+    const refreshed=page.waitForResponse('**/api/skills?scope=project');
+    hold.resolve();await settleResponse(page,await refreshed);
+    await expect(remove).toBeEnabled(); // and released exactly with busy
+    expect(pageErrors).toEqual([]);
+  }finally{hold.resolve();await context.close();}
+});
+
+// UI-05 (S-206): the connection probe holds the Connect button for an
+// independent reason — an unrelated busy transition ending mid-probe must
+// not re-enable it, the probe end must not override a still-busy page, and
+// seed actions created during the post-probe boot busy inherit the hold.
+test('connect probe reason survives busy end and seed actions inherit busy',async({browser})=>{
+  const {page,context,pageErrors}=await openAuditPage(browser,origin);
+  const probeHold=deferred<void>(),probeStarted=deferred<void>();
+  const updateHold=deferred<void>(),updateStarted=deferred<void>();
+  const bootHold=deferred<void>(),bootStarted=deferred<void>();
+  let skillCalls=0;
+  // project-skill call plan after the seeded reload: #1 the reload's own
+  // load, #2 the held update's completion load, #3 the post-probe boot load
+  // (HELD — the seed pane is re-created during it).
+  await page.route('**/api/skills?scope=project',async route=>{
+    skillCalls++;
+    if(skillCalls===3){bootStarted.resolve();await bootHold.promise;} // the boot load after probe success
+    await route.fulfill({json:{scope:'project',skills:[row('alpha','project'),row('beta','project')]}});
+  });
+  await page.route('**/api/version',async route=>{
+    probeStarted.resolve();await probeHold.promise;
+    await route.fulfill({json:{version:'0.0.0-fixture',capabilities:{hosted:true}}});
+  });
+  await page.route('**/api/prefs',route=>route.fulfill({json:{ok:true}}));
+  await page.route('**/api/update',async route=>{
+    updateStarted.resolve();await updateHold.promise;
+    await route.fulfill({json:{ok:true,output:'updated fixture'}});
+  });
+  await page.addInitScript(()=>{
+    const seed={kind:'add',source:'fixture/repo',skills:['alpha']};
+    Object.defineProperty(window,'__SEED__',{configurable:true,get:()=>seed,set:()=>{}});
+  });
+  try{
+    await page.goto(origin); // the init script only reaches future navigations
+    await expect(page.locator('#skillList')).toContainText('alpha');
+    await page.evaluate(()=>document.getElementById('connectState').click()); // opener is display:none off-loopback
+    await page.locator('#backendInput').fill(origin);
+    await page.locator('#tokenInput').fill('fixture-token');
+    await page.locator('#connectBtn').click();await probeStarted.promise;
+    const connect=page.locator('#connectBtn');
+    await expect(connect).toBeDisabled(); // probe reason recorded
+    await page.evaluate(()=>document.getElementById('updateAllBtn').click()); // modal blocks real clicks
+    await updateStarted.promise;
+    const refreshed=page.waitForResponse('**/api/skills?scope=project');
+    updateHold.resolve();await settleResponse(page,await refreshed);
+    await expect(connect).toBeDisabled(); // busy ended; the probe reason must survive
+    probeHold.resolve();await bootStarted.promise;
+    const seedInstall=page.locator('#seedInstall');
+    await expect(seedInstall).toBeDisabled(); // seed actions created mid-busy
+    await expect(page.locator('#connectDialog')).not.toBeVisible();
+    const booted=page.waitForResponse('**/api/skills?scope=project');
+    bootHold.resolve();await settleResponse(page,await booted);
+    await expect(seedInstall).toBeEnabled();
+    await expect(connect).toBeEnabled(); // probe reason cleared, no busy left
+    expect(pageErrors).toEqual([]);
+  }finally{
+    probeHold.resolve();updateHold.resolve();bootHold.resolve();await context.close();
+  }
+});

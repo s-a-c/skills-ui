@@ -661,7 +661,7 @@ function connectedDot(ok){
 }
 function tryConnect(base, token){
   if (!base || !token) { $('#connectStatus').textContent = 'Both the backend URL and the token are needed.'; return; }
-  $('#connectBtn').disabled = true;
+  setSemanticDisabled($('#connectBtn'), true);
   probeBackend(base, token, function(s){ $('#connectStatus').textContent = s; })
     .then(function(v){
       state.backend = base.replace(/\\/+$/, '');
@@ -674,7 +674,7 @@ function tryConnect(base, token){
       boot();
     })
     .catch(function(e){ $('#connectStatus').textContent = e.message || String(e); connectedDot(false); })
-    .finally(function(){ $('#connectBtn').disabled = false; });
+    .finally(function(){ setSemanticDisabled($('#connectBtn'), false); });
 }
 function openConnect(){
   var savedBase = state.backend, savedToken = state.token;
@@ -687,10 +687,28 @@ function openConnect(){
 }
 
 /* ---------- busy ---------- */
+/* UI-05 (S-206): ONE writer owns every .btn disabled state. state.busy is
+   transient; data-semantic-disabled records independent reasons (already
+   installed in this scope, already in the install list, connection probe in
+   flight). Syncing recomputes disabled = busy OR semantic, so a busy reset
+   can never re-enable a semantically disabled control, and every .btn
+   created mid-flight (results, detail actions, seed actions) is reconciled
+   by syncing after it is attached. Busy itself is never stored as a
+   semantic reason — the attribute only ever describes an independent one. */
+function syncButtonDisabled(button){
+  button.disabled = state.busy ||
+    button.getAttribute('data-semantic-disabled') === 'true';
+}
+function setSemanticDisabled(button, disabled){
+  button.setAttribute('data-semantic-disabled', String(!!disabled));
+  syncButtonDisabled(button);
+}
+function syncButtons(root){
+  root.querySelectorAll('.btn').forEach(syncButtonDisabled);
+}
 function setBusy(label){
   state.busy = !!label;
-  var btns = document.querySelectorAll('.btn');
-  btns.forEach(function(b){ b.disabled = state.busy; });
+  syncButtons(document);
   var bar = $('#busyBar');
   bar.style.display = label ? 'block' : 'none';
   $('#busyText').textContent = label || '';
@@ -1114,6 +1132,7 @@ function showDetail(name){
   }
   $('#removeBtn').addEventListener('click', function(){ openRemove(skill); });
   if (detailOutdated) $('#updateBtn').addEventListener('click', function(){ updateSkills([skill.name], skill.scope === 'global'); });
+  syncButtons(pane); /* UI-05: detail actions created mid-busy must not miss the busy disable */
   /* S-179: the row's own path rides along — the serve validates it as an exact cached-list row (name stays for older serves). */
   api('/api/skill?scope=' + skill.scope + '&name=' + encodeURIComponent(skill.name) + '&path=' + encodeURIComponent(skill.path))
     .then(function(d){
@@ -1243,6 +1262,7 @@ function showInstallSeed(seed){
       '<button class="btn" id="seedInstallAll">Install all</button>' +
       '<button class="btn" id="seedCancel">Cancel</button>' +
     '</div>';
+  syncButtons(pane); /* UI-05: seed actions created mid-busy must not miss the busy disable */
   var closeSeed = function(){ state.seedHold = false; loadSkills(); };
   $('#seedCancel').addEventListener('click', closeSeed);
   var preSelected = seed.skills || [];
@@ -1406,9 +1426,11 @@ function renderResults(){
       '<span class="result-installs">' + esc(String(r.installs)) + ' installs</span></div>' +
       '<span class="result-source">' + esc(r.source || r.slug) + '</span>' +
       '<div style="display:flex;gap:8px">' +
-      '<button class="btn add-btn' + (inQueue ? ' added' : '') + '"' + (inQueue ? ' disabled title="Already in your install list"' : '') + '>' +
+      /* UI-05: inQueue/sameScope are independent reasons recorded as
+         semantic markers; the writer reconciles busy on top at append. */
+      '<button class="btn add-btn' + (inQueue ? ' added' : '') + '"' + (inQueue ? ' data-semantic-disabled="true" title="Already in your install list"' : '') + '>' +
       (inQueue ? '✓ In list' : '+ Add to list') + '</button>' +
-      '<button class="btn primary install-btn"' + (sameScope ? ' disabled title="Already installed in ' + esc(state.scope) + ' scope"' : '') + '>' +
+      '<button class="btn primary install-btn"' + (sameScope ? ' data-semantic-disabled="true" title="Already installed in ' + esc(state.scope) + ' scope"' : '') + '>' +
       (sameScope ? 'Installed' : 'Install') + '</button></div>';
     li.querySelector('.add-btn').addEventListener('click', function(){
       if (state.queue.some(function(q){ return q.key === qk; })) return;
@@ -1437,6 +1459,7 @@ function renderResults(){
         .finally(function(){ setBusy(null); });
     });
     list.appendChild(li);
+    syncButtons(li); /* UI-05: newly attached .btn nodes inherit busy/semantic state */
   });
 }
 
