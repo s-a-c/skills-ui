@@ -1715,6 +1715,12 @@ document.addEventListener('DOMContentLoaded', function(){
     play('select');
   });
   skillListEl.addEventListener('keydown', function(ev){
+    /* UI-06 (S-207): an interactive descendant (the row checkbox) owns its own
+       keys — Space must reach the NATIVE checkbox toggle, so the delegated
+       row handler returns before its preventDefault and the existing change
+       handler above keeps owning the checked summary. */
+    if (ev.target instanceof Element &&
+        ev.target.closest('input,button,a,select,textarea,[contenteditable]')) return;
     if (ev.key !== 'Enter' && ev.key !== ' ') return;
     var li = ev.target.closest ? ev.target.closest('li[data-key]') : null;
     if (!li) return;

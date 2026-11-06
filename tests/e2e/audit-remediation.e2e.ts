@@ -563,3 +563,54 @@ test('connect probe reason survives busy end and seed actions inherit busy',asyn
     probeHold.resolve();updateHold.resolve();bootHold.resolve();await context.close();
   }
 });
+
+// UI-06 (S-207): Space on the FOCUSED row checkbox must reach the native
+// checkbox toggle — the delegated #skillList keydown may not preventDefault
+// it away and steal the keypress for row selection.
+test('Space toggles a focused checkbox without changing detail', async ({ browser }) => {
+  const { page, context } = await openAuditPage(browser, origin);
+  const checkbox = page.locator('#skillList li', { hasText: 'beta' }).locator('.skill-check');
+  await checkbox.focus(); await page.keyboard.press('Space');
+  await expect(checkbox).toBeChecked();
+  await expect(page.locator('#selCount')).toHaveText('1');
+  await expect(page.locator('.detail-title')).toHaveText('alpha');
+  await page.keyboard.press('Space'); await expect(checkbox).not.toBeChecked();
+  await context.close();
+});
+
+// UI-06 (S-207) positive controls: the escape guard must not weaken the row
+// handler — Enter/Space on the FOCUSED ROW still select it (one detail change,
+// checkbox untouched), and a mouse click on the checkbox toggles exactly once
+// without selecting the row. Keyboard focus and the aria name stay intact.
+test('Enter and Space on a focused row still select it', async ({ browser }) => {
+  const { page, context } = await openAuditPage(browser, origin);
+  const betaRow = page.locator('#skillList li', { hasText: 'beta' });
+  const betaBox = betaRow.locator('.skill-check');
+  await expect(betaRow).toBeVisible();
+  await betaRow.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.detail-title')).toHaveText('beta');
+  await expect(betaRow).toBeFocused(); // selection re-render keeps the row focusable and focused
+  await expect(betaBox).not.toBeChecked(); // row Enter never toggles the checkbox
+  await page.keyboard.press('Space');
+  await expect(page.locator('.detail-title')).toHaveText('beta'); // row Space selects, it does not toggle
+  await expect(betaBox).not.toBeChecked();
+  await expect(page.locator('#selCount')).toHaveText('0');
+  await context.close();
+});
+
+test('a mouse click toggles the checkbox exactly once without selecting the row', async ({ browser }) => {
+  const { page, context } = await openAuditPage(browser, origin);
+  const checkbox = page.locator('#skillList li', { hasText: 'beta' }).locator('.skill-check');
+  await checkbox.click();
+  await expect(checkbox).toBeChecked();
+  await expect(page.locator('#selCount')).toHaveText('1');
+  await expect(checkbox).toBeFocused();
+  await expect(checkbox).toHaveAttribute('aria-label', 'Select beta for update');
+  await expect(page.locator('.detail-title')).toHaveText('alpha'); // a checkbox click never selects the row
+  await checkbox.click();
+  await expect(checkbox).not.toBeChecked(); // exactly one toggle per activation
+  await expect(page.locator('#selCount')).toHaveText('0');
+  await expect(page.locator('.detail-title')).toHaveText('alpha');
+  await context.close();
+});
