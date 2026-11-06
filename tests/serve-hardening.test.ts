@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { bearerMatches } from "../src/core/hosted-auth.ts";
 import { SkillsBusyError, createSpawnQueue } from "../src/core/spawn-queue.ts";
+import { fetchRepoTree } from "../src/core/services/updates-check.ts";
 
 /**
  * 0.5.1 impl A hostile-input suite: cross-site fetch-metadata rejection,
@@ -113,6 +114,23 @@ describe("unit: updates-check URL encoding + timeout", () => {
     } finally {
       globalThis.fetch = originalFetch;
     }
+  });
+
+  // CORE-01 (S-195): a lock entry without an explicit ref must still request
+  // an explicit tree identifier — the bare /git/trees URL shape is
+  // upstream-unsupported. Omitted ref resolves to HEAD.
+  test('default branch tree is addressable without an explicit ref', async () => {
+    const old = globalThis.fetch;
+    let requested = '';
+    globalThis.fetch = (async input => {
+      requested = String(input);
+      return Response.json({ tree: [{ path: 'skills/demo', type: 'tree', sha: 'changed' }],
+        truncated: false });
+    }) as typeof fetch;
+    try {
+      expect(await fetchRepoTree('fixture/repo')).not.toBeNull();
+      expect(requested).toBe('https://api.github.com/repos/fixture/repo/git/trees/HEAD?recursive=1');
+    } finally { globalThis.fetch = old; }
   });
 });
 

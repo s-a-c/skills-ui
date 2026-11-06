@@ -20,7 +20,12 @@ interface TreeEntry {
 }
 
 export async function fetchRepoTree(source: string, ref?: string): Promise<TreeEntry[] | null> {
-  const refPath = ref ? `/${encodeURIComponent(ref)}` : "";
+  // CORE-01 (S-195): an omitted ref must still request an explicit tree
+  // identifier — the bare /git/trees URL shape is upstream-unsupported.
+  // HEAD resolves the default branch's tree (GitHub Trees API permits a
+  // tree ref); explicit refs stay one encoded path segment.
+  const treeRef = ref ?? "HEAD";
+  const refPath = `/${encodeURIComponent(treeRef)}`;
   // segment-wise encoding (0.5.1 impl A): a lockfile-controlled `source`
   // must not smuggle path separators or ':' into the authed API URL
   const repoPath = source
