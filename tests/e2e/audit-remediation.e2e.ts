@@ -77,3 +77,36 @@ test('browser install list retains partial-failure output',async({browser})=>{
     expect(pageErrors).toEqual([]);
   }finally{await context.close();}
 });
+
+// S-199: seed discovery → the real "Install all" button must post exactly
+// the singleton wildcard skills:["*"] (the API alone exempts it from the
+// shared name charset and maps it to `add … --all`). The install response is
+// stubbed like every case above; the captured body and the success toast are
+// the pins here, while the 200 + ok:true acceptance lives at the API seam.
+test('browser seed install all sends the singleton wildcard',async({browser})=>{
+  const {page,context,pageErrors}=await openAuditPage(browser,origin);
+  const bodies:Array<Record<string, unknown>>=[];
+  await page.route('**/api/install',async route=>{
+    bodies.push(route.request().postDataJSON());
+    await route.fulfill({json:{ok:true,output:'fixture installed'}});
+  });
+  // The audit backend serves the plain page (no CLI seed); pin an add-seed
+  // through the bootstrap embed assignment — an init script runs before the
+  // document scripts (and outside the hash-pinned CSP), so a one-way setter
+  // guard keeps the real seed pane + real Install all button in charge.
+  await page.addInitScript(()=>{
+    const seed={kind:'add',source:'fixture/repo',skills:['alpha']};
+    Object.defineProperty(window,'__SEED__',{configurable:true,get:()=>seed,set:()=>{}});
+  });
+  try{
+    await page.goto(origin); // reload with the seed active
+    // seed discovery runs against the REAL backend + CLI shim (the fixture
+    // stubs no /api/source-skills route): wait for the parsed rows
+    await expect(page.locator('#seedList .seed-row')).toHaveCount(3);
+    await page.locator('#seedInstallAll').click();
+    await expect.poll(()=>bodies.length).toBe(1);
+    expect(bodies[0]).toEqual({source:'fixture/repo',skills:['*'],global:false});
+    await expect(page.locator('.toast', { hasText: 'Installed from fixture/repo' })).toBeVisible();
+    expect(pageErrors).toEqual([]);
+  }finally{await context.close();}
+});
