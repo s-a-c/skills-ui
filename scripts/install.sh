@@ -81,8 +81,10 @@ fi
 [ "$got" = "$want" ] || die "checksum mismatch for $asset — retry, or report at https://github.com/$REPO/issues"
 
 # --- install (same-directory rename: atomic) ---
+# chmod BEFORE the rename: a chmod failure then aborts while the previous
+# executable is still in place, never replacing it with a non-runnable file.
+chmod +x "$tmpbin"
 mv -f "$tmpbin" "$DEST/skills-ui"
-chmod +x "$DEST/skills-ui"
 
 case ":$PATH:" in
   *":$DEST:"*) ;;
