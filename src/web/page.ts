@@ -370,6 +370,11 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
 }
 #results li[aria-selected="true"] .result-source,
 #results li[aria-selected="true"] .result-installs{color:var(--t-selectionText)}
+#results li[aria-selected="true"] .result-chip{
+  color:var(--t-selectionText);
+  border-color:color-mix(in srgb,var(--t-selectionText) 45%,transparent);
+  background:color-mix(in srgb,var(--t-selectionText) 14%,transparent);
+}
 .result-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .result-name{font-weight:700}
 .result-installs{color:var(--t-textMuted);font-size:12px;white-space:nowrap;margin-left:auto}
@@ -1544,7 +1549,9 @@ function renderResults(){
     li.setAttribute('data-key', qk);
     li.setAttribute('role', 'option');
     li.tabIndex = 0;
-    if (state.selectedSearchKey === qk) li.classList.add('selected');
+    var isSel = state.selectedSearchKey === qk;
+    li.setAttribute('aria-selected', String(isSel));
+    if (isSel) li.classList.add('selected');
     var installed = installedEntry(r.source, r.name);
     var sameScope = installed && installed.scope === state.scope;
     var up = sameScope ? scopeUpdates[r.name] : null;
@@ -1606,10 +1613,10 @@ function showSearchDetail(r){
           var sQueued = inQueueKey(sqk);
           var sInst = installedEntry(src, sk.name);
           var sSame = sInst && sInst.scope === state.scope;
-          return '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--t-surface);border:1px solid var(--t-border);border-radius:6px">' +
-            '<span style="font-weight:600;color:var(--t-accent);font-size:13px">' + esc(sk.name) + '</span>' +
+          return '<div style="display:flex;align-items:center;gap:8px;padding:4px 8px;background:var(--t-surface);border:1px solid var(--t-border);border-radius:6px">' +
+            '<span style="font-weight:600;color:var(--t-text);font-size:13px">' + esc(sk.name) + '</span>' +
             (sInst ? '<span class="chip">installed' + (sSame ? ' · ' + esc(sInst.scope) : '') + '</span>' : '') +
-            '<span style="flex:1;font-size:12px;color:var(--t-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(sk.description || '') + '</span>' +
+            '<span style="flex:1;font-size:12px;color:var(--t-textMuted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(sk.description || '') + '</span>' +
             '<button class="btn btn-sm sibling-queue-btn" data-sibling="' + esc(sk.name) + '"' + (sQueued ? ' data-semantic-disabled="true"' : '') + '>' + (sQueued ? '✓ In list' : '+ Add to list') + '</button>' +
             '</div>';
         }).join('') + '</div>';
@@ -2000,7 +2007,9 @@ document.addEventListener('DOMContentLoaded', function(){
     var qk = li.getAttribute('data-key');
     state.selectedSearchKey = qk;
     resultsEl.querySelectorAll('li[data-key]').forEach(function(node){
-      node.classList.toggle('selected', node.getAttribute('data-key') === qk);
+      var isSel = node.getAttribute('data-key') === qk;
+      node.classList.toggle('selected', isSel);
+      node.setAttribute('aria-selected', String(isSel));
     });
     showSearchDetail(selectedSearchResult());
     play('select');
@@ -2029,7 +2038,9 @@ document.addEventListener('DOMContentLoaded', function(){
     var qk = li.getAttribute('data-key');
     state.selectedSearchKey = qk;
     resultsEl.querySelectorAll('li[data-key]').forEach(function(node){
-      node.classList.toggle('selected', node.getAttribute('data-key') === qk);
+      var isSel = node.getAttribute('data-key') === qk;
+      node.classList.toggle('selected', isSel);
+      node.setAttribute('aria-selected', String(isSel));
     });
     showSearchDetail(selectedSearchResult());
     play('select');

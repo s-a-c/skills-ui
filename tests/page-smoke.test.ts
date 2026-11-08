@@ -407,11 +407,17 @@ describe("S-186 manual-smoke pins (bugs 4/5 written failing-first on 0.5.3)", ()
 
       await page!.locator("#searchInput").fill("skill");
       await pwExpect(page!.locator("#results li")).toHaveCount(2);
-      // First search result is auto-selected in #detailPane
+      // First search result is auto-selected in #detailPane and carries aria-selected="true"
+      const firstResult = page!.locator("#results li", { hasText: "perf-skill-000" });
+      const secondResult = page!.locator("#results li", { hasText: "fresh-skill" });
+      await pwExpect(firstResult).toHaveAttribute("aria-selected", "true");
+      await pwExpect(secondResult).toHaveAttribute("aria-selected", "false");
       await pwExpect(page!.locator("#detailPane .detail-title")).toHaveText("perf-skill-000");
 
       // Click second search result to inspect in #detailPane and browse sibling skills on demand
-      await page!.locator("#results li", { hasText: "fresh-skill" }).click();
+      await secondResult.click();
+      await pwExpect(firstResult).toHaveAttribute("aria-selected", "false");
+      await pwExpect(secondResult).toHaveAttribute("aria-selected", "true");
       await pwExpect(page!.locator("#detailPane .detail-title")).toHaveText("fresh-skill");
       await page!.locator("#browseSourceBtn").click();
       await pwExpect(page!.locator("#installAllSourceBtn")).toBeVisible();
