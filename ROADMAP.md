@@ -12,7 +12,8 @@ flowchart TB
   M5 --> M5A["0.5.1 — security hardening"]
   M5A --> M5B["0.5.2 — UI/UX consistency (web + TUI)"]
   M5B --> M5C["0.5.3 — performance: retrieval · filtering · search"]
-  M5C --> MX["later 0.x — @opentui/ssh serving · musl/win targets · upstream serve convergence"]
+  M5C --> M5D["0.5.4 — WebUI unified split-pane & ergonomic controls"]
+  M5D --> MX["later 0.x — @opentui/ssh serving · musl/win targets · upstream serve convergence"]
 ```
 
 ## Milestones
@@ -28,6 +29,7 @@ flowchart TB
 | 0.5.1 | Security hardening: comprehensive audit + fixes across serve API, hosted page + installer + release pipeline, dependencies/supply chain (map [S-142](https://linear.app/s-a-c/issue/S-142/skills-ui-051-security-hardening-wayfinder-map)) | **done** — S-156–S-159 shipped, `v0.5.1` tagged (signed) + released 2026-10-30, all 9 should-fixes + rate limiting; GATES-0.5.1 **8/8** (G7 smoke 2026-10-31; it surfaced two real bugs, hotfixed: renderList scope error `f34572d` page-live, Bun idle-timeout kill `5d7978a` binary→0.5.2) |
 | 0.5.2 | UI/UX consistency across web (local `--web` + hosted) and TUI: audits → divergence matrix → ratified fix slice (map [S-143](https://linear.app/s-a-c/issue/S-143/skills-ui-052-uiux-consistency-wayfinder-map-web-tui)) | **done** — S-161–S-168 shipped, `v0.5.2` tagged (signed) + released 2026-11-01, all ten ratified items + the hallmark floor pass (sloplint 0 FAIL, 24b waived+stamped); GATES-0.5.2 **8/8** (G7 smoke 2026-11-01, clean pass) |
 | 0.5.3 | Performance of retrieval, filtering, search: baselines → ratified budgets + harness → fixes for the ratified hot paths (map [S-144](https://linear.app/s-a-c/issue/S-144/skills-ui-053-performance-wayfinder-map-retrieval-filtering)) | **done** — S-177–S-184 shipped, `v0.5.3` tagged (signed) + released 2026-11-01: serve cache + coalescing (real warm global 50–60 s → 0.1 ms), detail-by-path (0 spawns), web filter debounce + keyed DOM reuse (0 rebuilds/0 replays, 0.9 ms render work), search dedup + stale guards (both UIs), TUI SWR (0.5 ms real index paint vs 300 ms budget) + visibleSkills compute-once, hallmark 24b re-space (57 → 0, sloplint clean), runtime-dash sweep; GATES-0.5.3 7/7 (11/11 synthetic budget MET + real evidence; upstream ls floor accepted-with-reason) |
+| 0.5.4 | WebUI unified split-pane (`#listPane` + `#detailPane` for Installed, Search, Install, and Update), compact 4px-grid button/control sizing + dedicated `.sort-row`, and user-adjustable `#listPane` width (`#listSplitter` + `#settings` slider persisted in `UiPreferences.listWidth`) (map [S-234](https://linear.app/s-a-c/issue/S-234/skills-ui-054-webui-unified-split-pane-and-ergonomic-controls)) | **done** — S-235–S-240 implemented and verified; 303 bun tests + 47 Playwright e2e + 11/11 perf budgets + sloplint 0 FAIL + binary selftest green (`GATES-0.5.4.md` 5/5) |
 
 ## Hosted UI (0.5.x, shipped)
 

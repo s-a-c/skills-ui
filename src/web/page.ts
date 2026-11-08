@@ -10,7 +10,12 @@ import {
   type CatppuccinPalette,
   type ThemeTokens,
 } from '../core/theme.ts';
-import { DEFAULT_UI_PREFERENCES, type UiPreferences } from '../core/prefs.ts';
+import {
+  DEFAULT_UI_PREFERENCES,
+  LIST_WIDTH_MIN,
+  LIST_WIDTH_MAX,
+  type UiPreferences,
+} from '../core/prefs.ts';
 import type { UiSeed } from '../core/seed.ts';
 
 function cssVarsFor(tokens: ThemeTokens, palette: CatppuccinPalette): string {
@@ -63,6 +68,10 @@ body{
   background:var(--t-bg);color:var(--t-text);
   font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   transition:background .35s ease,color .35s ease;
+  display:flex;flex-direction:column;height:100vh;overflow:hidden;
+}
+@media (max-width:720px){
+  body{height:auto;min-height:100vh;overflow-y:auto}
 }
 button,input,select{font:inherit;color:inherit}
 :root{
@@ -101,13 +110,14 @@ header{
 
 nav.tabs{display:flex;gap:4px;margin-left:8px;position:relative}
 .tab{
-  border:0;background:transparent;padding:8px 12px;border-radius:9px;cursor:pointer;
+  border:0;background:transparent;font-size:13px;line-height:1.2;padding:4px 12px;min-height:28px;border-radius:6px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:4px;
   color:var(--t-textMuted);transition:background calc(.18s * var(--motion-scale)) var(--ease),color .18s var(--ease),transform .18s var(--ease);
 }
 .tab:hover{background:var(--t-surfaceAlt);color:var(--t-text);transform:translateY(-1px)}
 .tab[aria-selected="true"]{background:var(--t-selectionBg);color:var(--t-selectionText);font-weight:600}
 .tab:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
-  outline:2px solid var(--t-focusRing);outline-offset:2px;border-radius:9px;
+  outline:2px solid var(--t-focusRing);outline-offset:2px;border-radius:6px;
 }
 
 .top-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
@@ -119,10 +129,11 @@ nav.tabs{display:flex;gap:4px;margin-left:8px;position:relative}
   .top-actions{flex-wrap:wrap;row-gap:8px}
 }
 .scope-toggle{
-  display:inline-flex;border:1px solid var(--t-border);border-radius:999px;overflow:hidden;
+  display:inline-flex;border:1px solid var(--t-border);border-radius:6px;overflow:hidden;
 }
 .scope-toggle button{
-  border:0;background:transparent;padding:4px 12px;cursor:pointer;color:var(--t-textMuted);
+  border:0;background:transparent;font-size:12.5px;line-height:1.2;padding:4px 8px;min-height:28px;cursor:pointer;color:var(--t-textMuted);
+  display:inline-flex;align-items:center;justify-content:center;
   transition:background calc(.18s * var(--motion-scale)) var(--ease),color calc(.18s * var(--motion-scale)) var(--ease);
 }
 .scope-toggle button[aria-pressed="true"]{
@@ -132,12 +143,14 @@ nav.tabs{display:flex;gap:4px;margin-left:8px;position:relative}
 
 /* ---------- buttons ---------- */
 .btn{
-  border:1px solid var(--t-border);background:var(--t-surfaceAlt);border-radius:9px;
-  padding:8px 12px;cursor:pointer;color:var(--t-text);font-weight:500;position:relative;overflow:hidden;
+  border:1px solid var(--t-border);background:var(--t-surfaceAlt);border-radius:6px;
+  font-size:13px;line-height:1.2;padding:4px 12px;min-height:28px;cursor:pointer;color:var(--t-text);font-weight:500;position:relative;overflow:hidden;
+  display:inline-flex;align-items:center;justify-content:center;gap:4px;
   transition:transform calc(.16s * var(--motion-scale)) var(--ease),box-shadow .16s var(--ease),background .16s var(--ease),border-color .16s var(--ease);
 }
-.btn:hover{transform:translateY(-2px);box-shadow:0 4px 14px color-mix(in srgb,var(--t-primary) 30%,transparent);border-color:var(--t-primary)}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px color-mix(in srgb,var(--t-primary) 30%,transparent);border-color:var(--t-primary)}
 .btn:active{transform:translateY(0) scale(.98)}
+.btn.btn-sm{padding:4px 8px;font-size:12px;line-height:1.2;min-height:24px}
 .btn.primary{background:var(--t-primary);border-color:var(--t-primary);color:var(--t-primaryText)}
 .btn.primary:hover{box-shadow:0 6px 18px color-mix(in srgb,var(--t-primary) 45%,transparent);filter:brightness(1.06)}
 .btn.danger{background:var(--t-danger);border-color:var(--t-danger);color:var(--t-dangerText)}
@@ -151,23 +164,41 @@ nav.tabs{display:flex;gap:4px;margin-left:8px;position:relative}
 /* S-186: icon-only header buttons. The glyph carries the state (filled/
    empty connect dot, sun/moon); aria-label + title carry the words; the
    square frame keeps a 32px hit target on the 4px grid. */
-.btn.btn-icon{padding:8px;min-width:32px;min-height:32px;line-height:1;text-align:center}
+.btn.btn-icon{padding:4px;min-width:32px;min-height:32px;line-height:1;text-align:center}
 .btn.btn-icon svg{display:block}
 
 /* ---------- layout ---------- */
-/* main height tracks the header bar; 66px is the measured header height
-   after the 24b re-space (S-181) so main ends exactly at the viewport edge. */
-main{display:grid;grid-template-columns:minmax(min(320px,40%),35%) 1fr;gap:0;height:calc(100vh - 66px)}
-#listPane{border-right:1px solid var(--t-border);display:flex;flex-direction:column;min-height:0}
-#detailPane{overflow:auto;overflow-x:hidden;padding:24px 28px;min-height:0}
-.filter-row{padding:12px 16px 8px;display:flex;gap:8px;align-items:center}
-#filter{
-  width:100%;padding:8px 12px;border-radius:10px;border:1px solid var(--t-border);
+main{
+  flex:1;min-height:0;display:grid;
+  grid-template-columns:var(--list-col,minmax(min(320px,40%),35%)) 0px 1fr;
+  gap:0;position:relative;
+}
+@media (max-width:720px){
+  main{grid-template-columns:minmax(min(320px,40%),35%) 1fr !important}
+  #listSplitter{display:none}
+}
+#listPane{border-right:1px solid var(--t-border);display:flex;flex-direction:column;min-height:0;min-width:0}
+#listSplitter{
+  width:8px;margin-left:-4px;height:100%;cursor:col-resize;position:relative;z-index:15;
+  touch-action:none;user-select:none;
+}
+#listSplitter::after{
+  content:"";position:absolute;top:0;bottom:0;left:3px;width:2px;
+  background:transparent;transition:background .16s var(--ease);
+}
+#listSplitter:hover::after,#listSplitter:focus-visible::after,#listSplitter.dragging::after{
+  background:var(--t-primary);
+}
+#detailPane{overflow:auto;overflow-x:hidden;padding:24px 28px;min-height:0;min-width:0}
+.filter-row{padding:8px 16px 4px;display:flex;gap:8px;align-items:center}
+.sort-row{padding:4px 16px;border-bottom:1px solid var(--t-border);display:flex;align-items:center;gap:8px}
+#filter,#searchInput{
+  width:100%;flex:1;min-width:0;padding:4px 12px;min-height:28px;font-size:13px;border-radius:6px;border:1px solid var(--t-border);
   background:var(--t-surfaceAlt);color:var(--t-text);
   transition:border-color .18s var(--ease),box-shadow .18s var(--ease);
 }
-#filter::placeholder{color:var(--t-textMuted)}
-#filter:focus{outline:none;border-color:var(--t-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--t-primary) 25%,transparent)}
+#filter::placeholder,#searchInput::placeholder{color:var(--t-textMuted)}
+#filter:focus,#searchInput:focus{outline:none;border-color:var(--t-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--t-primary) 25%,transparent)}
 
 /* S-186: the Select all subheading, a quiet label row above the list;
    its checkbox is the tri-state master for the FILTERED set. S-187: the
@@ -184,7 +215,7 @@ main{display:grid;grid-template-columns:minmax(min(320px,40%),35%) 1fr;gap:0;hei
 /* the inline Clear must fit the line the master checkbox already sizes:
    12px text on a 1.2 leading stays under the label line box, so showing
    it can never grow the row */
-.sel-summary .btn{font-size:12px;line-height:1.2;padding:0 8px;border-radius:6px}
+.sel-summary .btn{font-size:12px;line-height:1.2;padding:0 8px;min-height:0;border-radius:6px}
 @media (max-width:560px){
   .list-head{gap:4px;padding:4px 8px}
   .sel-summary{gap:4px}
@@ -321,54 +352,29 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
 .readme .md-table th,.readme .md-table td{border:1px solid var(--t-border);padding:4px 8px;text-align:left;vertical-align:top}
 .readme .md-table th{background:var(--t-surfaceAlt);font-weight:600}
 
-/* ---------- search ---------- */
-#searchView{display:none;padding:24px 28px;overflow:auto;height:100%}
-.view-search main{grid-template-columns:1fr}
-#searchView{display:block}
-.subtabs{display:flex;gap:8px;margin:0 0 16px}
-.subtabs button{
-  border:1px solid var(--t-border);background:transparent;border-radius:999px;padding:4px 12px;
-  cursor:pointer;color:var(--t-textMuted);font-weight:500;
-  transition:background .16s var(--ease),border-color .16s var(--ease),color .16s var(--ease);
-}
-.subtabs button[aria-selected="true"]{background:var(--t-primary);border-color:var(--t-primary);color:var(--t-primaryText);font-weight:600}
-.subtabs button:hover:not([aria-selected="true"]){background:var(--t-surfaceAlt);color:var(--t-text)}
-#queueList{list-style:none;margin:20px 0 0;padding:0;display:grid;gap:8px;max-width:860px}
-#queueList li{
-  display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--t-border);
-  border-radius:12px;background:var(--t-surface);
-  transition:border-color .16s var(--ease),box-shadow .16s var(--ease);
-  animation:rise .3s var(--ease) backwards;
-}
-#queueList li:hover{border-color:var(--t-primary)}
-#queueList .q-name{font-weight:600}
-#queueList .q-source{color:var(--t-textMuted);font-size:12.5px;font-family:ui-monospace,Menlo,monospace;margin-left:auto}
-#queueList .q-remove{
-  border:0;background:transparent;color:var(--t-textMuted);cursor:pointer;font-size:16px;padding:4px 8px;border-radius:6px;
-}
-#queueList .q-remove:hover{color:var(--t-danger);background:color-mix(in srgb,var(--t-danger) 15%,transparent)}
+/* ---------- search (unified inside #listPane + #detailPane) ---------- */
 .add-btn.added{background:color-mix(in srgb,var(--a-green) 18%,transparent);border-color:var(--a-green);color:var(--t-text);cursor:default}
 .add-btn.added:hover{transform:none;box-shadow:none}
-.search-row{display:flex;gap:12px;max-width:720px}
-#searchInput{
-  flex:1;padding:12px 16px;border-radius:12px;border:1px solid var(--t-border);
-  background:var(--t-surfaceAlt);color:var(--t-text);font-size:15px;
-  transition:border-color .18s var(--ease),box-shadow .18s var(--ease);
-}
-#searchInput:focus{outline:none;border-color:var(--t-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--t-primary) 25%,transparent)}
-#results{list-style:none;margin:24px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+#results{list-style:none;margin:0;padding:8px 12px 20px;overflow:auto;flex:1}
 #results li{
-  border:1px solid var(--t-border);border-radius:14px;background:var(--t-surface);padding:16px;
+  padding:12px;border-radius:10px;cursor:pointer;position:relative;margin-bottom:4px;
+  border:1px solid var(--t-border);background:var(--t-surface);
   display:flex;flex-direction:column;gap:8px;
-  transition:transform calc(.2s * var(--motion-scale)) var(--ease),box-shadow .2s var(--ease),border-color .2s var(--ease);
-  animation:rise calc(.4s * var(--motion-scale)) var(--ease) backwards;
-  animation-delay:calc(var(--i) * 40ms * var(--motion-scale));
+  transition:background .18s var(--ease),transform calc(.18s * var(--motion-scale)) var(--ease),border-color .18s var(--ease);
+  animation:rise calc(.35s * var(--motion-scale)) var(--ease) backwards;
+  animation-delay:calc(var(--i) * 28ms * var(--motion-scale));
 }
-#results li:hover{transform:translateY(-3px);box-shadow:0 10px 26px color-mix(in srgb,var(--a-mauve) 22%,transparent);border-color:var(--t-primary)}
-.result-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+#results li:hover{background:var(--t-surfaceAlt);border-color:var(--t-primary)}
+#results li[aria-selected="true"]{
+  background:var(--t-selectionBg);color:var(--t-selectionText);border-color:var(--t-primary);
+}
+#results li[aria-selected="true"] .result-source,
+#results li[aria-selected="true"] .result-installs{color:var(--t-selectionText)}
+.result-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .result-name{font-weight:700}
-.result-installs{color:var(--t-textMuted);font-size:12px;white-space:nowrap}
-.result-source{color:var(--t-textMuted);font-size:12.5px;font-family:ui-monospace,Menlo,monospace}
+.result-installs{color:var(--t-textMuted);font-size:12px;white-space:nowrap;margin-left:auto}
+.result-source{color:var(--t-textMuted);font-size:12.5px;font-family:ui-monospace,Menlo,monospace;overflow-wrap:anywhere}
+.result-actions{display:flex;gap:8px;flex-wrap:wrap}
 
 /* ---------- settings drawer ---------- */
 #settings{
@@ -390,10 +396,13 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
 .setting{margin-bottom:20px}
 .setting label{display:block;font-weight:600;margin-bottom:8px}
 .setting .hint{color:var(--t-textMuted);font-size:12px;margin-top:8px}
+.setting-inline{display:flex;align-items:center;gap:8px}
+#listWidthRange{flex:1;accent-color:var(--t-primary)}
 .hint-lines span{display:block}
-.seg{display:inline-flex;border:1px solid var(--t-border);border-radius:10px;overflow:hidden;width:100%}
+.seg{display:inline-flex;border:1px solid var(--t-border);border-radius:6px;overflow:hidden;width:100%}
 .seg button{
-  flex:1;border:0;background:transparent;padding:8px 4px;cursor:pointer;color:var(--t-textMuted);
+  flex:1;border:0;background:transparent;font-size:12.5px;line-height:1.2;padding:4px 8px;min-height:28px;cursor:pointer;color:var(--t-textMuted);
+  display:inline-flex;align-items:center;justify-content:center;
   transition:background .16s var(--ease),color .16s var(--ease);
 }
 .seg button[aria-pressed="true"]{background:var(--t-primary);color:var(--t-primaryText);font-weight:600}
@@ -485,7 +494,8 @@ var state = {
   updateCheckSeq: { project: 0, global: 0 },
   seedHold: false,
   queue: [],
-  sview: 'results',
+  selectedSearchKey: null,
+  sourceSkillsCache: {},
   agentFilter: null,
   backend: '',
   token: ''
@@ -564,6 +574,28 @@ function play(kind){
 }
 
 /* ---------- prefs ---------- */
+var LIST_W_MIN = ${LIST_WIDTH_MIN}, LIST_W_MAX = ${LIST_WIDTH_MAX};
+function clampListWidth(v){
+  var n = Number(v);
+  if (!Number.isFinite(n)) return null;
+  return Math.max(LIST_W_MIN, Math.min(LIST_W_MAX, Math.round(n)));
+}
+function applyListWidth(raw){
+  var w = raw == null ? null : clampListWidth(raw);
+  var mainEl = document.querySelector('main');
+  var splitter = $('#listSplitter');
+  var range = $('#listWidthRange');
+  var valEl = $('#listWidthValue');
+  if (mainEl) {
+    if (w === null) mainEl.style.removeProperty('--list-col');
+    else mainEl.style.setProperty('--list-col', 'min(' + w + 'px, 60vw)');
+  }
+  var measured = w !== null ? w : Math.round(($('#listPane') && $('#listPane').getBoundingClientRect().width) || 448);
+  var clamped = clampListWidth(measured) || 448;
+  if (splitter) splitter.setAttribute('aria-valuenow', String(clamped));
+  if (range) range.value = String(clamped);
+  if (valEl) valEl.textContent = w === null ? 'Auto (35%)' : (w + ' px');
+}
 function setPrefs(patch){
   state.prefs = Object.assign({}, state.prefs, patch);
   applyPrefs();
@@ -590,6 +622,7 @@ function applyPrefs(){
   }
   var themeBtns = document.querySelectorAll('[data-theme-choice]');
   themeBtns.forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-theme-choice') === state.prefs.theme)); });
+  applyListWidth(state.prefs.listWidth);
 }
 
 /* ---------- toasts ---------- */
@@ -622,7 +655,18 @@ function probeBackend(base, token, onStatus){
     return fetch(url + '/api/prefs', { headers: { authorization: 'Bearer ' + token } }).then(function(r2){
       if (r2.status === 401) throw new Error('bad-token');
       if (!r2.ok) throw new Error('unreachable');
-      return v;
+      return r2.json().catch(function(){ return null; }).then(function(p){
+        if (p && typeof p === 'object') {
+          if (p.theme === 'mocha' || p.theme === 'latte') state.prefs.theme = p.theme;
+          if (typeof p.sound === 'boolean') state.prefs.sound = p.sound;
+          if (p.reduceMotion === 'auto' || typeof p.reduceMotion === 'boolean') state.prefs.reduceMotion = p.reduceMotion;
+          if (p.listWidth === null || typeof p.listWidth === 'number') {
+            state.prefs.listWidth = p.listWidth === null ? null : clampListWidth(p.listWidth);
+          }
+          applyPrefs();
+        }
+        return v;
+      });
     });
   }).catch(function(e){
     var msg = e && e.message;
@@ -731,6 +775,7 @@ function loadSkills(){
   return api('/api/skills?scope='+scope).then(function(data){
     if(!owns())return;
     state.skills=data.skills;renderList();
+    if(state.tab!=='installed')return;
     if(!data.skills.length){
       detailSeq++; /* S-204: the empty pane replaces any detail still in flight */
       $('#detailPane').innerHTML='<div class="empty">No '+scope+' skills installed.<br>Open the <b>Search</b> tab to install one.</div>';
@@ -1094,6 +1139,7 @@ function showDetail(name){
      landing on a selection that no longer exists — must orphan any detail
      response already in flight. */
   var seq = ++detailSeq, scope = state.scope;
+  if (state.tab !== 'installed') return;
   var skill = state.skills.filter(function(s){ return s.name === name; })[0];
   if (!skill) return;
   var pane = $('#detailPane');
@@ -1126,7 +1172,7 @@ function showDetail(name){
   var readme = $('#readme'), capturedPath = skill.path;
   state.selectedPath = skill.path;
   function ownsDetail(){
-    return seq === detailSeq && scope === state.scope &&
+    return seq === detailSeq && state.tab === 'installed' && scope === state.scope &&
       state.selected === skill.name && readme && readme.isConnected &&
       capturedPath === state.selectedPath;
   }
@@ -1316,12 +1362,14 @@ function updateSkills(skills, global){
         // surface the sanitized output instead of a success-tone lie (G2/ST3).
         play('error');
         toast(clip(res.output, 240) || 'Update failed', 'error');
+        if (state.tab === 'search') refreshInstalledAll().then(renderResults);
         return loadSkills();
       }
       play('success');
       toast(all ? 'Update finished' : 'Updated ' + skills.join(', '), 'success');
       state.checked.clear();
       renderSelSummary();
+      if (state.tab === 'search') refreshInstalledAll().then(renderResults);
       return loadSkills();
     })
     .catch(function(e){ play('error'); toast(e.message, 'error'); })
@@ -1344,7 +1392,11 @@ function checkForUpdates(force){
       var updates = state.updates[scope];
       var n = Object.keys(updates).filter(function(k){ return updates[k].updateAvailable; }).length;
       renderList();
-      if (state.selected) showDetail(state.selected);
+      if (state.tab === 'installed' && state.selected) showDetail(state.selected);
+      if (state.tab === 'search') {
+        renderResults();
+        if (state.selectedSearchKey) showSearchDetail(selectedSearchResult());
+      }
       if (n > 0) toast(n + ' update' + (n === 1 ? '' : 's') + ' available', 'success');
       else if (force) toast('no updates available', 'success');
     })
@@ -1362,12 +1414,38 @@ function checkForUpdates(force){
 /* ---------- search ---------- */
 var searchTimer = null;
 var searchSeq = 0; /* S-182: monotonic token — a slow older response must never overwrite a newer render */
+function searchKeyOf(r){ return (r.source || r.slug || '') + '#' + (r.name || ''); }
+function inQueueKey(qk){ return state.queue.some(function(q){ return q.key === qk; }); }
+function selectedSearchResult(){
+  if (!state.selectedSearchKey) return null;
+  for (var i = 0; i < state.results.length; i++) {
+    if (searchKeyOf(state.results[i]) === state.selectedSearchKey) return state.results[i];
+  }
+  return null;
+}
+function sortedResults(){
+  var items = (state.results || []).slice();
+  if (state.sortBy === 'name') {
+    items.sort(function(a, b){ return (a.name || '').localeCompare(b.name || ''); });
+  } else if (state.sortBy === 'load') {
+    items.sort(function(a, b){ return (Number(b.installs) || 0) - (Number(a.installs) || 0); });
+  } else if (state.searchSortChecked) {
+    items.sort(function(a, b){
+      var ac = inQueueKey(searchKeyOf(a)) ? 0 : 1;
+      var bc = inQueueKey(searchKeyOf(b)) ? 0 : 1;
+      return ac - bc;
+    });
+  }
+  return items;
+}
 function runSearch(){
   var q = $('#searchInput').value.trim();
   if (searchTimer) clearTimeout(searchTimer);
   if (!q) {
     searchSeq++; /* clearing the input is newer state — any in-flight search is now stale */
-    state.results = []; state.searchFailed = false; renderResults();
+    state.results = []; state.searchFailed = false; state.selectedSearchKey = null;
+    renderResults(); renderSelSummary();
+    if (state.tab === 'search') showSearchDetail(null);
     /* clear only a search-owned busy slot — a non-search label (install etc.)
        in flight must survive clearing the input (S-182 review OPTIONAL 1) */
     if (($('#busyText').textContent || '').indexOf('Searching') === 0) setBusy(null);
@@ -1380,9 +1458,14 @@ function runSearch(){
     api('/api/search?q=' + encodeURIComponent(q))
       .then(function(d){
         if (seq !== searchSeq) return; /* …checked at resolve: stale, drop */
-        state.results = d.results;
+        state.results = d.results || [];
         state.searchFailed = !!d.failed;
+        if (!selectedSearchResult()) {
+          state.selectedSearchKey = state.results[0] ? searchKeyOf(state.results[0]) : null;
+        }
         renderResults();
+        renderSelSummary();
+        if (state.tab === 'search') showSearchDetail(selectedSearchResult());
         if (d.adjustedQuery) toast('No exact matches, showing results for “' + d.adjustedQuery + '”', 'success');
       })
       .catch(function(e){ if (seq !== searchSeq) return; play('error'); toast(e.message, 'error'); })
@@ -1402,10 +1485,49 @@ function refreshInstalledAll(){
     .then(function(rs){ state.installedAll = rs[0].skills.concat(rs[1].skills); })
     .catch(function(){ state.installedAll = state.skills; });
 }
+function installSingleSkill(source, name){
+  play('confirm');
+  setBusy('Installing ' + name + '…');
+  var scopeBtn = document.querySelector('.scope-toggle button[aria-pressed="true"]');
+  var installGlobal = scopeBtn ? scopeBtn.getAttribute('data-scope') === 'global' : false;
+  return api('/api/install', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ source: source, skill: name, global: installGlobal }) })
+    .then(function(res){
+      if (res.ok) {
+        play('success');
+        toast('Installed ' + name, 'success');
+        // A6: refresh the installed pools and re-render in place — the
+        // installed chip and disabled button appear without a tab re-entry.
+        return refreshInstalledAll().then(function(){
+          renderResults();
+          if (state.tab === 'search' && state.selectedSearchKey) showSearchDetail(selectedSearchResult());
+        });
+      }
+      play('error');
+      toast('Install failed for ' + name, 'error');
+    })
+    .catch(function(e){ play('error'); toast(e.message, 'error'); })
+    .finally(function(){ setBusy(null); });
+}
+function addToQueue(source, name){
+  var qk = source + '#' + name;
+  if (inQueueKey(qk)) return;
+  state.queue.push({ key: qk, source: source, name: name });
+  play('confirm');
+  toast('Added ' + name + ' to install list (' + state.queue.length + ')', 'success');
+  renderResults(); renderSelSummary(); updateSearchTabBadge();
+  if (state.tab === 'search' && state.selectedSearchKey) showSearchDetail(selectedSearchResult());
+}
+function removeFromQueue(qk){
+  state.queue = state.queue.filter(function(x){ return x.key !== qk; });
+  renderResults(); renderSelSummary(); updateSearchTabBadge();
+  if (state.tab === 'search' && state.selectedSearchKey) showSearchDetail(selectedSearchResult());
+}
 function renderResults(){
   var list = $('#results');
+  if (!list) return;
   list.innerHTML = '';
-  if (!state.results.length) {
+  var items = sortedResults();
+  if (!items.length) {
     if (state.searchFailed) {
       list.innerHTML = '<div class="empty search-error">search failed: skills.sh unreachable</div>';
       return;
@@ -1413,53 +1535,166 @@ function renderResults(){
     list.innerHTML = '<div class="empty">' + ($('#searchInput').value.trim() ? 'No results' : 'Type to search the skills.sh registry') + '</div>';
     return;
   }
-  state.results.forEach(function(r, i){
+  var scopeUpdates = state.updates[state.scope] || {};
+  items.forEach(function(r, i){
     var li = document.createElement('li');
+    var src = r.source || r.slug;
+    var qk = searchKeyOf(r);
     li.style.setProperty('--i', i);
+    li.setAttribute('data-key', qk);
+    li.setAttribute('role', 'option');
+    li.tabIndex = 0;
+    if (state.selectedSearchKey === qk) li.classList.add('selected');
     var installed = installedEntry(r.source, r.name);
     var sameScope = installed && installed.scope === state.scope;
-    var qk = (r.source || r.slug) + '#' + r.name;
-    var inQueue = state.queue.some(function(q){ return q.key === qk; });
+    var up = sameScope ? scopeUpdates[r.name] : null;
+    var inQueue = inQueueKey(qk);
     li.innerHTML =
+      '<input type="checkbox" class="result-check" aria-label="Select ' + esc(r.name) + '"' + (inQueue ? ' checked' : '') + '>' +
+      '<div class="skill-main">' +
       '<div class="result-head"><span class="result-name">' + esc(r.name) + '</span>' +
-      (installed ? '<span class="result-chip">installed' + (sameScope ? ' · ' + esc(installed.scope) : '') + '</span>' : '') +
+      (installed ? '<span class="result-chip">' + (up && up.updateAvailable ? 'update available' : 'installed') + (sameScope ? ' · ' + esc(installed.scope) : '') + '</span>' : '') +
       '<span class="result-installs">' + esc(String(r.installs)) + ' installs</span></div>' +
-      '<span class="result-source">' + esc(r.source || r.slug) + '</span>' +
-      '<div style="display:flex;gap:8px">' +
+      '<span class="result-source">' + esc(src) + '</span>' +
+      '<div class="result-actions">' +
       /* UI-05: inQueue/sameScope are independent reasons recorded as
          semantic markers; the writer reconciles busy on top at append. */
-      '<button class="btn add-btn' + (inQueue ? ' added' : '') + '"' + (inQueue ? ' data-semantic-disabled="true" title="Already in your install list"' : '') + '>' +
+      '<button class="btn btn-sm add-btn' + (inQueue ? ' added' : '') + '"' + (inQueue ? ' data-semantic-disabled="true" title="Already in your install list"' : '') + '>' +
       (inQueue ? '✓ In list' : '+ Add to list') + '</button>' +
-      '<button class="btn primary install-btn"' + (sameScope ? ' data-semantic-disabled="true" title="Already installed in ' + esc(state.scope) + ' scope"' : '') + '>' +
-      (sameScope ? 'Installed' : 'Install') + '</button></div>';
-    li.querySelector('.add-btn').addEventListener('click', function(){
-      if (state.queue.some(function(q){ return q.key === qk; })) return;
-      state.queue.push({ key: qk, source: r.source || r.slug, name: r.name });
-      play('confirm');
-      toast('Added ' + r.name + ' to install list (' + state.queue.length + ')', 'success');
-      renderResults(); renderQueue(); updateSearchTabBadge();
+      '<button class="btn btn-sm primary install-btn"' + (sameScope ? ' data-semantic-disabled="true" title="Already installed in ' + esc(state.scope) + ' scope"' : '') + '>' +
+      (sameScope ? 'Installed' : 'Install') + '</button></div></div>';
+    li.querySelector('.add-btn').addEventListener('click', function(ev){
+      ev.stopPropagation();
+      addToQueue(src, r.name);
     });
-    li.querySelector('.install-btn').addEventListener('click', function(){
-      play('confirm');
-      setBusy('Installing ' + r.name + '…');
-      var scopeBtn = document.querySelector('.scope-toggle button[aria-pressed="true"]');
-      var installGlobal = scopeBtn ? scopeBtn.getAttribute('data-scope') === 'global' : false;
-      api('/api/install', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ source: r.source || r.slug, skill: r.name, global: installGlobal }) })
-        .then(function(res){
-          if (res.ok) {
-            play('success');
-            toast('Installed ' + r.name, 'success');
-            // A6: refresh the installed pools and re-render in place — the
-            // installed chip and disabled button appear without a tab re-entry.
-            refreshInstalledAll().then(renderResults);
-          }
-          else { play('error'); toast('Install failed for ' + r.name, 'error'); }
+    li.querySelector('.install-btn').addEventListener('click', function(ev){
+      ev.stopPropagation();
+      installSingleSkill(src, r.name);
+    });
+    list.appendChild(li);
+    syncButtons(li); /* UI-05: newly attached .btn nodes inherit busy/semantic state */
+  });
+}
+
+function showSearchDetail(r){
+  if (state.tab !== 'search') return;
+  var pane = $('#detailPane');
+  if (!pane) return;
+  if (!r) {
+    pane.innerHTML = '<div class="empty">Select a search result to inspect its source and install options.</div>';
+    return;
+  }
+  var src = r.source || r.slug || '';
+  var qk = searchKeyOf(r);
+  var installed = installedEntry(r.source, r.name);
+  var sameScope = installed && installed.scope === state.scope;
+  var scopeUpdates = state.updates[state.scope] || {};
+  var up = sameScope ? scopeUpdates[r.name] : null;
+  var inQueue = inQueueKey(qk);
+  var cachedSiblings = state.sourceSkillsCache[src];
+  var siblingsHtml = '';
+  if (Array.isArray(cachedSiblings)) {
+    if (!cachedSiblings.length) {
+      siblingsHtml = '<p class="hint">No sibling skills reported for ' + esc(src) + '.</p>';
+    } else {
+      siblingsHtml = '<div class="row" style="margin-bottom:8px;justify-content:space-between;align-items:center">' +
+        '<strong>Skills in ' + esc(src) + ' (' + cachedSiblings.length + ')</strong>' +
+        '<button class="btn btn-sm primary" id="installAllSourceBtn">Install all from source</button></div>' +
+        '<div style="display:grid;gap:4px">' +
+        cachedSiblings.map(function(sk){
+          var sqk = src + '#' + sk.name;
+          var sQueued = inQueueKey(sqk);
+          var sInst = installedEntry(src, sk.name);
+          var sSame = sInst && sInst.scope === state.scope;
+          return '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--t-surface);border:1px solid var(--t-border);border-radius:6px">' +
+            '<span style="font-weight:600;color:var(--t-accent);font-size:13px">' + esc(sk.name) + '</span>' +
+            (sInst ? '<span class="chip">installed' + (sSame ? ' · ' + esc(sInst.scope) : '') + '</span>' : '') +
+            '<span style="flex:1;font-size:12px;color:var(--t-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(sk.description || '') + '</span>' +
+            '<button class="btn btn-sm sibling-queue-btn" data-sibling="' + esc(sk.name) + '"' + (sQueued ? ' data-semantic-disabled="true"' : '') + '>' + (sQueued ? '✓ In list' : '+ Add to list') + '</button>' +
+            '</div>';
+        }).join('') + '</div>';
+    }
+  } else if (src) {
+    siblingsHtml = '<button class="btn" id="browseSourceBtn">Browse skills in ' + esc(src) + '</button>';
+  }
+  pane.innerHTML =
+    '<div class="detail-head">' +
+      '<div>' +
+        '<h2 class="detail-title">' + esc(r.name) + '</h2>' +
+        '<div class="detail-meta">' +
+          '<span class="chip accent">' + esc(src) + '</span>' +
+          '<span class="chip">' + esc(String(r.installs)) + ' installs</span>' +
+          '<span class="chip">target: ' + esc(state.scope) + '</span>' +
+          (installed ? '<span class="chip">installed (' + esc(installed.scope) + ')</span>' : '') +
+          (up && up.updateAvailable ? '<span class="chip update" title="' + esc((up.installedHash || '').slice(0, 7) + ' → ' + (up.upstreamHash || '').slice(0, 7)) + '">update available</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="detail-actions">' +
+        '<button class="btn" id="detailQueueToggleBtn">' + (inQueue ? 'Remove from list' : '+ Add to list') + '</button>' +
+        '<button class="btn primary" id="detailInstallBtn"' + (sameScope ? ' data-semantic-disabled="true" title="Already installed in ' + esc(state.scope) + ' scope"' : '') + '>' + (sameScope ? 'Installed' : 'Install') + '</button>' +
+        (sameScope ? '<button class="btn' + (up && up.updateAvailable ? ' primary' : '') + '" id="detailUpdateBtn">Update</button>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="md">' +
+      '<p>Registry skill <code>' + esc(r.name) + '</code> from <code>' + esc(src) + '</code> (' + esc(String(r.installs)) + ' recorded installs on skills.sh).</p>' +
+      '<div id="sourceSkillsBox" style="margin-top:16px">' + siblingsHtml + '</div>' +
+    '</div>';
+  syncButtons(pane);
+  var qBtn = $('#detailQueueToggleBtn');
+  if (qBtn) {
+    qBtn.addEventListener('click', function(){
+      if (inQueueKey(qk)) removeFromQueue(qk);
+      else addToQueue(src, r.name);
+    });
+  }
+  var iBtn = $('#detailInstallBtn');
+  if (iBtn) {
+    iBtn.addEventListener('click', function(){ installSingleSkill(src, r.name); });
+  }
+  var uBtn = $('#detailUpdateBtn');
+  if (uBtn) {
+    uBtn.addEventListener('click', function(){ updateSkills([r.name], state.scope === 'global'); });
+  }
+  var bBtn = $('#browseSourceBtn');
+  if (bBtn) {
+    bBtn.addEventListener('click', function(){
+      setBusy('Discovering skills in ' + src + '…');
+      api('/api/source-skills?source=' + encodeURIComponent(src))
+        .then(function(d){
+          state.sourceSkillsCache[src] = d.skills || [];
+          if (state.tab === 'search' && state.selectedSearchKey === qk) showSearchDetail(r);
         })
         .catch(function(e){ play('error'); toast(e.message, 'error'); })
         .finally(function(){ setBusy(null); });
     });
-    list.appendChild(li);
-    syncButtons(li); /* UI-05: newly attached .btn nodes inherit busy/semantic state */
+  }
+  var allSrcBtn = $('#installAllSourceBtn');
+  if (allSrcBtn) {
+    allSrcBtn.addEventListener('click', function(){
+      setBusy('Installing all skills from ' + src + '…');
+      api('/api/install', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ source: src, skills: ['*'], global: state.scope === 'global' }) })
+        .then(function(res){
+          if (res.ok) {
+            play('success');
+            toast('Installed skills from ' + src, 'success');
+            refreshInstalledAll().then(function(){
+              renderResults();
+              if (state.tab === 'search' && state.selectedSearchKey === qk) showSearchDetail(r);
+            });
+          } else {
+            play('error');
+            toast(clip(res.output, 240) || 'Install failed', 'error');
+          }
+        })
+        .catch(function(e){ play('error'); toast(e.message, 'error'); })
+        .finally(function(){ setBusy(null); });
+    });
+  }
+  pane.querySelectorAll('.sibling-queue-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var sName = btn.getAttribute('data-sibling');
+      if (sName) addToQueue(src, sName);
+    });
   });
 }
 
@@ -1467,37 +1702,11 @@ function renderResults(){
 function updateSearchTabBadge(){
   var searchTab = document.querySelector('[data-tab="search"]');
   if (searchTab) searchTab.textContent = 'Search' + (state.queue.length ? ' (' + state.queue.length + ')' : '');
-}
-function renderQueue(){
-  var list = $('#queueList');
-  list.innerHTML = '';
-  state.queue.forEach(function(q){
-    var li = document.createElement('li');
-    li.innerHTML =
-      '<span class="q-name">' + esc(q.name) + '</span>' +
-      '<span class="q-source">' + esc(q.source) + '</span>' +
-      '<button class="q-remove" aria-label="Remove ' + esc(q.name) + ' from list">✕</button>';
-    li.querySelector('.q-remove').addEventListener('click', function(){
-      state.queue = state.queue.filter(function(x){ return x.key !== q.key; });
-      renderQueue(); renderResults(); updateSearchTabBadge();
-    });
-    list.appendChild(li);
-  });
-  $('#qCount').textContent = String(state.queue.length);
-  var empty = state.queue.length === 0;
-  list.style.display = empty ? 'none' : 'grid';
-  $('#queueActions').style.display = empty || state.sview !== 'selected' ? 'none' : 'flex';
-  var searchRow = document.querySelector('.search-row');
-  searchRow.style.display = state.sview === 'results' ? 'flex' : 'none';
-  $('#results').style.display = state.sview === 'results' ? 'grid' : 'none';
-  list.style.display = state.sview === 'selected' && !empty ? 'grid' : 'none';
-}
-function setSview(view){
-  state.sview = view;
-  document.querySelectorAll('[data-sview]').forEach(function(b){
-    b.setAttribute('aria-selected', String(b.getAttribute('data-sview') === view));
-  });
-  renderQueue(); play('select');
+  var iqBtn = $('#installQueueBtn');
+  if (iqBtn) {
+    iqBtn.style.display = state.queue.length ? '' : 'none';
+    iqBtn.textContent = 'Install selected (' + state.queue.length + ')';
+  }
 }
 function installQueue(){
   var groups = new Map();
@@ -1516,10 +1725,13 @@ function installQueue(){
   var next = function(){
     if (!entries.length) {
       state.queue = [];
-      renderQueue(); renderResults(); updateSearchTabBadge();
+      renderResults(); renderSelSummary(); updateSearchTabBadge();
       if (failed) { play('error'); toast('Installed ' + (total - failed) + ', failed ' + failed, 'error'); }
       else { play('success'); toast('Installed ' + total + ' skill' + (total === 1 ? '' : 's'), 'success'); }
-      setSview('results');
+      refreshInstalledAll().then(function(){
+        renderResults();
+        if (state.tab === 'search' && state.selectedSearchKey) showSearchDetail(selectedSearchResult());
+      });
       loadSkills();
       return;
     }
@@ -1539,14 +1751,30 @@ function setTab(tab){
   cancelFilterRender(); // S-180: a pending filter render must not fire into another view
   state.tab = tab;
   document.querySelectorAll('.tab').forEach(function(t){ t.setAttribute('aria-selected', String(t.getAttribute('data-tab') === tab)); });
-  var searchTab = document.querySelector('[data-tab="search"]');
-  if (searchTab) searchTab.textContent = 'Search' + (state.queue.length ? ' (' + state.queue.length + ')' : '');
+  updateSearchTabBadge();
   document.body.classList.toggle('view-search', tab === 'search');
-  $('#listPane').style.display = tab === 'installed' ? 'flex' : 'none';
-  $('#detailPane').style.display = tab === 'installed' ? 'block' : 'none';
-  $('#searchView').style.display = tab === 'search' ? 'block' : 'none';
-  if (tab === 'search') { $('#searchInput').focus(); refreshInstalledAll().then(function(){ if (state.results.length) renderResults(); }); }
-  else if (tab === 'installed') loadSkills().then(function(){ return checkForUpdates(false); });
+  var isSearch = tab === 'search';
+  $('#listPane').setAttribute('aria-label', isSearch ? 'Registry search' : 'Installed skills');
+  $('#filter').style.display = isSearch ? 'none' : '';
+  $('#agentsWrap').style.display = isSearch ? 'none' : '';
+  $('#searchInput').style.display = isSearch ? '' : 'none';
+  $('#skillList').style.display = isSearch ? 'none' : '';
+  $('#results').style.display = isSearch ? '' : 'none';
+  var loadSortBtn = document.querySelector('[data-sort="load"]');
+  if (loadSortBtn) loadSortBtn.textContent = isSearch ? 'Installs' : 'Load order';
+  renderSelSummary();
+  if (isSearch) {
+    $('#searchInput').focus();
+    showSearchDetail(selectedSearchResult());
+    refreshInstalledAll().then(function(){
+      if (state.results.length) {
+        renderResults();
+        if (state.tab === 'search') showSearchDetail(selectedSearchResult());
+      }
+    });
+  } else if (tab === 'installed') {
+    loadSkills().then(function(){ return checkForUpdates(false); });
+  }
 }
 
 function uniqueAgents(){
@@ -1584,23 +1812,34 @@ function toggleAgentsPop(){
 function closeAgentsPop(){ $('#agentsPop').classList.remove('open'); }
 
 function renderSelSummary(){
-  var n = state.checked.size;
+  var isSearch = state.tab === 'search';
+  var n = isSearch ? state.queue.length : state.checked.size;
   /* S-187: count + Clear ride the Select all line (right-aligned); the row
      itself is permanent, so only the summary shows or hides. */
   $('#selSummary').classList.toggle('on', n > 0);
   $('#selCount').textContent = n;
   /* S-186: the selected-scope actions live in the top bar; they show only
      while a selection exists. */
-  $('#updateCheckedBtn').style.display = n ? '' : 'none';
-  $('#deleteCheckedBtn').style.display = n ? '' : 'none';
+  $('#updateCheckedBtn').style.display = (!isSearch && n) ? '' : 'none';
+  $('#deleteCheckedBtn').style.display = (!isSearch && n) ? '' : 'none';
+  updateSearchTabBadge();
   syncSelectAll();
 }
-/* S-186: the Select all master mirrors the FILTERED set. Checked when every
-   filtered row is checked, indeterminate when some are, unchecked when none
+/* S-186: the Select all master mirrors the active mode's visible set. Checked
+   when every row is checked, indeterminate when some are, unchecked when none
    are. Runs on every render pass and every selection change. */
 function syncSelectAll(){
   var box = $('#selectAllMaster');
   if (!box) return;
+  if (state.tab === 'search') {
+    var rItems = state.results || [];
+    var rn = 0;
+    rItems.forEach(function(r){ if (inQueueKey(searchKeyOf(r))) rn++; });
+    var rAll = rItems.length > 0 && rn === rItems.length;
+    box.checked = rAll;
+    box.indeterminate = rn > 0 && !rAll;
+    return;
+  }
   var items = filteredSkills();
   var n = 0;
   items.forEach(function(s){ if (state.checked.has(s.name)) n++; });
@@ -1611,11 +1850,15 @@ function syncSelectAll(){
 function setScope(scope){
   cancelFilterRender(); // S-180: a pending filter render must not fire into the other scope
   state.checked.clear();
-  renderSelSummary();
   detailSeq++; /* S-204: a scope switch orphans any detail still in flight */
   state.scope = scope;
   document.querySelectorAll('[data-scope]').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-scope') === scope)); });
+  renderSelSummary();
   play('select');
+  if (state.tab === 'search') {
+    renderResults();
+    if (state.selectedSearchKey) showSearchDetail(selectedSearchResult());
+  }
   loadSkills();
 }
 
@@ -1629,13 +1872,7 @@ document.addEventListener('DOMContentLoaded', function(){
   document.querySelectorAll('.tab').forEach(function(t){
     t.addEventListener('click', function(){ setTab(t.getAttribute('data-tab')); play('select'); });
   });
-  document.querySelectorAll('[data-sview]').forEach(function(b){
-    b.addEventListener('click', function(){ setSview(b.getAttribute('data-sview')); });
-  });
   $('#installQueueBtn').addEventListener('click', installQueue);
-  $('#clearQueueBtn').addEventListener('click', function(){
-    state.queue = []; renderQueue(); renderResults(); updateSearchTabBadge();
-  });
   document.querySelectorAll('[data-scope]').forEach(function(b){
     b.addEventListener('click', function(){ setScope(b.getAttribute('data-scope')); });
   });
@@ -1647,6 +1884,14 @@ document.addEventListener('DOMContentLoaded', function(){
   });
   $('#deleteCheckedBtn').addEventListener('click', deleteChecked);
   $('#clearCheckedBtn').addEventListener('click', function(){
+    if (state.tab === 'search') {
+      state.queue = [];
+      renderResults();
+      renderSelSummary();
+      updateSearchTabBadge();
+      if (state.selectedSearchKey) showSearchDetail(selectedSearchResult());
+      return;
+    }
     state.checked.clear(); renderList(); renderSelSummary();
   });
   $('#agentsBtn').addEventListener('click', function(){ toggleAgentsPop(); });
@@ -1664,9 +1909,25 @@ document.addEventListener('DOMContentLoaded', function(){
   });
   $('#connectState').addEventListener('click', openConnect);
   /* S-186: the master checkbox replaces the Select all button. Semantics
-     preserved from the button for the add direction (every FILTERED row,
+     preserved from the button for the add direction (every visible row,
      render + selection bar refreshed); all-checked now toggles off. */
   $('#selectAllMaster').addEventListener('change', function(){
+    if (state.tab === 'search') {
+      var rItems = state.results || [];
+      var rAll = rItems.length > 0 && rItems.every(function(r){ return inQueueKey(searchKeyOf(r)); });
+      rItems.forEach(function(r){
+        var qk = searchKeyOf(r);
+        if (rAll) {
+          state.queue = state.queue.filter(function(q){ return q.key !== qk; });
+        } else if (!inQueueKey(qk)) {
+          state.queue.push({ key: qk, source: r.source || r.slug, name: r.name });
+        }
+      });
+      play('confirm');
+      renderResults(); renderSelSummary(); updateSearchTabBadge();
+      if (state.selectedSearchKey) showSearchDetail(selectedSearchResult());
+      return;
+    }
     var items = filteredSkills();
     var all = items.length > 0 && items.every(function(s){ return state.checked.has(s.name); });
     items.forEach(function(s){
@@ -1678,11 +1939,13 @@ document.addEventListener('DOMContentLoaded', function(){
   document.querySelectorAll('[data-sort]').forEach(function(b){
     b.addEventListener('click', function(){
       state.sortBy = b.getAttribute('data-sort');
+      state.searchSortChecked = (state.sortBy === 'checked');
       document.querySelectorAll('[data-sort]').forEach(function(x){
         x.setAttribute('aria-pressed', String(x.getAttribute('data-sort') === state.sortBy));
       });
       play('select');
-      renderList();
+      if (state.tab === 'search') renderResults();
+      else renderList();
     });
   });
   /* S-180: row events are delegated on the persistent list — row nodes are
@@ -1728,6 +1991,145 @@ document.addEventListener('DOMContentLoaded', function(){
     selectSkill(rowNameOf(li));
     play('select');
   });
+
+  var resultsEl = $('#results');
+  resultsEl.addEventListener('click', function(ev){
+    if (ev.target.closest && ev.target.closest('input,button,a')) return;
+    var li = ev.target.closest ? ev.target.closest('li[data-key]') : null;
+    if (!li) return;
+    var qk = li.getAttribute('data-key');
+    state.selectedSearchKey = qk;
+    resultsEl.querySelectorAll('li[data-key]').forEach(function(node){
+      node.classList.toggle('selected', node.getAttribute('data-key') === qk);
+    });
+    showSearchDetail(selectedSearchResult());
+    play('select');
+  });
+  resultsEl.addEventListener('change', function(ev){
+    var box = ev.target;
+    if (!box.classList || !box.classList.contains('result-check')) return;
+    var li = box.closest ? box.closest('li[data-key]') : null;
+    if (!li) return;
+    var qk = li.getAttribute('data-key');
+    var hit = null;
+    for (var i = 0; i < state.results.length; i++) {
+      if (searchKeyOf(state.results[i]) === qk) { hit = state.results[i]; break; }
+    }
+    if (!hit) return;
+    if (box.checked) addToQueue(hit.source || hit.slug, hit.name);
+    else { removeFromQueue(qk); play('select'); }
+  });
+  resultsEl.addEventListener('keydown', function(ev){
+    if (ev.target instanceof Element &&
+        ev.target.closest('input,button,a,select,textarea,[contenteditable]')) return;
+    if (ev.key !== 'Enter' && ev.key !== ' ') return;
+    var li = ev.target.closest ? ev.target.closest('li[data-key]') : null;
+    if (!li) return;
+    ev.preventDefault();
+    var qk = li.getAttribute('data-key');
+    state.selectedSearchKey = qk;
+    resultsEl.querySelectorAll('li[data-key]').forEach(function(node){
+      node.classList.toggle('selected', node.getAttribute('data-key') === qk);
+    });
+    showSearchDetail(selectedSearchResult());
+    play('select');
+  });
+
+  /* S-238: user-adjustable #listPane width via #listSplitter + #settings */
+  var listWidthSaveTimer = null;
+  function persistListWidthDebounced(px){
+    if (listWidthSaveTimer) clearTimeout(listWidthSaveTimer);
+    listWidthSaveTimer = setTimeout(function(){
+      listWidthSaveTimer = null;
+      setPrefs({ listWidth: px });
+    }, 150);
+  }
+  var splitter = $('#listSplitter');
+  var mainEl = document.querySelector('main');
+  if (splitter && mainEl) {
+    var dragging = false;
+    splitter.addEventListener('pointerdown', function(ev){
+      if (ev.button && ev.button !== 0) return;
+      ev.preventDefault();
+      dragging = true;
+      splitter.classList.add('dragging');
+      if (splitter.setPointerCapture && ev.pointerId != null) {
+        try { splitter.setPointerCapture(ev.pointerId); } catch (_) {}
+      }
+    });
+    splitter.addEventListener('pointermove', function(ev){
+      if (!dragging) return;
+      var rect = mainEl.getBoundingClientRect();
+      var w = clampListWidth(ev.clientX - rect.left);
+      if (w != null) {
+        state.prefs.listWidth = w;
+        applyListWidth(w);
+      }
+    });
+    var endDrag = function(ev){
+      if (!dragging) return;
+      dragging = false;
+      splitter.classList.remove('dragging');
+      if (splitter.releasePointerCapture && ev && ev.pointerId != null) {
+        try { splitter.releasePointerCapture(ev.pointerId); } catch (_) {}
+      }
+      setPrefs({ listWidth: state.prefs.listWidth });
+    };
+    splitter.addEventListener('pointerup', endDrag);
+    splitter.addEventListener('pointercancel', endDrag);
+    splitter.addEventListener('dblclick', function(){
+      if (listWidthSaveTimer) clearTimeout(listWidthSaveTimer);
+      setPrefs({ listWidth: null });
+      play('confirm');
+    });
+    splitter.addEventListener('keydown', function(ev){
+      var step = ev.shiftKey ? 32 : 16;
+      var cur = state.prefs.listWidth != null
+        ? state.prefs.listWidth
+        : Math.round($('#listPane').getBoundingClientRect().width || 360);
+      if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') {
+        ev.preventDefault();
+        var nextW = clampListWidth(cur + (ev.key === 'ArrowRight' ? step : -step));
+        state.prefs.listWidth = nextW;
+        applyListWidth(nextW);
+        persistListWidthDebounced(nextW);
+      } else if (ev.key === 'Home') {
+        ev.preventDefault();
+        state.prefs.listWidth = LIST_W_MIN;
+        applyListWidth(LIST_W_MIN);
+        persistListWidthDebounced(LIST_W_MIN);
+      } else if (ev.key === 'End') {
+        ev.preventDefault();
+        state.prefs.listWidth = LIST_W_MAX;
+        applyListWidth(LIST_W_MAX);
+        persistListWidthDebounced(LIST_W_MAX);
+      } else if (ev.key === '0' || ev.key === 'Backspace' || ev.key === 'Delete') {
+        ev.preventDefault();
+        if (listWidthSaveTimer) clearTimeout(listWidthSaveTimer);
+        setPrefs({ listWidth: null });
+      }
+    });
+  }
+  var listWidthRange = $('#listWidthRange');
+  if (listWidthRange) {
+    listWidthRange.addEventListener('input', function(ev){
+      var w = clampListWidth(Number(ev.target.value));
+      if (w != null) {
+        state.prefs.listWidth = w;
+        applyListWidth(w);
+        persistListWidthDebounced(w);
+      }
+    });
+  }
+  var listWidthReset = $('#listWidthReset');
+  if (listWidthReset) {
+    listWidthReset.addEventListener('click', function(){
+      if (listWidthSaveTimer) clearTimeout(listWidthSaveTimer);
+      setPrefs({ listWidth: null });
+      play('confirm');
+    });
+  }
+
   /* S-180: the filter render is debounced (trailing edge) — the listener
      only arms the timer; no filtering happens until it fires. */
   $('#filter').addEventListener('input', scheduleFilterRender);
@@ -1968,6 +2370,7 @@ ${APP_CSS}
     </div>
     <button class="btn" id="checkUpdatesBtn">Check for updates</button>
     <button class="btn" id="updateAllBtn">Update all</button>
+    <button class="btn primary" id="installQueueBtn" style="display:none">Install selected</button>
     <button class="btn primary" id="updateCheckedBtn" style="display:none">Update selected</button>
     <button class="btn danger" id="deleteCheckedBtn" style="display:none">Remove selected</button>
     <button class="btn btn-icon" id="connectState" style="display:none" aria-pressed="false" title="Connect to your local skills-ui serve" aria-label="Connect to your local skills-ui serve"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.25" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
@@ -1984,6 +2387,7 @@ ${APP_CSS}
   <section id="listPane" aria-label="Installed skills">
     <div class="filter-row">
       <input id="filter" type="search" placeholder="Filter skills (name, description, or repo)…" aria-label="Filter skills by name, description, or repo">
+      <input id="searchInput" type="search" placeholder="Search skills.sh: try “typescript”, “react”, “testing”…" aria-label="Search the skill registry" style="display:none">
       <div id="agentsWrap">
         <button class="btn" id="agentsBtn" aria-haspopup="true" title="Filter by agent (a)">Agents</button>
         <div id="agentsPop" role="dialog" aria-label="Filter by agent">
@@ -1996,6 +2400,9 @@ ${APP_CSS}
         </div>
       </div>
       <button class="btn" id="helpBtn" title="Keyboard shortcuts (?)">?</button>
+    </div>
+    <div class="sort-row">
+      <span class="sort-label">Sort</span>
       <div class="seg" role="group" aria-label="Sort order">
         <button data-sort="checked" aria-pressed="true">Checked first</button>
         <button data-sort="name" aria-pressed="false">A to Z</button>
@@ -2011,24 +2418,11 @@ ${APP_CSS}
       </span>
     </div>
     <ul id="skillList" role="listbox" aria-label="Skills"></ul>
+    <ul id="results" role="listbox" aria-label="Registry search results" style="display:none"></ul>
     <footer class="tip"><kbd>click</kbd> a skill for details · <kbd>Search</kbd> tab installs from skills.sh</footer>
   </section>
+  <div id="listSplitter" role="separator" aria-orientation="vertical" aria-label="Resize skill list pane" tabindex="0" aria-valuemin="${LIST_WIDTH_MIN}" aria-valuemax="${LIST_WIDTH_MAX}" aria-valuenow="${initialPrefs.listWidth ?? 360}" title="Drag to resize list pane (double-click to reset)"></div>
   <section id="detailPane" aria-label="Skill details"></section>
-  <section id="searchView" aria-label="Registry search" style="display:none">
-    <div class="subtabs" role="tablist" aria-label="Search views">
-      <button data-sview="results" aria-selected="true">Results</button>
-      <button data-sview="selected" aria-selected="false">Selected (<span id="qCount">0</span>)</button>
-    </div>
-    <div class="search-row">
-      <input id="searchInput" type="search" placeholder="Search skills.sh: try “typescript”, “react”, “testing”…" aria-label="Search the skill registry">
-    </div>
-    <ul id="results"></ul>
-    <ul id="queueList" style="display:none"></ul>
-    <div style="margin-top:16px;display:none" id="queueActions">
-      <button class="btn primary" id="installQueueBtn">Install all queued</button>
-      <button class="btn" id="clearQueueBtn">Clear list</button>
-    </div>
-  </section>
 </main>
 
 <div id="scrim"></div>
@@ -2063,6 +2457,15 @@ ${APP_CSS}
       <button data-motion-choice="false">Full</button>
     </div>
     <p class="hint">Auto follows your system “reduce motion” setting.</p>
+  </div>
+  <div class="setting">
+    <label for="listWidthRange">List pane width</label>
+    <div class="setting-inline">
+      <input id="listWidthRange" type="range" min="${LIST_WIDTH_MIN}" max="${LIST_WIDTH_MAX}" step="4" value="${initialPrefs.listWidth ?? 360}">
+      <span class="val" id="listWidthValue">${initialPrefs.listWidth != null ? `${initialPrefs.listWidth} px` : "Auto (35%)"}</span>
+      <button class="btn btn-sm" id="listWidthReset" type="button">Reset</button>
+    </div>
+    <p class="hint">Drag the divider between panes or adjust here (${LIST_WIDTH_MIN} to ${LIST_WIDTH_MAX} px).</p>
   </div>
   <div class="setting">
     <label for="portInput">Server port</label>

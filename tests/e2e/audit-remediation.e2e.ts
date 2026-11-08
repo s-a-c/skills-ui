@@ -20,7 +20,6 @@ test('browser install list keeps project scope while global is selected',async({
     await page.locator('#searchInput').fill('new');
     await page.locator('#results .add-btn').nth(0).click();
     await page.locator('#results .add-btn').nth(1).click();
-    await page.locator('[data-sview="selected"]').click();
     await page.locator('#installQueueBtn').click();await started.promise;
     await page.locator('[data-scope="global"]').click();first.resolve();
     await expect.poll(()=>calls.length).toBe(2);expect(calls).toEqual([false,false]);
@@ -44,7 +43,6 @@ test('browser install list keeps global scope while project is selected',async({
     await page.locator('#searchInput').fill('new');
     await page.locator('#results .add-btn').nth(0).click();
     await page.locator('#results .add-btn').nth(1).click();
-    await page.locator('[data-sview="selected"]').click();
     await page.locator('#installQueueBtn').click();await started.promise;
     await page.locator('[data-scope="project"]').click(); // scope → project mid-batch
     first.resolve();
@@ -69,7 +67,6 @@ test('browser install list retains partial-failure output',async({browser})=>{
     await page.locator('#searchInput').fill('new');
     await page.locator('#results .add-btn').nth(0).click();
     await page.locator('#results .add-btn').nth(1).click();
-    await page.locator('[data-sview="selected"]').click();
     await page.locator('#installQueueBtn').click();
     await expect.poll(()=>calls.length).toBe(2); // the failed first group must not abort the batch
     expect(calls).toEqual([false,false]);

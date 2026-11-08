@@ -11,12 +11,17 @@ import { dirname, join } from "node:path";
 
 export type ThemeName = "mocha" | "latte";
 
+export const LIST_WIDTH_MIN = 240;
+export const LIST_WIDTH_MAX = 640;
+
 export interface UiPreferences {
   theme: ThemeName;
   sound: boolean;
   reduceMotion: "auto" | boolean;
   /** Fixed port for `skills-ui --web` / `serve`. null = random each launch. */
   port: number | null;
+  /** Fixed width in px for the WebUI `#listPane` (`240..640`). null = responsive default (`35%`). */
+  listWidth: number | null;
 }
 
 export const DEFAULT_UI_PREFERENCES: UiPreferences = {
@@ -24,6 +29,7 @@ export const DEFAULT_UI_PREFERENCES: UiPreferences = {
   sound: true,
   reduceMotion: "auto",
   port: null,
+  listWidth: null,
 };
 
 const PREFS_DIR_ENV = "SKILLS_UI_PREFS_DIR";
@@ -72,6 +78,14 @@ export function normalizePreferences(input: unknown): UiPreferences {
     prefs.port = raw.port;
   } else if (raw.port === null) {
     prefs.port = null;
+  }
+  if (typeof raw.listWidth === "number" && Number.isFinite(raw.listWidth)) {
+    prefs.listWidth = Math.max(
+      LIST_WIDTH_MIN,
+      Math.min(LIST_WIDTH_MAX, Math.round(raw.listWidth)),
+    );
+  } else if (raw.listWidth === null) {
+    prefs.listWidth = null;
   }
   return prefs;
 }

@@ -457,6 +457,20 @@ describe("prefs", () => {
       rmSync(dir, { recursive: true, force: true });
     }
   });
+
+  test("normalizes and clamps listWidth bounds (240..640 or null)", async () => {
+    const prefs = await import("../src/core/prefs.ts");
+    expect(prefs.DEFAULT_UI_PREFERENCES.listWidth).toBeNull();
+    expect(prefs.normalizePreferences({}).listWidth).toBeNull();
+    expect(prefs.normalizePreferences({ listWidth: null }).listWidth).toBeNull();
+    expect(prefs.normalizePreferences({ listWidth: 360 }).listWidth).toBe(360);
+    expect(prefs.normalizePreferences({ listWidth: 360.6 }).listWidth).toBe(361);
+    expect(prefs.normalizePreferences({ listWidth: 120 }).listWidth).toBe(prefs.LIST_WIDTH_MIN);
+    expect(prefs.normalizePreferences({ listWidth: 920 }).listWidth).toBe(prefs.LIST_WIDTH_MAX);
+    expect(prefs.normalizePreferences({ listWidth: Number.NaN }).listWidth).toBeNull();
+    expect(prefs.normalizePreferences({ listWidth: Number.POSITIVE_INFINITY }).listWidth).toBeNull();
+    expect(prefs.normalizePreferences({ listWidth: "400" }).listWidth).toBeNull();
+  });
 });
 
 describe("theme WCAG discipline (ported)", () => {

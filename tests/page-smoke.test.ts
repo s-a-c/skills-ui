@@ -303,4 +303,134 @@ describe("S-186 manual-smoke pins (bugs 4/5 written failing-first on 0.5.3)", ()
     },
     20_000
   );
+
+  test(
+    "S-237: compact 4px-grid buttons and dedicated .sort-row below .filter-row",
+    async () => {
+      await page!.setViewportSize({ width: 1280, height: 800 });
+      const filterRow = await page!.locator(".filter-row").boundingBox();
+      const sortRow = await page!.locator(".sort-row").boundingBox();
+      const listHead = await page!.locator(".list-head").boundingBox();
+      expect(sortRow!.y).toBeGreaterThanOrEqual(filterRow!.y + filterRow!.height - 1);
+      expect(listHead!.y).toBeGreaterThanOrEqual(sortRow!.y + sortRow!.height - 1);
+      await pwExpect(page!.locator(".filter-row [data-sort]")).toHaveCount(0);
+      await pwExpect(page!.locator(".sort-row [data-sort]")).toHaveCount(3);
+
+      const checkUpdatesBox = await page!.locator("#checkUpdatesBtn").boundingBox();
+      expect(checkUpdatesBox!.height).toBeLessThanOrEqual(32);
+      const iconBox = await page!.locator("#themeToggle").boundingBox();
+      expect(iconBox!.width).toBeGreaterThanOrEqual(32);
+      expect(iconBox!.height).toBeGreaterThanOrEqual(32);
+    },
+    20_000
+  );
+
+  test(
+    "S-238: #listSplitter and #settings listWidthRange resize #listPane and persist listWidth",
+    async () => {
+      await page!.setViewportSize({ width: 1280, height: 800 });
+      const splitter = page!.locator("#listSplitter");
+      await pwExpect(splitter).toBeVisible();
+      await splitter.focus();
+      await page!.keyboard.press("End");
+      const maxBox = await page!.locator("#listPane").boundingBox();
+      expect(Math.round(maxBox!.width)).toBe(640);
+      await pwExpect(splitter).toHaveAttribute("aria-valuenow", "640");
+
+      await page!.keyboard.press("Home");
+      const minBox = await page!.locator("#listPane").boundingBox();
+      expect(Math.round(minBox!.width)).toBe(240);
+      await pwExpect(splitter).toHaveAttribute("aria-valuenow", "240");
+
+      // Adjust via Settings drawer range input and reset back to Auto (35% = 448px)
+      await page!.locator("#settingsBtn").click();
+      const range = page!.locator("#listWidthRange");
+      await range.fill("400");
+      await range.dispatchEvent("input");
+      const midBox = await page!.locator("#listPane").boundingBox();
+      expect(Math.round(midBox!.width)).toBe(400);
+      await pwExpect(page!.locator("#listWidthValue")).toHaveText("400 px");
+
+      const prefResp = page!.waitForResponse(
+        (r) => r.url().includes("/api/prefs") && r.request().method() === "PUT"
+      );
+      await page!.locator("#listWidthReset").click();
+      await prefResp;
+      await pwExpect(page!.locator("#listWidthValue")).toHaveText("Auto (35%)");
+      const resetBox = await page!.locator("#listPane").boundingBox();
+      expect(Math.round(resetBox!.width)).toBe(448);
+      await page!.locator("#settingsClose").click();
+    },
+    20_000
+  );
+
+  test(
+    "S-239: unified split-pane Search, Install, and Update inside #listPane + #detailPane",
+    async () => {
+      await page!.route("**/api/search*", (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            results: [
+              { slug: "org/repo", name: "perf-skill-000", source: "org/repo", installs: 42 },
+              { slug: "org/repo", name: "fresh-skill", source: "org/repo", installs: 19 },
+            ],
+            failed: false,
+          }),
+        })
+      );
+      await page!.route("**/api/source-skills*", (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            source: "org/repo",
+            skills: [
+              { name: "perf-skill-000", description: "Existing skill" },
+              { name: "fresh-skill", description: "Brand new skill" },
+            ],
+          }),
+        })
+      );
+
+      // Check an installed skill first to verify mode-isolated selection
+      await page!.locator("#skillList li", { hasText: "perf-skill-000" }).locator("input.skill-check").check();
+      await pwExpect(page!.locator("#selCount")).toHaveText("1");
+
+      // Switch to Search mode: split-pane remains visible, #searchView is retired
+      await page!.locator('[data-tab="search"]').click();
+      await pwExpect(page!.locator("#searchView")).toHaveCount(0);
+      await pwExpect(page!.locator("#listPane")).toBeVisible();
+      await pwExpect(page!.locator("#detailPane")).toBeVisible();
+      await pwExpect(page!.locator("#selSummary")).toBeHidden();
+
+      await page!.locator("#searchInput").fill("skill");
+      await pwExpect(page!.locator("#results li")).toHaveCount(2);
+      // First search result is auto-selected in #detailPane
+      await pwExpect(page!.locator("#detailPane .detail-title")).toHaveText("perf-skill-000");
+
+      // Click second search result to inspect in #detailPane and browse sibling skills on demand
+      await page!.locator("#results li", { hasText: "fresh-skill" }).click();
+      await pwExpect(page!.locator("#detailPane .detail-title")).toHaveText("fresh-skill");
+      await page!.locator("#browseSourceBtn").click();
+      await pwExpect(page!.locator("#installAllSourceBtn")).toBeVisible();
+
+      // Queue from #detailPane, verify #installQueueBtn in .top-actions and .list-head count
+      await page!.locator("#detailQueueToggleBtn").click();
+      await pwExpect(page!.locator("#selCount")).toHaveText("1");
+      await pwExpect(page!.locator("#installQueueBtn")).toBeVisible();
+      await pwExpect(page!.locator("#installQueueBtn")).toHaveText("Install selected (1)");
+
+      // Clear search queue via #clearCheckedBtn, return to Installed tab, verify installed selection survived
+      await page!.locator("#clearCheckedBtn").click();
+      await pwExpect(page!.locator("#installQueueBtn")).toBeHidden();
+      await page!.locator('[data-tab="installed"]').click();
+      await pwExpect(page!.locator("#selCount")).toHaveText("1");
+      await page!.locator("#clearCheckedBtn").click();
+      await page!.unroute("**/api/search*");
+      await page!.unroute("**/api/source-skills*");
+    },
+    20_000
+  );
 });
