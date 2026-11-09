@@ -1,4 +1,4 @@
-import type { InstalledSkill, SearchSkill } from "../core/services/types.ts";
+import type { InstalledSkill, SearchSkill, SourceSkill } from "../core/services/types.ts";
 import type { UiPreferences } from "../core/prefs.ts";
 import type { UiSeed } from "../core/seed.ts";
 
@@ -10,6 +10,7 @@ import type { UiSeed } from "../core/seed.ts";
 
 export type Tab = "installed" | "search" | "settings";
 export type Scope = "project" | "global";
+export type SortMode = "checked" | "name" | "load";
 
 /** Search results render at most this many rows — a memory bound against
  * pathological registry responses, NOT a renderer workaround: under the
@@ -47,11 +48,15 @@ export interface TuiModel {
   filtering: boolean;
   agentFilter: Set<string>;
   agentSelect: { agents: string[]; staged: Set<string>; index: number } | null;
+  sortBy: SortMode;
+  searchSortBy: SortMode;
   sortCheckedFirst: boolean;
   // search
   query: string;
   searching: boolean;
   results: SearchSkill[];
+  visibleResults: SearchSkill[];
+  sourceSkills: Record<string, SourceSkill[]>;
   adjustedQuery: string | null;
   /** True when the last completed search failed at the registry (F4) —
    * the pane says "search failed", never an honest-looking "no results". */
@@ -93,12 +98,16 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     updateErrors: { project: new Map(), global: new Map() },
     filter: "",
     filtering: false,
+    sortBy: "checked",
+    searchSortBy: "load",
     sortCheckedFirst: true,
     agentFilter: new Set(),
     agentSelect: null,
     query: "",
     searching: false,
     results: [],
+    visibleResults: [],
+    sourceSkills: {},
     adjustedQuery: null,
     searchFailed: false,
     searchSelected: 0,
@@ -152,11 +161,26 @@ export function visibleSkills(model: TuiModel): InstalledSkill[] {
     model.agentFilter.size > 0
       ? byText.filter((s) => s.agents.some((a) => model.agentFilter.has(a)))
       : byText;
-  if (!model.sortCheckedFirst) return visible;
+  const mode: SortMode = !model.sortCheckedFirst && model.sortBy === "checked" ? "load" : model.sortBy;
+  if (mode === "load") return visible;
+  if (mode === "name") return [...visible].sort((a, b) => a.name.localeCompare(b.name));
   return [...visible].sort((a, b) => {
     const ca = model.checked.has(a.name) ? 0 : 1;
     const cb = model.checked.has(b.name) ? 0 : 1;
     return ca !== cb ? ca - cb : a.name.localeCompare(b.name);
+  });
+}
+
+/** Visible search results sorted by `model.searchSortBy` (`load` -> registry
+ * relevance/installs order by default, `checked` -> queued first, `name` -> A->Z). */
+export function visibleSearchResults(model: TuiModel): SearchSkill[] {
+  const mode: SortMode = model.searchSortBy ?? "load";
+  if (mode === "load") return model.results;
+  if (mode === "name") return [...model.results].sort((a, b) => a.name.localeCompare(b.name));
+  return [...model.results].sort((a, b) => {
+    const ca = model.queue.has(`${a.source}#${a.name}`) ? 0 : 1;
+    const cb = model.queue.has(`${b.source}#${b.name}`) ? 0 : 1;
+    return ca !== cb ? ca - cb : 0;
   });
 }
 
@@ -209,6 +233,7 @@ export type Action =
   | { type: "graph"; on: boolean }
   | { type: "detail"; body: string | null }
   | { type: "skills-version"; version: string | null }
+  | { type: "source-skills-loaded"; source: string; skills: SourceSkill[] }
   | { type: "prefs"; prefs: UiPreferences };
 
 export function update(model: TuiModel, action: Action): TuiModel {
@@ -230,18 +255,25 @@ export function update(model: TuiModel, action: Action): TuiModel {
       ? { ...model.agentSelect, staged: new Set(model.agentSelect.staged) }
       : null,
     queue: new Map(model.queue),
+    sourceSkills: { ...model.sourceSkills },
   };
   // Rider (S-183): at most ONE filter+sort per dispatch. The memo serves the
   // action's own reads (clamps, check ops) AND the final `next.visible` the
   // render path consumes; `forget()` after any mutation of the visible
   // inputs (skills / filter / agentFilter / sortCheckedFirst / checked).
   let memo: InstalledSkill[] | null = null;
+  let searchMemo: SearchSkill[] | null = null;
   const forget = (): void => {
     memo = null;
+    searchMemo = null;
   };
   const visibleOf = (): InstalledSkill[] => {
     if (!memo) memo = visibleSkills(next);
     return memo;
+  };
+  const visibleSearchOf = (): SearchSkill[] => {
+    if (!searchMemo) searchMemo = visibleSearchResults(next);
+    return searchMemo;
   };
   switch (action.type) {
     case "tab":
@@ -345,7 +377,13 @@ export function update(model: TuiModel, action: Action): TuiModel {
       forget();
       break;
     case "sort-toggle":
-      next.sortCheckedFirst = !next.sortCheckedFirst;
+      if (next.tab === "search") {
+        next.searchSortBy =
+          next.searchSortBy === "load" ? "checked" : next.searchSortBy === "checked" ? "name" : "load";
+      } else {
+        next.sortBy = next.sortBy === "checked" ? "name" : next.sortBy === "name" ? "load" : "checked";
+        next.sortCheckedFirst = next.sortBy === "checked";
+      }
       forget(); // sort order input changed
       clamp(next, visibleOf);
       break;
@@ -416,6 +454,7 @@ export function update(model: TuiModel, action: Action): TuiModel {
       next.adjustedQuery = action.adjustedQuery ?? null;
       next.searchFailed = action.failed ?? false;
       next.searchSelected = 0;
+      forget();
       break;
     case "search-pane":
       next.searchPane = action.pane;
@@ -426,14 +465,17 @@ export function update(model: TuiModel, action: Action): TuiModel {
       if (next.queue.has(key)) next.queue.delete(key);
       else next.queue.set(key, action.skill);
       clampSelectedCursor(next);
+      forget();
       break;
     }
     case "queue-delete-at":
       next.queue.delete(action.key);
       clampSelectedCursor(next);
+      forget();
       break;
     case "queue-clear":
       next.queue.clear();
+      forget();
       break;
     case "busy":
       next.busy = action.label;
@@ -460,11 +502,15 @@ export function update(model: TuiModel, action: Action): TuiModel {
     case "skills-version":
       next.skillsVersion = action.version;
       break;
+    case "source-skills-loaded":
+      next.sourceSkills[action.source] = action.skills;
+      break;
     case "prefs":
       next.prefs = action.prefs;
       break;
   }
   next.visible = visibleOf(); // the render path's copy — no recompute (S-183 rider)
+  next.visibleResults = visibleSearchOf();
   return next;
 }
 

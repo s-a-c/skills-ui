@@ -252,6 +252,9 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
   // the loaded list — model.checked is pruned to it on every refresh);
   // with none it stays the S-162 count + sort form.
   const checkedCount = model.checked.size;
+  const listWidthPct = model.prefs.listWidth ?? 42;
+  const sortLabel = model.sortBy === "checked" ? "checked" : model.sortBy === "name" ? "name" : "order";
+  const defaultTitle = ` ${visible.length} skills·${sortLabel}`;
   const listTitle =
     model.agentFilter.size > 0
       ? ` agents: ${[...model.agentFilter].sort().join(", ")} `
@@ -259,10 +262,11 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
         ? ` filter: ${model.filter}${model.filtering ? "▌" : ""} `
         : checkedCount > 0
           ? checkedTitle(checkedCount, visible.length)
-          // `·checked` / `·order` glued to the count: the pane fits only a
-          // 19-char title at 80 cols (measured ladder: 19 renders, 20 drops),
-          // and "N skills" must stay — S-162
-          : ` ${visible.length} skills·${model.sortCheckedFirst ? "checked" : "order"}`;
+          // `·checked` / `·name` / `·order` glued to the count: the pane fits
+          // a 19-char title at 80 cols (42% = 33 cols), or compact count when narrowed.
+          : listWidthPct < 35
+            ? ` ${visible.length}·${sortLabel}`
+            : defaultTitle;
   useEffect(() => {
     refs.detailScroll = detailScrollRef.current ?? undefined;
   });
@@ -291,7 +295,7 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
   return (
     <box width="100%" flexGrow={1} flexShrink={1} minHeight={0} flexDirection="row" gap={1} paddingLeft={1} paddingRight={1}>
       <box
-        width="42%"
+        width={`${listWidthPct}%`}
         flexDirection="column"
         border={true}
         borderStyle="rounded"
@@ -309,6 +313,8 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
                 <box
                   key={skill.name}
                   width="100%"
+                  height={1}
+                  overflow="hidden"
                   flexDirection="row"
                   gap={1}
                   backgroundColor={sel ? t.selectionBg : undefined}
@@ -320,10 +326,10 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
                     }
                   }}
                 >
-                  <text fg={sel ? t.selectionText : checked ? t.success : t.textMuted}>
+                  <text flexShrink={0} fg={sel ? t.selectionText : checked ? t.success : t.textMuted}>
                     {`${checked ? CHECK : " "} ${sel ? ARROW : " "}`}
                   </text>
-                  <text fg={sel ? t.selectionText : t.text} attributes={sel ? TextAttributes.BOLD : TextAttributes.NONE}>
+                  <text flexShrink={0} fg={sel ? t.selectionText : t.text} attributes={sel ? TextAttributes.BOLD : TextAttributes.NONE}>
                     {skill.name}
                   </text>
                   {skill.source ? <text fg={sel ? t.selectionText : t.textMuted}>{skill.source}</text> : null}
@@ -393,9 +399,13 @@ export function highlightSegments(
 function SearchBody({ model }: { model: TuiModel }): ReactNode {
   const t = tokensFor(model.prefs.theme);
   const { dispatch } = useApp();
+  const listWidthPct = model.prefs.listWidth ?? 42;
   const resultsActive = model.searchPane === "results";
-  const resultsShown = Math.min(SEARCH_RENDER_CAP, model.results.length);
-  const title = ` search: ${model.query}${model.query && model.searching ? "▌" : ""} · ${model.results.length} results${model.adjustedQuery && model.query ? ` · showing "${model.adjustedQuery}"` : ""} `;
+  const visibleResults = model.visibleResults ?? model.results;
+  const selectedResult = visibleResults[model.searchSelected];
+  const fullTitle = ` search: ${model.query}${model.query && model.searching ? "▌" : ""} · ${model.results.length} results${model.adjustedQuery && model.query ? ` · showing "${model.adjustedQuery}"` : ""} `;
+  const compactTitle = ` search: ${model.query}${model.query && model.searching ? "▌" : ""} `;
+  const title = fullTitle.length <= 19 ? fullTitle : compactTitle.length <= 19 ? compactTitle : ` search: ${model.query.slice(0, 8)}${model.searching ? "▌" : ""} `;
   const scrollRef = useRef<ScrollBoxRenderable>(null);
   const resultRowRef = useRef<BoxRenderable>(null);
   const queueRowRef = useRef<BoxRenderable>(null);
@@ -417,104 +427,158 @@ function SearchBody({ model }: { model: TuiModel }): ReactNode {
     const rel = y - sy;
     if (rel < 0) scroll.scrollTop += rel;
     else if (rel >= vs) scroll.scrollTop += rel - vs + 1;
-  }, [model.searchSelected, model.selectedCursor, model.searchPane, model.results.length, model.queue.size]);
+  }, [model.searchSelected, model.selectedCursor, model.searchPane, visibleResults.length, model.queue.size]);
+
+  const installedMatch = selectedResult
+    ? model.skills.find((s) => s.name === selectedResult.name && (!s.source || s.source === selectedResult.source))
+    : undefined;
+  const updatesAvailable = model.updatesAvailable[model.scope];
+  const hasUpdate = selectedResult ? updatesAvailable.has(selectedResult.name) : false;
+  const inQueue = selectedResult ? model.queue.has(`${selectedResult.source}#${selectedResult.name}`) : false;
+  const repoSkills = selectedResult ? model.sourceSkills[selectedResult.source] : undefined;
 
   return (
     <box width="100%" flexGrow={1} flexShrink={1} minHeight={0} flexDirection="column" paddingLeft={1} paddingRight={1}>
-      <box
-        width="100%"
-        flexGrow={1}
-        flexShrink={1}
-        minHeight={0}
-        flexDirection="column"
-        border={true}
-        borderStyle="rounded"
-        borderColor={t.border}
-        title={title}
-      >
-        <scrollbox ref={scrollRef} width="100%" flexGrow={1} flexShrink={1} scrollY={true}>
-          <text fg={resultsActive ? t.primary : t.textMuted} attributes={resultsActive ? TextAttributes.BOLD : TextAttributes.NONE}>
-            {`${resultsActive ? ARROW : " "} Results`}
-          </text>
-          {model.results.length === 0 ? (
-            <text fg={model.searchFailed ? t.danger : t.textMuted}>
-              {model.searchFailed
-                ? "search failed: skills.sh unreachable"
-                : model.query
-                  ? "no results"
-                  : "search the skills.sh registry"}
+      <box width="100%" flexGrow={1} flexShrink={1} minHeight={0} flexDirection="row" gap={1}>
+        <box
+          width={`${listWidthPct}%`}
+          flexDirection="column"
+          border={true}
+          borderStyle="rounded"
+          borderColor={t.border}
+          title={title}
+        >
+          <scrollbox ref={scrollRef} width="100%" flexGrow={1} flexShrink={1} scrollY={true}>
+            <text fg={resultsActive ? t.primary : t.textMuted} attributes={resultsActive ? TextAttributes.BOLD : TextAttributes.NONE}>
+              {`${resultsActive ? ARROW : " "} Results${model.query ? ` (${model.query})` : ""} · ${model.results.length} results${model.adjustedQuery && model.query ? ` · showing "${model.adjustedQuery}"` : ""}`}
             </text>
-          ) : (
-            model.results.slice(0, SEARCH_RENDER_CAP).map((r, i) => {
-              const sel = resultsActive && i === model.searchSelected;
-              const queued = model.queue.has(`${r.source}#${r.name}`);
-              return (
-                <box
-                  key={`${r.source}#${r.name}`}
-                  ref={sel ? resultRowRef : undefined}
-                  width="100%"
-                  flexDirection="row"
-                  gap={1}
-                  backgroundColor={sel ? t.selectionBg : undefined}
-                  onMouseDown={() => {
-                    if (!sel) dispatch({ type: "move", delta: i - model.searchSelected });
-                  }}
-                >
-                  <text fg={queued ? t.success : t.textMuted}>{`${queued ? CHECK : " "}${sel ? ARROW : " "}`}</text>
-                  <image source={sourceBadge(r.source, model.prefs.theme)} fit="fill" protocol="auto" style={{ width: 2, height: 1 }} />
-                  {/* query-match highlighting (S-103): segments live in a
-                      gap-0 wrapper so no spaces creep between runs */}
-                  <box flexDirection="row">
-                    {highlightSegments(r.name, [model.query, model.adjustedQuery]).map((seg, j) => (
-                      <text
-                        key={j}
-                        fg={seg.match ? (sel ? t.selectionText : t.primary) : sel ? t.selectionText : t.text}
-                        attributes={seg.match || sel ? TextAttributes.BOLD : TextAttributes.NONE}
-                      >
-                        {seg.text}
+            {visibleResults.length === 0 ? (
+              <text fg={model.searchFailed ? t.danger : t.textMuted}>
+                {model.searchFailed
+                  ? "search failed: skills.sh unreachable"
+                  : model.query
+                    ? "no results"
+                    : "search the skills.sh registry"}
+              </text>
+            ) : (
+              visibleResults.slice(0, SEARCH_RENDER_CAP).map((r, i) => {
+                const sel = resultsActive && i === model.searchSelected;
+                const queued = model.queue.has(`${r.source}#${r.name}`);
+                return (
+                  <box
+                    key={`${r.source}#${r.name}`}
+                    ref={sel ? resultRowRef : undefined}
+                    width="100%"
+                    height={1}
+                    overflow="hidden"
+                    flexDirection="row"
+                    gap={1}
+                    backgroundColor={sel ? t.selectionBg : undefined}
+                    onMouseDown={() => {
+                      if (!sel) dispatch({ type: "move", delta: i - model.searchSelected });
+                    }}
+                  >
+                    <text flexShrink={0} fg={queued ? t.success : t.textMuted}>{`${queued ? CHECK : " "}${sel ? ARROW : " "}`}</text>
+                    <image source={sourceBadge(r.source, model.prefs.theme)} fit="fill" protocol="auto" style={{ width: 2, height: 1 }} />
+                    {/* query-match highlighting (S-103): segments live in a
+                        gap-0 wrapper so no spaces creep between runs */}
+                    <box flexDirection="row" flexShrink={0}>
+                      {highlightSegments(r.name, [model.query, model.adjustedQuery]).map((seg, j) => (
+                        <text
+                          key={j}
+                          fg={seg.match ? (sel ? t.selectionText : t.primary) : sel ? t.selectionText : t.text}
+                          attributes={seg.match || sel ? TextAttributes.BOLD : TextAttributes.NONE}
+                        >
+                          {seg.text}
+                        </text>
+                      ))}
+                    </box>
+                    <box flexDirection="row">
+                      {highlightSegments(r.source, [model.query, model.adjustedQuery]).map((seg, j) => (
+                        <text
+                          key={j}
+                          fg={seg.match ? (sel ? t.selectionText : t.primary) : sel ? t.selectionText : t.textMuted}
+                          attributes={seg.match ? TextAttributes.BOLD : TextAttributes.NONE}
+                        >
+                          {seg.text}
+                        </text>
+                      ))}
+                    </box>
+                    <text fg={t.textMuted}>{`${r.installs}`}</text>
+                  </box>
+                );
+              })
+            )}
+            <text fg={!resultsActive ? t.primary : t.textMuted} attributes={!resultsActive ? TextAttributes.BOLD : TextAttributes.NONE}>
+              {`${!resultsActive ? ARROW : " "} install list (${model.queue.size})`}
+            </text>
+            {model.queue.size === 0 ? (
+              <text fg={t.textMuted}>  (empty; space or + adds from Results)</text>
+            ) : (
+              [...model.queue.values()].map((r, i) => {
+                const sel = !resultsActive && i === model.selectedCursor;
+                return (
+                  <box key={`${r.source}#${r.name}`} ref={sel ? queueRowRef : undefined} width="100%" height={1} overflow="hidden" flexDirection="row" gap={1} backgroundColor={sel ? t.selectionBg : undefined}>
+                    <text flexShrink={0} fg={t.textMuted}>{`${sel ? ARROW : " "}`}</text>
+                    <text flexShrink={0} fg={sel ? t.selectionText : t.text} attributes={sel ? TextAttributes.BOLD : TextAttributes.NONE}>
+                      {r.name}
+                    </text>
+                    <text fg={sel ? t.selectionText : t.textMuted}>{r.source}</text>
+                  </box>
+                );
+              })
+            )}
+          </scrollbox>
+        </box>
+        <box
+          flexGrow={1}
+          flexShrink={1}
+          flexDirection="column"
+          border={true}
+          borderStyle="rounded"
+          borderColor={t.border}
+          title={selectedResult ? ` ${selectedResult.name} ` : " detail "}
+        >
+          <scrollbox width="100%" flexGrow={1} flexShrink={1} scrollY={true}>
+            {!selectedResult ? (
+              <text fg={model.searchFailed ? t.danger : t.textMuted}>
+                {model.searchFailed
+                  ? "search failed: skills.sh unreachable"
+                  : "Select a search result to inspect its source and install options."}
+              </text>
+            ) : (
+              <box flexDirection="column" gap={1}>
+                <text fg={t.primary} attributes={TextAttributes.BOLD}>{selectedResult.name}</text>
+                <text fg={t.text}>{`source: ${selectedResult.source}`}</text>
+                <text fg={t.textMuted}>{`installs: ${selectedResult.installs} · target scope: ${model.scope}`}</text>
+                <text fg={installedMatch ? t.success : t.textMuted}>
+                  {installedMatch
+                    ? `status: installed in ${installedMatch.scope}${hasUpdate ? " · ↑ update available (u updates)" : ""}`
+                    : "status: not installed in this scope"}
+                </text>
+                <text fg={inQueue ? t.success : t.textMuted}>
+                  {inQueue
+                    ? "queue: ✓ in install list (space/- removes · u installs list)"
+                    : "queue: not in install list (space/+ adds · enter installs now)"}
+                </text>
+                {repoSkills && repoSkills.length > 0 ? (
+                  <box flexDirection="column">
+                    <text fg={t.primary} attributes={TextAttributes.BOLD}>{`skills in ${selectedResult.source} (${repoSkills.length}):`}</text>
+                    {repoSkills.map((s) => (
+                      <text key={s.name} fg={s.name === selectedResult.name ? t.primary : t.text}>
+                        {`  ${s.name === selectedResult.name ? ARROW : "·"} ${s.name}${s.description ? `: ${s.description}` : ""}`}
                       </text>
                     ))}
                   </box>
-                  <box flexDirection="row">
-                    {highlightSegments(r.source, [model.query, model.adjustedQuery]).map((seg, j) => (
-                      <text
-                        key={j}
-                        fg={seg.match ? (sel ? t.selectionText : t.primary) : sel ? t.selectionText : t.textMuted}
-                        attributes={seg.match ? TextAttributes.BOLD : TextAttributes.NONE}
-                      >
-                        {seg.text}
-                      </text>
-                    ))}
-                  </box>
-                  <text fg={t.textMuted}>{`${r.installs}`}</text>
-                </box>
-              );
-            })
-          )}
-          <text fg={!resultsActive ? t.primary : t.textMuted} attributes={!resultsActive ? TextAttributes.BOLD : TextAttributes.NONE}>
-            {`${!resultsActive ? ARROW : " "} install list (${model.queue.size})`}
-          </text>
-          {model.queue.size === 0 ? (
-            <text fg={t.textMuted}>  (empty; space or + adds from Results)</text>
-          ) : (
-            [...model.queue.values()].map((r, i) => {
-              const sel = !resultsActive && i === model.selectedCursor;
-              return (
-                <box key={`${r.source}#${r.name}`} ref={sel ? queueRowRef : undefined} width="100%" flexDirection="row" gap={1} backgroundColor={sel ? t.selectionBg : undefined}>
-                  <text fg={t.textMuted}>{`${sel ? ARROW : " "}`}</text>
-                  <text fg={sel ? t.selectionText : t.text} attributes={sel ? TextAttributes.BOLD : TextAttributes.NONE}>
-                    {r.name}
-                  </text>
-                  <text fg={sel ? t.selectionText : t.textMuted}>{r.source}</text>
-                </box>
-              );
-            })
-          )}
-        </scrollbox>
+                ) : null}
+              </box>
+            )}
+          </scrollbox>
+        </box>
       </box>
       <box width="100%" flexShrink={0} flexDirection="row">
         <box flexDirection="row">
-          <text fg={t.textMuted}>space/+ add · -/d/x remove · Tab pane · u install list</text>
+          <text fg={t.textMuted}>space/+ add · -/d/x remove · enter install · s sort · Tab pane · u install list</text>
         </box>
       </box>
     </box>
@@ -531,7 +595,8 @@ function SettingsBody({ model }: { model: TuiModel }): ReactNode {
     ["t  theme", `${model.prefs.theme}${model.prefs.theme === "mocha" ? " → latte" : " → mocha"}`],
     [",  sound", model.prefs.sound ? "on → off" : "off → on"],
     ["m  motion", motion],
-    ["theme/sound/motion persist to ~/.config/skills-ui/prefs.json", ""],
+    ["[ / ]  list width", model.prefs.listWidth != null ? `${model.prefs.listWidth}% (0 resets to 35%)` : "Auto (35%)"],
+    ["theme/sound/motion/width persist to ~/.config/skills-ui/prefs.json", ""],
   ];
   return (
     <box width="100%" flexGrow={1} flexShrink={1} minHeight={0} flexDirection="column" paddingLeft={2} gap={1}>
@@ -581,7 +646,8 @@ function HelpOverlay({ model }: { model: TuiModel }): ReactNode {
     ["f", "filter (or just type)"],
     ["tab", "detail scroll mode (arrows/PgUp/PgDn scroll the doc)"],
     ["a", "agent filter (multi, a=all)"],
-    ["s", "sort checked first"],
+    ["s", "sort checked first (cycles name/order)"],
+    ["[ / ] / 0", "resize list pane (10% to 50%, 0 resets)"],
     ["c", "check for updates"],
     ["A | I", "check all / invert"],
     ["g | p", "global / project scope"],

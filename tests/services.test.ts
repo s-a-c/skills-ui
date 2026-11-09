@@ -458,18 +458,22 @@ describe("prefs", () => {
     }
   });
 
-  test("normalizes and clamps listWidth bounds (240..640 or null)", async () => {
+  test("normalizes and clamps listWidth bounds (10..50 or null, migrating >50 px values to null)", async () => {
     const prefs = await import("../src/core/prefs.ts");
     expect(prefs.DEFAULT_UI_PREFERENCES.listWidth).toBeNull();
     expect(prefs.normalizePreferences({}).listWidth).toBeNull();
     expect(prefs.normalizePreferences({ listWidth: null }).listWidth).toBeNull();
-    expect(prefs.normalizePreferences({ listWidth: 360 }).listWidth).toBe(360);
-    expect(prefs.normalizePreferences({ listWidth: 360.6 }).listWidth).toBe(361);
-    expect(prefs.normalizePreferences({ listWidth: 120 }).listWidth).toBe(prefs.LIST_WIDTH_MIN);
-    expect(prefs.normalizePreferences({ listWidth: 920 }).listWidth).toBe(prefs.LIST_WIDTH_MAX);
+    expect(prefs.normalizePreferences({ listWidth: 35 }).listWidth).toBe(35);
+    expect(prefs.normalizePreferences({ listWidth: 35.6 }).listWidth).toBe(36);
+    expect(prefs.normalizePreferences({ listWidth: 5 }).listWidth).toBe(prefs.LIST_WIDTH_MIN);
+    expect(prefs.normalizePreferences({ listWidth: 50 }).listWidth).toBe(prefs.LIST_WIDTH_MAX);
+    // Legacy v0.5.4 pixel values (> 50) reset to null (35% default)
+    expect(prefs.normalizePreferences({ listWidth: 240 }).listWidth).toBeNull();
+    expect(prefs.normalizePreferences({ listWidth: 360 }).listWidth).toBeNull();
+    expect(prefs.normalizePreferences({ listWidth: 640 }).listWidth).toBeNull();
     expect(prefs.normalizePreferences({ listWidth: Number.NaN }).listWidth).toBeNull();
     expect(prefs.normalizePreferences({ listWidth: Number.POSITIVE_INFINITY }).listWidth).toBeNull();
-    expect(prefs.normalizePreferences({ listWidth: "400" }).listWidth).toBeNull();
+    expect(prefs.normalizePreferences({ listWidth: "40" }).listWidth).toBeNull();
   });
 });
 

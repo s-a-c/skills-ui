@@ -170,7 +170,7 @@ nav.tabs{display:flex;gap:4px;margin-left:8px;position:relative}
 /* ---------- layout ---------- */
 main{
   flex:1;min-height:0;display:grid;
-  grid-template-columns:var(--list-col,minmax(min(320px,40%),35%)) 0px 1fr;
+  grid-template-columns:var(--list-col,35%) 0px 1fr;
   gap:0;position:relative;
 }
 @media (max-width:720px){
@@ -190,8 +190,9 @@ main{
   background:var(--t-primary);
 }
 #detailPane{overflow:auto;overflow-x:hidden;padding:24px 28px;min-height:0;min-width:0}
-.filter-row{padding:8px 16px 4px;display:flex;gap:8px;align-items:center}
-.sort-row{padding:4px 16px;border-bottom:1px solid var(--t-border);display:flex;align-items:center;gap:8px}
+.filter-row{padding:8px 16px 4px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-width:0}
+.sort-row{padding:4px 16px;border-bottom:1px solid var(--t-border);display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0}
+.sort-row .seg{flex-wrap:wrap;min-width:0}
 #filter,#searchInput{
   width:100%;flex:1;min-width:0;padding:4px 12px;min-height:28px;font-size:13px;border-radius:6px;border:1px solid var(--t-border);
   background:var(--t-surfaceAlt);color:var(--t-text);
@@ -206,7 +207,7 @@ main{
    row is permanent and the summary shows or hides as inline content sized
    inside the text line the label already sets, so the row height never
    changes when a selection appears or clears. */
-.list-head{display:flex;align-items:center;gap:8px;padding:4px 16px;color:var(--t-textMuted);font-size:12px;white-space:nowrap}
+.list-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:4px 16px;color:var(--t-textMuted);font-size:12px;white-space:nowrap;min-width:0}
 .list-head input{width:15px;height:15px;accent-color:var(--t-primary);cursor:pointer;flex:none}
 .list-head label{cursor:pointer;flex:none}
 .sel-summary{margin-left:auto;display:none;align-items:center;gap:8px;flex:none}
@@ -231,7 +232,7 @@ main{
 @media (max-width:480px){
   .list-head label[for="selectAllMaster"]{font-size:0}
 }
-.skill-check{width:15px;height:15px;accent-color:var(--t-primary);cursor:pointer;flex:none}
+.skill-check,.result-check{width:15px;height:15px;accent-color:var(--t-primary);cursor:pointer;flex:none}
 #agentsWrap{position:relative}
 #agentsPop{
   position:absolute;top:calc(100% + 6px);left:0;z-index:26;width:280px;max-height:320px;overflow:auto;
@@ -284,8 +285,10 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
   border-color:color-mix(in srgb,var(--t-selectionText) 45%,transparent);
   background:color-mix(in srgb,var(--t-selectionText) 14%,transparent);
 }
-.skill-name{font-weight:600;display:flex;align-items:center;gap:8px}
-.skill-desc{color:var(--t-textMuted);font-size:13px;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.skill-name{font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.skill-title-unit,.result-title-unit{display:inline-flex;align-items:center;gap:8px;flex-wrap:nowrap;min-width:0;max-width:100%;flex:1 1 auto}
+.skill-name-text,.result-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.skill-desc{color:var(--t-textMuted);font-size:13px;margin-top:2px;text-align:left;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--a-green);flex:none}
 .dot.unlinked{background:var(--t-textMuted)}
 
@@ -375,11 +378,13 @@ kbd{background:var(--t-surfaceAlt);border:1px solid var(--t-border);border-radiu
   border-color:color-mix(in srgb,var(--t-selectionText) 45%,transparent);
   background:color-mix(in srgb,var(--t-selectionText) 14%,transparent);
 }
-.result-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.skill-main{display:flex;flex-direction:column;gap:8px;min-width:0}
+.result-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
 .result-name{font-weight:700}
 .result-installs{color:var(--t-textMuted);font-size:12px;white-space:nowrap;margin-left:auto}
-.result-source{color:var(--t-textMuted);font-size:12.5px;font-family:ui-monospace,Menlo,monospace;overflow-wrap:anywhere}
-.result-actions{display:flex;gap:8px;flex-wrap:wrap}
+.result-foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-width:0}
+.result-source{color:var(--t-textMuted);font-size:12.5px;font-family:ui-monospace,Menlo,monospace;overflow-wrap:anywhere;text-align:left;margin-right:auto;min-width:0}
+.result-actions{display:inline-flex;flex-wrap:nowrap;gap:8px;margin-left:auto;flex-shrink:0}
 
 /* ---------- settings drawer ---------- */
 #settings{
@@ -593,13 +598,12 @@ function applyListWidth(raw){
   var valEl = $('#listWidthValue');
   if (mainEl) {
     if (w === null) mainEl.style.removeProperty('--list-col');
-    else mainEl.style.setProperty('--list-col', 'min(' + w + 'px, 60vw)');
+    else mainEl.style.setProperty('--list-col', w + '%');
   }
-  var measured = w !== null ? w : Math.round(($('#listPane') && $('#listPane').getBoundingClientRect().width) || 448);
-  var clamped = clampListWidth(measured) || 448;
-  if (splitter) splitter.setAttribute('aria-valuenow', String(clamped));
-  if (range) range.value = String(clamped);
-  if (valEl) valEl.textContent = w === null ? 'Auto (35%)' : (w + ' px');
+  var pct = w !== null ? w : 35;
+  if (splitter) splitter.setAttribute('aria-valuenow', String(pct));
+  if (range) range.value = String(pct);
+  if (valEl) valEl.textContent = w === null ? 'Auto (35%)' : (w + '%');
 }
 function setPrefs(patch){
   state.prefs = Object.assign({}, state.prefs, patch);
@@ -878,10 +882,12 @@ function rowSignature(s){
 function rowHtml(s){
   var outdated = scopeUpdates()[s.name] && scopeUpdates()[s.name].updateAvailable;
   return '<div class="skill-name">' +
+    '<span class="skill-title-unit">' +
     '<input type="checkbox" class="skill-check" aria-label="Select ' + esc(s.name) + ' for update"' +
     (state.checked.has(s.name) ? ' checked' : '') + '>' +
     '<span class="dot' + (s.agents.length ? '' : ' unlinked') + '"></span>' +
-    esc(s.name) +
+    '<span class="skill-name-text">' + esc(s.name) + '</span>' +
+    '</span>' +
     (outdated ? '<span class="update-badge">update</span>' : '') +
     '</div>' +
     '<div class="skill-desc">' + esc(s.description || '') + '</div>' +
@@ -1557,11 +1563,15 @@ function renderResults(){
     var up = sameScope ? scopeUpdates[r.name] : null;
     var inQueue = inQueueKey(qk);
     li.innerHTML =
-      '<input type="checkbox" class="result-check" aria-label="Select ' + esc(r.name) + '"' + (inQueue ? ' checked' : '') + '>' +
       '<div class="skill-main">' +
-      '<div class="result-head"><span class="result-name">' + esc(r.name) + '</span>' +
+      '<div class="result-head">' +
+      '<span class="result-title-unit">' +
+      '<input type="checkbox" class="result-check" aria-label="Select ' + esc(r.name) + '"' + (inQueue ? ' checked' : '') + '>' +
+      '<span class="result-name">' + esc(r.name) + '</span>' +
+      '</span>' +
       (installed ? '<span class="result-chip">' + (up && up.updateAvailable ? 'update available' : 'installed') + (sameScope ? ' · ' + esc(installed.scope) : '') + '</span>' : '') +
       '<span class="result-installs">' + esc(String(r.installs)) + ' installs</span></div>' +
+      '<div class="result-foot">' +
       '<span class="result-source">' + esc(src) + '</span>' +
       '<div class="result-actions">' +
       /* UI-05: inQueue/sameScope are independent reasons recorded as
@@ -1569,7 +1579,7 @@ function renderResults(){
       '<button class="btn btn-sm add-btn' + (inQueue ? ' added' : '') + '"' + (inQueue ? ' data-semantic-disabled="true" title="Already in your install list"' : '') + '>' +
       (inQueue ? '✓ In list' : '+ Add to list') + '</button>' +
       '<button class="btn btn-sm primary install-btn"' + (sameScope ? ' data-semantic-disabled="true" title="Already installed in ' + esc(state.scope) + ' scope"' : '') + '>' +
-      (sameScope ? 'Installed' : 'Install') + '</button></div></div>';
+      (sameScope ? 'Installed' : 'Install') + '</button></div></div></div>';
     li.querySelector('.add-btn').addEventListener('click', function(ev){
       ev.stopPropagation();
       addToQueue(src, r.name);
@@ -2071,7 +2081,8 @@ document.addEventListener('DOMContentLoaded', function(){
     splitter.addEventListener('pointermove', function(ev){
       if (!dragging) return;
       var rect = mainEl.getBoundingClientRect();
-      var w = clampListWidth(ev.clientX - rect.left);
+      if (!rect.width) return;
+      var w = clampListWidth(((ev.clientX - rect.left) / rect.width) * 100);
       if (w != null) {
         state.prefs.listWidth = w;
         applyListWidth(w);
@@ -2094,10 +2105,8 @@ document.addEventListener('DOMContentLoaded', function(){
       play('confirm');
     });
     splitter.addEventListener('keydown', function(ev){
-      var step = ev.shiftKey ? 32 : 16;
-      var cur = state.prefs.listWidth != null
-        ? state.prefs.listWidth
-        : Math.round($('#listPane').getBoundingClientRect().width || 360);
+      var step = ev.shiftKey ? 5 : 1;
+      var cur = state.prefs.listWidth != null ? state.prefs.listWidth : 35;
       if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') {
         ev.preventDefault();
         var nextW = clampListWidth(cur + (ev.key === 'ArrowRight' ? step : -step));
@@ -2432,7 +2441,7 @@ ${APP_CSS}
     <ul id="results" role="listbox" aria-label="Registry search results" style="display:none"></ul>
     <footer class="tip"><kbd>click</kbd> a skill for details · <kbd>Search</kbd> tab installs from skills.sh</footer>
   </section>
-  <div id="listSplitter" role="separator" aria-orientation="vertical" aria-label="Resize skill list pane" tabindex="0" aria-valuemin="${LIST_WIDTH_MIN}" aria-valuemax="${LIST_WIDTH_MAX}" aria-valuenow="${initialPrefs.listWidth ?? 360}" title="Drag to resize list pane (double-click to reset)"></div>
+  <div id="listSplitter" role="separator" aria-orientation="vertical" aria-label="Resize skill list pane" tabindex="0" aria-valuemin="${LIST_WIDTH_MIN}" aria-valuemax="${LIST_WIDTH_MAX}" aria-valuenow="${initialPrefs.listWidth ?? 35}" title="Drag to resize list pane (double-click to reset)"></div>
   <section id="detailPane" aria-label="Skill details"></section>
 </main>
 
@@ -2472,11 +2481,11 @@ ${APP_CSS}
   <div class="setting">
     <label for="listWidthRange">List pane width</label>
     <div class="setting-inline">
-      <input id="listWidthRange" type="range" min="${LIST_WIDTH_MIN}" max="${LIST_WIDTH_MAX}" step="4" value="${initialPrefs.listWidth ?? 360}">
-      <span class="val" id="listWidthValue">${initialPrefs.listWidth != null ? `${initialPrefs.listWidth} px` : "Auto (35%)"}</span>
+      <input id="listWidthRange" type="range" min="${LIST_WIDTH_MIN}" max="${LIST_WIDTH_MAX}" step="1" value="${initialPrefs.listWidth ?? 35}">
+      <span class="val" id="listWidthValue">${initialPrefs.listWidth != null ? `${initialPrefs.listWidth}%` : "Auto (35%)"}</span>
       <button class="btn btn-sm" id="listWidthReset" type="button">Reset</button>
     </div>
-    <p class="hint">Drag the divider between panes or adjust here (${LIST_WIDTH_MIN} to ${LIST_WIDTH_MAX} px).</p>
+    <p class="hint">Drag the divider between panes or adjust here (${LIST_WIDTH_MIN}% to ${LIST_WIDTH_MAX}%).</p>
   </div>
   <div class="setting">
     <label for="portInput">Server port</label>

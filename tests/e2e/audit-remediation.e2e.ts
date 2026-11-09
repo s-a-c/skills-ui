@@ -611,3 +611,48 @@ test('a mouse click toggles the checkbox exactly once without selecting the row'
   await expect(page.locator('.detail-title')).toHaveText('alpha');
   await context.close();
 });
+
+// S-260 (v0.5.4.1): unbreakable Name-Checkbox Unit + merging right-justified
+// .result-actions inside .result-foot across 10%..50% listWidth.
+test('search card keeps checkbox attached to name and merges or wraps contiguous right-justified actions', async ({ browser }) => {
+  const { page, context } = await openAuditPage(browser, origin);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.route('**/api/search*', route =>
+    route.fulfill({
+      json: {
+        results: [{ slug: 'org/repo', name: 'very-long-skill-identifier-name', source: 'org/repo', installs: 99 }],
+        failed: false,
+      },
+    }),
+  );
+  await page.locator('[data-tab="search"]').click();
+  await page.locator('#searchInput').fill('very');
+  const card = page.locator('#results li').first();
+  await expect(card).toBeVisible();
+
+  // At 50% width (640px), short source 'org/repo' and .result-actions share one line
+  const splitter = page.locator('#listSplitter');
+  await splitter.focus();
+  await page.keyboard.press('End');
+  const srcWide = await card.locator('.result-source').boundingBox();
+  const actWide = await card.locator('.result-actions').boundingBox();
+  expect(Math.abs(srcWide!.y + srcWide!.height / 2 - (actWide!.y + actWide!.height / 2))).toBeLessThan(8);
+
+  // At 15% width (192px), checkbox + name still share a row, and .result-actions
+  // wraps below .result-source while keeping both buttons on the same row.
+  await page.evaluate(() => {
+    const r = document.getElementById('listWidthRange') as HTMLInputElement;
+    r.value = '15';
+    r.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  const chkNarrow = await card.locator('.result-check').boundingBox();
+  const nameNarrow = await card.locator('.result-name').boundingBox();
+  expect(Math.abs(chkNarrow!.y + chkNarrow!.height / 2 - (nameNarrow!.y + nameNarrow!.height / 2))).toBeLessThan(6);
+
+  const srcNarrow = await card.locator('.result-source').boundingBox();
+  const addBtn = await card.locator('.add-btn').boundingBox();
+  const installBtn = await card.locator('.install-btn').boundingBox();
+  expect(addBtn!.y).toBeGreaterThanOrEqual(srcNarrow!.y + srcNarrow!.height - 2);
+  expect(Math.abs(addBtn!.y - installBtn!.y)).toBeLessThan(4);
+  await context.close();
+});

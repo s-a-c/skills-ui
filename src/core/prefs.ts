@@ -11,8 +11,8 @@ import { dirname, join } from "node:path";
 
 export type ThemeName = "mocha" | "latte";
 
-export const LIST_WIDTH_MIN = 240;
-export const LIST_WIDTH_MAX = 640;
+export const LIST_WIDTH_MIN = 10;
+export const LIST_WIDTH_MAX = 50;
 
 export interface UiPreferences {
   theme: ThemeName;
@@ -20,7 +20,7 @@ export interface UiPreferences {
   reduceMotion: "auto" | boolean;
   /** Fixed port for `skills-ui --web` / `serve`. null = random each launch. */
   port: number | null;
-  /** Fixed width in px for the WebUI `#listPane` (`240..640`). null = responsive default (`35%`). */
+  /** Width in % of the Frame (`10..50`) for the Filter List Panel (`#listPane` / TUI left pane). null = default (`35%`). */
   listWidth: number | null;
 }
 
@@ -80,10 +80,13 @@ export function normalizePreferences(input: unknown): UiPreferences {
     prefs.port = null;
   }
   if (typeof raw.listWidth === "number" && Number.isFinite(raw.listWidth)) {
-    prefs.listWidth = Math.max(
-      LIST_WIDTH_MIN,
-      Math.min(LIST_WIDTH_MAX, Math.round(raw.listWidth)),
-    );
+    const rounded = Math.round(raw.listWidth);
+    if (rounded > LIST_WIDTH_MAX) {
+      // Legacy v0.5.4 pixel values (240..640) migrate cleanly to default (null = 35%).
+      prefs.listWidth = null;
+    } else {
+      prefs.listWidth = Math.max(LIST_WIDTH_MIN, rounded);
+    }
   } else if (raw.listWidth === null) {
     prefs.listWidth = null;
   }

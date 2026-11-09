@@ -326,7 +326,7 @@ describe("S-186 manual-smoke pins (bugs 4/5 written failing-first on 0.5.3)", ()
   );
 
   test(
-    "S-238: #listSplitter and #settings listWidthRange resize #listPane and persist listWidth",
+    "S-238 / S-260: #listSplitter and #settings listWidthRange resize #listPane (10%..50%) and persist listWidth",
     async () => {
       await page!.setViewportSize({ width: 1280, height: 800 });
       const splitter = page!.locator("#listSplitter");
@@ -334,22 +334,27 @@ describe("S-186 manual-smoke pins (bugs 4/5 written failing-first on 0.5.3)", ()
       await splitter.focus();
       await page!.keyboard.press("End");
       const maxBox = await page!.locator("#listPane").boundingBox();
-      expect(Math.round(maxBox!.width)).toBe(640);
-      await pwExpect(splitter).toHaveAttribute("aria-valuenow", "640");
+      expect(Math.round(maxBox!.width)).toBe(640); // 50% of 1280
+      await pwExpect(splitter).toHaveAttribute("aria-valuenow", "50");
 
       await page!.keyboard.press("Home");
       const minBox = await page!.locator("#listPane").boundingBox();
-      expect(Math.round(minBox!.width)).toBe(240);
-      await pwExpect(splitter).toHaveAttribute("aria-valuenow", "240");
+      expect(Math.round(minBox!.width)).toBe(128); // 10% of 1280
+      await pwExpect(splitter).toHaveAttribute("aria-valuenow", "10");
+
+      // At 10% width (128px), Name-Checkbox Unit stays on the same horizontal row
+      const checkBox = await page!.locator("#skillList li").first().locator(".skill-check").boundingBox();
+      const nameBox = await page!.locator("#skillList li").first().locator(".skill-name-text").boundingBox();
+      expect(Math.abs(checkBox!.y + checkBox!.height / 2 - (nameBox!.y + nameBox!.height / 2))).toBeLessThan(6);
 
       // Adjust via Settings drawer range input and reset back to Auto (35% = 448px)
       await page!.locator("#settingsBtn").click();
       const range = page!.locator("#listWidthRange");
-      await range.fill("400");
+      await range.fill("40");
       await range.dispatchEvent("input");
       const midBox = await page!.locator("#listPane").boundingBox();
-      expect(Math.round(midBox!.width)).toBe(400);
-      await pwExpect(page!.locator("#listWidthValue")).toHaveText("400 px");
+      expect(Math.round(midBox!.width)).toBe(512); // 40% of 1280
+      await pwExpect(page!.locator("#listWidthValue")).toHaveText("40%");
 
       const prefResp = page!.waitForResponse(
         (r) => r.url().includes("/api/prefs") && r.request().method() === "PUT"

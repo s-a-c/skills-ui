@@ -647,6 +647,9 @@ describe("tui (in-memory)", () => {
     await s.flush();
     const resized = s.captureCharFrame();
     expect(resized).toContain("105 skills·checked");
+    await s.mockInput.pressKey("s"); // → name (A→Z)
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("105 skills·name"));
     await s.mockInput.pressKey("s"); // → load order
     await s.flush();
     const order = await waitForFrame(s, (f) => f.includes("105 skills·order"));
@@ -1039,7 +1042,7 @@ describe("tui model (pure)", () => {
     expect(m.checked.size).toBe(0);
   });
 
-  test("sort-toggle: checked-first on, load order off; no in-place mutation", () => {
+  test("sort-toggle: cycles checked -> name -> load -> checked; no in-place mutation", () => {
     const loaded: InstalledSkill[] = ["b-skill", "a-skill", "c-skill"].map((name) => ({
       name,
       path: `/x/${name}`,
@@ -1053,11 +1056,20 @@ describe("tui model (pure)", () => {
     expect(visibleSkills(m).map((s) => s.name)).toEqual(["a-skill", "b-skill", "c-skill"]); // A→Z
     expect(m.skills.map((s) => s.name)).toEqual(["b-skill", "a-skill", "c-skill"]); // untouched
     m = update(m, { type: "toggle-check" }); // checks a-skill
-    m = update(m, { type: "move", delta: 2 }); // to c-skill in [a, c, b]
+    m = update(m, { type: "move", delta: 2 }); // to c-skill in [a, b, c]
     m = update(m, { type: "toggle-check" }); // checks c-skill
     expect(visibleSkills(m).map((s) => s.name)).toEqual(["a-skill", "c-skill", "b-skill"]); // checked first
-    m = update(m, { type: "sort-toggle" });
+    m = update(m, { type: "sort-toggle" }); // -> name
+    expect(m.sortBy).toBe("name");
+    expect(m.sortCheckedFirst).toBe(false);
+    expect(visibleSkills(m).map((s) => s.name)).toEqual(["a-skill", "b-skill", "c-skill"]); // A->Z regardless of checks
+    m = update(m, { type: "sort-toggle" }); // -> load
+    expect(m.sortBy).toBe("load");
     expect(visibleSkills(m).map((s) => s.name)).toEqual(["b-skill", "a-skill", "c-skill"]); // load order
+    m = update(m, { type: "sort-toggle" }); // -> checked
+    expect(m.sortBy).toBe("checked");
+    expect(m.sortCheckedFirst).toBe(true);
+    expect(visibleSkills(m).map((s) => s.name)).toEqual(["a-skill", "c-skill", "b-skill"]);
     expect(m.skills.map((s) => s.name)).toEqual(["b-skill", "a-skill", "c-skill"]); // still untouched
   });
   test("agent filter: overlay stages and applies; description is a secondary text match", () => {
@@ -1496,6 +1508,53 @@ describe("S-103 search text-entry + match highlighting", () => {
     expect(highlightSegments("nomatch", ["labs", null])).toEqual([{ text: "nomatch", match: false }]);
     // adjusted query wins only when the raw query misses
     expect(highlightSegments("cli-ansi", ["zzz", "ansi"])[1]).toEqual({ text: "ansi", match: true });
+  });
+
+  test("S-261 / S-262: SearchBody renders two-pane split with Detail Panel, sourceSkills, and 3-mode sort", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    deps.search = async () => ({
+      results: [
+        { name: "zeta-skill", slug: "zeta", source: "org/repo", installs: 10 },
+        { name: "alpha-skill", slug: "alpha", source: "org/repo", installs: 5 },
+      ],
+      adjustedQuery: null,
+    });
+    deps.listSourceSkills = async (src) => [
+      { name: "zeta-skill", description: `from ${src}` },
+      { name: "alpha-skill", description: "sibling skill" },
+    ];
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await s.mockInput.typeText("/");
+    await s.mockInput.typeText("skill");
+    await new Promise((r) => setTimeout(r, 450));
+    await s.flush();
+    const frame = await waitForFrame(
+      s,
+      (f) => f.includes("source: org/repo") && f.includes("skills in org/repo (2):")
+    );
+    expect(frame).toContain("zeta-skill");
+    expect(frame).toContain("sibling skill");
+  });
+
+  test("S-261: [ / ] / 0 adjust listWidth between 10% and 50% and persist via savePrefs", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    const saved: Array<number | null> = [];
+    deps.savePrefs = (p) => saved.push(p.listWidth);
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await s.mockInput.pressKey("]"); // 35 -> 40
+    await s.flush();
+    expect(saved.at(-1)).toBe(40);
+    await s.mockInput.pressKey("["); // 40 -> 35
+    await s.mockInput.pressKey("["); // 35 -> 30
+    await s.flush();
+    expect(saved.at(-1)).toBe(30);
+    await s.mockInput.pressKey("0"); // reset -> null
+    await s.flush();
+    expect(saved.at(-1)).toBeNull();
   });
 });
 

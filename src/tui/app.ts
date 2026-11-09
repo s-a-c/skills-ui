@@ -3,15 +3,16 @@ import {
   checkForUpdates as svcCheckForUpdates,
   install as svcInstall,
   listInstalled as svcListInstalled,
+  listSourceSkills as svcListSourceSkills,
   remove as svcRemove,
   searchWithFallback as svcSearch,
   skillBody as svcSkillBody,
   update as svcUpdate,
 } from "../core/index.ts";
 import { loadDiskIndex, saveDiskIndex } from "../core/disk-index.ts";
-import { loadUiPreferences, saveUiPreferences, type UiPreferences } from "../core/prefs.ts";
+import { LIST_WIDTH_MAX, LIST_WIDTH_MIN, loadUiPreferences, saveUiPreferences, type UiPreferences } from "../core/prefs.ts";
 import { skillsVersion } from "../core/skills-client.ts";
-import type { InstalledSkill, SearchSkill, UpdatesResult } from "../core/services/types.ts";
+import type { InstalledSkill, SearchSkill, SourceSkill, UpdatesResult } from "../core/services/types.ts";
 import type { UiSeed } from "../core/seed.ts";
 import { readSkillDoc } from "../core/services/skill-doc.ts";
 import { disposeAudio, playSound, type SoundKind } from "./audio.ts";
@@ -96,6 +97,7 @@ export interface TuiDeps {
   skillBody(path: string): Promise<string | null>;
   checkUpdates(scope: "project" | "global"): Promise<UpdatesResult>;
   skillsVersion(): Promise<string | null>;
+  listSourceSkills?(source: string): Promise<SourceSkill[]>;
   savePrefs(prefs: UiPreferences): void;
   play(kind: SoundKind, prefs: UiPreferences): Promise<void>;
 }
@@ -156,6 +158,7 @@ export const realDeps: TuiDeps = {
       return null; // the CLI may be missing — settings shows "not found"
     }
   },
+  listSourceSkills: (source) => svcListSourceSkills(source),
   savePrefs: (prefs) => saveUiPreferences(prefs),
   play: (kind, prefs) => playSound(kind, prefs),
 };
@@ -215,9 +218,28 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     (renderer as unknown as { requestRender?: () => void }).requestRender?.();
   };
 
+  const inFlightSources = new Set<string>();
+  const ensureSelectedSourceSkills = (): void => {
+    if (model.tab !== "search" || !deps.listSourceSkills) return;
+    const sel = (model.visibleResults ?? model.results)[model.searchSelected];
+    const source = sel?.source;
+    if (!source || model.sourceSkills[source] || inFlightSources.has(source)) return;
+    inFlightSources.add(source);
+    void deps
+      .listSourceSkills(source)
+      .then((skills) => {
+        dispatch({ type: "source-skills-loaded", source, skills });
+      })
+      .catch(() => {})
+      .finally(() => {
+        inFlightSources.delete(source);
+      });
+  };
+
   const dispatch = (action: Action): void => {
     model = update(model, action);
     for (const fn of listeners) fn();
+    if (action.type !== "source-skills-loaded") ensureSelectedSourceSkills();
   };
 
   // Toast queue (ST7): the single toast slot stays, but a toast fired
@@ -414,7 +436,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       const skill = [...model.queue.values()][model.selectedCursor];
       return skill ? { key: `${skill.source}#${skill.name}`, skill } : null;
     }
-    const skill = model.results[model.searchSelected];
+    const skill = (model.visibleResults ?? model.results)[model.searchSelected];
     return skill ? { key: `${skill.source}#${skill.name}`, skill } : null;
   };
 
@@ -535,7 +557,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         // on the search tab space queues the selection; in filter mode it
         // toggles the check under the cursor (fork contract)
         if (inSearch) {
-          const skill = model.results[model.searchSelected];
+          const skill = (model.visibleResults ?? model.results)[model.searchSelected];
           if (skill) {
             dispatch({ type: "queue-toggle", skill });
             void deps.play("select", model.prefs);
@@ -660,7 +682,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
           dispatch({ type: "toggle-check" });
           void deps.play("select", model.prefs);
         } else if (model.tab === "search") {
-          const skill = model.results[model.searchSelected];
+          const skill = (model.visibleResults ?? model.results)[model.searchSelected];
           if (skill) {
             dispatch({ type: "queue-toggle", skill });
             void deps.play("select", model.prefs);
@@ -744,7 +766,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         if (model.tab === "installed") {
           void loadDetail();
         } else if (model.tab === "search") {
-          const skill = model.results[model.searchSelected];
+          const skill = (model.visibleResults ?? model.results)[model.searchSelected];
           if (skill) {
             void (async () => {
               dispatch({ type: "busy", label: `installing ${skill.name}` });
@@ -765,8 +787,24 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         }
         return;
       case "s":
-        if (model.tab === "installed") dispatch({ type: "sort-toggle" });
+        if (model.tab === "installed" || model.tab === "search") dispatch({ type: "sort-toggle" });
         return;
+      case "[":
+      case "]": {
+        const cur = model.prefs.listWidth ?? 35;
+        const delta = k === "]" ? 5 : -5;
+        const nextW = Math.max(LIST_WIDTH_MIN, Math.min(LIST_WIDTH_MAX, cur + delta));
+        const prefs: UiPreferences = { ...model.prefs, listWidth: nextW };
+        deps.savePrefs(prefs);
+        dispatch({ type: "prefs", prefs });
+        return;
+      }
+      case "0": {
+        const prefs: UiPreferences = { ...model.prefs, listWidth: null };
+        deps.savePrefs(prefs);
+        dispatch({ type: "prefs", prefs });
+        return;
+      }
       case ",":
       case "comma":
         if (model.tab === "settings") {
