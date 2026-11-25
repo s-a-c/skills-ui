@@ -1,4 +1,10 @@
-import type { InstalledSkill, SearchSkill, SourceSkill } from "../core/services/types.ts";
+import type {
+  HealthCheckResult,
+  InstalledSkill,
+  SearchSkill,
+  SkillProvenance,
+  SourceSkill,
+} from "../core/services/types.ts";
 import type { UiPreferences } from "../core/prefs.ts";
 import type { UiSeed } from "../core/seed.ts";
 
@@ -48,6 +54,7 @@ export interface TuiModel {
   filtering: boolean;
   agentFilter: Set<string>;
   agentSelect: { agents: string[]; staged: Set<string>; index: number } | null;
+  provenanceFilter: "all" | SkillProvenance;
   sortBy: SortMode;
   searchSortBy: SortMode;
   sortCheckedFirst: boolean;
@@ -67,8 +74,15 @@ export interface TuiModel {
   queue: Map<string, SearchSkill>; // key: source#name
   busy: string | null;
   toast: Toast | null;
-  confirm: { kind: "delete" | "update"; names: string[] } | null;
+  confirm: {
+    kind: "delete" | "update";
+    names: string[];
+    nonLocked?: Array<{ name: string; provenance: SkillProvenance }>;
+  } | null;
   help: boolean;
+  healthCapability: boolean;
+  health: HealthCheckResult | null;
+  healthOpen: boolean;
   detailBody: string | null;
   /** detail-scroll mode: arrows/PgUp/PgDn scroll the doc, not the list */
   detailScroll: boolean;
@@ -103,6 +117,7 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     sortCheckedFirst: true,
     agentFilter: new Set(),
     agentSelect: null,
+    provenanceFilter: "all",
     query: "",
     searching: false,
     results: [],
@@ -118,6 +133,9 @@ export function createTuiModel(prefs: UiPreferences): TuiModel {
     toast: null,
     confirm: null,
     help: false,
+    healthCapability: false,
+    health: null,
+    healthOpen: false,
     detailBody: null,
     detailScroll: false,
     splash: true,
@@ -157,10 +175,13 @@ export function visibleSkills(model: TuiModel): InstalledSkill[] {
           (s.description?.toLowerCase().includes(q) ?? false)
       )
     : model.skills;
-  const visible =
+  const byAgent =
     model.agentFilter.size > 0
       ? byText.filter((s) => s.agents.some((a) => model.agentFilter.has(a)))
       : byText;
+  const prov = model.provenanceFilter ?? "all";
+  const visible =
+    prov === "all" ? byAgent : byAgent.filter((s) => (s.provenance ?? "local") === prov);
   const mode: SortMode = !model.sortCheckedFirst && model.sortBy === "checked" ? "load" : model.sortBy;
   if (mode === "load") return visible;
   if (mode === "name") return [...visible].sort((a, b) => a.name.localeCompare(b.name));
@@ -234,6 +255,10 @@ export type Action =
   | { type: "detail"; body: string | null }
   | { type: "skills-version"; version: string | null }
   | { type: "source-skills-loaded"; source: string; skills: SourceSkill[] }
+  | { type: "provenance-cycle" }
+  | { type: "health-capability"; on: boolean }
+  | { type: "health-loaded"; health: HealthCheckResult }
+  | { type: "health-open"; on: boolean }
   | { type: "prefs"; prefs: UiPreferences };
 
 export function update(model: TuiModel, action: Action): TuiModel {
@@ -504,6 +529,23 @@ export function update(model: TuiModel, action: Action): TuiModel {
       break;
     case "source-skills-loaded":
       next.sourceSkills[action.source] = action.skills;
+      break;
+    case "provenance-cycle": {
+      const order: Array<"all" | SkillProvenance> = ["all", "locked", "linked", "local"];
+      const idx = order.indexOf(next.provenanceFilter ?? "all");
+      next.provenanceFilter = order[(idx + 1) % order.length]!;
+      forget();
+      clamp(next, visibleOf);
+      break;
+    }
+    case "health-capability":
+      next.healthCapability = action.on;
+      break;
+    case "health-loaded":
+      next.health = action.health;
+      break;
+    case "health-open":
+      next.healthOpen = action.on;
       break;
     case "prefs":
       next.prefs = action.prefs;

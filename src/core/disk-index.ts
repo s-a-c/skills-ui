@@ -148,6 +148,9 @@ function normalizeEntry(input: unknown, scope: Scope): InstalledSkill | null {
     sourceUrl: raw.sourceUrl,
     sourceType: raw.sourceType,
   };
+  if (raw.provenance === "locked" || raw.provenance === "linked" || raw.provenance === "local") {
+    skill.provenance = raw.provenance;
+  }
   if (typeof raw.description === "string") skill.description = raw.description;
   return skill;
 }
