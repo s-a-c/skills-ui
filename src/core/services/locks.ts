@@ -79,8 +79,11 @@ export function projectLockPath(cwd = process.cwd()): string {
 
 export function globalLockPath(): string {
   const xdgState = process.env.XDG_STATE_HOME;
-  if (xdgState) return join(xdgState, "skills", "skills-lock.json");
-  return join(homedir(), ".local", "state", "skills", "skills-lock.json");
+  const base = xdgState ? join(xdgState, "skills") : join(homedir(), ".local", "state", "skills");
+  const dotPath = join(base, ".skill-lock.json");
+  const legacyPath = join(base, "skills-lock.json");
+  if (existsSync(dotPath) || !existsSync(legacyPath)) return dotPath;
+  return legacyPath;
 }
 
 export function readLock(scope: Scope, cwd = process.cwd()): LockFile {

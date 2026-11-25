@@ -36,6 +36,8 @@ Every env var owned by this project is prefixed `SKILLS_UI_`:
 | `SKILLS_UI_PREFS_DIR` | Override prefs directory | `~/.config/skills-ui/prefs.json` |
 | `SKILLS_UI_API_URL` | skills.sh registry base URL | `https://skills.sh` |
 | `SKILLS_UI_SPAWN_QUEUE_CAP` | Max queued `skills` CLI invocations before 503 busy (0.5.1 impl A) | `8` |
+| `SKILLS_UI_POST_MUTATION_HOOK` | Executable path run directly via `Bun.spawn` after `install`/`remove`/`update` (host env only) | *(unset)* |
+| `SKILLS_UI_HEALTH_CMD` | Executable path run directly by `GET /api/health-check` (host env only, 10s cache) | *(unset)* |
 
 Standard and third-party vars (`GITHUB_TOKEN`, `XDG_STATE_HOME`, `COLORTERM`,
 `OPENTUI_LIBC`) keep their conventional names. New project-owned vars must take
@@ -92,8 +94,7 @@ Single-context: `CONTEXT.md` + `docs/adr/` at the repo root, created lazily. See
   number multi-step work, end with one concrete next action.
 - `karpathy-guidelines` — think before coding, simplicity first, surgical
   changes, goal-driven execution with verifiable success criteria.
-- `caveman` — terse responses; full prose for anything persisted outside chat
-  (docs, commits, tickets, Linear).
+- `asd-ste100` — controlled technical English for prompts, docs, UI labels, and status output.
 - `wayfinder` — decision maps on Linear for routes still in fog.
 - `grill-with-docs` — grilling + domain-modeling before building.
 - `unlazy` — gates and verification discipline when outcomes must provably

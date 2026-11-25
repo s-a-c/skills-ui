@@ -62,12 +62,18 @@ const ENV_PREFIX_ALLOWLIST = [
   "no_proxy",
 ];
 
+const ENV_DENYLIST = new Set([
+  "SKILLS_UI_POST_MUTATION_HOOK",
+  "SKILLS_UI_HEALTH_CMD",
+]);
+
 export function sanitizeEnv(
   base: Record<string, string | undefined> = process.env
 ): Record<string, string> {
   const env: Record<string, string> = {};
   for (const [key, value] of Object.entries(base)) {
     if (value === undefined) continue;
+    if (ENV_DENYLIST.has(key)) continue;
     if (ENV_ALLOWLIST.has(key) || ENV_PREFIX_ALLOWLIST.some((p) => key.startsWith(p))) {
       env[key] = value;
     }

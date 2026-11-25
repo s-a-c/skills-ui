@@ -35,3 +35,17 @@ _Avoid_: Subtitle, caption, subtext
 **Contiguous Action Group**:
 The non-breaking, right-justified group of action buttons on a Filter List Card (such as `+ Add to list` and `Install` on Search cards). It occupies the last line of the card when horizontal space is tight and merges onto the Penultimate Card Line (right-justified) when the card is wide enough to fit both without wrapping individual buttons.
 _Avoid_: Button bar, toolbar, card footer
+
+### Provenance, Hooks & Health
+
+**Skill Provenance**:
+The filesystem and lockfile origin of an installed skill (`locked`, `linked`, or `local`), determined from `lstat(skill.path)` and the active lockfile (`readLock(scope)`). `locked` identifies a real directory tracked in the lockfile, `linked` identifies a filesystem symlink (such as an externally linked framework skill), and `local` identifies an untracked real directory absent from the lockfile. Removal of `linked` or `local` skills requires explicit confirmation in both WebUI and TUI.
+_Avoid_: Source type, origin tag, ownership flag
+
+**Post-Mutation Hook**:
+An optional executable path supplied solely via the host process environment variable `SKILLS_UI_POST_MUTATION_HOOK` (never configurable via HTTP or `prefs.json`), invoked directly via `Bun.spawn` without a shell after successful `install`, `remove`, or `update` mutations. Failures surface as non-fatal warning toasts and response telemetry rather than reverting the `skills` CLI change.
+_Avoid_: Shell callback, lifecycle script, webhook
+
+**Health Pill**:
+The compact status indicator in the application header driven by host-env `SKILLS_UI_HEALTH_CMD` via `GET /api/health-check` (and hidden completely when `SKILLS_UI_HEALTH_CMD` is unset). It refreshes automatically after mutations and toggles a read-only detail view on click in the WebUI or `H` in the TUI.
+_Avoid_: Status banner, telemetry widget, diagnostics modal

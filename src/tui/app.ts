@@ -1,10 +1,13 @@
 import { createCliRenderer, type CliRenderer, type ScrollBoxRenderable } from "@opentui/core";
 import {
   checkForUpdates as svcCheckForUpdates,
+  checkHealth as svcCheckHealth,
   install as svcInstall,
+  isHealthCmdConfigured,
   listInstalled as svcListInstalled,
   listSourceSkills as svcListSourceSkills,
   remove as svcRemove,
+  runPostMutationHook as svcRunPostMutationHook,
   searchWithFallback as svcSearch,
   skillBody as svcSkillBody,
   update as svcUpdate,
@@ -12,7 +15,16 @@ import {
 import { loadDiskIndex, saveDiskIndex } from "../core/disk-index.ts";
 import { LIST_WIDTH_MAX, LIST_WIDTH_MIN, loadUiPreferences, saveUiPreferences, type UiPreferences } from "../core/prefs.ts";
 import { skillsVersion } from "../core/skills-client.ts";
-import type { InstalledSkill, SearchSkill, SourceSkill, UpdatesResult } from "../core/services/types.ts";
+import type {
+  HealthCheckResult,
+  InstalledSkill,
+  MutationEvent,
+  PostMutationHookResult,
+  SearchSkill,
+  SkillProvenance,
+  SourceSkill,
+  UpdatesResult,
+} from "../core/services/types.ts";
 import type { UiSeed } from "../core/seed.ts";
 import { readSkillDoc } from "../core/services/skill-doc.ts";
 import { disposeAudio, playSound, type SoundKind } from "./audio.ts";
@@ -98,6 +110,14 @@ export interface TuiDeps {
   checkUpdates(scope: "project" | "global"): Promise<UpdatesResult>;
   skillsVersion(): Promise<string | null>;
   listSourceSkills?(source: string): Promise<SourceSkill[]>;
+  healthConfigured?(): boolean;
+  checkHealth?(opts?: { refresh?: boolean }): Promise<HealthCheckResult>;
+  runPostMutationHook?(opts: {
+    event: MutationEvent;
+    scope: "project" | "global";
+    skills: string[];
+    cwd?: string;
+  }): Promise<PostMutationHookResult>;
   savePrefs(prefs: UiPreferences): void;
   play(kind: SoundKind, prefs: UiPreferences): Promise<void>;
 }
@@ -159,6 +179,9 @@ export const realDeps: TuiDeps = {
     }
   },
   listSourceSkills: (source) => svcListSourceSkills(source),
+  healthConfigured: () => isHealthCmdConfigured(),
+  checkHealth: (opts) => svcCheckHealth(opts),
+  runPostMutationHook: (opts) => svcRunPostMutationHook(opts),
   savePrefs: (prefs) => saveUiPreferences(prefs),
   play: (kind, prefs) => playSound(kind, prefs),
 };
@@ -263,6 +286,57 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
   const toast = (text: string, tone: ToastTone): void => {
     toastQueue.push({ text, tone });
     if (!toastTimer) showNextToast(); // idle slot — show immediately
+  };
+
+  let healthSeq = 0;
+  const refreshHealth = async (force: boolean): Promise<void> => {
+    if (!deps.checkHealth) return;
+    const seq = ++healthSeq;
+    try {
+      const health = await deps.checkHealth({ refresh: force });
+      if (seq !== healthSeq) return;
+      dispatch({ type: "health-loaded", health });
+    } catch (error) {
+      if (seq !== healthSeq) return;
+      dispatch({
+        type: "health-loaded",
+        health: {
+          configured: true,
+          ok: false,
+          summary: "health check error",
+          details: [error instanceof Error ? error.message : String(error)],
+          checkedAt: new Date().toISOString(),
+        },
+      });
+    }
+  };
+
+  const afterMutation = async (
+    event: MutationEvent,
+    skills: string[],
+    scope: "project" | "global",
+    ok: boolean
+  ): Promise<void> => {
+    if (ok && deps.runPostMutationHook) {
+      try {
+        const hook = await deps.runPostMutationHook({ event, scope, skills });
+        if (hook.configured && !hook.ok) {
+          toast(`Hook warning: ${hook.output || hook.summary || "hook failed"}`, "error");
+        }
+      } catch (error) {
+        toast(`Hook warning: ${error instanceof Error ? error.message : String(error)}`, "error");
+      }
+    }
+    if (model.healthCapability) {
+      await refreshHealth(true);
+    }
+  };
+
+  const nonLockedFor = (names: string[]): Array<{ name: string; provenance: SkillProvenance }> => {
+    const set = new Set(names);
+    return model.skills
+      .filter((s) => set.has(s.name) && (s.provenance === "linked" || s.provenance === "local"))
+      .map((s) => ({ name: s.name, provenance: s.provenance as SkillProvenance }));
   };
 
   // Double-press quit (S-161): a bare `q` in command mode must not be a
@@ -406,6 +480,7 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         const result = await deps.install(source, names, scope);
         toast(`${source}: ${result.summary}`, result.ok ? "success" : "error");
         await deps.play(result.ok ? "success" : "error", model.prefs);
+        await afterMutation("install", names, scope, result.ok);
       }
       dispatch({ type: "queue-clear" });
       await reloadSkills();
@@ -420,9 +495,11 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     dispatch({ type: "confirm", confirm: null });
     dispatch({ type: "busy", label: `${kind === "delete" ? "removing" : "updating"} ${names.length} skill(s)` });
     try {
-      const result = kind === "delete" ? await deps.remove(names, model.scope) : await deps.update(names, model.scope);
+      const scope = model.scope;
+      const result = kind === "delete" ? await deps.remove(names, scope) : await deps.update(names, scope);
       toast(result.summary, result.ok ? "success" : "error");
       await deps.play(result.ok ? "success" : "error", model.prefs);
+      await afterMutation(kind === "delete" ? "remove" : "update", names, scope, result.ok);
       dispatch({ type: "clear-checks" });
       await reloadSkills();
     } finally {
@@ -472,6 +549,14 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     }
     if (model.help) {
       if (k === "escape" || k === "?" || k === "q") dispatch({ type: "help", on: false });
+      return;
+    }
+    if (model.healthOpen) {
+      if (k === "escape" || k === "H" || (key.shift && k === "h") || k === "q") {
+        dispatch({ type: "health-open", on: false });
+      } else if (k === "r") {
+        void refreshHealth(true);
+      }
       return;
     }
     if (model.agentSelect) {
@@ -601,6 +686,17 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     // G (shift+g) opens the 3D skills graph (S-100); g stays scope-global
     if (k === "G" || (key.shift && k === "g")) {
       dispatch({ type: "graph", on: true });
+      void deps.play("select", model.prefs);
+      return;
+    }
+    if ((k === "H" || (key.shift && k === "h")) && model.healthCapability) {
+      const nextOpen = !model.healthOpen;
+      dispatch({ type: "health-open", on: nextOpen });
+      if (nextOpen) void refreshHealth(true);
+      return;
+    }
+    if ((k === "P" || (key.shift && k === "p")) && model.tab === "installed") {
+      dispatch({ type: "provenance-cycle" });
       void deps.play("select", model.prefs);
       return;
     }
@@ -743,7 +839,10 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
       case "r":
         if (model.tab === "installed") {
           const skill = model.visible[model.selected];
-          if (skill) dispatch({ type: "confirm", confirm: { kind: "delete", names: [skill.name] } });
+          if (skill) {
+            const nonLocked = nonLockedFor([skill.name]);
+            dispatch({ type: "confirm", confirm: { kind: "delete", names: [skill.name], nonLocked } });
+          }
         }
         return;
       case "u":
@@ -760,7 +859,10 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
         }
         return;
       case "d":
-        if (model.checked.size > 0) dispatch({ type: "confirm", confirm: { kind: "delete", names: [...model.checked] } });
+        if (model.checked.size > 0) {
+          const names = [...model.checked];
+          dispatch({ type: "confirm", confirm: { kind: "delete", names, nonLocked: nonLockedFor(names) } });
+        }
         return;
       case "return":
         if (model.tab === "installed") {
@@ -769,10 +871,12 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
           const skill = (model.visibleResults ?? model.results)[model.searchSelected];
           if (skill) {
             void (async () => {
+              const scope = model.scope;
               dispatch({ type: "busy", label: `installing ${skill.name}` });
-              const result = await deps.install(skill.source, [skill.name], model.scope);
+              const result = await deps.install(skill.source, [skill.name], scope);
               toast(result.summary, result.ok ? "success" : "error");
               await deps.play(result.ok ? "success" : "error", model.prefs);
+              await afterMutation("install", [skill.name], scope, result.ok);
               dispatch({ type: "busy", label: null });
               await reloadSkills();
             })();
@@ -856,6 +960,10 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
 
   const bridge: AppBridge = { subscribe, getState, dispatch, loadDetail, play: (k, prefs) => void deps.play(k, prefs), refs: refsHolder };
   unmount = mountApp(renderer, bridge);
+  if (deps.healthConfigured?.()) {
+    dispatch({ type: "health-capability", on: true });
+    void refreshHealth(false);
+  }
   await reloadSkills();
   if (seed?.kind === "add") scheduleSearch();
 

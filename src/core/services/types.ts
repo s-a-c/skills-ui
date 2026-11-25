@@ -1,5 +1,27 @@
 export type Scope = "project" | "global";
 
+export type SkillProvenance = "locked" | "linked" | "local";
+
+export type MutationEvent = "install" | "remove" | "update";
+
+export interface PostMutationHookResult {
+  configured: boolean;
+  ok: boolean;
+  skipped?: boolean;
+  exitCode?: number;
+  timedOut?: boolean;
+  summary?: string;
+  output?: string;
+}
+
+export interface HealthCheckResult {
+  configured: boolean;
+  ok: boolean;
+  summary: string;
+  details?: string[];
+  checkedAt: string;
+}
+
 /** One installed skill, mapped from `skills ls --json` output. */
 export interface InstalledSkill {
   name: string;
@@ -11,6 +33,8 @@ export interface InstalledSkill {
   source: string | null;
   sourceUrl: string | null;
   sourceType: string | null;
+  /** Filesystem/lockfile origin (0.5.5). */
+  provenance?: SkillProvenance;
   /** Frontmatter description, enriched by callers that want it (TUI filter, API). */
   description?: string;
 }

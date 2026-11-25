@@ -1,10 +1,14 @@
 import { pageCspFor, renderPage } from "../web/page.ts";
 import {
   checkForUpdates,
+  createHealthChecker,
   install,
+  isHealthCmdConfigured,
+  isPostMutationHookConfigured,
   listInstalled,
   listSourceSkills,
   remove,
+  runPostMutationHook,
   searchWithFallback,
   skillBody,
   update,
@@ -251,6 +255,7 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
   // never read into, or write over, the CURRENT shared enrichment.
 
   const descriptionCache = new Map<string, string>();
+  const healthChecker = createHealthChecker();
 
   const descriptionFor = (path: string, generation: number): string => {
     const current = generation === listGeneration;
@@ -296,8 +301,18 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
         return json({
           version: APP_VERSION,
           skillsVersion: skills,
-          capabilities: { updatesCheck: "github", hosted: true },
+          capabilities: {
+            updatesCheck: "github",
+            hosted: true,
+            healthCheck: isHealthCmdConfigured(),
+            postMutationHook: isPostMutationHookConfigured(),
+          },
         });
+      }
+
+      if (method === "GET" && path === "/api/health-check") {
+        const refresh = url.searchParams.get("refresh") === "1";
+        return json(await healthChecker.check({ refresh }));
       }
 
       if (method === "GET" && path === "/api/skills") {
@@ -320,6 +335,7 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
             agents: s.agents,
             path: s.path,
             source: s.source,
+            provenance: s.provenance ?? "local",
           })),
         });
       }
@@ -401,9 +417,18 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
         // half-mutation to flush. If install ever gains a post-spawn throw,
         // add the remove() try/catch pattern below.
         invalidateListCache();
+        healthChecker.invalidate();
         const output = JSON.stringify(result.results);
         if (!result.ok) return json({ ok: false, output }, 500);
-        return json({ ok: true, output });
+        const installedNames = result.results
+          .filter((r) => r.status === "installed" && r.name)
+          .map((r) => r.name as string);
+        const hook = await runPostMutationHook({
+          event: "install",
+          scope: body.global === true ? "global" : "project",
+          skills: installedNames.length > 0 ? installedNames : skillsList,
+        });
+        return json({ ok: true, output, ...(hook.configured ? { hook } : {}) });
       }
 
       if (method === "GET" && path === "/api/source-skills") {
@@ -442,10 +467,14 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
           invalidateListCache();
           throw error;
         }
+        healthChecker.invalidate();
         const output =
           result.ok ? `Removed: ${result.removed.join(", ")}` :
           `Removed: ${result.removed.join(", ") || "none"} — failed: ${result.missing.join(", ")}`;
-        return json({ ok: result.ok, output });
+        const hook = result.ok
+          ? await runPostMutationHook({ event: "remove", scope, skills: result.removed })
+          : null;
+        return json({ ok: result.ok, output, ...(hook && hook.configured ? { hook } : {}) });
       }
 
       if (method === "POST" && path === "/api/update") {
@@ -472,7 +501,11 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
         // S-178: mutation ⇒ drop the list cache (see /api/install — update's
         // throw paths are likewise pre-spawn only, no half-mutation to flush)
         invalidateListCache();
-        return json({ ok: result.ok, output: result.output });
+        healthChecker.invalidate();
+        const hook = result.ok
+          ? await runPostMutationHook({ event: "update", scope, skills: names })
+          : null;
+        return json({ ok: result.ok, output: result.output, ...(hook && hook.configured ? { hook } : {}) });
       }
 
       if (method === "GET" && path === "/api/updates") {

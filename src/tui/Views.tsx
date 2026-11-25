@@ -105,6 +105,7 @@ export function App(): ReactNode {
       )}
       <Footer model={model} />
       <ConfirmOverlay model={model} />
+      <HealthOverlay model={model} />
       <HelpOverlay model={model} />
       <AgentSelectOverlay model={model} />
     </box>
@@ -196,6 +197,8 @@ function Header({ model }: { model: TuiModel }): ReactNode {
   const t = tokensFor(model.prefs.theme);
   const right = [`[${model.scope === "project" ? "p" : "g"}] ${model.scope}`];
   if (model.busy) right.push(`· ${model.busy}…`);
+  const healthColor = !model.health ? t.textMuted : model.health.ok ? t.success : t.danger;
+  const healthText = model.health ? `● ${model.health.summary} [H]` : "● health… [H]";
   return (
     <box width="100%" flexShrink={0} flexDirection="row" justifyContent="space-between" paddingLeft={1} paddingRight={1}>
       <box flexDirection="row" gap={2}>
@@ -208,7 +211,8 @@ function Header({ model }: { model: TuiModel }): ReactNode {
           );
         })}
       </box>
-      <box flexDirection="row">
+      <box flexDirection="row" gap={2}>
+        {model.healthCapability ? <text fg={healthColor}>{healthText}</text> : null}
         <text fg={t.textMuted}>{right.join(" ")}</text>
       </box>
     </box>
@@ -254,7 +258,8 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
   const checkedCount = model.checked.size;
   const listWidthPct = model.prefs.listWidth ?? 42;
   const sortLabel = model.sortBy === "checked" ? "checked" : model.sortBy === "name" ? "name" : "order";
-  const defaultTitle = ` ${visible.length} skills·${sortLabel}`;
+  const provSuffix = model.provenanceFilter !== "all" ? `·${model.provenanceFilter}` : "";
+  const defaultTitle = ` ${visible.length} skills·${sortLabel}${provSuffix}`;
   const listTitle =
     model.agentFilter.size > 0
       ? ` agents: ${[...model.agentFilter].sort().join(", ")} `
@@ -265,7 +270,7 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
           // `·checked` / `·name` / `·order` glued to the count: the pane fits
           // a 19-char title at 80 cols (42% = 33 cols), or compact count when narrowed.
           : listWidthPct < 35
-            ? ` ${visible.length}·${sortLabel}`
+            ? ` ${visible.length}·${sortLabel}${provSuffix}`
             : defaultTitle;
   useEffect(() => {
     refs.detailScroll = detailScrollRef.current ?? undefined;
@@ -332,6 +337,11 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
                   <text flexShrink={0} fg={sel ? t.selectionText : t.text} attributes={sel ? TextAttributes.BOLD : TextAttributes.NONE}>
                     {skill.name}
                   </text>
+                  {skill.provenance ? (
+                    <text flexShrink={0} fg={sel ? t.selectionText : skill.provenance === "locked" ? t.textMuted : t.primary}>
+                      {skill.provenance === "locked" ? "[lck]" : skill.provenance === "linked" ? "[lnk]" : "[loc]"}
+                    </text>
+                  ) : null}
                   {skill.source ? <text fg={sel ? t.selectionText : t.textMuted}>{skill.source}</text> : null}
                   {updatesAvailable.has(skill.name) ? <text fg={t.success}>↑</text> : null}
                 </box>
@@ -357,7 +367,7 @@ function InstalledBody({ model }: { model: TuiModel }): ReactNode {
         </scrollbox>
         {selected ? (
           <text fg={t.textMuted}>
-            {`${selected.agents.length} agent(s) · ${selected.scope} · ${selected.path}${updatesAvailable.has(selected.name) ? " · ↑ update available" : ""}`}
+            {`${selected.agents.length} agent(s) · ${selected.scope}${selected.provenance ? ` · ${selected.provenance}` : ""} · ${selected.path}${updatesAvailable.has(selected.name) ? " · ↑ update available" : ""}`}
           </text>
         ) : null}
         {selected && updateErrors.get(selected.name) ? (
@@ -638,14 +648,15 @@ function Footer({ model }: { model: TuiModel }): ReactNode {
 
 function HelpOverlay({ model }: { model: TuiModel }): ReactNode {
   const t = tokensFor(model.prefs.theme);
-  const pop = usePopInOverlay(model.prefs, 2);
+  const pop = usePopInOverlay(model.prefs, 1);
   if (!model.help) return null;
   const keys: Array<[string, string]> = [
     ["i / ,", "installed / settings tabs"],
     ["/", "search tab"],
     ["f", "filter (or just type)"],
-    ["tab", "detail scroll mode (arrows/PgUp/PgDn scroll the doc)"],
+    ["tab", "detail scroll mode (arrows/PgUp/PgDn)"],
     ["a", "agent filter (multi, a=all)"],
+    ["P | H", "provenance filter / hub health"],
     ["s", "sort checked first (cycles name/order)"],
     ["[ / ] / 0", "resize list pane (10% to 50%, 0 resets)"],
     ["c", "check for updates"],
@@ -660,7 +671,7 @@ function HelpOverlay({ model }: { model: TuiModel }): ReactNode {
     ["q", "quit (press twice)"],
   ];
   return (
-    <box ref={pop.ref} position="absolute" zIndex={11} top={pop.top} left="25%" width="50%" flexDirection="column" padding={1} border={true} borderStyle="rounded" borderColor={t.border} backgroundColor={t.surface} title=" help ">
+    <box ref={pop.ref} position="absolute" zIndex={11} top={pop.top} left="15%" width="70%" flexDirection="column" padding={1} border={true} borderStyle="rounded" borderColor={t.border} backgroundColor={t.surface} title=" help ">
       {keys.map(([key, label]) => (
         <box key={key} flexDirection="row" gap={2}>
           <text fg={t.primary}>{key.padEnd(18)}</text>
@@ -693,13 +704,42 @@ function AgentSelectOverlay({ model }: { model: TuiModel }): ReactNode {
   );
 }
 
+function HealthOverlay({ model }: { model: TuiModel }): ReactNode {
+  const t = tokensFor(model.prefs.theme);
+  const pop = usePopInOverlay(model.prefs, 5);
+  if (!model.healthOpen || !model.healthCapability) return null;
+  const h = model.health;
+  const details = h?.details ?? [];
+  return (
+    <box ref={pop.ref} position="absolute" zIndex={13} top={pop.top} left="20%" width="60%" flexDirection="column" gap={1} padding={1} border={true} borderStyle="rounded" borderColor={h?.ok === false ? t.danger : t.primary} backgroundColor={t.surface} title=" hub health ">
+      <text fg={h?.ok === false ? t.danger : t.success} attributes={TextAttributes.BOLD}>
+        {h ? `${h.ok ? "OK" : "FAIL"}: ${h.summary}` : "Loading health status…"}
+      </text>
+      {details.length > 0 ? (
+        <box flexDirection="column">
+          {details.map((line, i) => (
+            <text key={i} fg={t.text}>{`· ${line}`}</text>
+          ))}
+        </box>
+      ) : null}
+      <text fg={t.textMuted}>r refresh · H/esc close</text>
+    </box>
+  );
+}
+
 function ConfirmOverlay({ model }: { model: TuiModel }): ReactNode {
   const t = tokensFor(model.prefs.theme);
   const pop = usePopInOverlay(model.prefs, 7);
   if (!model.confirm) return null;
+  const nonLocked = model.confirm.kind === "delete" ? (model.confirm.nonLocked ?? []) : [];
   return (
     <box ref={pop.ref} position="absolute" zIndex={10} top={pop.top} left="25%" width="50%" flexDirection="column" gap={1} padding={1} border={true} borderStyle="rounded" borderColor={model.confirm.kind === "delete" ? t.danger : t.primary} backgroundColor={t.surface} title={model.confirm.kind === "delete" ? " remove skills " : " update skills "}>
       <text fg={t.text}>{model.confirm.names.join(", ")}</text>
+      {nonLocked.length > 0 ? (
+        <text fg={t.danger}>
+          {`Warning: non-locked (${nonLocked.map((x) => `${x.name} [${x.provenance}]`).join(", ")})`}
+        </text>
+      ) : null}
       <text fg={t.textMuted}>y confirm · n/esc cancel</text>
     </box>
   );

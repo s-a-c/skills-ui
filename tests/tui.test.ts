@@ -1570,3 +1570,96 @@ describe("S-187: checkedTitle 19-char pane-title ladder (review F2 table test)",
     expect(checkedTitle(9999999999, 1).length).toBeLessThanOrEqual(19);
   });
 });
+
+describe("0.5.5 provenance, hook warning & health strip (T4)", () => {
+  test("P cycles provenance filter and renders [lck]/[lnk]/[loc] badges", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    deps.listInstalled = async () => [
+      { ...SKILLS[0]!, name: "locked-one", provenance: "locked" },
+      { ...SKILLS[0]!, name: "linked-one", provenance: "linked" },
+      { ...SKILLS[1]!, name: "local-one", provenance: "local" },
+    ];
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    const initial = await waitForFrame(s, (f) => f.includes("[lck]") && f.includes("[lnk]") && f.includes("[loc]"));
+    expect(initial).toContain("3 skills");
+
+    await s.mockInput.pressKey("P");
+    await s.flush();
+    const lockedFrame = await waitForFrame(s, (f) => f.includes("1 skills·") && f.includes("·locked"));
+    expect(lockedFrame).toContain("locked-one");
+    expect(lockedFrame).not.toContain("linked-one");
+
+    await s.mockInput.pressKey("P");
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("·linked") && f.includes("linked-one"));
+
+    await s.mockInput.pressKey("P");
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("·local") && f.includes("local-one"));
+
+    await s.mockInput.pressKey("P");
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("3 skills") && !f.includes("·locked") && !f.includes("·local"));
+  });
+
+  test("remove confirmation warns on non-locked skill and surfaces hook failure toast", async () => {
+    const s = setup!;
+    const deps = fakeDeps();
+    deps.listInstalled = async () => [
+      { ...SKILLS[0]!, name: "linked-one", provenance: "linked" },
+    ];
+    deps.runPostMutationHook = async () => ({
+      configured: true,
+      ok: false,
+      exitCode: 1,
+      output: "drift",
+    });
+    await runTuiOn(s.renderer, undefined, deps);
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("linked-one"));
+
+    await s.mockInput.pressKey("r");
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("Warning: non-locked (linked-one [linked])"));
+
+    await s.mockInput.pressKey("y");
+    await s.flush();
+    await waitForFrame(s, (f) => f.includes("Hook warning: drift"), 8_000);
+  }, 15_000);
+
+  test("health pill and H overlay stay hidden when unconfigured and work when configured", async () => {
+    const s = setup!;
+    const hiddenDeps = fakeDeps();
+    await runTuiOn(s.renderer, undefined, hiddenDeps);
+    await s.flush();
+    const hiddenFrame = await waitForFrame(s, (f) => f.includes("code-review"));
+    expect(hiddenFrame).not.toContain("[H]");
+    await s.mockInput.pressKey("H");
+    await s.flush();
+    expect(s.captureCharFrame()).not.toContain("hub health");
+
+    s.renderer.destroy();
+    setup = await createTestRenderer({ width: 100, height: 30 });
+    const configuredDeps = fakeDeps();
+    configuredDeps.healthConfigured = () => true;
+    configuredDeps.checkHealth = async () => ({
+      ok: true,
+      summary: "113/113 · 8 hosts",
+      details: ["claude: 113 links"],
+    });
+    await runTuiOn(setup.renderer, undefined, configuredDeps);
+    await setup.flush();
+    const pillFrame = await waitForFrame(setup, (f) => f.includes("113/113"));
+    expect(pillFrame).toContain("113/113");
+
+    await setup.mockInput.pressKey("H");
+    await setup.flush();
+    await waitForFrame(setup, (f) => f.includes("hub health") && f.includes("claude: 113 links"));
+
+    await setup.mockInput.pressKey("H");
+    await setup.flush();
+    await waitForFrame(setup, (f) => !f.includes("hub health"));
+  });
+});
