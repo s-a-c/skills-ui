@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { APP_JS } from "../src/web/page.ts";
 
 /**
  * S-184 — dash-sweep gate: no en-dash (U+2013) or em-dash (U+2014) may appear
@@ -133,23 +134,6 @@ function lex(src: string): { literals: { kind: Hit["kind"]; text: string }[]; bl
   return { literals, blanked: buf.join("") };
 }
 
-/** The APP_JS template body, found by its content anchor (never line numbers). */
-function appJsBody(pageTs: string): string {
-  const anchor = "const APP_JS = `";
-  const at = pageTs.indexOf(anchor);
-  if (at < 0) throw new Error("APP_JS anchor not found in src/web/page.ts");
-  const start = at + anchor.length;
-  let i = start;
-  while (i < pageTs.length && pageTs[i] !== "`") {
-    if (pageTs[i] === "\\") {
-      i += 2;
-      continue;
-    }
-    i++;
-  }
-  return pageTs.slice(start, i);
-}
-
 /** JSX text runs in blanked .tsx source: anything between `>` and `<`. */
 function jsxTextRuns(blanked: string): string[] {
   const runs: string[] = [];
@@ -158,7 +142,6 @@ function jsxTextRuns(blanked: string): string[] {
 }
 
 const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
-const pageTs = read("src/web/page.ts");
 const views = read("src/tui/Views.tsx");
 const app = read("src/tui/app.ts");
 const model = read("src/tui/model.ts");
@@ -173,7 +156,7 @@ function dashHits(file: string, candidates: { kind: Hit["kind"]; text: string }[
 
 describe("S-184: dash sweep — no en/em dash in user-facing runtime strings", () => {
   test("web APP_JS: no string literal carries an en/em dash", () => {
-    const { literals } = lex(appJsBody(pageTs));
+    const { literals } = lex(APP_JS);
     expect(dashHits("src/web/page.ts APP_JS", literals)).toEqual([]);
   });
 
@@ -193,7 +176,7 @@ describe("S-184: dash sweep — no en/em dash in user-facing runtime strings", (
   });
 
   test("the extractor reaches the runtime copy (guard against a vacuous pass)", () => {
-    const appJs = lex(appJsBody(pageTs)).literals.map((l) => l.text);
+    const appJs = lex(APP_JS).literals.map((l) => l.text);
     const viewsLiterals = lex(views).literals.map((l) => l.text);
     const appLiterals = lex(app).literals.map((l) => l.text);
     const modelLiterals = lex(model).literals.map((l) => l.text);

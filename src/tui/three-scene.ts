@@ -11,7 +11,7 @@
 import { THREE, ThreeRenderable } from "@opentui/three";
 import type { CliRenderer } from "@opentui/core";
 import { hexToRgb, CATPPUCCIN_MOCHA, CATPPUCCIN_LATTE, type ThemeName } from "../core/theme.ts";
-import type { InstalledSkill } from "../core/services/types.ts";
+import type { InstalledSkill } from "../core/index.ts";
 
 // React's prop application assigns every prop onto the constructed
 // instance; ThreeRenderable exposes readonly members (scene, camera,

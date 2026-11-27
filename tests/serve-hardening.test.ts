@@ -47,7 +47,12 @@ async function start(
   rateLimit?: { capacity: number; refillPerSec: number } | null
 ): Promise<string> {
   const { createSkillsUiServer } = await import("../src/core/api.ts");
-  server = await createSkillsUiServer({ withPage: true, ...(rateLimit !== undefined ? { rateLimit } : {}) });
+  const { webPageRenderer } = await import("../src/web/page.ts");
+  server = await createSkillsUiServer({
+    withPage: true,
+    pageRenderer: webPageRenderer,
+    ...(rateLimit !== undefined ? { rateLimit } : {}),
+  });
   return `http://127.0.0.1:${server.port}`;
 }
 

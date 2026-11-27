@@ -1,4 +1,3 @@
-import { pageCspFor, renderPage } from "../web/page.ts";
 import {
   checkForUpdates,
   createHealthChecker,
@@ -48,11 +47,29 @@ import { APP_VERSION } from "./version.ts";
 
 const BODY_LIMIT = 1024 * 1024;
 
+export interface PageRenderer {
+  renderPage: (
+    version: string,
+    prefs?: UiPreferences,
+    serverPort?: number,
+    seed?: UiSeed,
+    opts?: { hosted?: boolean }
+  ) => string;
+  pageCspFor: (
+    prefs?: UiPreferences,
+    serverPort?: number,
+    seed?: UiSeed,
+    hosted?: boolean
+  ) => string;
+}
+
 export interface ApiOptions {
   port?: number | null;
   seed?: UiSeed;
   /** Serve the HTML page at / (true for --web, false for headless serve). */
   withPage?: boolean;
+  /** Required when `withPage` is true; injected by caller so core stays decoupled from web. */
+  pageRenderer?: PageRenderer;
   onReady?: (info: { port: number; fellBack: boolean }) => void;
   /** Called once at startup with the hosted-UI token (main.ts prints it). */
   onToken?: (token: string) => void;
@@ -163,6 +180,9 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
   fellBack: boolean;
   stop: () => Promise<void>;
 }> {
+  if (options.withPage && !options.pageRenderer) {
+    throw new Error("createSkillsUiServer: withPage requires options.pageRenderer");
+  }
   const prefs: UiPreferences = loadUiPreferences();
   const preferred = options.port ?? prefs.port ?? 0;
   // The actually-bound port (auto-assign may rewrite a requested 0); set
@@ -269,273 +289,265 @@ export async function createSkillsUiServer(options: ApiOptions = {}): Promise<{
     return description;
   };
 
+  const finalizeMutation = async (
+    event: "install" | "remove" | "update",
+    scope: Scope,
+    skills: string[],
+    ok: boolean
+  ) => {
+    healthChecker.invalidate();
+    if (!ok) return null;
+    const hook = await runPostMutationHook({ event, scope, skills });
+    return hook.configured ? hook : null;
+  };
+
+  const handleGetPage = (): Response => {
+    if (!options.withPage || !options.pageRenderer) return json({ error: "not found: headless serve mode" }, 404);
+    return new Response(options.pageRenderer.renderPage(APP_VERSION, prefs, boundPort || undefined, options.seed), {
+      headers: {
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "no-store",
+        // hash-pinned CSP (0.5.1 impl B) — no script-src 'unsafe-inline';
+        // these two cannot go in a meta CSP, so the embedded page gets
+        // them as real headers
+        "content-security-policy": options.pageRenderer.pageCspFor(prefs, boundPort || undefined, options.seed, false),
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer",
+      },
+    });
+  };
+
+  const handleGetVersion = async (): Promise<Response> => {
+    let skills: string | null = null;
+    try {
+      skills = await skillsVersion();
+    } catch {
+      skills = null;
+    }
+    return json({
+      version: APP_VERSION,
+      skillsVersion: skills,
+      capabilities: {
+        updatesCheck: "github",
+        hosted: true,
+        healthCheck: isHealthCmdConfigured(),
+        postMutationHook: isPostMutationHookConfigured(),
+      },
+    });
+  };
+
+  const handleGetHealthCheck = async (_req: Request, url: URL): Promise<Response> =>
+    json(await healthChecker.check({ refresh: url.searchParams.get("refresh") === "1" }));
+
+  const handleGetSkills = async (_req: Request, url: URL): Promise<Response> => {
+    const scope = scopeParam(url);
+    // S-201: capture the generation BEFORE awaiting the list — a request
+    // whose flight is overtaken by a mutation must not read or repopulate
+    // the description cache (its own stale response is still served,
+    // enriched from the files at response time).
+    const generation = listGeneration;
+    // S-178: served from the per-server list cache — the first request
+    // for a scope spawns one `skills ls`, concurrent requests coalesce
+    // onto it, later requests hit the cache
+    const skills = await cachedListInstalled(scope);
+    return json({
+      scope,
+      skills: skills.map((s) => ({
+        name: s.name,
+        description: descriptionFor(s.path, generation),
+        scope: s.scope,
+        agents: s.agents,
+        path: s.path,
+        source: s.source,
+        provenance: s.provenance ?? "local",
+      })),
+    });
+  };
+
+  const handleGetSkill = async (_req: Request, url: URL): Promise<Response> => {
+    const scope = scopeParam(url);
+    // S-178/S-179: both lookup forms run against the cached list — the
+    // first read on a fresh serve populates it (one spawn), later reads
+    // spawn nothing, whichever form the client used.
+    const skills = await cachedListInstalled(scope);
+    // S-179 detail-by-path — SECURITY boundary: the `path` param is
+    // caller-supplied, so it is used ONLY as an exact-string membership
+    // check against the scope's cached-or-in-flight InstalledSkill rows.
+    const requestedPath = url.searchParams.get("path");
+    let skill: InstalledSkill | undefined;
+    if (requestedPath) {
+      skill = skills.find((s) => s.path === requestedPath);
+    } else {
+      const name = url.searchParams.get("name");
+      if (!name) return json({ error: "name is required" }, 400);
+      if (!validSkillName(name)) return json({ error: "invalid skill name" }, 400);
+      skill = skills.find((s) => s.name === name);
+    }
+    if (!skill) return json({ error: "skill not found" }, 404);
+    const body = skillBody(skill.path);
+    return json({ name: skill.name, scope: skill.scope, body: body ?? "" });
+  };
+
+  const handleGetSearch = async (_req: Request, url: URL): Promise<Response> => {
+    const q = url.searchParams.get("q") ?? "";
+    if (!q.trim()) return json({ results: [], adjustedQuery: null });
+    if (validQuery(q) === null) return json({ error: "invalid query" }, 400);
+    const { results, adjustedQuery, failed } = await searchWithFallback(q);
+    // `failed` (F4): the registry was unreachable — surfaces must say so
+    // instead of rendering an honest-looking "no results"
+    return json({ results, adjustedQuery, failed });
+  };
+
+  const parseInstallSkills = (body: Record<string, unknown>): string[] | Response => {
+    let skillsList: string[] | null = null;
+    if (typeof body.skill === "string" && body.skill) skillsList = [body.skill];
+    else if (Array.isArray(body.skills)) {
+      if (!body.skills.every((s) => typeof s === "string")) {
+        return json({ error: "skills must be a string array" }, 400);
+      }
+      skillsList = body.skills as string[];
+    }
+    if (!skillsList) return json({ error: "skill or skills is required" }, 400);
+    // S-199: only the SINGLETON wildcard maps to `add <source> --all`.
+    const installAll = skillsList.length === 1 && skillsList[0] === "*";
+    if (!installAll && !skillsList.every((s) => validSkillName(s) !== null)) {
+      return json({ error: "invalid skill name" }, 400);
+    }
+    return skillsList;
+  };
+
+  const handlePostInstall = async (req: Request): Promise<Response> => {
+    const body = await readJsonBody(req);
+    const source = typeof body.source === "string" ? body.source : null;
+    if (!source) return json({ error: "source is required" }, 400);
+    if (validSource(source) === null) return json({ error: "invalid source" }, 400);
+    const skillsOrErr = parseInstallSkills(body);
+    if (skillsOrErr instanceof Response) return skillsOrErr;
+    const scope: Scope = body.global === true ? "global" : "project";
+    const result = await install({ source, skills: skillsOrErr, global: scope === "global" });
+    invalidateListCache();
+    const output = JSON.stringify(result.results);
+    if (!result.ok) {
+      healthChecker.invalidate();
+      return json({ ok: false, output }, 500);
+    }
+    const installedNames = result.results
+      .filter((r) => r.status === "installed" && r.name)
+      .map((r) => r.name as string);
+    const hook = await finalizeMutation(
+      "install",
+      scope,
+      installedNames.length > 0 ? installedNames : skillsOrErr,
+      true
+    );
+    return json({ ok: true, output, ...(hook ? { hook } : {}) });
+  };
+
+  const handleGetSourceSkills = async (_req: Request, url: URL): Promise<Response> => {
+    const source = url.searchParams.get("source");
+    if (!source) return json({ error: "source is required" }, 400);
+    if (validSource(source) === null) return json({ error: "invalid source" }, 400);
+    const skills = await listSourceSkills(source);
+    return json({ source, skills });
+  };
+
+  const handlePostRemove = async (req: Request): Promise<Response> => {
+    const body = await readJsonBody(req);
+    if (!Array.isArray(body.skills) || !body.skills.every((s) => typeof s === "string")) {
+      return json({ error: "skills must be a string array" }, 400);
+    }
+    const names = body.skills as string[];
+    if (!names.every((s) => validSkillName(s) !== null)) {
+      return json({ error: "invalid skill name" }, 400);
+    }
+    const scope: Scope = body.global === true ? "global" : "project";
+    // S-178: before-set from list cache; verification list refreshes cache in one spawn
+    let result;
+    try {
+      result = await remove(names, scope, {
+        listBefore: await cachedListInstalled(scope),
+        listAfter: () => {
+          invalidateListCache();
+          return cachedListInstalled(scope);
+        },
+      });
+    } catch (error) {
+      invalidateListCache();
+      throw error;
+    }
+    const hook = await finalizeMutation("remove", scope, result.removed, result.ok);
+    const output = result.ok
+      ? `Removed: ${result.removed.join(", ")}`
+      : `Removed: ${result.removed.join(", ") || "none"} — failed: ${result.missing.join(", ")}`;
+    return json({ ok: result.ok, output, ...(hook ? { hook } : {}) });
+  };
+
+  const handlePostUpdate = async (req: Request): Promise<Response> => {
+    const body = await readJsonBody(req);
+    // S-200: a PRESENT `skills` must be an array of strings; ABSENT or [] stays whole-scope.
+    const supplied = Object.hasOwn(body, "skills");
+    if (
+      supplied &&
+      (!Array.isArray(body.skills) || !body.skills.every((value: unknown) => typeof value === "string"))
+    ) {
+      return json({ error: "skills must be an array of strings" }, 400);
+    }
+    const names: string[] = supplied ? (body.skills as string[]) : [];
+    if (!names.every((s) => validSkillName(s) !== null)) {
+      return json({ error: "invalid skill name" }, 400);
+    }
+    const scope: Scope = body.global === true ? "global" : "project";
+    const result = await update(names, scope);
+    invalidateListCache();
+    const hook = await finalizeMutation("update", scope, names, result.ok);
+    return json({ ok: result.ok, output: result.output, ...(hook ? { hook } : {}) });
+  };
+
+  const handleGetUpdates = async (_req: Request, url: URL): Promise<Response> => {
+    const scope = scopeParam(url);
+    try {
+      return json(await checkForUpdates(scope));
+    } catch (error) {
+      // CORE-03 (S-197): container-level lock corruption is a controlled client-state error.
+      if (error instanceof InvalidLockFileError) {
+        return json({ error: "invalid skills lock file" }, 400);
+      }
+      throw error;
+    }
+  };
+
+  const handleGetPrefs = (): Response => json(loadUiPreferences());
+
+  const handlePutPrefs = async (req: Request): Promise<Response> => {
+    const body = await readJsonBody(req);
+    const merged = normalizePreferences({ ...loadUiPreferences(), ...body });
+    saveUiPreferences(merged);
+    return json(merged);
+  };
+
+  const routes: Record<string, (req: Request, url: URL) => Promise<Response> | Response> = {
+    "GET /": handleGetPage,
+    "GET /index.html": handleGetPage,
+    "GET /api/version": handleGetVersion,
+    "GET /api/health-check": handleGetHealthCheck,
+    "GET /api/skills": handleGetSkills,
+    "GET /api/skill": handleGetSkill,
+    "GET /api/search": handleGetSearch,
+    "POST /api/install": handlePostInstall,
+    "GET /api/source-skills": handleGetSourceSkills,
+    "POST /api/remove": handlePostRemove,
+    "POST /api/update": handlePostUpdate,
+    "GET /api/updates": handleGetUpdates,
+    "GET /api/prefs": handleGetPrefs,
+    "PUT /api/prefs": handlePutPrefs,
+  };
+
   const route = async (req: Request): Promise<Response> => {
     const url = new URL(req.url);
-    const path = url.pathname;
-    const method = req.method;
-
+    const key = `${req.method} ${url.pathname}`;
+    const target = routes[key];
     try {
-      if (method === "GET" && (path === "/" || path === "/index.html")) {
-        if (!options.withPage) return json({ error: "not found: headless serve mode" }, 404);
-        return new Response(renderPage(APP_VERSION, prefs, boundPort || undefined, options.seed), {
-          headers: {
-            "content-type": "text/html; charset=utf-8",
-            "cache-control": "no-store",
-            // hash-pinned CSP (0.5.1 impl B) — no script-src 'unsafe-inline';
-            // these two cannot go in a meta CSP, so the embedded page gets
-            // them as real headers
-            "content-security-policy": pageCspFor(prefs, boundPort || undefined, options.seed, false),
-            "x-content-type-options": "nosniff",
-            "referrer-policy": "no-referrer",
-          },
-        });
-      }
-
-      if (method === "GET" && path === "/api/version") {
-        let skills: string | null = null;
-        try {
-          skills = await skillsVersion();
-        } catch {
-          skills = null;
-        }
-        return json({
-          version: APP_VERSION,
-          skillsVersion: skills,
-          capabilities: {
-            updatesCheck: "github",
-            hosted: true,
-            healthCheck: isHealthCmdConfigured(),
-            postMutationHook: isPostMutationHookConfigured(),
-          },
-        });
-      }
-
-      if (method === "GET" && path === "/api/health-check") {
-        const refresh = url.searchParams.get("refresh") === "1";
-        return json(await healthChecker.check({ refresh }));
-      }
-
-      if (method === "GET" && path === "/api/skills") {
-        const scope = scopeParam(url);
-        // S-201: capture the generation BEFORE awaiting the list — a request
-        // whose flight is overtaken by a mutation must not read or repopulate
-        // the description cache (its own stale response is still served,
-        // enriched from the files at response time).
-        const generation = listGeneration;
-        // S-178: served from the per-server list cache — the first request
-        // for a scope spawns one `skills ls`, concurrent requests coalesce
-        // onto it, later requests hit the cache
-        const skills = await cachedListInstalled(scope);
-        return json({
-          scope,
-          skills: skills.map((s) => ({
-            name: s.name,
-            description: descriptionFor(s.path, generation),
-            scope: s.scope,
-            agents: s.agents,
-            path: s.path,
-            source: s.source,
-            provenance: s.provenance ?? "local",
-          })),
-        });
-      }
-
-      if (method === "GET" && path === "/api/skill") {
-        const scope = scopeParam(url);
-        // S-178/S-179: both lookup forms run against the cached list — the
-        // first read on a fresh serve populates it (one spawn), later reads
-        // spawn nothing, whichever form the client used.
-        const skills = await cachedListInstalled(scope);
-        // S-179 detail-by-path — SECURITY boundary: the `path` param is
-        // caller-supplied, so it is used ONLY as an exact-string membership
-        // check against the scope's cached-or-in-flight InstalledSkill rows
-        // (path is never echoed; a present path WINS over a present name,
-        // so a stale client gets an honest 404),
-        // and the doc read below happens on the matched cached row's path
-        // (string-equal to the param by that check). No substring/prefix
-        // matching and no read of any path that is not exactly a cached
-        // row's path; a non-empty path that fails the check is 404 with no
-        // file touched. Empty/absent path falls through to the cache-served
-        // name lookup — unchanged 400/404 shape.
-        const requestedPath = url.searchParams.get("path");
-        let skill: InstalledSkill | undefined;
-        if (requestedPath) {
-          skill = skills.find((s) => s.path === requestedPath);
-          if (!skill) return json({ error: "skill not found" }, 404);
-        } else {
-          const name = url.searchParams.get("name");
-          if (!name) return json({ error: "name is required" }, 400);
-          if (!validSkillName(name)) return json({ error: "invalid skill name" }, 400);
-          skill = skills.find((s) => s.name === name);
-          if (!skill) return json({ error: "skill not found" }, 404);
-        }
-        const body = skillBody(skill.path);
-        return json({ name: skill.name, scope: skill.scope, body: body ?? "" });
-      }
-
-      if (method === "GET" && path === "/api/search") {
-        const q = url.searchParams.get("q") ?? "";
-        if (!q.trim()) return json({ results: [], adjustedQuery: null });
-        if (validQuery(q) === null) return json({ error: "invalid query" }, 400);
-        const { results, adjustedQuery, failed } = await searchWithFallback(q);
-        // `failed` (F4): the registry was unreachable — surfaces must say so
-        // instead of rendering an honest-looking "no results"
-        return json({ results, adjustedQuery, failed });
-      }
-
-      if (method === "POST" && path === "/api/install") {
-        const body = await readJsonBody(req);
-        const source = typeof body.source === "string" ? body.source : null;
-        if (!source) return json({ error: "source is required" }, 400);
-        if (validSource(source) === null) return json({ error: "invalid source" }, 400);
-        let skillsList: string[] | null = null;
-        if (typeof body.skill === "string" && body.skill) skillsList = [body.skill];
-        else if (Array.isArray(body.skills)) {
-          if (!body.skills.every((s) => typeof s === "string")) {
-            return json({ error: "skills must be a string array" }, 400);
-          }
-          skillsList = body.skills as string[];
-        }
-        if (!skillsList) return json({ error: "skill or skills is required" }, 400);
-        // S-199: the seed flow's "Install all" sends exactly skills:["*"] —
-        // install() maps that singleton to `add <source> --all` (services/
-        // install.ts). Only the SINGLETON wildcard bypasses the strict shared
-        // name charset here; mixed lists and option-shaped entries still 400.
-        const installAll = skillsList.length === 1 && skillsList[0] === "*";
-        if (!installAll && !skillsList.every((s) => validSkillName(s) !== null)) {
-          return json({ error: "invalid skill name" }, 400);
-        }
-        const result = await install({
-          source,
-          skills: skillsList,
-          global: body.global === true,
-        });
-        // S-178: mutation ⇒ drop the list cache, failed attempts included
-        // (upstream `add` can partially succeed before reporting failure).
-        // No invalidate-on-throw guard needed here: install's throw paths
-        // are all pre-spawn (queue overflow, spawn failure) — there is no
-        // half-mutation to flush. If install ever gains a post-spawn throw,
-        // add the remove() try/catch pattern below.
-        invalidateListCache();
-        healthChecker.invalidate();
-        const output = JSON.stringify(result.results);
-        if (!result.ok) return json({ ok: false, output }, 500);
-        const installedNames = result.results
-          .filter((r) => r.status === "installed" && r.name)
-          .map((r) => r.name as string);
-        const hook = await runPostMutationHook({
-          event: "install",
-          scope: body.global === true ? "global" : "project",
-          skills: installedNames.length > 0 ? installedNames : skillsList,
-        });
-        return json({ ok: true, output, ...(hook.configured ? { hook } : {}) });
-      }
-
-      if (method === "GET" && path === "/api/source-skills") {
-        const source = url.searchParams.get("source");
-        if (!source) return json({ error: "source is required" }, 400);
-        if (validSource(source) === null) return json({ error: "invalid source" }, 400);
-        const skills = await listSourceSkills(source);
-        return json({ source, skills });
-      }
-
-      if (method === "POST" && path === "/api/remove") {
-        const body = await readJsonBody(req);
-        if (!Array.isArray(body.skills) || !body.skills.every((s) => typeof s === "string")) {
-          return json({ error: "skills must be a string array" }, 400);
-        }
-        if (!(body.skills as string[]).every((s) => validSkillName(s) !== null)) {
-          return json({ error: "invalid skill name" }, 400);
-        }
-        const scope = body.global === true ? "global" : "project";
-        // S-178: the before-set comes from the list cache (fresh spawn only
-        // on a cold cache); after `rm`, the verification list refreshes the
-        // cache in that same single spawn — previously remove() paid two
-        // full uncached lists per removal
-        let result;
-        try {
-          result = await remove(body.skills as string[], scope, {
-            listBefore: await cachedListInstalled(scope),
-            listAfter: () => {
-              invalidateListCache();
-              return cachedListInstalled(scope);
-            },
-          });
-        } catch (error) {
-          // `rm` may have half-run before failing — never serve a stale
-          // pre-rm list after an error
-          invalidateListCache();
-          throw error;
-        }
-        healthChecker.invalidate();
-        const output =
-          result.ok ? `Removed: ${result.removed.join(", ")}` :
-          `Removed: ${result.removed.join(", ") || "none"} — failed: ${result.missing.join(", ")}`;
-        const hook = result.ok
-          ? await runPostMutationHook({ event: "remove", scope, skills: result.removed })
-          : null;
-        return json({ ok: result.ok, output, ...(hook && hook.configured ? { hook } : {}) });
-      }
-
-      if (method === "POST" && path === "/api/update") {
-        const body = await readJsonBody(req);
-        // S-200: a PRESENT `skills` must be an array of strings — any other
-        // shape is a client bug and must 400 before any spawn, never widen to
-        // a whole-scope update. An ABSENT `skills` (or an explicit []) stays
-        // the deliberate whole-scope operation; valid names keep the
-        // validSkillName rejection below.
-        const supplied = Object.hasOwn(body, "skills");
-        if (
-          supplied &&
-          (!Array.isArray(body.skills) ||
-            !body.skills.every((value: unknown) => typeof value === "string"))
-        ) {
-          return json({ error: "skills must be an array of strings" }, 400);
-        }
-        const names: string[] = supplied ? body.skills as string[] : [];
-        if (!names.every((s) => validSkillName(s) !== null)) {
-          return json({ error: "invalid skill name" }, 400);
-        }
-        const scope = body.global === true ? "global" : "project";
-        const result = await update(names, scope);
-        // S-178: mutation ⇒ drop the list cache (see /api/install — update's
-        // throw paths are likewise pre-spawn only, no half-mutation to flush)
-        invalidateListCache();
-        healthChecker.invalidate();
-        const hook = result.ok
-          ? await runPostMutationHook({ event: "update", scope, skills: names })
-          : null;
-        return json({ ok: result.ok, output: result.output, ...(hook && hook.configured ? { hook } : {}) });
-      }
-
-      if (method === "GET" && path === "/api/updates") {
-        const scope = scopeParam(url);
-        try {
-          return json(await checkForUpdates(scope));
-        } catch (error) {
-          // CORE-03 (S-197): container-level lock corruption (malformed
-          // JSON, root array, skills:null/array) is a controlled client-state
-          // error — report 400 {error:'invalid skills lock file'}, never the
-          // generic 500.
-          if (error instanceof InvalidLockFileError) {
-            return json({ error: "invalid skills lock file" }, 400);
-          }
-          throw error;
-        }
-      }
-
-      if (method === "GET" && path === "/api/prefs") {
-        return json(loadUiPreferences());
-      }
-
-      if (method === "PUT" && path === "/api/prefs") {
-        const body = await readJsonBody(req);
-        const merged = normalizePreferences({ ...loadUiPreferences(), ...body });
-        saveUiPreferences(merged);
-        return json(merged);
-      }
-
-      return json({ error: `not found: ${method} ${path}` }, 404);
+      return target ? await target(req, url) : json({ error: `not found: ${key}` }, 404);
     } catch (error) {
       if (error instanceof BodyTooLarge) return json({ error: "body too large" }, 413);
       if (error instanceof BadJson) return json({ error: (error as Error).message }, 400);

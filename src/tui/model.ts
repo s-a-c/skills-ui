@@ -1,10 +1,11 @@
-import type {
-  HealthCheckResult,
-  InstalledSkill,
-  SearchSkill,
-  SkillProvenance,
-  SourceSkill,
-} from "../core/services/types.ts";
+import {
+  skillMatches,
+  type HealthCheckResult,
+  type InstalledSkill,
+  type SearchSkill,
+  type SkillProvenance,
+  type SourceSkill,
+} from "../core/index.ts";
 import type { UiPreferences } from "../core/prefs.ts";
 import type { UiSeed } from "../core/seed.ts";
 
@@ -166,15 +167,7 @@ export function applySeed(model: TuiModel, seed: UiSeed | undefined): void {
  * rider): update() computes this once per dispatch and stores it there. */
 export function visibleSkills(model: TuiModel): InstalledSkill[] {
   const q = model.filter.trim().toLowerCase();
-  const byText = q
-    ? model.skills.filter(
-        (s) =>
-          s.name.toLowerCase().includes(q) ||
-          s.source?.toLowerCase().includes(q) ||
-          s.agents.some((a) => a.toLowerCase().includes(q)) ||
-          (s.description?.toLowerCase().includes(q) ?? false)
-      )
-    : model.skills;
+  const byText = q ? model.skills.filter((s) => skillMatches(s, q)) : model.skills;
   const byAgent =
     model.agentFilter.size > 0
       ? byText.filter((s) => s.agents.some((a) => model.agentFilter.has(a)))
@@ -261,6 +254,272 @@ export type Action =
   | { type: "health-open"; on: boolean }
   | { type: "prefs"; prefs: UiPreferences };
 
+interface UpdateCtx {
+  next: TuiModel;
+  visibleOf: () => InstalledSkill[];
+  visibleSearchOf: () => SearchSkill[];
+  forget: () => void;
+}
+
+function applySkillsLoaded(ctx: UpdateCtx, skills: InstalledSkill[]): void {
+  const { next, visibleOf, forget } = ctx;
+  // S-183 swap reconciliation (the stale->fresh swap AND every fresh
+  // load share this action): keep the cursor on the same skill NAME
+  // when fresh truth still has it, else clamp below.
+  const selectedName = visibleOf()[next.selected]?.name;
+  const seen = new Set(next.skills.map((s) => s.name));
+  next.skills = skills;
+  const alive = new Set(skills.map((s) => s.name));
+  for (const name of next.checked) if (!alive.has(name) && seen.has(name)) next.checked.delete(name);
+  forget();
+  const at = visibleOf().findIndex((s) => s.name === selectedName);
+  if (at >= 0) next.selected = at;
+  else clamp(next, visibleOf);
+}
+
+function applyMove(ctx: UpdateCtx, delta: number): void {
+  const { next, visibleOf } = ctx;
+  if (next.tab === "search" && next.searchPane === "selected") {
+    next.selectedCursor = Math.max(0, Math.min(next.queue.size - 1, next.selectedCursor + delta));
+    return;
+  }
+  const count = next.tab === "installed" ? visibleOf().length : Math.min(next.results.length, SEARCH_RENDER_CAP);
+  const cur = next.tab === "installed" ? next.selected : next.searchSelected;
+  next.selected = Math.max(0, Math.min(count - 1, cur + delta));
+  if (next.tab === "search") next.searchSelected = next.selected;
+}
+
+function applyHomeEnd(ctx: UpdateCtx, edge: "home" | "end"): void {
+  const { next, visibleOf } = ctx;
+  if (next.tab === "search") {
+    if (next.searchPane === "selected") {
+      next.selectedCursor = edge === "home" ? 0 : Math.max(0, next.queue.size - 1);
+    } else {
+      next.searchSelected = edge === "home" ? 0 : Math.max(0, Math.min(next.results.length, SEARCH_RENDER_CAP) - 1);
+    }
+    return;
+  }
+  next.selected = edge === "home" ? 0 : Math.max(0, visibleOf().length - 1);
+}
+
+function applyCheckAction(
+  ctx: UpdateCtx,
+  kind: "toggle-check" | "check-all" | "toggle-all-checks" | "invert-checks" | "clear-checks"
+): void {
+  const { next, visibleOf, forget } = ctx;
+  if (kind === "clear-checks") {
+    next.checked.clear();
+  } else if (kind === "toggle-check") {
+    const skill = visibleOf()[next.selected];
+    if (skill) {
+      if (next.checked.has(skill.name)) next.checked.delete(skill.name);
+      else next.checked.add(skill.name);
+    }
+  } else if (kind === "check-all") {
+    for (const s of visibleOf()) next.checked.add(s.name);
+  } else if (kind === "toggle-all-checks") {
+    const list = visibleOf();
+    const all = list.length > 0 && list.every((s) => next.checked.has(s.name));
+    if (all) for (const s of list) next.checked.delete(s.name);
+    else for (const s of list) next.checked.add(s.name);
+  } else {
+    for (const s of visibleOf()) {
+      if (next.checked.has(s.name)) next.checked.delete(s.name);
+      else next.checked.add(s.name);
+    }
+  }
+  forget();
+}
+
+function applyAgentSelectAction(
+  ctx: UpdateCtx,
+  action: Extract<
+    Action,
+    {
+      type:
+        | "agent-select-move"
+        | "agent-select-toggle"
+        | "agent-select-toggle-all"
+        | "agent-select-apply";
+    }
+  >
+): void {
+  const { next, visibleOf, forget } = ctx;
+  const sel = next.agentSelect;
+  if (!sel) return;
+  if (action.type === "agent-select-move") {
+    sel.index = Math.max(0, Math.min(sel.agents.length - 1, sel.index + action.delta));
+  } else if (action.type === "agent-select-toggle") {
+    const agent = sel.agents[sel.index];
+    if (agent !== undefined) {
+      if (sel.staged.has(agent)) sel.staged.delete(agent);
+      else sel.staged.add(agent);
+    }
+  } else if (action.type === "agent-select-toggle-all") {
+    if (sel.agents.length > 0 && sel.staged.size === sel.agents.length) sel.staged.clear();
+    else for (const agent of sel.agents) sel.staged.add(agent);
+  } else {
+    // staging every agent filters nothing — normalize to "no filter"
+    const all = sel.agents.length > 0 && sel.staged.size === sel.agents.length;
+    next.agentFilter = all ? new Set<string>() : new Set(sel.staged);
+    next.agentSelect = null;
+    forget();
+    clamp(next, visibleOf);
+  }
+}
+
+function applySortToggle(ctx: UpdateCtx): void {
+  const { next, visibleOf, forget } = ctx;
+  if (next.tab === "search") {
+    next.searchSortBy = next.searchSortBy === "load" ? "checked" : next.searchSortBy === "checked" ? "name" : "load";
+  } else {
+    next.sortBy = next.sortBy === "checked" ? "name" : next.sortBy === "name" ? "load" : "checked";
+    next.sortCheckedFirst = next.sortBy === "checked";
+  }
+  forget();
+  clamp(next, visibleOf);
+}
+
+function applyProvenanceCycle(ctx: UpdateCtx): void {
+  const { next, visibleOf, forget } = ctx;
+  const order: Array<"all" | SkillProvenance> = ["all", "locked", "linked", "local"];
+  const idx = order.indexOf(next.provenanceFilter ?? "all");
+  next.provenanceFilter = order[(idx + 1) % order.length]!;
+  forget();
+  clamp(next, visibleOf);
+}
+
+type ActionHandlers = {
+  [K in Action["type"]]: (ctx: UpdateCtx, action: Extract<Action, { type: K }>) => void;
+};
+
+const ACTION_HANDLERS: ActionHandlers = {
+  tab: ({ next }, a) => {
+    next.tab = a.tab;
+    next.searching = a.tab === "search";
+    next.detailScroll = false;
+  },
+  "detail-scroll": ({ next }, a) => {
+    next.detailScroll = a.on;
+  },
+  scope: ({ next, forget }, a) => {
+    next.scope = a.scope;
+    next.selected = 0;
+    next.checked.clear();
+    forget();
+  },
+  "skills-loaded": (ctx, a) => applySkillsLoaded(ctx, a.skills),
+  "updates-loaded": ({ next }, a) => {
+    next.updatesAvailable[a.scope] = new Set(a.names);
+    next.updateErrors[a.scope] = new Map(Object.entries(a.errors ?? {}));
+  },
+  move: (ctx, a) => applyMove(ctx, a.delta),
+  home: (ctx) => applyHomeEnd(ctx, "home"),
+  end: (ctx) => applyHomeEnd(ctx, "end"),
+  "toggle-check": (ctx) => applyCheckAction(ctx, "toggle-check"),
+  "check-all": (ctx) => applyCheckAction(ctx, "check-all"),
+  "toggle-all-checks": (ctx) => applyCheckAction(ctx, "toggle-all-checks"),
+  "invert-checks": (ctx) => applyCheckAction(ctx, "invert-checks"),
+  "clear-checks": (ctx) => applyCheckAction(ctx, "clear-checks"),
+  "sort-toggle": (ctx) => applySortToggle(ctx),
+  filter: ({ next, visibleOf, forget }, a) => {
+    next.filter = a.text;
+    forget();
+    clamp(next, visibleOf);
+  },
+  filtering: ({ next }, a) => {
+    next.filtering = a.on;
+  },
+  "agent-select-open": ({ next }) => {
+    const agents = new Set<string>();
+    for (const skill of next.skills) for (const a of skill.agents) agents.add(a);
+    next.agentSelect = { agents: [...agents].sort(), staged: new Set(next.agentFilter), index: 0 };
+  },
+  "agent-select-move": (ctx, a) => applyAgentSelectAction(ctx, a),
+  "agent-select-toggle": (ctx, a) => applyAgentSelectAction(ctx, a),
+  "agent-select-toggle-all": (ctx, a) => applyAgentSelectAction(ctx, a),
+  "agent-select-apply": (ctx, a) => applyAgentSelectAction(ctx, a),
+  "agent-select-cancel": ({ next }) => {
+    next.agentSelect = null;
+  },
+  query: ({ next }, a) => {
+    next.query = a.text;
+    next.adjustedQuery = null;
+    next.searchFailed = false;
+  },
+  searching: ({ next }, a) => {
+    next.searching = a.on;
+  },
+  results: ({ next, forget }, a) => {
+    next.results = a.results;
+    next.adjustedQuery = a.adjustedQuery ?? null;
+    next.searchFailed = a.failed ?? false;
+    next.searchSelected = 0;
+    forget();
+  },
+  "search-pane": ({ next }, a) => {
+    next.searchPane = a.pane;
+    clampSelectedCursor(next);
+  },
+  "queue-toggle": ({ next, forget }, a) => {
+    const key = `${a.skill.source}#${a.skill.name}`;
+    if (next.queue.has(key)) next.queue.delete(key);
+    else next.queue.set(key, a.skill);
+    clampSelectedCursor(next);
+    forget();
+  },
+  "queue-delete-at": ({ next, forget }, a) => {
+    next.queue.delete(a.key);
+    clampSelectedCursor(next);
+    forget();
+  },
+  "queue-clear": ({ next, forget }) => {
+    next.queue.clear();
+    forget();
+  },
+  busy: ({ next }, a) => {
+    next.busy = a.label;
+  },
+  toast: ({ next }, a) => {
+    next.toast = a.toast;
+  },
+  confirm: ({ next }, a) => {
+    next.confirm = a.confirm;
+  },
+  help: ({ next }, a) => {
+    next.help = a.on;
+  },
+  "splash-dismiss": ({ next }) => {
+    next.splash = false;
+  },
+  graph: ({ next }, a) => {
+    next.graph = a.on;
+    next.detailScroll = false;
+  },
+  detail: ({ next }, a) => {
+    next.detailBody = a.body;
+  },
+  "skills-version": ({ next }, a) => {
+    next.skillsVersion = a.version;
+  },
+  "source-skills-loaded": ({ next }, a) => {
+    next.sourceSkills[a.source] = a.skills;
+  },
+  "provenance-cycle": (ctx) => applyProvenanceCycle(ctx),
+  "health-capability": ({ next }, a) => {
+    next.healthCapability = a.on;
+  },
+  "health-loaded": ({ next }, a) => {
+    next.health = a.health;
+  },
+  "health-open": ({ next }, a) => {
+    next.healthOpen = a.on;
+  },
+  prefs: ({ next }, a) => {
+    next.prefs = a.prefs;
+  },
+};
+
 export function update(model: TuiModel, action: Action): TuiModel {
   const next: TuiModel = {
     ...model,
@@ -282,277 +541,28 @@ export function update(model: TuiModel, action: Action): TuiModel {
     queue: new Map(model.queue),
     sourceSkills: { ...model.sourceSkills },
   };
-  // Rider (S-183): at most ONE filter+sort per dispatch. The memo serves the
-  // action's own reads (clamps, check ops) AND the final `next.visible` the
-  // render path consumes; `forget()` after any mutation of the visible
-  // inputs (skills / filter / agentFilter / sortCheckedFirst / checked).
+  // Rider (S-183): at most ONE filter+sort per dispatch.
   let memo: InstalledSkill[] | null = null;
   let searchMemo: SearchSkill[] | null = null;
-  const forget = (): void => {
-    memo = null;
-    searchMemo = null;
+  const ctx: UpdateCtx = {
+    next,
+    forget: () => {
+      memo = null;
+      searchMemo = null;
+    },
+    visibleOf: () => {
+      if (!memo) memo = visibleSkills(next);
+      return memo;
+    },
+    visibleSearchOf: () => {
+      if (!searchMemo) searchMemo = visibleSearchResults(next);
+      return searchMemo;
+    },
   };
-  const visibleOf = (): InstalledSkill[] => {
-    if (!memo) memo = visibleSkills(next);
-    return memo;
-  };
-  const visibleSearchOf = (): SearchSkill[] => {
-    if (!searchMemo) searchMemo = visibleSearchResults(next);
-    return searchMemo;
-  };
-  switch (action.type) {
-    case "tab":
-      next.tab = action.tab;
-      next.searching = action.tab === "search";
-      next.detailScroll = false;
-      break;
-    case "detail-scroll":
-      next.detailScroll = action.on;
-      break;
-    case "scope":
-      next.scope = action.scope;
-      next.selected = 0;
-      next.checked.clear();
-      forget(); // checked order input changed
-      break;
-    case "skills-loaded": {
-      // S-183 swap reconciliation (the stale->fresh swap AND every fresh
-      // load share this action): keep the cursor on the same skill NAME
-      // when fresh truth still has it (the fresh checked-first sort can
-      // reshuffle indices), else the clamp below keeps today's index
-      // behavior. Seen-set prune rule: drop a checked name only when the
-      // model has actually SEEN it in a loaded list (previous skills) and
-      // the new list lacks it — checks seeded by `skills ui update/remove`
-      // before the first load have never been seen, so a stale paint whose
-      // index predates the seeded skill can never silently drop them (no
-      // lost checks); true vanishings still prune exactly where they
-      // vanish. Filter and agent filter are untouched — the view stays
-      // narrowed across the swap.
-      const selectedName = visibleOf()[next.selected]?.name;
-      const seen = new Set(next.skills.map((s) => s.name)); // names the model has shown
-      next.skills = action.skills;
-      const alive = new Set(action.skills.map((s) => s.name));
-      for (const name of next.checked) if (!alive.has(name) && seen.has(name)) next.checked.delete(name);
-      forget();
-      const at = visibleOf().findIndex((s) => s.name === selectedName);
-      if (at >= 0) next.selected = at;
-      else clamp(next, visibleOf);
-      break;
-    }
-    case "updates-loaded":
-      // UI-07: store into the action's OWN scope only — a late (or simply
-      // same-named) result for one scope must never replace the other
-      // scope's record; Views reads the model.scope projection.
-      next.updatesAvailable[action.scope] = new Set(action.names);
-      next.updateErrors[action.scope] = new Map(Object.entries(action.errors ?? {}));
-      break;
-    case "move": {
-      if (next.tab === "search" && next.searchPane === "selected") {
-        next.selectedCursor = Math.max(0, Math.min(next.queue.size - 1, next.selectedCursor + action.delta));
-        break;
-      }
-      const count =
-        next.tab === "installed" ? visibleOf().length : Math.min(next.results.length, SEARCH_RENDER_CAP);
-      next.selected = Math.max(0, Math.min(count - 1, (next.tab === "installed" ? next.selected : next.searchSelected) + action.delta));
-      if (next.tab === "search") next.searchSelected = next.selected;
-      break;
-    }
-    case "home":
-      if (next.tab === "search") {
-        if (next.searchPane === "selected") next.selectedCursor = 0;
-        else next.searchSelected = 0;
-      } else next.selected = 0;
-      break;
-    case "end": {
-      if (next.tab === "search") {
-        // clamp to the rendered rows — the cursor must stay visible (S-101)
-        if (next.searchPane === "selected") next.selectedCursor = Math.max(0, next.queue.size - 1);
-        else next.searchSelected = Math.max(0, Math.min(next.results.length, SEARCH_RENDER_CAP) - 1);
-      } else {
-        next.selected = Math.max(0, visibleOf().length - 1);
-      }
-      break;
-    }
-    case "toggle-check": {
-      const skill = visibleOf()[next.selected];
-      if (skill) {
-        if (next.checked.has(skill.name)) next.checked.delete(skill.name);
-        else next.checked.add(skill.name);
-      }
-      forget(); // checked order input changed (the read above was pre-toggle, as before)
-      break;
-    }
-    case "check-all":
-      for (const s of visibleOf()) next.checked.add(s.name);
-      forget();
-      break;
-    case "toggle-all-checks": {
-      const list = visibleOf();
-      const all = list.length > 0 && list.every((s) => next.checked.has(s.name));
-      if (all) for (const s of list) next.checked.delete(s.name);
-      else for (const s of list) next.checked.add(s.name);
-      forget();
-      break;
-    }
-    case "invert-checks":
-      for (const s of visibleOf()) {
-        if (next.checked.has(s.name)) next.checked.delete(s.name);
-        else next.checked.add(s.name);
-      }
-      forget();
-      break;
-    case "sort-toggle":
-      if (next.tab === "search") {
-        next.searchSortBy =
-          next.searchSortBy === "load" ? "checked" : next.searchSortBy === "checked" ? "name" : "load";
-      } else {
-        next.sortBy = next.sortBy === "checked" ? "name" : next.sortBy === "name" ? "load" : "checked";
-        next.sortCheckedFirst = next.sortBy === "checked";
-      }
-      forget(); // sort order input changed
-      clamp(next, visibleOf);
-      break;
-    case "clear-checks":
-      next.checked.clear();
-      forget();
-      break;
-    case "filter":
-      next.filter = action.text;
-      forget(); // text filter input changed
-      clamp(next, visibleOf);
-      break;
-    case "filtering":
-      next.filtering = action.on;
-      break;
-    case "agent-select-open": {
-      const agents = new Set<string>();
-      for (const skill of next.skills) for (const a of skill.agents) agents.add(a);
-      next.agentSelect = { agents: [...agents].sort(), staged: new Set(next.agentFilter), index: 0 };
-      break;
-    }
-    case "agent-select-move":
-      if (next.agentSelect) {
-        const count = next.agentSelect.agents.length;
-        next.agentSelect.index = Math.max(0, Math.min(count - 1, next.agentSelect.index + action.delta));
-      }
-      break;
-    case "agent-select-toggle":
-      if (next.agentSelect) {
-        const agent = next.agentSelect.agents[next.agentSelect.index];
-        if (agent !== undefined) {
-          if (next.agentSelect.staged.has(agent)) next.agentSelect.staged.delete(agent);
-          else next.agentSelect.staged.add(agent);
-        }
-      }
-      break;
-    case "agent-select-toggle-all":
-      if (next.agentSelect) {
-        const sel = next.agentSelect;
-        if (sel.agents.length > 0 && sel.staged.size === sel.agents.length) sel.staged.clear();
-        else for (const agent of sel.agents) sel.staged.add(agent);
-      }
-      break;
-    case "agent-select-apply":
-      if (next.agentSelect) {
-        // staging every agent filters nothing — normalize to "no filter"
-        const all = next.agentSelect.agents.length > 0
-          && next.agentSelect.staged.size === next.agentSelect.agents.length;
-        next.agentFilter = all ? new Set<string>() : new Set(next.agentSelect.staged);
-        next.agentSelect = null;
-        forget(); // agent filter input changed
-        clamp(next, visibleOf);
-      }
-      break;
-    case "agent-select-cancel":
-      next.agentSelect = null;
-      break;
-    case "query":
-      next.query = action.text;
-      next.adjustedQuery = null; // stale until the next results arrive
-      next.searchFailed = false; // same staleness rule (F4)
-      break;
-    case "searching":
-      next.searching = action.on;
-      break;
-    case "results":
-      next.results = action.results;
-      next.adjustedQuery = action.adjustedQuery ?? null;
-      next.searchFailed = action.failed ?? false;
-      next.searchSelected = 0;
-      forget();
-      break;
-    case "search-pane":
-      next.searchPane = action.pane;
-      clampSelectedCursor(next);
-      break;
-    case "queue-toggle": {
-      const key = `${action.skill.source}#${action.skill.name}`;
-      if (next.queue.has(key)) next.queue.delete(key);
-      else next.queue.set(key, action.skill);
-      clampSelectedCursor(next);
-      forget();
-      break;
-    }
-    case "queue-delete-at":
-      next.queue.delete(action.key);
-      clampSelectedCursor(next);
-      forget();
-      break;
-    case "queue-clear":
-      next.queue.clear();
-      forget();
-      break;
-    case "busy":
-      next.busy = action.label;
-      break;
-    case "toast":
-      next.toast = action.toast;
-      break;
-    case "confirm":
-      next.confirm = action.confirm;
-      break;
-    case "help":
-      next.help = action.on;
-      break;
-    case "splash-dismiss":
-      next.splash = false;
-      break;
-    case "graph":
-      next.graph = action.on;
-      next.detailScroll = false;
-      break;
-    case "detail":
-      next.detailBody = action.body;
-      break;
-    case "skills-version":
-      next.skillsVersion = action.version;
-      break;
-    case "source-skills-loaded":
-      next.sourceSkills[action.source] = action.skills;
-      break;
-    case "provenance-cycle": {
-      const order: Array<"all" | SkillProvenance> = ["all", "locked", "linked", "local"];
-      const idx = order.indexOf(next.provenanceFilter ?? "all");
-      next.provenanceFilter = order[(idx + 1) % order.length]!;
-      forget();
-      clamp(next, visibleOf);
-      break;
-    }
-    case "health-capability":
-      next.healthCapability = action.on;
-      break;
-    case "health-loaded":
-      next.health = action.health;
-      break;
-    case "health-open":
-      next.healthOpen = action.on;
-      break;
-    case "prefs":
-      next.prefs = action.prefs;
-      break;
-  }
-  next.visible = visibleOf(); // the render path's copy — no recompute (S-183 rider)
-  next.visibleResults = visibleSearchOf();
+  const handler = ACTION_HANDLERS[action.type] as (c: UpdateCtx, a: Action) => void;
+  handler(ctx, action);
+  next.visible = ctx.visibleOf(); // the render path's copy — no recompute (S-183 rider)
+  next.visibleResults = ctx.visibleSearchOf();
   return next;
 }
 

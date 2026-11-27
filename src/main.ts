@@ -55,12 +55,14 @@ async function selftest(): Promise<void> {
 async function runWeb(headless: boolean, portArg: number | null, seedArgs: string[]): Promise<void> {
   const { createSkillsUiServer } = await import("./core/api.ts");
   const { parseUiSeed } = await import("./core/seed.ts");
+  const pageRenderer = !headless ? (await import("./web/page.ts")).webPageRenderer : undefined;
   const seed = parseUiSeed(seedArgs);
   let hostedToken: string | undefined;
   const server = await createSkillsUiServer({
     port: portArg,
     seed,
     withPage: !headless,
+    pageRenderer,
     onToken: (t) => {
       hostedToken = t;
     },

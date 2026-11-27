@@ -68,9 +68,9 @@ import {
   stubUpdates,
 } from "../../tests/perf/playwright-probes.ts";
 import { createSkillsUiServer } from "../../src/core/api.ts";
-import { listInstalled, readSkillDoc, runSkills, sanitizeMetadata } from "../../src/core/index.ts";
+import { listInstalled, readSkillDoc, runSkills, sanitizeMetadata, skillMatches } from "../../src/core/index.ts";
 import { APP_VERSION } from "../../src/core/version.ts";
-import { skillMatches } from "../../src/web/page.ts";
+import { webPageRenderer } from "../../src/web/page.ts";
 
 // ---------- CLI ----------
 
@@ -169,7 +169,7 @@ interface Server {
   stop: () => Promise<void>;
 }
 async function freshServer(withPage: boolean): Promise<Server> {
-  const s = await createSkillsUiServer({ withPage });
+  const s = await createSkillsUiServer({ withPage, pageRenderer: withPage ? webPageRenderer : undefined });
   return { port: s.port, base: `http://127.0.0.1:${s.port}`, stop: s.stop };
 }
 
@@ -287,6 +287,302 @@ async function setupReal(): Promise<Scenario> {
   };
 }
 
+// ---------- benchmark stages ----------
+
+function benchFilterMatching(scenario: Scenario): void {
+  const matchInputs = scenario.projectEntries.map((entry) => {
+    const doc = readSkillDoc(entry.path);
+    const description = sanitizeMetadata(doc?.match(/^description:\s*(.+)$/m)?.[1] ?? "");
+    return { name: entry.name, description, source: entry.source, agents: entry.agents };
+  });
+  const matchNeedles = [...scenario.filterProbes, ""];
+  skillMatches(matchInputs[0]!, ""); // JIT warm-up, untimed
+  const matchingSamples: number[] = [];
+  let matchedRows = 0;
+  for (let rep = 0; rep < REPS; rep++) {
+    for (const needle of matchNeedles) {
+      const t0 = performance.now();
+      for (const input of matchInputs) {
+        if (skillMatches(input, needle)) matchedRows++;
+      }
+      matchingSamples.push(performance.now() - t0);
+    }
+  }
+  const matchingMedian = median(matchingSamples);
+  progress(
+    `filter matching alone: ${fmtMs(matchingMedian)} median full-corpus pass (${matchInputs.length} entries x ${matchNeedles.length} needles x ${REPS} reps)`
+  );
+  msRow(
+    `filter matching alone — skillMatches over ${scenario.expectedProjectRows} entries, per needle pass, median`,
+    "≤ 5 ms",
+    5,
+    matchingMedian
+  );
+  observations.push(
+    `filter matching instrument: ${matchedRows} matches counted across ${matchingSamples.length} timed full-corpus passes (liveness check; per-needle row counts are the filter probe samples below)`
+  );
+}
+
+async function benchColdList(scope: "project" | "global", expectedProjectRows?: number): Promise<number> {
+  const samples: number[] = [];
+  for (let i = 0; i < REPS; i++) {
+    const server = await freshServer(false);
+    let r;
+    try {
+      r = await timedGetJson(`${server.base}/api/skills?scope=${scope}`);
+    } finally {
+      await server.stop().catch(() => {});
+    }
+    if (r.status !== 200) die(`cold ${scope} rep ${i + 1}: HTTP ${r.status}`);
+    if (expectedProjectRows !== undefined && r.body.skills.length !== expectedProjectRows) {
+      die(`cold project rep ${i + 1}: expected ${expectedProjectRows} rows, got ${r.body.skills.length}`);
+    }
+    samples.push(r.ms);
+    progress(`cold ${scope}${scope === "global" ? " (API)" : ""} rep ${i + 1}/${REPS}: ${fmtMs(r.ms)}`);
+  }
+  return median(samples);
+}
+
+async function benchApiLists(scenario: Scenario, servers: Server[]): Promise<Server> {
+  msRow(
+    "cold project list — GET /api/skills, first call on a fresh serve",
+    "≤ 500 ms",
+    500,
+    await benchColdList("project", scenario.expectedProjectRows)
+  );
+
+  const warm = await freshServer(false);
+  servers.push(warm);
+  await timedGetJson(`${warm.base}/api/skills?scope=project`); // its cold call — discarded
+  const warmProject: number[] = [];
+  for (let i = 0; i < REPS; i++) {
+    const r = await timedGetJson(`${warm.base}/api/skills?scope=project`);
+    if (r.status !== 200) die(`warm project rep ${i + 1}: HTTP ${r.status}`);
+    warmProject.push(r.ms);
+  }
+  msRow("warm list — repeated GET /api/skills?scope=project on a live serve", "≤ 100 ms", 100, median(warmProject));
+
+  const detail: number[] = [];
+  const detailUrl = `${warm.base}/api/skill?name=${encodeURIComponent(scenario.detailName)}&path=${encodeURIComponent(scenario.detailPath)}&scope=project`;
+  for (let i = 0; i < REPS; i++) {
+    const r = await timedGetJson(detailUrl);
+    if (r.status !== 200) die(`detail rep ${i + 1}: HTTP ${r.status}`);
+    detail.push(r.ms);
+  }
+  msRow(
+    `detail read — GET /api/skill (name+path, exact-path resolution) for ${scenario.detailName} on a live serve`,
+    "≤ 100 ms",
+    100,
+    median(detail)
+  );
+
+  const coldGlobalMed = await benchColdList("global");
+  observations.push(
+    `cold global list via API (context only — the ratified row is the page's perceived first paint): ${fmtMs(coldGlobalMed)} median`
+  );
+  const warmGlobal: number[] = [];
+  await timedGetJson(`${warm.base}/api/skills?scope=global`); // warm-up
+  for (let i = 0; i < REPS; i++) {
+    warmGlobal.push((await timedGetJson(`${warm.base}/api/skills?scope=global`)).ms);
+  }
+  observations.push(`warm global list via API: ${fmtMs(median(warmGlobal))} median`);
+  return warm;
+}
+
+async function benchSearch(warm: Server): Promise<SearchStub> {
+  const stub = await startSearchStub({
+    rttMs: 40,
+    perQueryRttMs: { "stale-aaaa": 900, aaab: 50 },
+    skills: [
+      { id: "stub-skill", name: "stub-skill", installs: 42, source: "stub/registry" },
+      { id: "fresh-aaab-result", name: "fresh-aaab-result", installs: 1, source: "stub/registry" },
+    ],
+    perQuerySkills: {
+      "stale-aaaa": [{ id: "stale-aaaa-result", name: "stale-aaaa-result", installs: 2, source: "stub/registry" }],
+    },
+  });
+  process.env.SKILLS_UI_API_URL = stub.url;
+
+  const directRtt: number[] = [];
+  const wrapped: number[] = [];
+  for (let i = 0; i < REPS; i++) {
+    directRtt.push((await timedGetJson(`${stub.url}/api/search?q=stub`)).ms);
+    const r = await timedGetJson(`${warm.base}/api/search?q=stub`);
+    if (r.status !== 200) die(`search overhead rep ${i + 1}: HTTP ${r.status}`);
+    wrapped.push(r.ms);
+  }
+  const overhead = median(wrapped) - median(directRtt);
+  observations.push(
+    `search overhead inputs: stub RTT fixed at 40 ms; direct median ${fmtMs(median(directRtt))}; wrapped median ${fmtMs(median(wrapped))}`
+  );
+  rows.push({
+    hotPath: "search wrapper overhead over registry RTT (GET /api/search vs direct stub call)",
+    budget: "≤ 50 ms",
+    measured: fmtMs(overhead),
+    verdict: verdictFor(overhead, 50),
+  });
+
+  await Promise.all(Array.from({ length: 3 }, () => timedGetJson(`${warm.base}/api/search?q=stub`)));
+  const inFlight = stub.maxIdenticalInFlight();
+  const stubCallsForQ = stub.requests.filter((r) => r.q === "stub").length;
+  observations.push(
+    `upstream search calls logged: ${stub.requests.length} total, ${stubCallsForQ} for q=stub (1 of them is the concurrent identical-search pin; S-182 deduped 3 concurrent callers onto it)`
+  );
+  rows.push({
+    hotPath: "in-flight identical upstream search requests (3 concurrent GET /api/search?q=stub)",
+    budget: "≤ 1",
+    measured: `${inFlight} concurrent (of ${stubCallsForQ} upstream calls)`,
+    verdict: verdictFor(inFlight, 1),
+  });
+  return stub;
+}
+
+async function benchColdGlobalPaint(page: Page, scenario: Scenario, pageTimeout: number): Promise<void> {
+  const paintSamples: number[] = [];
+  for (let i = 0; i < REPS; i++) {
+    const paintServer = await freshServer(true);
+    try {
+      progress(`cold global paint rep ${i + 1}/${REPS}: opening a fresh serve + page…`);
+      await openServedPage(page, paintServer.base, scenario.expectedProjectRows, pageTimeout);
+      paintSamples.push(
+        await probeScopeFirstPaint(page, {
+          scope: "global",
+          markerText: scenario.globalMarker,
+          expectedRowCount: scenario.globalRowCount,
+          timeoutMs: pageTimeout,
+        })
+      );
+      progress(`cold global paint rep ${i + 1}/${REPS}: ${fmtMs(paintSamples[paintSamples.length - 1]!)}`);
+    } finally {
+      await paintServer.stop().catch(() => {});
+    }
+  }
+  msRow(
+    "cold global perceived first paint — scope switch on a fresh serve, median of fresh-serve reps",
+    "≤ 300 ms",
+    300,
+    median(paintSamples)
+  );
+}
+
+async function benchFilterRenderAndRebuild(page: Page, scenario: Scenario): Promise<void> {
+  const FILTER_PROBE_WINDOW_MS = 400;
+  const keystrokes: number[] = [];
+  const perceived: number[] = [];
+  const probeSamples: string[] = [];
+  for (const value of scenario.filterProbes) {
+    const probe = await probeFilterRender(page, value, FILTER_PROBE_WINDOW_MS);
+    if (probe.timedOut) die(`filter probe: content for needle "${value}" never appeared (rows lost or value diverged)`);
+    if (probe.noMutation && probe.renderWorkMs < 0) {
+      die(`filter probe: zero DOM mutations AND no render measure for needle "${value}" — the debounced render never fired`);
+    }
+    const work = probe.noMutation ? Math.max(0, probe.renderWorkMs) : probe.renderWorkMs;
+    const tag = probe.noMutation ? "no DOM change, render" : "render";
+    probeSamples.push(`"${value}" → ${probe.rows} rows, ${tag} ${fmtMs(work)} (perceived ${fmtMs(probe.durationMs)})`);
+    keystrokes.push(work);
+    perceived.push(probe.durationMs);
+  }
+  observations.push(`filter probe samples: ${probeSamples.join("; ")}`);
+  observations.push(
+    `filter perceived dispatch→render (INCLUDES the ratified debounce wait, context only — the budget row charges the render work): ${fmtMs(median(perceived))} median`
+  );
+  msRow(
+    "filter render work per debounced render (User Timing measure of the pass) — median over varied needles",
+    "≤ 50 ms",
+    50,
+    median(keystrokes)
+  );
+
+  await probeFilterRender(page, scenario.rebuildProbe, FILTER_PROBE_WINDOW_MS);
+  const repeat = await probeFilterRender(page, scenario.rebuildProbe, FILTER_PROBE_WINDOW_MS);
+  if (repeat.timedOut) die("filter probe: same-result keystroke content never appeared (rows lost or value diverged)");
+  const rebuilt = !repeat.noMutation && repeat.preservedRows < repeat.rows;
+  rows.push({
+    hotPath: "filter full rebuilds per same-result keystroke (row DOM identity preserved?)",
+    budget: "0 full rebuilds",
+    measured: repeat.noMutation
+      ? `0 (no list mutation — ${repeat.rows}/${repeat.rows} rows preserved)`
+      : rebuilt
+        ? `1 (${repeat.preservedRows}/${repeat.rows} rows preserved)`
+        : `0 (${repeat.preservedRows}/${repeat.rows} rows preserved)`,
+    verdict: rebuilt ? "BUDGET-MISS" : "MET",
+  });
+  rows.push({
+    hotPath: "filter animation replays per same-result keystroke",
+    budget: "0 replays",
+    measured: repeat.noMutation ? "0 (no list mutation — nothing replayed)" : `${repeat.freshAnimations} fresh list animations`,
+    verdict: repeat.freshAnimations === 0 ? "MET" : "BUDGET-MISS",
+  });
+}
+
+async function benchStaleOverwrite(page: Page): Promise<void> {
+  const stale = await probeStaleOverwrite(page, {
+    staleQuery: "stale-aaaa",
+    freshQuery: "aaab",
+    staleMarker: "stale-aaaa-result",
+    freshMarker: "fresh-aaab-result",
+    staleRttMs: 900,
+    timeoutMs: 15_000,
+  });
+  if (!stale.freshRendered) {
+    die(`stale probe: the fresh result never rendered — final #results: "${stale.finalText}"`);
+  }
+  rows.push({
+    hotPath: "stale search response overwrites newer render (slow query answers after fast one)",
+    budget: "never overwrites",
+    measured: stale.staleOverwrote
+      ? "overwrote — the late stale response replaced the fresh render"
+      : "held — the fresh render survived the late stale response",
+    verdict: stale.staleOverwrote ? "BUDGET-MISS" : "MET",
+  });
+}
+
+async function benchPageProbes(scenario: Scenario, servers: Server[]): Promise<Browser> {
+  const browser = await chromium.launch();
+  const context: BrowserContext = await newPerfContext(browser);
+  const page: Page = await context.newPage();
+  await stubUpdates(page);
+  const pageTimeout = REAL ? 300_000 : 60_000;
+
+  await benchColdGlobalPaint(page, scenario, pageTimeout);
+
+  const pageServer = await freshServer(true);
+  servers.push(pageServer);
+  progress("opening the served page for the filter probes…");
+  await openServedPage(page, pageServer.base, scenario.expectedProjectRows, pageTimeout);
+  await benchFilterRenderAndRebuild(page, scenario);
+  await benchStaleOverwrite(page);
+  return browser;
+}
+
+function recordShimSpawns(): void {
+  if (REAL) return;
+  const calls = readShimCallLog(process.env.SKILLS_SHIM_CALLLOG!);
+  const globalLs = countShimCalls(calls, ["ls", "--json", "-g"]);
+  const projectLs = countShimCalls(calls, ["ls", "--json"]) - globalLs;
+  const other = countShimCalls(calls) - projectLs - globalLs;
+  observations.push(
+    `shim spawns this run: ${countShimCalls(calls)} total — ls --json (project) x${projectLs}, ls --json -g x${globalLs}, other x${other}`
+  );
+}
+
+function emitReport(scenario: Scenario): void {
+  const date = new Date();
+  const report = renderReport(scenario, date);
+  console.log(report);
+  if (OUT) {
+    const outPath = new URL(`./report-${date.toISOString().slice(0, 10)}${REAL ? "-real" : ""}.md`, import.meta.url).pathname;
+    if (!FORCE && existsSync(outPath)) {
+      die(`--out would overwrite the existing report ${outPath} — pass --force to overwrite`);
+    }
+    writeFileSync(outPath, report);
+    progress(`report written: ${outPath}`);
+  }
+  if (STRICT && rows.some((r) => r.verdict === "BUDGET-MISS")) {
+    process.exitCode = 1;
+  }
+}
+
 // ---------- main ----------
 
 async function main(): Promise<void> {
@@ -299,361 +595,12 @@ async function main(): Promise<void> {
     const scenario = REAL ? await setupReal() : await setupSynthetic(workDir);
     progress(`scenario: ${scenario.label} — ${REPS} reps per wall-clock row (median reported)`);
 
-    // ----- filter matching alone (the "matching ≤ 5 ms @390" budget) -----
-    // Pure skillMatches predicate work over the project corpus: the exact
-    // match set the page's filteredSkills() runs (name, source, agents,
-    // description). No DOM, no browser. Inputs are enriched with the same
-    // frontmatter description the serve derives, so the strings the
-    // predicate scans are the ones production scans. Timed as whole
-    // full-corpus passes (never per-entry); median over REPS passes per
-    // needle (the 7 scenario needles + the empty needle that matches all).
-    const matchInputs = scenario.projectEntries.map((entry) => {
-      const doc = readSkillDoc(entry.path);
-      const description = sanitizeMetadata(doc?.match(/^description:\s*(.+)$/m)?.[1] ?? "");
-      return { name: entry.name, description, source: entry.source, agents: entry.agents };
-    });
-    const matchNeedles = [...scenario.filterProbes, ""];
-    skillMatches(matchInputs[0]!, ""); // JIT warm-up, untimed
-    const matchingSamples: number[] = [];
-    let matchedRows = 0;
-    for (let rep = 0; rep < REPS; rep++) {
-      for (const needle of matchNeedles) {
-        const t0 = performance.now();
-        for (const input of matchInputs) {
-          if (skillMatches(input, needle)) matchedRows++;
-        }
-        matchingSamples.push(performance.now() - t0);
-      }
-    }
-    const matchingMedian = median(matchingSamples);
-    progress(
-      `filter matching alone: ${fmtMs(matchingMedian)} median full-corpus pass (${matchInputs.length} entries x ${matchNeedles.length} needles x ${REPS} reps)`
-    );
-
-    // ----- wall-clock: cold project list (fresh serve per rep) -----
-    const coldProject: number[] = [];
-    for (let i = 0; i < REPS; i++) {
-      const server = await freshServer(false);
-      let r;
-      try {
-        r = await timedGetJson(`${server.base}/api/skills?scope=project`);
-      } finally {
-        await server.stop().catch(() => {}); // no accumulated live servers across reps
-      }
-      if (r.status !== 200) die(`cold project rep ${i + 1}: HTTP ${r.status}`);
-      if (r.body.skills.length !== scenario.expectedProjectRows) {
-        die(`cold project rep ${i + 1}: expected ${scenario.expectedProjectRows} rows, got ${r.body.skills.length}`);
-      }
-      coldProject.push(r.ms);
-      progress(`cold project rep ${i + 1}/${REPS}: ${fmtMs(r.ms)}`);
-    }
-    msRow(
-      "cold project list — GET /api/skills, first call on a fresh serve",
-      "≤ 500 ms",
-      500,
-      median(coldProject)
-    );
-
-    // ----- wall-clock: warm list + detail read (one long-lived serve) -----
-    const warm = await freshServer(false);
-    servers.push(warm);
-    await timedGetJson(`${warm.base}/api/skills?scope=project`); // its cold call — discarded
-    const warmProject: number[] = [];
-    for (let i = 0; i < REPS; i++) {
-      const r = await timedGetJson(`${warm.base}/api/skills?scope=project`);
-      if (r.status !== 200) die(`warm project rep ${i + 1}: HTTP ${r.status}`);
-      warmProject.push(r.ms);
-    }
-    msRow(
-      "warm list — repeated GET /api/skills?scope=project on a live serve",
-      "≤ 100 ms",
-      100,
-      median(warmProject)
-    );
-
-    // S-179: the probe uses the production form — the page sends name+path
-    // and the serve resolves by exact path match against the cached rows.
-    const detail: number[] = [];
-    for (let i = 0; i < REPS; i++) {
-      const r = await timedGetJson(
-        `${warm.base}/api/skill?name=${encodeURIComponent(scenario.detailName)}&path=${encodeURIComponent(scenario.detailPath)}&scope=project`
-      );
-      if (r.status !== 200) die(`detail rep ${i + 1}: HTTP ${r.status}`);
-      detail.push(r.ms);
-    }
-    msRow(
-      `detail read — GET /api/skill (name+path, exact-path resolution) for ${scenario.detailName} on a live serve`,
-      "≤ 100 ms",
-      100,
-      median(detail)
-    );
-
-    // ----- wall-clock: cold global list via API (observation; the ratified
-    // cold-global row is the perceived first paint, measured on the page) -----
-    const coldGlobalApi: number[] = [];
-    for (let i = 0; i < REPS; i++) {
-      const server = await freshServer(false);
-      let r;
-      try {
-        r = await timedGetJson(`${server.base}/api/skills?scope=global`);
-      } finally {
-        await server.stop().catch(() => {}); // no accumulated live servers across reps
-      }
-      if (r.status !== 200) die(`cold global rep ${i + 1}: HTTP ${r.status}`);
-      coldGlobalApi.push(r.ms);
-      progress(`cold global (API) rep ${i + 1}/${REPS}: ${fmtMs(r.ms)}`);
-    }
-    observations.push(
-      `cold global list via API (context only — the ratified row is the page's perceived first paint): ${fmtMs(median(coldGlobalApi))} median`
-    );
-    const warmGlobal: number[] = [];
-    await timedGetJson(`${warm.base}/api/skills?scope=global`); // warm-up
-    for (let i = 0; i < REPS; i++) {
-      warmGlobal.push((await timedGetJson(`${warm.base}/api/skills?scope=global`)).ms);
-    }
-    observations.push(`warm global list via API: ${fmtMs(median(warmGlobal))} median`);
-
-    // ----- search: stub registry with fixed artificial RTT -----
-    // One stub serves every search probe: 'stub' (hyphen-free → exactly one
-    // upstream call) for overhead + in-flight; the stale/fresh pair for the
-    // in-flight ordering probe on the page. 'stale-aaaa' must gate-match its
-    // own token so the wrapper does not fan out shortenings behind it.
-    stub = await startSearchStub({
-      rttMs: 40,
-      perQueryRttMs: { "stale-aaaa": 900, "aaab": 50 },
-      // S-182: DISJOINT per-query payloads. The stale query answers a
-      // stale-only set; the fresh/default answers a fresh set with NO stale
-      // marker. With one shared payload a full stale-over-fresh swap renders
-      // byte-identical content and the stale-overwrite row could never fire;
-      // with disjoint payloads the row's detector is a TRUE full-swap
-      // detector. 'stub' keeps its exact pre-S-182 row so the
-      // wrapper-overhead and dedup rows are unchanged.
-      skills: [
-        { id: "stub-skill", name: "stub-skill", installs: 42, source: "stub/registry" },
-        { id: "fresh-aaab-result", name: "fresh-aaab-result", installs: 1, source: "stub/registry" },
-      ],
-      perQuerySkills: {
-        "stale-aaaa": [
-          { id: "stale-aaaa-result", name: "stale-aaaa-result", installs: 2, source: "stub/registry" },
-        ],
-      },
-    });
-    process.env.SKILLS_UI_API_URL = stub.url; // restored from the env snapshot in finally
-
-    const directRtt: number[] = [];
-    for (let i = 0; i < REPS; i++) {
-      directRtt.push((await timedGetJson(`${stub.url}/api/search?q=stub`)).ms);
-    }
-    const wrapped: number[] = [];
-    for (let i = 0; i < REPS; i++) {
-      const r = await timedGetJson(`${warm.base}/api/search?q=stub`);
-      if (r.status !== 200) die(`search overhead rep ${i + 1}: HTTP ${r.status}`);
-      wrapped.push(r.ms);
-    }
-    const overhead = median(wrapped) - median(directRtt);
-    observations.push(
-      `search overhead inputs: stub RTT fixed at 40 ms; direct median ${fmtMs(median(directRtt))}; wrapped median ${fmtMs(median(wrapped))}`
-    );
-    rows.push({
-      hotPath: "search wrapper overhead over registry RTT (GET /api/search vs direct stub call)",
-      budget: "≤ 50 ms",
-      measured: fmtMs(overhead),
-      verdict: verdictFor(overhead, 50),
-    });
-
-    // in-flight identical searches: 3 concurrent, same query
-    await Promise.all(Array.from({ length: 3 }, () => timedGetJson(`${warm.base}/api/search?q=stub`)));
-    const inFlight = stub.maxIdenticalInFlight();
-    const stubCallsForQ = stub.requests.filter((r) => r.q === "stub").length;
-    observations.push(
-      `upstream search calls logged: ${stub.requests.length} total, ${stubCallsForQ} for q=stub (1 of them is the concurrent identical-search pin; S-182 deduped 3 concurrent callers onto it)`
-    );
-    rows.push({
-      hotPath: "in-flight identical upstream search requests (3 concurrent GET /api/search?q=stub)",
-      budget: "≤ 1",
-      measured: `${inFlight} concurrent (of ${stubCallsForQ} upstream calls)`,
-      verdict: verdictFor(inFlight, 1),
-    });
-
-    // ----- page probes (real served page via Playwright) -----
-    browser = await chromium.launch();
-    const context: BrowserContext = await newPerfContext(browser); // animations must RUN
-    const page: Page = await context.newPage();
-    await stubUpdates(page);
-    const pageTimeout = REAL ? 300_000 : 60_000;
-
-    // cold global perceived first paint — TRULY COLD per rep: a fresh serve
-    // (global never listed) and a fresh page load per sample, median of
-    // REPS. A single sample proved machine-noisy (±100 ms swings on this
-    // row on this machine); the median is the honest cold number.
-    const paintSamples: number[] = [];
-    for (let i = 0; i < REPS; i++) {
-      const paintServer = await freshServer(true);
-      try {
-        progress(`cold global paint rep ${i + 1}/${REPS}: opening a fresh serve + page…`);
-        await openServedPage(page, paintServer.base, scenario.expectedProjectRows, pageTimeout);
-        paintSamples.push(
-          await probeScopeFirstPaint(page, {
-            scope: "global",
-            markerText: scenario.globalMarker,
-            expectedRowCount: scenario.globalRowCount,
-            timeoutMs: pageTimeout,
-          })
-        );
-        progress(`cold global paint rep ${i + 1}/${REPS}: ${fmtMs(paintSamples[paintSamples.length - 1]!)}`);
-      } finally {
-        await paintServer.stop().catch(() => {});
-      }
-    }
-    msRow(
-      "cold global perceived first paint — scope switch on a fresh serve, median of fresh-serve reps",
-      "≤ 300 ms",
-      300,
-      median(paintSamples)
-    );
-
-    // the filter probes run on their own fresh serve (fresh load starts on
-    // the project list with an empty filter)
-    const pageServer = await freshServer(true);
-    servers.push(pageServer);
-    progress("opening the served page for the filter probes…");
-    await openServedPage(page, pageServer.base, scenario.expectedProjectRows, pageTimeout);
-    msRow(
-      `filter matching alone — skillMatches over ${scenario.expectedProjectRows} entries, per needle pass, median`,
-      "≤ 5 ms",
-      5,
-      matchingMedian
-    );
-    observations.push(
-      `filter matching instrument: ${matchedRows} matches counted across ${matchingSamples.length} timed full-corpus passes (liveness check; per-needle row counts are the filter probe samples below)`
-    );
-
-    // per-needle row: the RENDER WORK of each debounced pass (first list
-    // mutation → settled). The S-155 budget "≤ 50 ms per debounced render"
-    // charges the render, not the ratified 150–200 ms debounce wait — the
-    // perceived dispatch→render value (debounce included) is reported as
-    // context. Probe window 400 ms: any legitimate debounced render of this
-    // corpus lands well inside it; a no-mutation outcome for a CHANGING
-    // needle inside that window means the render never happened.
-    const FILTER_PROBE_WINDOW_MS = 400;
-    const keystrokes: number[] = [];
-    const perceived: number[] = [];
-    const probeSamples: string[] = [];
-    for (const value of scenario.filterProbes) {
-      const probe = await probeFilterRender(page, value, FILTER_PROBE_WINDOW_MS);
-      if (probe.timedOut) die(`filter probe: content for needle "${value}" never appeared (rows lost or value diverged)`);
-      if (probe.noMutation) {
-        // A changing needle CAN mutate nothing: when its result set equals
-        // the previous one (e.g. "p" vs "" over this corpus — every name
-        // contains both), the keyed reconcile is a legitimate no-op. The
-        // page's own User Timing measure for this window proves the pass
-        // ran; sample its render work (a REAL 0 is valid — e.g. a 1-row
-        // real corpus narrowing within the same result set measures no
-        // work). No measure at all (-1) means the debounced render never
-        // fired — that is still fatal.
-        if (probe.renderWorkMs < 0) {
-          die(`filter probe: zero DOM mutations AND no render measure for needle "${value}" — the debounced render never fired`);
-        }
-        probeSamples.push(`"${value}" → ${probe.rows} rows, no DOM change, render ${fmtMs(Math.max(0, probe.renderWorkMs))} (perceived ${fmtMs(probe.durationMs)})`);
-        keystrokes.push(Math.max(0, probe.renderWorkMs));
-        perceived.push(probe.durationMs);
-        continue;
-      }
-      keystrokes.push(probe.renderWorkMs);
-      perceived.push(probe.durationMs);
-      probeSamples.push(`"${value}" → ${probe.rows} rows, render ${fmtMs(probe.renderWorkMs)} (perceived ${fmtMs(probe.durationMs)})`);
-    }
-    observations.push(`filter probe samples: ${probeSamples.join("; ")}`);
-    observations.push(
-      `filter perceived dispatch→render (INCLUDES the ratified debounce wait, context only — the budget row charges the render work): ${fmtMs(median(perceived))} median`
-    );
-    msRow(
-      "filter render work per debounced render (User Timing measure of the pass) — median over varied needles",
-      "≤ 50 ms",
-      50,
-      median(keystrokes)
-    );
-
-    // rebuild + replay rows: two identical keystrokes — the second one renders
-    // the SAME row set, so any recreation is measurable waste. A zero-mutation
-    // outcome is the DOM-reuse happy path (0 rebuilds / 0 replays), not a
-    // failure; a rebuild only counts MET when EVERY row kept identity.
-    await probeFilterRender(page, scenario.rebuildProbe, FILTER_PROBE_WINDOW_MS);
-    const repeat = await probeFilterRender(page, scenario.rebuildProbe, FILTER_PROBE_WINDOW_MS);
-    if (repeat.timedOut) die("filter probe: same-result keystroke content never appeared (rows lost or value diverged)");
-    const rebuilt = !repeat.noMutation && repeat.preservedRows < repeat.rows;
-    rows.push({
-      hotPath: "filter full rebuilds per same-result keystroke (row DOM identity preserved?)",
-      budget: "0 full rebuilds",
-      measured: repeat.noMutation
-        ? `0 (no list mutation — ${repeat.rows}/${repeat.rows} rows preserved)`
-        : rebuilt
-          ? `1 (${repeat.preservedRows}/${repeat.rows} rows preserved)`
-          : `0 (${repeat.preservedRows}/${repeat.rows} rows preserved)`,
-      verdict: rebuilt ? "BUDGET-MISS" : "MET",
-    });
-    rows.push({
-      hotPath: "filter animation replays per same-result keystroke",
-      budget: "0 replays",
-      measured: repeat.noMutation
-        ? "0 (no list mutation — nothing replayed)"
-        : `${repeat.freshAnimations} fresh list animations`,
-      verdict: repeat.freshAnimations === 0 ? "MET" : "BUDGET-MISS",
-    });
-
-    // stale-vs-newer ordering over the real page flow
-    const stale = await probeStaleOverwrite(page, {
-      staleQuery: "stale-aaaa",
-      freshQuery: "aaab",
-      staleMarker: "stale-aaaa-result",
-      freshMarker: "fresh-aaab-result",
-      staleRttMs: 900,
-      timeoutMs: 15_000,
-    });
-    if (!stale.freshRendered) {
-      die(`stale probe: the fresh result never rendered — final #results: "${stale.finalText}"`);
-    }
-    rows.push({
-      hotPath: "stale search response overwrites newer render (slow query answers after fast one)",
-      budget: "never overwrites",
-      measured: stale.staleOverwrote
-        ? "overwrote — the late stale response replaced the fresh render"
-        : "held — the fresh render survived the late stale response",
-      verdict: stale.staleOverwrote ? "BUDGET-MISS" : "MET",
-    });
-
-    // ----- shim spawn accounting (synthetic only — the real CLI has no log) -----
-    if (!REAL) {
-      const calls = readShimCallLog(process.env.SKILLS_SHIM_CALLLOG!);
-      const globalLs = countShimCalls(calls, ["ls", "--json", "-g"]);
-      // the 2-argv prefix also matches the -g variant — subtract for the pure project count
-      const projectLs = countShimCalls(calls, ["ls", "--json"]) - globalLs;
-      const other = countShimCalls(calls) - projectLs - globalLs;
-      observations.push(
-        `shim spawns this run: ${countShimCalls(calls)} total — ls --json (project) x${projectLs}, ls --json -g x${globalLs}, other x${other}`
-      );
-    }
-
-    // ----- report -----
-    const date = new Date();
-    const report = renderReport(scenario, date);
-    console.log(report);
-    if (OUT) {
-      // real and synthetic share dates: the scenario rides the filename so
-      // a same-day real run can never collide with the synthetic baseline
-      const outPath = new URL(
-        `./report-${date.toISOString().slice(0, 10)}${REAL ? "-real" : ""}.md`,
-        import.meta.url
-      ).pathname;
-      if (!FORCE && existsSync(outPath)) {
-        die(`--out would overwrite the existing report ${outPath} — pass --force to overwrite`);
-      }
-      writeFileSync(outPath, report);
-      progress(`report written: ${outPath}`);
-    }
-    if (STRICT && rows.some((r) => r.verdict === "BUDGET-MISS")) {
-      process.exitCode = 1;
-    }
+    benchFilterMatching(scenario);
+    const warm = await benchApiLists(scenario, servers);
+    stub = await benchSearch(warm);
+    browser = await benchPageProbes(scenario, servers);
+    recordShimSpawns();
+    emitReport(scenario);
   } finally {
     if (browser) await closeBrowser(browser);
     stub?.stop();

@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
-import { pageCspFor, renderPage } from "../src/web/page.ts";
+import { pageCspFor, renderPage, webPageRenderer } from "../src/web/page.ts";
 
 /**
  * 0.5.1 impl B: hash-pinned CSP (no script-src 'unsafe-inline'), sessionStorage
@@ -126,7 +126,7 @@ describe("serve: embedded page headers", () => {
 
   test("GET / carries hash-pinned CSP + nosniff + no-referrer headers", async () => {
     const { createSkillsUiServer } = await import("../src/core/api.ts");
-    server = await createSkillsUiServer({ withPage: true });
+    server = await createSkillsUiServer({ withPage: true, pageRenderer: webPageRenderer });
     const res = await fetch(`http://127.0.0.1:${server.port}/`);
     const csp = res.headers.get("content-security-policy") ?? "";
     expect(csp).toContain("'sha256-");

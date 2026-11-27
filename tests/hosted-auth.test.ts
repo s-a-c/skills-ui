@@ -42,9 +42,11 @@ afterEach(async () => {
 
 async function start(): Promise<string> {
   const { createSkillsUiServer } = await import("../src/core/api.ts");
+  const { webPageRenderer } = await import("../src/web/page.ts");
   let captured: string | undefined;
   server = await createSkillsUiServer({
     withPage: true,
+    pageRenderer: webPageRenderer,
     onToken: (t) => {
       captured = t;
     },

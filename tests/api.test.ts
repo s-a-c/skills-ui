@@ -33,7 +33,8 @@ afterEach(async () => {
 
 async function start(): Promise<string> {
   const { createSkillsUiServer } = await import("../src/core/api.ts");
-  server = await createSkillsUiServer({ withPage: true });
+  const { webPageRenderer } = await import("../src/web/page.ts");
+  server = await createSkillsUiServer({ withPage: true, pageRenderer: webPageRenderer });
   return `http://127.0.0.1:${server.port}`;
 }
 

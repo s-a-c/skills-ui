@@ -6,27 +6,25 @@ import {
   isHealthCmdConfigured,
   listInstalled as svcListInstalled,
   listSourceSkills as svcListSourceSkills,
+  readSkillDoc,
   remove as svcRemove,
   runPostMutationHook as svcRunPostMutationHook,
   searchWithFallback as svcSearch,
   skillBody as svcSkillBody,
+  skillsVersion,
   update as svcUpdate,
+  type HealthCheckResult,
+  type InstalledSkill,
+  type MutationEvent,
+  type PostMutationHookResult,
+  type SearchSkill,
+  type SkillProvenance,
+  type SourceSkill,
+  type UpdatesResult,
 } from "../core/index.ts";
 import { loadDiskIndex, saveDiskIndex } from "../core/disk-index.ts";
 import { LIST_WIDTH_MAX, LIST_WIDTH_MIN, loadUiPreferences, saveUiPreferences, type UiPreferences } from "../core/prefs.ts";
-import { skillsVersion } from "../core/skills-client.ts";
-import type {
-  HealthCheckResult,
-  InstalledSkill,
-  MutationEvent,
-  PostMutationHookResult,
-  SearchSkill,
-  SkillProvenance,
-  SourceSkill,
-  UpdatesResult,
-} from "../core/services/types.ts";
 import type { UiSeed } from "../core/seed.ts";
-import { readSkillDoc } from "../core/services/skill-doc.ts";
 import { disposeAudio, playSound, type SoundKind } from "./audio.ts";
 import { applySeed, createTuiModel, tabFor, update, type Action, type TuiModel } from "./model.ts";
 import { mountApp, type AppBridge, type RefsHolder } from "./Views.tsx";
@@ -535,406 +533,436 @@ export async function runTuiOn(renderer: CliRenderer, seed: UiSeed | undefined, 
     }
   };
 
-  const onKey = (key: { name: string; shift?: boolean; ctrl?: boolean }): void => {
-    if (key.ctrl && key.name === "c") return; // exitOnCtrlC owns ctrl+c
-    const k = key.name;
-    if (k !== "q") disarmQuit(); // any non-q press cancels an armed quit (S-161)
+  const saveAndApplyPrefs = (patch: Partial<UiPreferences>): void => {
+    const prefs: UiPreferences = { ...model.prefs, ...patch };
+    deps.savePrefs(prefs);
+    dispatch({ type: "prefs", prefs });
+  };
 
+  const runUpdateCheck = async (): Promise<void> => {
+    // UI-07: capture scope AND sequence BEFORE the await — the
+    // completion stores into the captured scope's record only, and
+    // only the latest check owns the busy label and the toasts.
+    const scope = model.scope;
+    const seq = ++checkBusySeq;
+    dispatch({ type: "busy", label: "checking for updates" });
+    try {
+      const result = await deps.checkUpdates(scope);
+      if (seq !== checkBusySeq) return; // a newer check owns the model — drop
+      const entries = Object.values(result.updates);
+      const names = entries.filter((u) => u.updateAvailable).map((u) => u.name);
+      // G4: keep the per-skill check-status errors so the detail pane
+      // can show WHY a skill is badge-less (not checkable / check failed)
+      const errors: Record<string, string> = {};
+      for (const u of entries) if (u.error) errors[u.name] = u.error;
+      // the result always populates ITS OWN scope's record — a
+      // completion that lands after a scope switch still fills the
+      // captured scope's cache
+      dispatch({ type: "updates-loaded", scope, names, errors });
+      // the toast is a visible effect of the CURRENT view — a check
+      // completing after a scope switch stays cache-only
+      if (scope === model.scope) {
+        const notCheckable = Object.keys(errors).length;
+        toast(
+          names.length > 0
+            ? `${names.length} update(s) available`
+            : notCheckable > 0
+              ? `no updates available · ${notCheckable} not checkable`
+              : "no updates available",
+          names.length > 0 ? "info" : "success"
+        );
+      }
+    } catch (error) {
+      // stale failures never toast over newer state, and a failure
+      // for another scope says nothing about the current view
+      if (seq !== checkBusySeq || scope !== model.scope) return;
+      toast(`update check failed: ${error instanceof Error ? error.message : String(error)}`, "error");
+    } finally {
+      // UI-07 busy ownership: only the latest check may clear, and
+      // only while no other operation has since taken the label
+      // (reload/install/search own their own slots).
+      if (seq === checkBusySeq && model.busy === "checking for updates") {
+        dispatch({ type: "busy", label: null });
+      }
+    }
+  };
+
+  const installSelectedSearchSkill = async (): Promise<void> => {
+    const skill = (model.visibleResults ?? model.results)[model.searchSelected];
+    if (!skill) return;
+    const scope = model.scope;
+    dispatch({ type: "busy", label: `installing ${skill.name}` });
+    const result = await deps.install(skill.source, [skill.name], scope);
+    toast(result.summary, result.ok ? "success" : "error");
+    await deps.play(result.ok ? "success" : "error", model.prefs);
+    await afterMutation("install", [skill.name], scope, result.ok);
+    dispatch({ type: "busy", label: null });
+    await reloadSkills();
+  };
+
+  const handleAgentSelectKey = (k: string): void => {
+    const actionMap: Record<string, Action> = {
+      up: { type: "agent-select-move", delta: -1 },
+      k: { type: "agent-select-move", delta: -1 },
+      down: { type: "agent-select-move", delta: 1 },
+      j: { type: "agent-select-move", delta: 1 },
+      space: { type: "agent-select-toggle" },
+      a: { type: "agent-select-toggle-all" },
+      return: { type: "agent-select-apply" },
+      escape: { type: "agent-select-cancel" },
+    };
+    const action = actionMap[k];
+    if (action) dispatch(action);
+  };
+
+  const MOVE_DELTA: Record<string, number> = {
+    up: -1,
+    k: -1,
+    down: 1,
+    j: 1,
+    pageup: -PAGE,
+    pagedown: PAGE,
+  };
+
+  const handleDetailScrollKey = (k: string): boolean => {
+    const scrollDelta = k === "up" || k === "down" || k === "pageup" || k === "pagedown" ? MOVE_DELTA[k] : undefined;
+    if (scrollDelta !== undefined) {
+      scrollDetail(refsHolder.detailScroll, scrollDelta);
+      return true;
+    }
+    if (k === "home" || k === "end") {
+      const scroll = refsHolder.detailScroll;
+      if (scroll) {
+        const vs = scroll.viewport?.height ?? 0;
+        scroll.scrollTop = k === "home" ? 0 : Math.max(0, scroll.scrollHeight - vs);
+        (renderer as unknown as { requestRender?: () => void }).requestRender?.();
+      }
+      return true;
+    }
+    if (k === "escape" || k === "tab") {
+      dispatch({ type: "detail-scroll", on: false });
+      return true;
+    }
+    return false;
+  };
+
+  const handleConfirmOrHelpKey = (k: string): boolean => {
     if (model.confirm) {
       if (k === "y") void confirmRun();
-      // n/N cancel (S-162): the y/N copy promised it; shift lands as name
-      // "n" or "N" depending on the parser, so accept both spellings
+      // n/N cancel (S-162): shift lands as "n" or "N" depending on parser
       else if (k === "escape" || k === "n" || k === "N") dispatch({ type: "confirm", confirm: null });
-      return;
+      return true;
     }
     if (model.help) {
       if (k === "escape" || k === "?" || k === "q") dispatch({ type: "help", on: false });
-      return;
+      return true;
     }
+    return false;
+  };
+
+  const handleHealthOrGraphKey = (key: { name: string; shift?: boolean }): boolean => {
+    const k = key.name;
     if (model.healthOpen) {
-      if (k === "escape" || k === "H" || (key.shift && k === "h") || k === "q") {
-        dispatch({ type: "health-open", on: false });
-      } else if (k === "r") {
-        void refreshHealth(true);
-      }
-      return;
-    }
-    if (model.agentSelect) {
-      if (k === "up" || k === "k") dispatch({ type: "agent-select-move", delta: -1 });
-      else if (k === "down" || k === "j") dispatch({ type: "agent-select-move", delta: 1 });
-      else if (k === "space") dispatch({ type: "agent-select-toggle" });
-      else if (k === "a") dispatch({ type: "agent-select-toggle-all" });
-      else if (k === "return") dispatch({ type: "agent-select-apply" });
-      else if (k === "escape") dispatch({ type: "agent-select-cancel" });
-      return;
+      if (k === "escape" || k === "q" || k === "H" || (key.shift && k === "h")) dispatch({ type: "health-open", on: false });
+      else if (k === "r") void refreshHealth(true);
+      return true;
     }
     if (model.graph) {
-      // the 3D graph owns the body — leave-intent keys only (q still quits)
       if (k === "escape" || k === "G" || (key.shift && k === "g")) dispatch({ type: "graph", on: false });
       else if (k === "q") renderer.destroy();
-      return;
+      return true;
     }
-    // Search-tab queue keys: Tab flips Results/Selected anywhere on the
-    // search tab (not printable text, safe mid-word). The -/d/x/+ queue
-    // keys are COMMAND-MODE only — they used to fire while typing too,
-    // eating every d/x/+/- out of the query ("vercel-labs" → "vercellabs",
-    // S-103). After Esc/Return all five work as queue keys again.
-    const queueKey = model.tab === "search" && (k === "tab" || (!model.searching && (k === "+" || k === "-" || k === "d" || k === "x")));
-    if (queueKey) {
+    return false;
+  };
+
+  const QUEUE_ACTION_KEYS = new Set(["+", "-", "d", "x"]);
+
+  const handleTabModeKey = (k: string): boolean => {
+    // Search-tab queue keys: Tab flips Results/Selected; -/d/x/+ are COMMAND-MODE only (S-103).
+    const isQueueKey = k === "tab" || (!model.searching && QUEUE_ACTION_KEYS.has(k));
+    if (model.tab === "search" && isQueueKey) {
       handleQueueKey(k);
-      return;
+      return true;
     }
     if (model.tab === "installed" && k === "tab") {
       dispatch({ type: "detail-scroll", on: !model.detailScroll });
       void deps.play("select", model.prefs);
-      return;
+      return true;
     }
     if (model.detailScroll && model.tab === "installed") {
-      if (k === "up" || k === "down" || k === "pageup" || k === "pagedown") {
-        scrollDetail(refsHolder.detailScroll, k === "up" ? -1 : k === "down" ? 1 : k === "pageup" ? -PAGE : PAGE);
-        return;
-      }
-      if (k === "home" || k === "end") {
-        const scroll = refsHolder.detailScroll;
-        if (scroll) {
-          const vs = scroll.viewport?.height ?? 0;
-          scroll.scrollTop = k === "home" ? 0 : Math.max(0, scroll.scrollHeight - vs);
-          (renderer as unknown as { requestRender?: () => void }).requestRender?.();
-        }
-        return;
-      }
-      if (k === "escape" || k === "tab") {
-        dispatch({ type: "detail-scroll", on: false });
-        return;
-      }
+      return handleDetailScrollKey(k);
     }
+    return false;
+  };
 
-    // Text-entry modes (filter/search) capture printable input; letter
-    // hotkeys must not fire mid-word (the "cli"→i-jumps-tabs trap). This
-    // claims `q` too (S-161): while the filter/search is live, a filter
-    // word starting with q must type, never quit — quitting is reachable
-    // only after Esc/Return leaves text mode. Arrows still navigate;
-    // Esc/Return exit the mode but keep the text (contract).
-    const inFilter = model.tab === "installed" && model.filtering;
-    const inSearch = model.tab === "search" && model.searching;
-    if (inFilter || inSearch) {
-      disarmQuit(); // typing — any key here, even q — cancels an armed quit
-      if (k === "escape" || k === "return") {
-        if (inFilter) dispatch({ type: "filtering", on: false });
-        else dispatch({ type: "searching", on: false });
-        return;
-      }
-      if (k === "up" || k === "down" || k === "home" || k === "end") {
-        dispatch({ type: "move", delta: k === "up" ? -1 : k === "down" ? 1 : 0 });
-        if (k === "home") dispatch({ type: "home" });
-        if (k === "end") dispatch({ type: "end" });
-        if (model.tab === "installed") void loadDetail();
-        return;
-      }
-      if (k === "pageup" || k === "pagedown") {
-        // paging must survive text-entry modes too — the branch swallows
-        // unlisted keys, which silently ate PgUp/PgDn mid-filter (S-88)
-        dispatch({ type: "move", delta: k === "pageup" ? -PAGE : PAGE });
-        if (model.tab === "installed") void loadDetail();
-        return;
-      }
-      if (k === "space") {
-        // on the search tab space queues the selection; in filter mode it
-        // toggles the check under the cursor (fork contract)
-        if (inSearch) {
-          const skill = (model.visibleResults ?? model.results)[model.searchSelected];
-          if (skill) {
-            dispatch({ type: "queue-toggle", skill });
-            void deps.play("select", model.prefs);
-          }
-        } else {
-          dispatch({ type: "toggle-check" });
-          void deps.play("select", model.prefs);
-        }
-        return;
-      }
-      if (k === "backspace") {
-        if (inSearch) {
-          dispatch({ type: "query", text: model.query.slice(0, -1) });
-          scheduleSearch();
-        } else {
-          dispatch({ type: "filter", text: model.filter.slice(0, -1) });
-        }
-        return;
-      }
-      if (k.length === 1 && /[a-z0-9\-_/.]/i.test(k)) {
-        if (inSearch) {
-          dispatch({ type: "query", text: model.query + k });
-          scheduleSearch();
-        } else {
-          dispatch({ type: "filter", text: model.filter + k });
-        }
+  const handleOverlayKey = (key: { name: string; shift?: boolean }): boolean => {
+    if (handleConfirmOrHelpKey(key.name)) return true;
+    if (handleHealthOrGraphKey(key)) return true;
+    if (model.agentSelect) {
+      handleAgentSelectKey(key.name);
+      return true;
+    }
+    return handleTabModeKey(key.name);
+  };
+
+  const handleTextEntryNav = (k: string): boolean => {
+    if (k === "up" || k === "down" || k === "home" || k === "end") {
+      dispatch({ type: "move", delta: k === "up" ? -1 : k === "down" ? 1 : 0 });
+      if (k === "home") dispatch({ type: "home" });
+      if (k === "end") dispatch({ type: "end" });
+      if (model.tab === "installed") void loadDetail();
+      return true;
+    }
+    if (k === "pageup" || k === "pagedown") {
+      dispatch({ type: "move", delta: k === "pageup" ? -PAGE : PAGE });
+      if (model.tab === "installed") void loadDetail();
+      return true;
+    }
+    return false;
+  };
+
+  const toggleSearchQueueAtSelection = (): void => {
+    const skill = (model.visibleResults ?? model.results)[model.searchSelected];
+    if (!skill) return;
+    dispatch({ type: "queue-toggle", skill });
+    void deps.play("select", model.prefs);
+  };
+
+  const handleTextEntryEdit = (k: string, inSearch: boolean): void => {
+    if (k === "backspace") {
+      if (inSearch) {
+        dispatch({ type: "query", text: model.query.slice(0, -1) });
+        scheduleSearch();
+      } else {
+        dispatch({ type: "filter", text: model.filter.slice(0, -1) });
       }
       return;
     }
+    if (k.length !== 1 || !/[a-z0-9\-_/.]/i.test(k)) return;
+    if (inSearch) {
+      dispatch({ type: "query", text: model.query + k });
+      scheduleSearch();
+    } else {
+      dispatch({ type: "filter", text: model.filter + k });
+    }
+  };
 
-    // Shifted batch keys (fork contract): A toggles all checks, I inverts;
-    // lowercase a keeps its check-all meaning in the switch below.
+  const handleTextEntryKey = (k: string, inFilter: boolean, inSearch: boolean): void => {
+    disarmQuit(); // typing — any key here, even q — cancels an armed quit
+    if (k === "escape" || k === "return") {
+      dispatch(inFilter ? { type: "filtering", on: false } : { type: "searching", on: false });
+      return;
+    }
+    if (handleTextEntryNav(k)) return;
+    if (k === "space") {
+      if (inSearch) toggleSearchQueueAtSelection();
+      else {
+        dispatch({ type: "toggle-check" });
+        void deps.play("select", model.prefs);
+      }
+      return;
+    }
+    handleTextEntryEdit(k, inSearch);
+  };
+
+  const handleShiftedKey = (key: { name: string; shift?: boolean }): boolean => {
+    const k = key.name;
+    const isShift = (ch: string) => k === ch.toUpperCase() || (Boolean(key.shift) && k === ch);
     if (key.shift && (k === "a" || k === "i")) {
       if (model.tab === "installed") {
         dispatch({ type: k === "a" ? "toggle-all-checks" : "invert-checks" });
         void deps.play("select", model.prefs);
       }
-      return;
+      return true;
     }
-
-    // G (shift+g) opens the 3D skills graph (S-100); g stays scope-global
-    if (k === "G" || (key.shift && k === "g")) {
+    if (isShift("g")) {
       dispatch({ type: "graph", on: true });
       void deps.play("select", model.prefs);
-      return;
+      return true;
     }
-    if ((k === "H" || (key.shift && k === "h")) && model.healthCapability) {
+    if (isShift("h") && model.healthCapability) {
       const nextOpen = !model.healthOpen;
       dispatch({ type: "health-open", on: nextOpen });
       if (nextOpen) void refreshHealth(true);
-      return;
+      return true;
     }
-    if ((k === "P" || (key.shift && k === "p")) && model.tab === "installed") {
+    if (isShift("p") && model.tab === "installed") {
       dispatch({ type: "provenance-cycle" });
       void deps.play("select", model.prefs);
-      return;
+      return true;
     }
+    return false;
+  };
 
-    const tab = tabFor(k === "/" ? "/" : k);
+  const handleShiftedAndTabKey = (key: { name: string; shift?: boolean }): boolean => {
+    if (handleShiftedKey(key)) return true;
+    const k = key.name;
+    const tab = tabFor(k);
     // `,` doubles as the sound toggle once settings is open — fall through
-    if (tab && !(k === "," && model.tab === "settings")) {
-      dispatch({ type: "tab", tab });
-      void deps.play("select", model.prefs);
-      if (tab === "settings" && model.skillsVersion === undefined) {
-        void deps
-          .skillsVersion()
-          .then((version) => dispatch({ type: "skills-version", version }))
-          .catch(() => dispatch({ type: "skills-version", version: null }));
-      }
+    if (!tab || (k === "," && model.tab === "settings")) return false;
+    dispatch({ type: "tab", tab });
+    void deps.play("select", model.prefs);
+    if (tab === "settings" && model.skillsVersion === undefined) {
+      void deps
+        .skillsVersion()
+        .then((version) => dispatch({ type: "skills-version", version }))
+        .catch(() => dispatch({ type: "skills-version", version: null }));
+    }
+    return true;
+  };
+
+  const handleSettingsCommandKey = (k: string): boolean => {
+    if (k === "[" || k === "]") {
+      const cur = model.prefs.listWidth ?? 35;
+      const nextW = Math.max(LIST_WIDTH_MIN, Math.min(LIST_WIDTH_MAX, cur + (k === "]" ? 5 : -5)));
+      saveAndApplyPrefs({ listWidth: nextW });
+      return true;
+    }
+    if (k === "0") {
+      saveAndApplyPrefs({ listWidth: null });
+      return true;
+    }
+    if (model.tab !== "settings") return false;
+    if (k === "t") saveAndApplyPrefs({ theme: model.prefs.theme === "mocha" ? "latte" : "mocha" });
+    else if (k === "," || k === "comma") saveAndApplyPrefs({ sound: !model.prefs.sound });
+    else if (k === "m") {
+      const next: UiPreferences["reduceMotion"] =
+        model.prefs.reduceMotion === "auto" ? true : model.prefs.reduceMotion === true ? false : "auto";
+      saveAndApplyPrefs({ reduceMotion: next });
+    } else return false;
+    return true;
+  };
+
+  const handleNavigationCommandKey = (k: string): boolean => {
+    const delta = MOVE_DELTA[k];
+    if (delta !== undefined) {
+      dispatch({ type: "move", delta });
+      if (model.tab === "installed") void loadDetail();
+      return true;
+    }
+    if (k === "home" || k === "end") {
+      dispatch({ type: k });
+      return true;
+    }
+    if (k === "g" || k === "p") {
+      dispatch({ type: "scope", scope: k === "g" ? "global" : "project" });
+      void reloadSkills();
+      return true;
+    }
+    return false;
+  };
+
+  const triggerUpdateAction = (): void => {
+    if (model.tab === "search") {
+      void runQueue();
       return;
     }
+    // S-203 (UI-02): checked selection or whole loaded scope (model.skills).
+    const names = model.checked.size > 0 ? [...model.checked] : model.skills.map((skill) => skill.name);
+    if (names.length > 0) dispatch({ type: "confirm", confirm: { kind: "update", names } });
+  };
 
+  const handleActionCommandKey = (k: string): boolean => {
+    if (k === "space") {
+      if (model.tab === "installed") {
+        dispatch({ type: "toggle-check" });
+        void deps.play("select", model.prefs);
+      } else if (model.tab === "search") {
+        toggleSearchQueueAtSelection();
+      }
+      return true;
+    }
+    if (k === "u") {
+      triggerUpdateAction();
+      return true;
+    }
+    if (k === "return") {
+      if (model.tab === "installed") void loadDetail();
+      else if (model.tab === "search") void installSelectedSearchSkill();
+      return true;
+    }
+    if (k === "s") {
+      if (model.tab === "installed" || model.tab === "search") dispatch({ type: "sort-toggle" });
+      return true;
+    }
+    return false;
+  };
+
+  const handleInstalledModalOrDeleteKey = (k: string): boolean => {
+    if (k === "c" && model.tab === "installed") {
+      void runUpdateCheck();
+      return true;
+    }
+    if (k === "r" && model.tab === "installed") {
+      const skill = model.visible[model.selected];
+      if (skill) dispatch({ type: "confirm", confirm: { kind: "delete", names: [skill.name], nonLocked: nonLockedFor([skill.name]) } });
+      return true;
+    }
+    if (k === "d" && model.checked.size > 0) {
+      const names = [...model.checked];
+      dispatch({ type: "confirm", confirm: { kind: "delete", names, nonLocked: nonLockedFor(names) } });
+      return true;
+    }
+    if ((k === "f" || k === "a") && model.tab === "installed") {
+      dispatch({ type: k === "f" ? "filtering" : "agent-select-open", ...(k === "f" ? { on: true } : {}) } as Action);
+      return true;
+    }
+    return false;
+  };
+
+  const handleCommandKey = (k: string): void => {
     // Keymap ratification (S-161): command-mode single letters are
     // a c d f g i j k m p q r s t u (+ shift A/G/I). Intentionally unbound:
     // b e h l n o v w x y z — an unbound printable falls through to the
-    // filter-start below, so filter words can BEGIN with those. Binding any
-    // of them costs that first character (the user must press `f` first);
-    // `q` stays the quit key, now DOUBLE-PRESS (arm, then confirm) so no
-    // single bare keystroke reaches the destructive destroy — while the
-    // filter/search is live the text-entry branch above claims q entirely
-    // (S-161 q-guard).
-    switch (k) {
-      case "q": // double-press quit — unreachable while filtering/searching (claimed above)
-        if (quitArmed) {
-          disarmQuit();
-          renderer.destroy();
-        } else {
-          quitArmed = true;
-          quitTimer = setTimeout(disarmQuit, 1500);
-          toast("press q again to quit", "info");
-        }
-        return;
-      case "?":
-        dispatch({ type: "help", on: true });
-        return;
-      case "g":
-        dispatch({ type: "scope", scope: "global" });
-        void reloadSkills();
-        return;
-      case "p":
-        dispatch({ type: "scope", scope: "project" });
-        void reloadSkills();
-        return;
-      case "f":
-        if (model.tab === "installed") dispatch({ type: "filtering", on: true });
-        return;
-      case "a":
-        if (model.tab === "installed") dispatch({ type: "agent-select-open" });
-        return;
-      case "up":
-      case "k":
-        dispatch({ type: "move", delta: -1 });
-        if (model.tab === "installed") void loadDetail();
-        return;
-      case "down":
-      case "j":
-        dispatch({ type: "move", delta: 1 });
-        if (model.tab === "installed") void loadDetail();
-        return;
-      case "home":
-        dispatch({ type: "home" });
-        return;
-      case "end":
-        dispatch({ type: "end" });
-        return;
-      case "pageup":
-      case "pagedown":
-        dispatch({ type: "move", delta: k === "pageup" ? -PAGE : PAGE });
-        if (model.tab === "installed") void loadDetail();
-        return;
-      case "space":
-        if (model.tab === "installed") {
-          dispatch({ type: "toggle-check" });
-          void deps.play("select", model.prefs);
-        } else if (model.tab === "search") {
-          const skill = (model.visibleResults ?? model.results)[model.searchSelected];
-          if (skill) {
-            dispatch({ type: "queue-toggle", skill });
-            void deps.play("select", model.prefs);
-          }
-        }
-        return;
-      case "c":
-        if (model.tab === "installed") {
-          void (async () => {
-            // UI-07: capture scope AND sequence BEFORE the await — the
-            // completion stores into the captured scope's record only, and
-            // only the latest check owns the busy label and the toasts.
-            const scope = model.scope;
-            const seq = ++checkBusySeq;
-            dispatch({ type: "busy", label: "checking for updates" });
-            try {
-              const result = await deps.checkUpdates(scope);
-              if (seq !== checkBusySeq) return; // a newer check owns the model — drop
-              const entries = Object.values(result.updates);
-              const names = entries.filter((u) => u.updateAvailable).map((u) => u.name);
-              // G4: keep the per-skill check-status errors so the detail pane
-              // can show WHY a skill is badge-less (not checkable / check failed)
-              const errors: Record<string, string> = {};
-              for (const u of entries) if (u.error) errors[u.name] = u.error;
-              // the result always populates ITS OWN scope's record — a
-              // completion that lands after a scope switch still fills the
-              // captured scope's cache
-              dispatch({ type: "updates-loaded", scope, names, errors });
-              // the toast is a visible effect of the CURRENT view — a check
-              // completing after a scope switch stays cache-only
-              if (scope === model.scope) {
-                const notCheckable = Object.keys(errors).length;
-                toast(
-                  names.length > 0
-                    ? `${names.length} update(s) available`
-                    : notCheckable > 0
-                      ? `no updates available · ${notCheckable} not checkable`
-                      : "no updates available",
-                  names.length > 0 ? "info" : "success"
-                );
-              }
-            } catch (error) {
-              // stale failures never toast over newer state, and a failure
-              // for another scope says nothing about the current view
-              if (seq !== checkBusySeq || scope !== model.scope) return;
-              toast(`update check failed: ${error instanceof Error ? error.message : String(error)}`, "error");
-            } finally {
-              // UI-07 busy ownership: only the latest check may clear, and
-              // only while no other operation has since taken the label
-              // (reload/install/search own their own slots).
-              if (seq === checkBusySeq && model.busy === "checking for updates") {
-                dispatch({ type: "busy", label: null });
-              }
-            }
-          })();
-        }
-        return;
-      case "r":
-        if (model.tab === "installed") {
-          const skill = model.visible[model.selected];
-          if (skill) {
-            const nonLocked = nonLockedFor([skill.name]);
-            dispatch({ type: "confirm", confirm: { kind: "delete", names: [skill.name], nonLocked } });
-          }
-        }
-        return;
-      case "u":
-        if (model.tab === "search") void runQueue();
-        else {
-          // S-203 (UI-02): an explicit checked selection owns the operation;
-          // with nothing checked, update the WHOLE loaded scope (model.skills),
-          // never just the filtered rows (model.visible) — parity with the
-          // browser's deliberate whole-scope update (POST /api/update with
-          // omitted or [] skills). Same confirmation gate as any update.
-          const names =
-            model.checked.size > 0 ? [...model.checked] : model.skills.map((skill) => skill.name);
-          if (names.length > 0) dispatch({ type: "confirm", confirm: { kind: "update", names } });
-        }
-        return;
-      case "d":
-        if (model.checked.size > 0) {
-          const names = [...model.checked];
-          dispatch({ type: "confirm", confirm: { kind: "delete", names, nonLocked: nonLockedFor(names) } });
-        }
-        return;
-      case "return":
-        if (model.tab === "installed") {
-          void loadDetail();
-        } else if (model.tab === "search") {
-          const skill = (model.visibleResults ?? model.results)[model.searchSelected];
-          if (skill) {
-            void (async () => {
-              const scope = model.scope;
-              dispatch({ type: "busy", label: `installing ${skill.name}` });
-              const result = await deps.install(skill.source, [skill.name], scope);
-              toast(result.summary, result.ok ? "success" : "error");
-              await deps.play(result.ok ? "success" : "error", model.prefs);
-              await afterMutation("install", [skill.name], scope, result.ok);
-              dispatch({ type: "busy", label: null });
-              await reloadSkills();
-            })();
-          }
-        }
-        return;
-      case "t":
-        if (model.tab === "settings") {
-          const prefs: UiPreferences = { ...model.prefs, theme: model.prefs.theme === "mocha" ? "latte" : "mocha" };
-          deps.savePrefs(prefs);
-          dispatch({ type: "prefs", prefs });
-        }
-        return;
-      case "s":
-        if (model.tab === "installed" || model.tab === "search") dispatch({ type: "sort-toggle" });
-        return;
-      case "[":
-      case "]": {
-        const cur = model.prefs.listWidth ?? 35;
-        const delta = k === "]" ? 5 : -5;
-        const nextW = Math.max(LIST_WIDTH_MIN, Math.min(LIST_WIDTH_MAX, cur + delta));
-        const prefs: UiPreferences = { ...model.prefs, listWidth: nextW };
-        deps.savePrefs(prefs);
-        dispatch({ type: "prefs", prefs });
-        return;
+    // filter-start below, so filter words can BEGIN with those.
+    if (k === "q") {
+      if (quitArmed) {
+        disarmQuit();
+        renderer.destroy();
+      } else {
+        quitArmed = true;
+        quitTimer = setTimeout(disarmQuit, 1500);
+        toast("press q again to quit", "info");
       }
-      case "0": {
-        const prefs: UiPreferences = { ...model.prefs, listWidth: null };
-        deps.savePrefs(prefs);
-        dispatch({ type: "prefs", prefs });
-        return;
-      }
-      case ",":
-      case "comma":
-        if (model.tab === "settings") {
-          const prefs: UiPreferences = { ...model.prefs, sound: !model.prefs.sound };
-          deps.savePrefs(prefs);
-          dispatch({ type: "prefs", prefs });
-        }
-        return;
-      case "m":
-        if (model.tab === "settings") {
-          const next: UiPreferences["reduceMotion"] =
-            model.prefs.reduceMotion === "auto" ? true : model.prefs.reduceMotion === true ? false : "auto";
-          const prefs: UiPreferences = { ...model.prefs, reduceMotion: next };
-          deps.savePrefs(prefs);
-          dispatch({ type: "prefs", prefs });
-        }
-        return;
-      default:
-        // fork UX: typing a printable char on the installed list starts the
-        // text filter directly (the agent overlay owns `a`; `f` opens this filter)
-        if (model.tab === "installed" && k.length === 1 && /[a-z0-9\-_/.]/i.test(k)) {
-          dispatch({ type: "filtering", on: true });
-          dispatch({ type: "filter", text: model.filter + k });
-        }
-        break;
+      return;
     }
+    if (k === "?") {
+      dispatch({ type: "help", on: true });
+      return;
+    }
+    if (
+      handleNavigationCommandKey(k) ||
+      handleInstalledModalOrDeleteKey(k) ||
+      handleActionCommandKey(k) ||
+      handleSettingsCommandKey(k)
+    ) {
+      return;
+    }
+    // fork UX: typing a printable char on the installed list starts the
+    // text filter directly (the agent overlay owns `a`; `f` opens this filter)
+    if (model.tab === "installed" && k.length === 1 && /[a-z0-9\-_/.]/i.test(k)) {
+      dispatch({ type: "filtering", on: true });
+      dispatch({ type: "filter", text: model.filter + k });
+    }
+  };
+
+  const onKey = (key: { name: string; shift?: boolean; ctrl?: boolean }): void => {
+    if (key.ctrl && key.name === "c") return; // exitOnCtrlC owns ctrl+c
+    const k = key.name;
+    if (k !== "q") disarmQuit(); // any non-q press cancels an armed quit (S-161)
+
+    if (handleOverlayKey(key)) return;
+
+    // Text-entry modes (filter/search) capture printable input; letter
+    // hotkeys must not fire mid-word (the "cli"→i-jumps-tabs trap).
+    const inFilter = model.tab === "installed" && model.filtering;
+    const inSearch = model.tab === "search" && model.searching;
+    if (inFilter || inSearch) {
+      handleTextEntryKey(k, inFilter, inSearch);
+      return;
+    }
+    if (handleShiftedAndTabKey(key)) return;
+    handleCommandKey(k);
   };
 
   renderer.keyInput.on("keypress", onKey);
