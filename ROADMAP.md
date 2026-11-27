@@ -18,10 +18,10 @@ flowchart TB
   M5F --> MX["later 0.x — @opentui/ssh serving · musl/win targets · upstream serve convergence"]
 ```
 
-## Milestones
+## 1. Milestones
 
 | Version | Scope | Status |
-|---|---|---|
+| --- | --- | --- |
 | 0.0.x | Feasibility spike ✓ · core services over the `skills` subprocess contract ✓ · HTTP API + WebUI port ✓ · OpenTUI TUI with the full keyboard contract ✓ · packaging matrix ✓ · audio synth + markdown + image pipeline ✓ | done (this milestone) |
 | 0.1.x | HTTP API (10 endpoints + `/api/version`) via `Bun.serve`; WebUI port; `--web` / `serve` modes | done — absorbed into 0.0.x (S-61/S-62, 2026-10-28) |
 | 0.2.x | Parity where it matters (map S-65): list ops (`I`/`A`/`s`, settings → `,`, PgUp/PgDn), single remove `r` + update-all `u`, update-check wiring (`c`/`↑`/hint), agent filter `a` (multi-select + all) + description match, search-queue sub-view (Tab), crash-guard + adjustedQuery notice, `skills`-version display | **done** — S-69–S-75 shipped, 50 tests green, binary `skills-ui-0.2.0-darwin-arm64` (2026-10-28) |
@@ -33,15 +33,15 @@ flowchart TB
 | 0.5.3 | Performance of retrieval, filtering, search: baselines → ratified budgets + harness → fixes for the ratified hot paths (map [S-144](https://linear.app/s-a-c/issue/S-144/skills-ui-053-performance-wayfinder-map-retrieval-filtering)) | **done** — S-177–S-184 shipped, `v0.5.3` tagged (signed) + released 2026-11-01: serve cache + coalescing (real warm global 50–60 s → 0.1 ms), detail-by-path (0 spawns), web filter debounce + keyed DOM reuse (0 rebuilds/0 replays, 0.9 ms render work), search dedup + stale guards (both UIs), TUI SWR (0.5 ms real index paint vs 300 ms budget) + visibleSkills compute-once, hallmark 24b re-space (57 → 0, sloplint clean), runtime-dash sweep; GATES-0.5.3 7/7 (11/11 synthetic budget MET + real evidence; upstream ls floor accepted-with-reason) |
 | 0.5.4 | WebUI unified split-pane (`#listPane` + `#detailPane` for Installed, Search, Install, and Update), compact 4px-grid button/control sizing + dedicated `.sort-row`, and user-adjustable `#listPane` width (`#listSplitter` + `#settings` slider persisted in `UiPreferences.listWidth`) (map [S-234](https://linear.app/s-a-c/issue/S-234/skills-ui-054-webui-unified-split-pane-and-ergonomic-controls)) | **done** — S-235–S-240 implemented and verified; 303 bun tests + 47 Playwright e2e + 11/11 perf budgets + sloplint 0 FAIL + binary selftest green (`GATES-0.5.4.md` 5/5) |
 | 0.5.4.1 | List-card ergonomics & WebUI/TUI split-pane parity: unbreakable Name-Checkbox Unit, `10%–50%` proportional Filter List Panel width (with legacy v0.5.4 pixel migration), left-justified penultimate line + contiguous right-justified action buttons that merge when space allows, and TUI split-pane `SearchBody` + 3-mode `s` sort + `[`/`]`/`0` list-width parity (map [S-256](https://linear.app/s-a-c/issue/S-256/skills-ui-0541-list-card-ergonomics-and-webuitui-split-pane-parity)) | **done** — merged to `main` (`99ed844`); `GATES-0.5.4.1.md` 6/6 verified |
-| 0.5.5 | Hub integration, provenance guardrails & read-only health strip: `.skill-lock.json` primary resolution, `Skill Provenance` (`locked`/`linked`/`local`) badges + non-locked `rm` confirmation, host-env `SKILLS_UI_POST_MUTATION_HOOK`, and `SKILLS_UI_HEALTH_CMD` / `GET /api/health-check` + header `Health Pill` across WebUI and TUI (map [S-312](https://linear.app/s-a-c/issue/S-312/skills-ui-055-hub-integration-provenance-guardrails-and-read-only)) | **done** — S-313–S-319 implemented on `phase/0.5.5` (`321` bun tests + `48` Playwright E2E + PTY smoke + `11/11` perf budgets + sloplint clean + darwin-arm64 `0.5.5` binary `--selftest` + companion hub bridge `113/113 · 8 hosts`; `GATES-0.5.5.md` 7/7) |
+| 0.5.5 | Hub integration, provenance guardrails & read-only health strip: `.skill-lock.json` primary resolution, `Skill Provenance` (`locked`/`linked`/`local`) badges + non-locked `rm` confirmation, host-env `SKILLS_UI_POST_MUTATION_HOOK`, and `SKILLS_UI_HEALTH_CMD` / `GET /api/health-check` + header `Health Pill` across WebUI and TUI (map [S-312](https://linear.app/s-a-c/issue/S-312/skills-ui-055-hub-integration-provenance-guardrails-and-read-only)) | **done** — S-313–S-319 + Archify cleanup (`ef10815`), `v0.5.5` tagged (signed) + released 2026-11-27 (`321` bun tests + `48` Playwright E2E + PTY smoke + `11/11` perf budgets + sloplint clean + 4-target binary matrix + companion hub bridge `113/113 · 8 hosts`; `GATES-0.5.5.md` 7/7) |
 
-## Hosted UI (0.5.x, shipped)
+## 2. Hosted UI (0.5.X, Shipped)
 
 **Shipped 2026-10-30 (build map [S-130](https://linear.app/s-a-c/issue/S-130/skills-ui-hosted-ui-build-wayfinder-map-05x-github-pages)): live at <https://s-a-c.github.io/skills-ui/app.html>** — connect dialog (backend URL + Hosted-UI token), LNA prompt/denial UX, capabilities negotiation; serve hardened per the verdict. Playwright e2e from the real hosted origin (grant/negative/wrong-token) green; `GATES-0.5.x.md` 6/7 met — G7 is the one human step, the native LNA prompt click on first connect.
 
 Ratified 2026-10-29 (verdict ticket [S-129](https://linear.app/s-a-c/issue/S-129/05x-verdict-ratify-gono-go-per-line-and-update-roadmap-folds-in); evidence in the [0.5.x map](https://linear.app/s-a-c/issue/S-120/skills-ui-05x-route-wayfinder-map-wasm-app-exploratory)). The line is a **hosted zero-install WebUI** — a static page (hosting choice is follow-on) talking to the user's local `skills-ui serve` for all mutations. Audience: public demo primary, other skills users secondary; `--web` remains the private/local path.
 
-1. **Hosted zero-install WebUI — GO.** Chrome 142+/Edge and Firefox 153+ reach `serve` via the Local Network Access permission prompt; Safari blocks loopback outright (WebKit 171934). Serve owes plain CORS (OPTIONS preflight + ACAO with `Vary: Origin`), a Bearer token in `Authorization` (RFC 6750 — never query-string), and a Host-header allowlist (127.0.0.1/localhost/[::1]) against DNS rebinding; skills.sh search proxies through serve (it sends no ACAO); the page owns the LNA prompt/denial UX.
+1. **Hosted zero-install WebUI — GO.** Chrome 142+/Edge and Firefox 153+ reach `serve` via the Local Network Access permission prompt; Safari blocks loopback outright (WebKit 171934). Serve owes plain CORS (OPTIONS preflight + ACAO with `Vary: Origin`), a Bearer token in `Authorization` (RFC 6750 — never query-string), and a Host-header allowlist (127.0.0.1/localhost/\[::1\]) against DNS rebinding; skills.sh search proxies through serve (it sends no ACAO); the page owns the LNA prompt/denial UX.
 2. **Browser-bundled core — feasible, and no wasm exists.** The portable core subset is plain TS (7.5 KiB min / 3.4 KiB gzip, probed). Whether to bundle it into a page at all is a follow-on design choice.
 3. **TUI-in-browser — no-go for shipping.** Upstream has no browser path (FFI natives; roadmap #821 has zero web targets); an optional PoC spike (opentui-web fork) is follow-on fun, not product.
 
@@ -54,19 +54,19 @@ Guardrails (what this line never grows into):
 
 Shipped follow-ons not taken here (parked): browser-bundled core (feasible, no wasm — a later design choice) and the optional TUI-in-browser PoC spike.
 
-## Hardening series (0.5.1–0.5.3, charted 2026-10-30)
+## 3. Hardening Series (0.5.1–0.5.3, Charted 2026-10-30)
 
 Three follow-on wayfinder maps inside the 0.5.x line, each **defog-first** (read-only audits) and closing on its own **shipped patch release** — execution carried into the map, not handed off. Serial order ratified: security → UI/UX → performance (audit defog may run early in parallel; implementation waits for the prior map's ship gate).
 
 Ship gate per milestone: merged to `main`, `bun test` green, tagged release with binaries built, hosted page updated when web-facing, gate ledger (`GATES-0.5.1/2/3.md`) with evidence, live checks pass.
 
 | Map | Scope | Skills (beyond the mandatory set: wayfinder · grill-with-docs · unlazy · code-review-and-quality · i-have-adhd · caveman) |
-|---|---|---|
+| --- | --- | --- |
 | [S-142](https://linear.app/s-a-c/issue/S-142/skills-ui-051-security-hardening-wayfinder-map) | serve API · hosted page · installer/pipeline · deps/supply chain | security-and-hardening · github:secret |
 | [S-143](https://linear.app/s-a-c/issue/S-143/skills-ui-052-uiux-consistency-wayfinder-map-web-tui) | consistency definition → divergence matrix → ratified slice | frontend-design · web-design-guidelines · tui-design · opentui |
 | [S-144](https://linear.app/s-a-c/issue/S-144/skills-ui-053-performance-wayfinder-map-retrieval-filtering) | retrieval pipeline · filtering/search paths · budgets + harness | performance-optimization · systematic-debugging |
 
-## Later (unversioned)
+## 4. Later (Unversioned)
 
 - `@opentui/ssh` — serve the TUI over SSH.
 - musl + Windows targets in the packaging matrix.

@@ -1,8 +1,8 @@
-# skills-ui
+# Skills-UI
 
 **TUI/WebUI wrapper for the [`skills`](https://github.com/vercel-labs/skills) CLI.** OpenTUI terminal app + web UI over a local HTTP API, shipped as a self-contained Bun executable. Versioning: **0.x.y forever** — no 1.0 implied.
 
-## What it is
+## 1. What It Is
 
 - A single binary (`bun build --compile`) embedding the Bun runtime and OpenTUI's native core.
 - Three entry modes: `skills-ui` (terminal UI) · `skills-ui --web` (local web UI) · `skills-ui serve` (headless HTTP API) — plus a **hosted zero-install page** at [s-a-c.github.io/skills-ui](https://s-a-c.github.io/skills-ui/app.html) that talks to your local `serve` over an authenticated loopback connection (Chrome/Edge/Firefox 153+; Safari blocks local network access).
@@ -10,7 +10,7 @@
 - Talks to the public skills.sh registry directly for search.
 - Rich terminal UI: markdown (tree-sitter), images (kitty/sixel/blocks), 3D graph view (`@opentui/three`), synthesized audio, catppuccin latte|mocha theming with WCAG-verified contrast.
 
-## Performance (0.5.3)
+## 2. Performance (0.5.3)
 
 Every hot path is measured against ratified budgets (`bun run perf:budget`, committed harness). On a real 300-skill corpus:
 
@@ -20,17 +20,17 @@ Every hot path is measured against ratified budgets (`bun run perf:budget`, comm
 
 The remaining wall is upstream: `skills ls` itself re-parses every SKILL.md once per agent dir per canonical skill on large home directories ([vercel-labs/skills#2644](https://github.com/vercel-labs/skills/issues/2644)) — skills-ui caches around it, it can't fix it.
 
-## Requirements
+## 3. Requirements
 
 - `skills` on `PATH` (or point `SKILLS_UI_SKILLS_BIN` at it) — v1.7.x, stock upstream.
 - Terminal with truecolor for full fidelity (degrades gracefully).
 
-## Install
+## 4. Install
 
 Pinned to a signed release tag (recommended — the installer script and the checksum manifest both come from the tag's tree, so `git tag -v` covers what verifies your binary):
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/s-a-c/skills-ui/v0.5.3.1/scripts/install.sh | sh -s v0.5.3.1
+curl -fsSL https://raw.githubusercontent.com/s-a-c/skills-ui/v0.5.5/scripts/install.sh | sh -s v0.5.5
 ```
 
 Rolling latest from `main` (unpinned script):
@@ -41,7 +41,7 @@ curl -fsSL https://raw.githubusercontent.com/s-a-c/skills-ui/main/scripts/instal
 
 Either way it detects OS/arch, downloads the release binary, verifies it against the checksum manifest, and installs to `~/.local/bin` (override with `SKILLS_UI_INSTALL_DIR`). Manual alternative: grab a binary from the [releases](https://github.com/s-a-c/skills-ui/releases) (darwin-arm64 · darwin-x64 · linux-x64 · linux-arm64), `chmod +x`, put it on your `PATH`; browser-downloaded macOS copies also need `xattr -d com.apple.quarantine <file>` (ad-hoc signed). Package managers (Homebrew, winget, …) are roadmap-later.
 
-## Usage
+## 5. Usage
 
 ```sh
 skills-ui               # terminal UI (OpenTUI)
@@ -51,7 +51,7 @@ skills-ui add owner/repo --skill tdd   # opens the UI seeded for that install
 skills-ui --selftest    # in-memory smoke check — no TTY needed
 ```
 
-## Development
+## 6. Development
 
 ```sh
 mise install            # bun 1.4.4
@@ -66,10 +66,10 @@ bun install --frozen-lockfile --os='*' --cpu='*' --libc='*'   # before the matri
 bun run build --all     # darwin-x64/arm64 + linux-x64/arm64 matrix
 ```
 
-## Relationship to `skills`
+## 7. Relationship to `skills`
 
 This project has **no build-time dependency on `skills`** — source or package. The fork `s-a-c/vercel-labs-skills` (branch `dev/tui-webui`) is a porting reference only (API contract, web page, theme system), carried with attribution. See [ROADMAP.md](ROADMAP.md) and `plans/skills-ui-wrapper-pivot-plan.md` in the fork repo for the full architecture diagrams.
 
-## License
+## 8. License
 
 MIT. Theme system and API contract adapted from `vercel-labs/skills` (MIT).
