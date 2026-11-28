@@ -1,0 +1,3165 @@
+{
+  "scriptCompleted": true,
+  "commonPrefix": "",
+  "directoryGroups": {
+    "src": [
+      "file:src/core/api.ts",
+      "file:src/core/hosted-auth.ts",
+      "file:src/core/services/hooks.ts",
+      "file:src/core/services/install.ts",
+      "file:src/core/services/installed.ts",
+      "file:src/core/services/locks.ts",
+      "file:src/core/services/remove.ts",
+      "file:src/core/services/sanitize.ts",
+      "file:src/core/services/search.ts",
+      "file:src/core/services/skill-doc.ts",
+      "file:src/core/services/source.ts",
+      "file:src/core/services/types.ts",
+      "file:src/core/services/update.ts",
+      "file:src/core/services/updates-check.ts",
+      "file:src/core/skills-client.ts",
+      "file:src/core/spawn-queue.ts",
+      "file:src/core/disk-index.ts",
+      "file:src/core/index.ts",
+      "file:src/core/prefs.ts",
+      "file:src/core/seed.ts",
+      "file:src/core/theme.ts",
+      "file:src/tui/Views.tsx",
+      "file:src/tui/app.ts",
+      "file:src/tui/art.ts",
+      "file:src/tui/audio.ts",
+      "file:src/tui/model.ts",
+      "file:src/tui/renderer-ready.ts",
+      "file:src/tui/three-scene.ts",
+      "file:src/web/client/core.ts",
+      "file:src/core/version.ts",
+      "file:src/main.ts",
+      "file:src/web/client/installed.ts",
+      "file:src/web/client/search-and-boot.ts",
+      "file:src/web/page.ts",
+      "file:src/web/styles.ts",
+      "file:src/core/filter.ts",
+      "file:src/tui/spike.ts"
+    ],
+    "tests": [
+      "file:tests/hosted-auth.test.ts",
+      "file:tests/locks.test.ts",
+      "file:tests/sanitize.test.ts",
+      "file:tests/serve-hardening.test.ts",
+      "file:tests/filter-parity.test.ts",
+      "file:tests/hooks-health.test.ts",
+      "file:tests/selftest.test.ts",
+      "file:tests/tui-disk-index.test.ts",
+      "file:tests/tui.test.ts",
+      "file:tests/api.test.ts",
+      "file:tests/page-smoke.test.ts",
+      "file:tests/perf/filter-dom.test.ts",
+      "file:tests/perf/helpers.ts",
+      "file:tests/perf/playwright-probes.ts",
+      "file:tests/perf/search-stub.test.ts",
+      "file:tests/perf/spawn-count.test.ts",
+      "file:tests/version.test.ts",
+      "file:tests/web-055.test.ts",
+      "file:tests/dash-sweep.test.ts",
+      "file:tests/fixtures/audit-web-server.ts",
+      "file:tests/markdown-render.test.ts",
+      "file:tests/page-hardening.test.ts",
+      "file:tests/terminology.test.ts",
+      "file:tests/e2e/audit-remediation.e2e.ts",
+      "file:tests/e2e/helpers/audit-fixture.ts",
+      "file:tests/helpers/audit-state.ts",
+      "file:tests/helpers/installer-fixture.ts",
+      "file:tests/installer.test.ts",
+      "config:tests/fixtures/contract/add-hostile.json",
+      "config:tests/fixtures/contract/add.json",
+      "config:tests/fixtures/contract/ls-empty.json",
+      "config:tests/fixtures/contract/ls-global.json",
+      "config:tests/fixtures/contract/ls-hostile.json",
+      "config:tests/fixtures/contract/ls-project.json",
+      "file:tests/e2e/hosted.e2e.ts",
+      "document:tests/fixtures/contract/hostile-skill/SKILL.md",
+      "file:tests/fixtures/skills-shim.mjs",
+      "file:tests/fixtures/slow-skills-shim.mjs",
+      "file:tests/image.test.ts",
+      "file:tests/services.test.ts"
+    ],
+    "scripts": [
+      "file:scripts/export-page.ts",
+      "file:scripts/perf/budget.ts",
+      "file:scripts/build.ts",
+      "file:scripts/install.sh",
+      "document:scripts/perf/report-2026-11-01-real.md",
+      "document:scripts/perf/report-2026-11-01.md",
+      "document:scripts/pty-smoke/README.md",
+      "file:scripts/pty-smoke/bin/skills",
+      "document:scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "document:scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "document:scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "config:scripts/pty-smoke/fixtures/ls-project.json",
+      "file:scripts/pty-smoke/runner.py",
+      "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "file:scripts/pty-smoke/smoke.py",
+      "file:scripts/verify-build-targets.ts"
+    ],
+    ".github": [
+      "pipeline:.github/workflows/claude-code-review.yml",
+      "pipeline:.github/workflows/claude.yml"
+    ],
+    "root": [
+      "document:AGENTS.md",
+      "document:CONTEXT.md",
+      "document:README.md",
+      "document:ROADMAP.md",
+      "config:mise.toml",
+      "config:package.json",
+      "config:tsconfig.json",
+      "file:playwright.config.ts"
+    ],
+    "docs": [
+      "config:docs/_config.yml",
+      "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "document:docs/index.md",
+      "document:docs/release.md",
+      "document:docs/upstream-issue-draft.md",
+      "document:docs/upstream-ls-memoization.md",
+      "document:docs/agents/domain.md",
+      "document:docs/agents/issue-tracker.md",
+      "document:docs/agents/triage-labels.md",
+      "document:docs/agents/workspace.md",
+      "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md"
+    ]
+  },
+  "subDirectoryGroups": {
+    "src/core": [
+      "file:src/core/api.ts",
+      "file:src/core/hosted-auth.ts",
+      "file:src/core/skills-client.ts",
+      "file:src/core/spawn-queue.ts",
+      "file:src/core/disk-index.ts",
+      "file:src/core/index.ts",
+      "file:src/core/prefs.ts",
+      "file:src/core/seed.ts",
+      "file:src/core/theme.ts",
+      "file:src/core/version.ts",
+      "file:src/core/filter.ts"
+    ],
+    "src/core/services": [
+      "file:src/core/services/hooks.ts",
+      "file:src/core/services/install.ts",
+      "file:src/core/services/installed.ts",
+      "file:src/core/services/locks.ts",
+      "file:src/core/services/remove.ts",
+      "file:src/core/services/sanitize.ts",
+      "file:src/core/services/search.ts",
+      "file:src/core/services/skill-doc.ts",
+      "file:src/core/services/source.ts",
+      "file:src/core/services/types.ts",
+      "file:src/core/services/update.ts",
+      "file:src/core/services/updates-check.ts"
+    ],
+    "tests": [
+      "file:tests/hosted-auth.test.ts",
+      "file:tests/locks.test.ts",
+      "file:tests/sanitize.test.ts",
+      "file:tests/serve-hardening.test.ts",
+      "file:tests/filter-parity.test.ts",
+      "file:tests/hooks-health.test.ts",
+      "file:tests/selftest.test.ts",
+      "file:tests/tui-disk-index.test.ts",
+      "file:tests/tui.test.ts",
+      "file:tests/api.test.ts",
+      "file:tests/page-smoke.test.ts",
+      "file:tests/version.test.ts",
+      "file:tests/web-055.test.ts",
+      "file:tests/dash-sweep.test.ts",
+      "file:tests/markdown-render.test.ts",
+      "file:tests/page-hardening.test.ts",
+      "file:tests/terminology.test.ts",
+      "file:tests/installer.test.ts",
+      "file:tests/image.test.ts",
+      "file:tests/services.test.ts"
+    ],
+    "src/tui": [
+      "file:src/tui/Views.tsx",
+      "file:src/tui/app.ts",
+      "file:src/tui/art.ts",
+      "file:src/tui/audio.ts",
+      "file:src/tui/model.ts",
+      "file:src/tui/renderer-ready.ts",
+      "file:src/tui/three-scene.ts",
+      "file:src/tui/spike.ts"
+    ],
+    "src/web": [
+      "file:src/web/client/core.ts",
+      "file:src/web/client/installed.ts",
+      "file:src/web/client/search-and-boot.ts",
+      "file:src/web/page.ts",
+      "file:src/web/styles.ts"
+    ],
+    "scripts": [
+      "file:scripts/export-page.ts",
+      "file:scripts/perf/budget.ts",
+      "file:scripts/build.ts",
+      "file:scripts/install.sh",
+      "document:scripts/perf/report-2026-11-01-real.md",
+      "document:scripts/perf/report-2026-11-01.md",
+      "document:scripts/pty-smoke/README.md",
+      "file:scripts/pty-smoke/bin/skills",
+      "document:scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "document:scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "document:scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "config:scripts/pty-smoke/fixtures/ls-project.json",
+      "file:scripts/pty-smoke/runner.py",
+      "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "file:scripts/pty-smoke/smoke.py",
+      "file:scripts/verify-build-targets.ts"
+    ],
+    "src (root)": [
+      "file:src/main.ts"
+    ],
+    "tests/perf": [
+      "file:tests/perf/filter-dom.test.ts",
+      "file:tests/perf/helpers.ts",
+      "file:tests/perf/playwright-probes.ts",
+      "file:tests/perf/search-stub.test.ts",
+      "file:tests/perf/spawn-count.test.ts"
+    ],
+    "tests/fixtures": [
+      "file:tests/fixtures/audit-web-server.ts",
+      "config:tests/fixtures/contract/add-hostile.json",
+      "config:tests/fixtures/contract/add.json",
+      "config:tests/fixtures/contract/ls-empty.json",
+      "config:tests/fixtures/contract/ls-global.json",
+      "config:tests/fixtures/contract/ls-hostile.json",
+      "config:tests/fixtures/contract/ls-project.json",
+      "document:tests/fixtures/contract/hostile-skill/SKILL.md",
+      "file:tests/fixtures/skills-shim.mjs",
+      "file:tests/fixtures/slow-skills-shim.mjs"
+    ],
+    "tests/e2e": [
+      "file:tests/e2e/audit-remediation.e2e.ts",
+      "file:tests/e2e/helpers/audit-fixture.ts",
+      "file:tests/e2e/hosted.e2e.ts"
+    ],
+    "tests/helpers": [
+      "file:tests/helpers/audit-state.ts",
+      "file:tests/helpers/installer-fixture.ts"
+    ],
+    ".github/workflows": [
+      "pipeline:.github/workflows/claude-code-review.yml",
+      "pipeline:.github/workflows/claude.yml"
+    ],
+    "root": [
+      "document:AGENTS.md",
+      "document:CONTEXT.md",
+      "document:README.md",
+      "document:ROADMAP.md",
+      "config:mise.toml",
+      "config:package.json",
+      "config:tsconfig.json",
+      "file:playwright.config.ts"
+    ],
+    "docs": [
+      "config:docs/_config.yml",
+      "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "document:docs/index.md",
+      "document:docs/release.md",
+      "document:docs/upstream-issue-draft.md",
+      "document:docs/upstream-ls-memoization.md"
+    ],
+    "docs/agents": [
+      "document:docs/agents/domain.md",
+      "document:docs/agents/issue-tracker.md",
+      "document:docs/agents/triage-labels.md",
+      "document:docs/agents/workspace.md"
+    ],
+    "docs/designs": [
+      "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md"
+    ]
+  },
+  "nodeTypeGroups": {
+    "file": [
+      "file:src/core/api.ts",
+      "file:src/core/hosted-auth.ts",
+      "file:src/core/services/hooks.ts",
+      "file:src/core/services/install.ts",
+      "file:src/core/services/installed.ts",
+      "file:src/core/services/locks.ts",
+      "file:src/core/services/remove.ts",
+      "file:src/core/services/sanitize.ts",
+      "file:src/core/services/search.ts",
+      "file:src/core/services/skill-doc.ts",
+      "file:src/core/services/source.ts",
+      "file:src/core/services/types.ts",
+      "file:src/core/services/update.ts",
+      "file:src/core/services/updates-check.ts",
+      "file:src/core/skills-client.ts",
+      "file:src/core/spawn-queue.ts",
+      "file:tests/hosted-auth.test.ts",
+      "file:tests/locks.test.ts",
+      "file:tests/sanitize.test.ts",
+      "file:tests/serve-hardening.test.ts",
+      "file:src/core/disk-index.ts",
+      "file:src/core/index.ts",
+      "file:src/core/prefs.ts",
+      "file:src/core/seed.ts",
+      "file:src/core/theme.ts",
+      "file:src/tui/Views.tsx",
+      "file:src/tui/app.ts",
+      "file:src/tui/art.ts",
+      "file:src/tui/audio.ts",
+      "file:src/tui/model.ts",
+      "file:src/tui/renderer-ready.ts",
+      "file:src/tui/three-scene.ts",
+      "file:src/web/client/core.ts",
+      "file:tests/filter-parity.test.ts",
+      "file:tests/hooks-health.test.ts",
+      "file:tests/selftest.test.ts",
+      "file:tests/tui-disk-index.test.ts",
+      "file:tests/tui.test.ts",
+      "file:scripts/export-page.ts",
+      "file:scripts/perf/budget.ts",
+      "file:src/core/version.ts",
+      "file:src/main.ts",
+      "file:tests/api.test.ts",
+      "file:tests/page-smoke.test.ts",
+      "file:tests/perf/filter-dom.test.ts",
+      "file:tests/perf/helpers.ts",
+      "file:tests/perf/playwright-probes.ts",
+      "file:tests/perf/search-stub.test.ts",
+      "file:tests/perf/spawn-count.test.ts",
+      "file:tests/version.test.ts",
+      "file:tests/web-055.test.ts",
+      "file:src/web/client/installed.ts",
+      "file:src/web/client/search-and-boot.ts",
+      "file:src/web/page.ts",
+      "file:src/web/styles.ts",
+      "file:tests/dash-sweep.test.ts",
+      "file:tests/fixtures/audit-web-server.ts",
+      "file:tests/markdown-render.test.ts",
+      "file:tests/page-hardening.test.ts",
+      "file:tests/terminology.test.ts",
+      "file:tests/e2e/audit-remediation.e2e.ts",
+      "file:tests/e2e/helpers/audit-fixture.ts",
+      "file:tests/helpers/audit-state.ts",
+      "file:tests/helpers/installer-fixture.ts",
+      "file:tests/installer.test.ts",
+      "file:playwright.config.ts",
+      "file:scripts/build.ts",
+      "file:scripts/install.sh",
+      "file:scripts/pty-smoke/bin/skills",
+      "file:scripts/pty-smoke/runner.py",
+      "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "file:scripts/pty-smoke/smoke.py",
+      "file:scripts/verify-build-targets.ts",
+      "file:src/core/filter.ts",
+      "file:src/tui/spike.ts",
+      "file:tests/e2e/hosted.e2e.ts",
+      "file:tests/fixtures/skills-shim.mjs",
+      "file:tests/fixtures/slow-skills-shim.mjs",
+      "file:tests/image.test.ts",
+      "file:tests/services.test.ts"
+    ],
+    "pipeline": [
+      "pipeline:.github/workflows/claude-code-review.yml",
+      "pipeline:.github/workflows/claude.yml"
+    ],
+    "document": [
+      "document:AGENTS.md",
+      "document:CONTEXT.md",
+      "document:README.md",
+      "document:ROADMAP.md",
+      "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "document:docs/index.md",
+      "document:docs/release.md",
+      "document:docs/upstream-issue-draft.md",
+      "document:docs/upstream-ls-memoization.md",
+      "document:docs/agents/domain.md",
+      "document:docs/agents/issue-tracker.md",
+      "document:docs/agents/triage-labels.md",
+      "document:docs/agents/workspace.md",
+      "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "document:scripts/perf/report-2026-11-01-real.md",
+      "document:scripts/perf/report-2026-11-01.md",
+      "document:scripts/pty-smoke/README.md",
+      "document:scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "document:scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "document:scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "document:tests/fixtures/contract/hostile-skill/SKILL.md"
+    ],
+    "config": [
+      "config:mise.toml",
+      "config:package.json",
+      "config:tsconfig.json",
+      "config:docs/_config.yml",
+      "config:tests/fixtures/contract/add-hostile.json",
+      "config:tests/fixtures/contract/add.json",
+      "config:tests/fixtures/contract/ls-empty.json",
+      "config:tests/fixtures/contract/ls-global.json",
+      "config:tests/fixtures/contract/ls-hostile.json",
+      "config:tests/fixtures/contract/ls-project.json",
+      "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "config:scripts/pty-smoke/fixtures/ls-project.json"
+    ]
+  },
+  "crossCategoryEdges": [
+    {
+      "fromType": "file",
+      "toType": "file",
+      "edgeType": "imports",
+      "count": 135
+    },
+    {
+      "fromType": "file",
+      "toType": "file",
+      "edgeType": "tested_by",
+      "count": 82
+    },
+    {
+      "fromType": "document",
+      "toType": "file",
+      "edgeType": "documents",
+      "count": 72
+    },
+    {
+      "fromType": "document",
+      "toType": "document",
+      "edgeType": "related",
+      "count": 35
+    },
+    {
+      "fromType": "file",
+      "toType": "file",
+      "edgeType": "depends_on",
+      "count": 12
+    },
+    {
+      "fromType": "file",
+      "toType": "config",
+      "edgeType": "depends_on",
+      "count": 12
+    },
+    {
+      "fromType": "config",
+      "toType": "file",
+      "edgeType": "configures",
+      "count": 11
+    },
+    {
+      "fromType": "config",
+      "toType": "file",
+      "edgeType": "related",
+      "count": 8
+    },
+    {
+      "fromType": "document",
+      "toType": "config",
+      "edgeType": "documents",
+      "count": 5
+    },
+    {
+      "fromType": "config",
+      "toType": "file",
+      "edgeType": "triggers",
+      "count": 5
+    },
+    {
+      "fromType": "config",
+      "toType": "document",
+      "edgeType": "configures",
+      "count": 4
+    },
+    {
+      "fromType": "config",
+      "toType": "document",
+      "edgeType": "depends_on",
+      "count": 4
+    },
+    {
+      "fromType": "file",
+      "toType": "config",
+      "edgeType": "imports",
+      "count": 2
+    },
+    {
+      "fromType": "file",
+      "toType": "file",
+      "edgeType": "configures",
+      "count": 2
+    },
+    {
+      "fromType": "file",
+      "toType": "file",
+      "edgeType": "related",
+      "count": 2
+    },
+    {
+      "fromType": "pipeline",
+      "toType": "pipeline",
+      "edgeType": "related",
+      "count": 1
+    },
+    {
+      "fromType": "config",
+      "toType": "config",
+      "edgeType": "configures",
+      "count": 1
+    },
+    {
+      "fromType": "document",
+      "toType": "document",
+      "edgeType": "documents",
+      "count": 1
+    },
+    {
+      "fromType": "file",
+      "toType": "document",
+      "edgeType": "depends_on",
+      "count": 1
+    },
+    {
+      "fromType": "file",
+      "toType": "document",
+      "edgeType": "related",
+      "count": 1
+    }
+  ],
+  "interGroupImports": [
+    {
+      "from": "tests",
+      "to": "src",
+      "count": 40
+    },
+    {
+      "from": "scripts",
+      "to": "src",
+      "count": 6
+    },
+    {
+      "from": "scripts",
+      "to": "tests",
+      "count": 2
+    },
+    {
+      "from": "src",
+      "to": "root",
+      "count": 1
+    },
+    {
+      "from": "tests",
+      "to": "root",
+      "count": 1
+    }
+  ],
+  "subInterGroupImports": [
+    {
+      "from": "tests",
+      "to": "src/core",
+      "count": 16
+    },
+    {
+      "from": "src/tui",
+      "to": "src/core",
+      "count": 16
+    },
+    {
+      "from": "tests",
+      "to": "src/tui",
+      "count": 9
+    },
+    {
+      "from": "tests",
+      "to": "src/core/services",
+      "count": 8
+    },
+    {
+      "from": "src/core/services",
+      "to": "src/core",
+      "count": 6
+    },
+    {
+      "from": "src/core",
+      "to": "src/core/services",
+      "count": 5
+    },
+    {
+      "from": "tests",
+      "to": "tests/helpers",
+      "count": 5
+    },
+    {
+      "from": "src/web",
+      "to": "src/core",
+      "count": 5
+    },
+    {
+      "from": "tests",
+      "to": "src/web",
+      "count": 5
+    },
+    {
+      "from": "scripts",
+      "to": "src/core",
+      "count": 4
+    },
+    {
+      "from": "tests",
+      "to": "tests/perf",
+      "count": 3
+    },
+    {
+      "from": "scripts",
+      "to": "src/web",
+      "count": 2
+    },
+    {
+      "from": "scripts",
+      "to": "tests/perf",
+      "count": 2
+    },
+    {
+      "from": "tests/e2e",
+      "to": "tests/helpers",
+      "count": 2
+    },
+    {
+      "from": "src/core",
+      "to": "root",
+      "count": 1
+    },
+    {
+      "from": "src (root)",
+      "to": "src/core",
+      "count": 1
+    },
+    {
+      "from": "src (root)",
+      "to": "src/tui",
+      "count": 1
+    },
+    {
+      "from": "tests",
+      "to": "root",
+      "count": 1
+    },
+    {
+      "from": "tests/fixtures",
+      "to": "src/core",
+      "count": 1
+    },
+    {
+      "from": "tests/fixtures",
+      "to": "src/web",
+      "count": 1
+    }
+  ],
+  "intraGroupDensity": {
+    "src": {
+      "internalEdges": 70,
+      "totalEdges": 117,
+      "density": 0.598
+    },
+    "tests": {
+      "internalEdges": 16,
+      "totalEdges": 59,
+      "density": 0.271
+    },
+    "scripts": {
+      "internalEdges": 1,
+      "totalEdges": 9,
+      "density": 0.111
+    },
+    ".github": {
+      "internalEdges": 0,
+      "totalEdges": 0,
+      "density": 0
+    },
+    "root": {
+      "internalEdges": 0,
+      "totalEdges": 2,
+      "density": 0
+    },
+    "docs": {
+      "internalEdges": 0,
+      "totalEdges": 0,
+      "density": 0
+    }
+  },
+  "subIntraGroupDensity": {
+    "src/core": {
+      "internalEdges": 8,
+      "totalEdges": 63,
+      "density": 0.127
+    },
+    "src/core/services": {
+      "internalEdges": 18,
+      "totalEdges": 37,
+      "density": 0.486
+    },
+    "tests": {
+      "internalEdges": 0,
+      "totalEdges": 47,
+      "density": 0
+    },
+    "src/tui": {
+      "internalEdges": 6,
+      "totalEdges": 32,
+      "density": 0.188
+    },
+    "src/web": {
+      "internalEdges": 4,
+      "totalEdges": 17,
+      "density": 0.235
+    },
+    "scripts": {
+      "internalEdges": 1,
+      "totalEdges": 9,
+      "density": 0.111
+    },
+    "src (root)": {
+      "internalEdges": 0,
+      "totalEdges": 2,
+      "density": 0
+    },
+    "tests/perf": {
+      "internalEdges": 4,
+      "totalEdges": 9,
+      "density": 0.444
+    },
+    "tests/fixtures": {
+      "internalEdges": 0,
+      "totalEdges": 2,
+      "density": 0
+    },
+    "tests/e2e": {
+      "internalEdges": 1,
+      "totalEdges": 3,
+      "density": 0.333
+    },
+    "tests/helpers": {
+      "internalEdges": 1,
+      "totalEdges": 8,
+      "density": 0.125
+    },
+    ".github/workflows": {
+      "internalEdges": 0,
+      "totalEdges": 0,
+      "density": 0
+    },
+    "root": {
+      "internalEdges": 0,
+      "totalEdges": 2,
+      "density": 0
+    },
+    "docs": {
+      "internalEdges": 0,
+      "totalEdges": 0,
+      "density": 0
+    },
+    "docs/agents": {
+      "internalEdges": 0,
+      "totalEdges": 0,
+      "density": 0
+    },
+    "docs/designs": {
+      "internalEdges": 0,
+      "totalEdges": 0,
+      "density": 0
+    }
+  },
+  "patternMatches": {
+    "src": "unmatched",
+    "tests": "test",
+    "scripts": "scripts",
+    ".github": "ci-cd",
+    "root": "unmatched",
+    "docs": "documentation"
+  },
+  "subPatternMatches": {
+    "src/core": "service",
+    "src/core/services": "service",
+    "tests": "test",
+    "src/tui": "ui",
+    "src/web": "ui",
+    "scripts": "scripts",
+    "src (root)": "unmatched",
+    "tests/perf": "unmatched",
+    "tests/fixtures": "unmatched",
+    "tests/e2e": "unmatched",
+    "tests/helpers": "utility",
+    ".github/workflows": "unmatched",
+    "root": "unmatched",
+    "docs": "documentation",
+    "docs/agents": "unmatched",
+    "docs/designs": "unmatched"
+  },
+  "deploymentTopology": {
+    "hasDockerfile": false,
+    "hasCompose": false,
+    "hasK8s": false,
+    "hasTerraform": false,
+    "hasCI": true,
+    "infraFiles": [
+      ".github/workflows/claude-code-review.yml",
+      ".github/workflows/claude.yml"
+    ]
+  },
+  "dataPipeline": {
+    "schemaFiles": [],
+    "migrationFiles": [],
+    "dataModelFiles": [
+      "src/core/services/types.ts"
+    ],
+    "apiHandlerFiles": [
+      "src/core/api.ts",
+      "tests/api.test.ts"
+    ]
+  },
+  "docCoverage": {
+    "groupsWithDocs": 5,
+    "totalGroups": 6,
+    "coverageRatio": 0.83,
+    "undocumentedGroups": [
+      ".github"
+    ]
+  },
+  "dependencyDirection": [
+    {
+      "dependent": "tests",
+      "dependsOn": "src",
+      "forward": 40,
+      "reverse": 0
+    },
+    {
+      "dependent": "scripts",
+      "dependsOn": "src",
+      "forward": 6,
+      "reverse": 0
+    },
+    {
+      "dependent": "scripts",
+      "dependsOn": "tests",
+      "forward": 2,
+      "reverse": 0
+    },
+    {
+      "dependent": "src",
+      "dependsOn": "root",
+      "forward": 1,
+      "reverse": 0
+    },
+    {
+      "dependent": "tests",
+      "dependsOn": "root",
+      "forward": 1,
+      "reverse": 0
+    }
+  ],
+  "subDependencyDirection": [
+    {
+      "dependent": "tests",
+      "dependsOn": "src/core",
+      "forward": 16,
+      "reverse": 0
+    },
+    {
+      "dependent": "src/tui",
+      "dependsOn": "src/core",
+      "forward": 16,
+      "reverse": 0
+    },
+    {
+      "dependent": "tests",
+      "dependsOn": "src/tui",
+      "forward": 9,
+      "reverse": 0
+    },
+    {
+      "dependent": "tests",
+      "dependsOn": "src/core/services",
+      "forward": 8,
+      "reverse": 0
+    },
+    {
+      "dependent": "src/core/services",
+      "dependsOn": "src/core",
+      "forward": 6,
+      "reverse": 5
+    },
+    {
+      "dependent": "tests",
+      "dependsOn": "tests/helpers",
+      "forward": 5,
+      "reverse": 0
+    },
+    {
+      "dependent": "src/web",
+      "dependsOn": "src/core",
+      "forward": 5,
+      "reverse": 0
+    },
+    {
+      "dependent": "tests",
+      "dependsOn": "src/web",
+      "forward": 5,
+      "reverse": 0
+    },
+    {
+      "dependent": "scripts",
+      "dependsOn": "src/core",
+      "forward": 4,
+      "reverse": 0
+    },
+    {
+      "dependent": "tests",
+      "dependsOn": "tests/perf",
+      "forward": 3,
+      "reverse": 0
+    },
+    {
+      "dependent": "scripts",
+      "dependsOn": "src/web",
+      "forward": 2,
+      "reverse": 0
+    },
+    {
+      "dependent": "scripts",
+      "dependsOn": "tests/perf",
+      "forward": 2,
+      "reverse": 0
+    },
+    {
+      "dependent": "tests/e2e",
+      "dependsOn": "tests/helpers",
+      "forward": 2,
+      "reverse": 0
+    },
+    {
+      "dependent": "src/core",
+      "dependsOn": "root",
+      "forward": 1,
+      "reverse": 0
+    },
+    {
+      "dependent": "src (root)",
+      "dependsOn": "src/core",
+      "forward": 1,
+      "reverse": 0
+    },
+    {
+      "dependent": "src (root)",
+      "dependsOn": "src/tui",
+      "forward": 1,
+      "reverse": 0
+    },
+    {
+      "dependent": "tests",
+      "dependsOn": "root",
+      "forward": 1,
+      "reverse": 0
+    },
+    {
+      "dependent": "tests/fixtures",
+      "dependsOn": "src/core",
+      "forward": 1,
+      "reverse": 0
+    },
+    {
+      "dependent": "tests/fixtures",
+      "dependsOn": "src/web",
+      "forward": 1,
+      "reverse": 0
+    }
+  ],
+  "fileStats": {
+    "totalFileNodes": 116,
+    "filesPerGroup": {
+      "src": 37,
+      "tests": 40,
+      "scripts": 17,
+      ".github": 2,
+      "root": 8,
+      "docs": 12
+    },
+    "filesPerSubGroup": {
+      "src/core": 11,
+      "src/core/services": 12,
+      "tests": 20,
+      "src/tui": 8,
+      "src/web": 5,
+      "scripts": 17,
+      "src (root)": 1,
+      "tests/perf": 5,
+      "tests/fixtures": 10,
+      "tests/e2e": 3,
+      "tests/helpers": 2,
+      ".github/workflows": 2,
+      "root": 8,
+      "docs": 6,
+      "docs/agents": 4,
+      "docs/designs": 2
+    },
+    "nodeTypeCounts": {
+      "file": 80,
+      "pipeline": 2,
+      "document": 22,
+      "config": 12
+    }
+  },
+  "fileFanIn": {
+    "file:src/core/api.ts": 3,
+    "file:src/core/hosted-auth.ts": 3,
+    "file:src/core/services/hooks.ts": 0,
+    "file:src/core/services/install.ts": 0,
+    "file:src/core/services/installed.ts": 1,
+    "file:src/core/services/locks.ts": 5,
+    "file:src/core/services/remove.ts": 0,
+    "file:src/core/services/sanitize.ts": 9,
+    "file:src/core/services/search.ts": 0,
+    "file:src/core/services/skill-doc.ts": 1,
+    "file:src/core/services/source.ts": 0,
+    "file:src/core/services/types.ts": 13,
+    "file:src/core/services/update.ts": 0,
+    "file:src/core/services/updates-check.ts": 2,
+    "file:src/core/skills-client.ts": 11,
+    "file:src/core/spawn-queue.ts": 2,
+    "file:tests/hosted-auth.test.ts": 0,
+    "file:tests/locks.test.ts": 0,
+    "file:tests/sanitize.test.ts": 0,
+    "file:tests/serve-hardening.test.ts": 0,
+    "file:src/core/disk-index.ts": 3,
+    "file:src/core/index.ts": 8,
+    "file:src/core/prefs.ts": 11,
+    "file:src/core/seed.ts": 5,
+    "file:src/core/theme.ts": 4,
+    "file:src/tui/Views.tsx": 1,
+    "file:src/tui/app.ts": 4,
+    "file:src/tui/art.ts": 1,
+    "file:src/tui/audio.ts": 2,
+    "file:src/tui/model.ts": 5,
+    "file:src/tui/renderer-ready.ts": 3,
+    "file:src/tui/three-scene.ts": 0,
+    "file:src/web/client/core.ts": 1,
+    "file:tests/filter-parity.test.ts": 0,
+    "file:tests/hooks-health.test.ts": 0,
+    "file:tests/selftest.test.ts": 0,
+    "file:tests/tui-disk-index.test.ts": 0,
+    "file:tests/tui.test.ts": 0,
+    "file:scripts/export-page.ts": 0,
+    "file:scripts/perf/budget.ts": 0,
+    "file:src/core/version.ts": 7,
+    "file:src/main.ts": 0,
+    "file:tests/api.test.ts": 0,
+    "file:tests/page-smoke.test.ts": 0,
+    "file:tests/perf/filter-dom.test.ts": 0,
+    "file:tests/perf/helpers.ts": 7,
+    "file:tests/perf/playwright-probes.ts": 2,
+    "file:tests/perf/search-stub.test.ts": 0,
+    "file:tests/perf/spawn-count.test.ts": 0,
+    "file:tests/version.test.ts": 0,
+    "file:tests/web-055.test.ts": 0,
+    "file:src/web/client/installed.ts": 1,
+    "file:src/web/client/search-and-boot.ts": 1,
+    "file:src/web/page.ts": 8,
+    "file:src/web/styles.ts": 1,
+    "file:tests/dash-sweep.test.ts": 0,
+    "file:tests/fixtures/audit-web-server.ts": 0,
+    "file:tests/markdown-render.test.ts": 0,
+    "file:tests/page-hardening.test.ts": 0,
+    "file:tests/terminology.test.ts": 0,
+    "file:tests/e2e/audit-remediation.e2e.ts": 0,
+    "file:tests/e2e/helpers/audit-fixture.ts": 1,
+    "file:tests/helpers/audit-state.ts": 7,
+    "file:tests/helpers/installer-fixture.ts": 1,
+    "file:tests/installer.test.ts": 0,
+    "pipeline:.github/workflows/claude-code-review.yml": 0,
+    "pipeline:.github/workflows/claude.yml": 0,
+    "document:AGENTS.md": 0,
+    "document:CONTEXT.md": 0,
+    "document:README.md": 0,
+    "document:ROADMAP.md": 0,
+    "config:mise.toml": 0,
+    "config:package.json": 2,
+    "config:tsconfig.json": 0,
+    "config:docs/_config.yml": 0,
+    "document:docs/archify-findings-review-and-report-2026-11-26.md": 0,
+    "document:docs/index.md": 0,
+    "document:docs/release.md": 0,
+    "document:docs/upstream-issue-draft.md": 0,
+    "document:docs/upstream-ls-memoization.md": 0,
+    "document:docs/agents/domain.md": 0,
+    "document:docs/agents/issue-tracker.md": 0,
+    "document:docs/agents/triage-labels.md": 0,
+    "document:docs/agents/workspace.md": 0,
+    "config:tests/fixtures/contract/add-hostile.json": 0,
+    "config:tests/fixtures/contract/add.json": 0,
+    "config:tests/fixtures/contract/ls-empty.json": 0,
+    "config:tests/fixtures/contract/ls-global.json": 0,
+    "config:tests/fixtures/contract/ls-hostile.json": 0,
+    "config:tests/fixtures/contract/ls-project.json": 0,
+    "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md": 0,
+    "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md": 0,
+    "file:playwright.config.ts": 0,
+    "file:scripts/build.ts": 0,
+    "file:scripts/install.sh": 0,
+    "document:scripts/perf/report-2026-11-01-real.md": 0,
+    "document:scripts/perf/report-2026-11-01.md": 0,
+    "document:scripts/pty-smoke/README.md": 0,
+    "file:scripts/pty-smoke/bin/skills": 0,
+    "document:scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md": 0,
+    "document:scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md": 0,
+    "document:scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md": 0,
+    "config:scripts/pty-smoke/fixtures/ls-global-long.json": 0,
+    "config:scripts/pty-smoke/fixtures/ls-project.json": 0,
+    "file:scripts/pty-smoke/runner.py": 1,
+    "file:scripts/pty-smoke/skills-smoke-bin.ts": 0,
+    "file:scripts/pty-smoke/smoke.py": 0,
+    "file:scripts/verify-build-targets.ts": 0,
+    "file:src/core/filter.ts": 0,
+    "file:src/tui/spike.ts": 0,
+    "file:tests/e2e/hosted.e2e.ts": 0,
+    "document:tests/fixtures/contract/hostile-skill/SKILL.md": 0,
+    "file:tests/fixtures/skills-shim.mjs": 0,
+    "file:tests/fixtures/slow-skills-shim.mjs": 0,
+    "file:tests/image.test.ts": 0,
+    "file:tests/services.test.ts": 0
+  },
+  "fileFanOut": {
+    "file:src/core/api.ts": 10,
+    "file:src/core/hosted-auth.ts": 0,
+    "file:src/core/services/hooks.ts": 3,
+    "file:src/core/services/install.ts": 3,
+    "file:src/core/services/installed.ts": 4,
+    "file:src/core/services/locks.ts": 1,
+    "file:src/core/services/remove.ts": 3,
+    "file:src/core/services/sanitize.ts": 0,
+    "file:src/core/services/search.ts": 2,
+    "file:src/core/services/skill-doc.ts": 1,
+    "file:src/core/services/source.ts": 2,
+    "file:src/core/services/types.ts": 0,
+    "file:src/core/services/update.ts": 3,
+    "file:src/core/services/updates-check.ts": 2,
+    "file:src/core/skills-client.ts": 1,
+    "file:src/core/spawn-queue.ts": 0,
+    "file:tests/hosted-auth.test.ts": 1,
+    "file:tests/locks.test.ts": 3,
+    "file:tests/sanitize.test.ts": 1,
+    "file:tests/serve-hardening.test.ts": 3,
+    "file:src/core/disk-index.ts": 1,
+    "file:src/core/index.ts": 0,
+    "file:src/core/prefs.ts": 0,
+    "file:src/core/seed.ts": 0,
+    "file:src/core/theme.ts": 1,
+    "file:src/tui/Views.tsx": 8,
+    "file:src/tui/app.ts": 7,
+    "file:src/tui/art.ts": 1,
+    "file:src/tui/audio.ts": 1,
+    "file:src/tui/model.ts": 3,
+    "file:src/tui/renderer-ready.ts": 0,
+    "file:src/tui/three-scene.ts": 2,
+    "file:src/web/client/core.ts": 1,
+    "file:tests/filter-parity.test.ts": 4,
+    "file:tests/hooks-health.test.ts": 5,
+    "file:tests/selftest.test.ts": 2,
+    "file:tests/tui-disk-index.test.ts": 8,
+    "file:tests/tui.test.ts": 7,
+    "file:scripts/export-page.ts": 2,
+    "file:scripts/perf/budget.ts": 6,
+    "file:src/core/version.ts": 1,
+    "file:src/main.ts": 2,
+    "file:tests/api.test.ts": 4,
+    "file:tests/page-smoke.test.ts": 1,
+    "file:tests/perf/filter-dom.test.ts": 2,
+    "file:tests/perf/helpers.ts": 0,
+    "file:tests/perf/playwright-probes.ts": 0,
+    "file:tests/perf/search-stub.test.ts": 1,
+    "file:tests/perf/spawn-count.test.ts": 1,
+    "file:tests/version.test.ts": 2,
+    "file:tests/web-055.test.ts": 1,
+    "file:src/web/client/installed.ts": 0,
+    "file:src/web/client/search-and-boot.ts": 0,
+    "file:src/web/page.ts": 8,
+    "file:src/web/styles.ts": 0,
+    "file:tests/dash-sweep.test.ts": 1,
+    "file:tests/fixtures/audit-web-server.ts": 2,
+    "file:tests/markdown-render.test.ts": 1,
+    "file:tests/page-hardening.test.ts": 1,
+    "file:tests/terminology.test.ts": 1,
+    "file:tests/e2e/audit-remediation.e2e.ts": 2,
+    "file:tests/e2e/helpers/audit-fixture.ts": 1,
+    "file:tests/helpers/audit-state.ts": 0,
+    "file:tests/helpers/installer-fixture.ts": 1,
+    "file:tests/installer.test.ts": 1,
+    "pipeline:.github/workflows/claude-code-review.yml": 0,
+    "pipeline:.github/workflows/claude.yml": 0,
+    "document:AGENTS.md": 0,
+    "document:CONTEXT.md": 0,
+    "document:README.md": 0,
+    "document:ROADMAP.md": 0,
+    "config:mise.toml": 0,
+    "config:package.json": 0,
+    "config:tsconfig.json": 0,
+    "config:docs/_config.yml": 0,
+    "document:docs/archify-findings-review-and-report-2026-11-26.md": 0,
+    "document:docs/index.md": 0,
+    "document:docs/release.md": 0,
+    "document:docs/upstream-issue-draft.md": 0,
+    "document:docs/upstream-ls-memoization.md": 0,
+    "document:docs/agents/domain.md": 0,
+    "document:docs/agents/issue-tracker.md": 0,
+    "document:docs/agents/triage-labels.md": 0,
+    "document:docs/agents/workspace.md": 0,
+    "config:tests/fixtures/contract/add-hostile.json": 0,
+    "config:tests/fixtures/contract/add.json": 0,
+    "config:tests/fixtures/contract/ls-empty.json": 0,
+    "config:tests/fixtures/contract/ls-global.json": 0,
+    "config:tests/fixtures/contract/ls-hostile.json": 0,
+    "config:tests/fixtures/contract/ls-project.json": 0,
+    "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md": 0,
+    "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md": 0,
+    "file:playwright.config.ts": 0,
+    "file:scripts/build.ts": 0,
+    "file:scripts/install.sh": 0,
+    "document:scripts/perf/report-2026-11-01-real.md": 0,
+    "document:scripts/perf/report-2026-11-01.md": 0,
+    "document:scripts/pty-smoke/README.md": 0,
+    "file:scripts/pty-smoke/bin/skills": 0,
+    "document:scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md": 0,
+    "document:scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md": 0,
+    "document:scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md": 0,
+    "config:scripts/pty-smoke/fixtures/ls-global-long.json": 0,
+    "config:scripts/pty-smoke/fixtures/ls-project.json": 0,
+    "file:scripts/pty-smoke/runner.py": 0,
+    "file:scripts/pty-smoke/skills-smoke-bin.ts": 0,
+    "file:scripts/pty-smoke/smoke.py": 1,
+    "file:scripts/verify-build-targets.ts": 0,
+    "file:src/core/filter.ts": 0,
+    "file:src/tui/spike.ts": 0,
+    "file:tests/e2e/hosted.e2e.ts": 0,
+    "document:tests/fixtures/contract/hostile-skill/SKILL.md": 0,
+    "file:tests/fixtures/skills-shim.mjs": 0,
+    "file:tests/fixtures/slow-skills-shim.mjs": 0,
+    "file:tests/image.test.ts": 0,
+    "file:tests/services.test.ts": 0
+  },
+  "fileCatalog": [
+    {
+      "id": "file:src/core/api.ts",
+      "type": "file",
+      "filePath": "src/core/api.ts",
+      "subGroup": "src/core",
+      "filePattern": "code",
+      "fanIn": 3,
+      "fanOut": 10,
+      "tags": [
+        "http-api",
+        "bun-serve",
+        "security-gate",
+        "caching",
+        "core",
+        "tested"
+      ],
+      "summary": "Loopback HTTP API server built on Bun.serve that exposes skill listing, search, installation, removal, update, preferences, and health-check routes. Enforces host/origin allowlists, bearer authentication, cross-site fetch rejection, token-bucket rate limiting, request body limits, and per-server list/description caching."
+    },
+    {
+      "id": "file:src/core/hosted-auth.ts",
+      "type": "file",
+      "filePath": "src/core/hosted-auth.ts",
+      "subGroup": "src/core",
+      "filePattern": "code",
+      "fanIn": 3,
+      "fanOut": 0,
+      "tags": [
+        "authentication",
+        "cors",
+        "security",
+        "hosted-ui",
+        "core",
+        "tested"
+      ],
+      "summary": "Authentication and browser-boundary protection helpers for hosted WebUI access to the local API server. Provides stable bearer token persistence, constant-time bearer verification, DNS-rebinding Host checks, cross-site fetch detection, and CORS/preflight responses."
+    },
+    {
+      "id": "file:src/core/services/hooks.ts",
+      "type": "file",
+      "filePath": "src/core/services/hooks.ts",
+      "subGroup": "src/core/services",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 3,
+      "tags": [
+        "hooks",
+        "health-check",
+        "subprocess",
+        "caching",
+        "services",
+        "tested"
+      ],
+      "summary": "Manages user-configured external post-mutation hooks and health-check commands specified via SKILLS_UI_POST_MUTATION_HOOK and SKILLS_UI_HEALTH_CMD. Spawns executables in sanitized environments with timeouts, sanitizes output, and caches health-check results with in-flight deduplication."
+    },
+    {
+      "id": "file:src/core/services/install.ts",
+      "type": "file",
+      "filePath": "src/core/services/install.ts",
+      "subGroup": "src/core/services",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 3,
+      "tags": [
+        "install",
+        "skills-cli",
+        "sanitization",
+        "services",
+        "tested"
+      ],
+      "summary": "Service wrapper around `skills add --yes --json` for installing one, several, or all (`*`) skills from a source into project or global scope. Parses CLI JSON output and sanitizes all returned metadata fields at ingress."
+    },
+    {
+      "id": "file:src/core/services/installed.ts",
+      "type": "file",
+      "filePath": "src/core/services/installed.ts",
+      "subGroup": "src/core/services",
+      "filePattern": "code",
+      "fanIn": 1,
+      "fanOut": 4,
+      "tags": [
+        "installed-skills",
+        "provenance",
+        "skills-cli",
+        "services",
+        "tested"
+      ],
+      "summary": "Lists and looks up installed skills for project or global scope via `skills ls --json`. Enriches each skill with provenance classification (`linked`, `locked`, or `local`) using symlink inspection and lockfile membership while sanitizing display metadata."
+    },
+    {
+      "id": "file:src/core/services/locks.ts",
+      "type": "file",
+      "filePath": "src/core/services/locks.ts",
+      "subGroup": "src/core/services",
+      "filePattern": "code",
+      "fanIn": 5,
+      "fanOut": 1,
+      "tags": [
+        "lockfile",
+        "validation",
+        "diagnostics",
+        "filesystem",
+        "services",
+        "tested"
+      ],
+      "summary": "Read-only lockfile reader for project (`skills-lock.json`) and global XDG state (`.skill-lock.json` / `skills-lock.json`) lock files. Validates entries individually with per-entry diagnostics while raising InvalidLockFileError on container-level corruption."
+    },
+    {
+      "id": "file:src/core/services/remove.ts",
+      "type": "file",
+      "filePath": "src/core/services/remove.ts",
+      "subGroup": "src/core/services",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 3,
+      "tags": [
+        "remove",
+        "skills-cli",
+        "verification",
+        "services",
+        "tested"
+      ],
+      "summary": "Service wrapper around `skills rm -y [-g]` that verifies removal accuracy by diffing before- and after-installed skill lists. Supports injectable `listBefore`/`listAfter` callbacks so the HTTP API can reuse and refresh its per-server cache."
+    },
+    {
+      "id": "file:src/core/services/sanitize.ts",
+      "type": "file",
+      "filePath": "src/core/services/sanitize.ts",
+      "subGroup": "src/core/services",
+      "filePattern": "code",
+      "fanIn": 9,
+      "fanOut": 0,
+      "tags": [
+        "sanitization",
+        "ansi-stripping",
+        "security",
+        "cwe-150",
+        "services",
+        "tested"
+      ],
+      "summary": "CWE-150 terminal-escape and control-character scrubbing utilities applied at ingress for all external strings from the skills CLI, lockfiles, SKILL.md documents, and registry API."
+    },
+    {
+      "id": "file:src/core/services/search.ts",
+      "type": "file",
+      "filePath": "src/core/services/search.ts",
+      "subGroup": "src/core/services",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 2,
+      "tags": [
+        "registry-search",
+        "fuzzy-fallback",
+        "deduplication",
+        "http-client",
+        "services",
+        "tested"
+      ],
+      "summary": "Registry search client for skills.sh with in-flight request deduplication, ingress sanitization, and fuzzy fallback strategies including hyphenated-prefix gating, trailing-dash character fan-out, and progressive query shortening."
+    },
+    {
+      "id": "file:src/core/services/skill-doc.ts",
+      "type": "file",
+      "filePath": "src/core/services/skill-doc.ts",
+      "subGroup": "src/core/services",
+      "filePattern": "code",
+      "fanIn": 1,
+      "fanOut": 1,
+      "tags": [
+        "skill-doc",
+        "markdown",
+        "frontmatter",
+        "filesystem",
+        "services",
+        "tested"
+      ],
+      "summary": "Reads skill documentation (`SKILL.md`) from either a direct file path or skill directory, strips leading YAML frontmatter, and sanitizes the markdown body for safe rendering."
+    },
+    {
+      "id": "file:src/core/services/source.ts",
+      "type": "file",
+      "filePath": "src/core/services/source.ts",
+      "subGroup": "src/core/services",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 2,
+      "tags": [
+        "source-discovery",
+        "skills-cli",
+        "ansi-parsing",
+        "services",
+        "tested"
+      ],
+      "summary": "Discovers skills available in an external source by running `skills install <source> --list --yes` with `FORCE_COLOR=1` and parsing sanitized skill names from cyan ANSI spans."
+    },
+    {
+      "id": "file:src/core/services/types.ts",
+      "type": "file",
+      "filePath": "src/core/services/types.ts",
+      "subGroup": "src/core/services",
+      "filePattern": "code",
+      "fanIn": 13,
+      "fanOut": 0,
+      "tags": [
+        "types",
+        "domain-model",
+        "interfaces",
+        "services"
+      ],
+      "summary": "Shared domain type and interface definitions for scopes, skill provenance, mutation events, hook/health-check payloads, installed/search skills, add results, and update-check reports."
+    },
+    {
+      "id": "file:src/core/services/update.ts",
+      "type": "file",
+      "filePath": "src/core/services/update.ts",
+      "subGroup": "src/core/services",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 3,
+      "tags": [
+        "update",
+        "skills-cli",
+        "sanitization",
+        "services",
+        "tested"
+      ],
+      "summary": "Thin service wrapper around `skills update -p|-g -y [names]` that updates selected or all skills in a scope and sanitizes combined CLI output."
+    },
+    {
+      "id": "file:src/core/services/updates-check.ts",
+      "type": "file",
+      "filePath": "src/core/services/updates-check.ts",
+      "subGroup": "src/core/services",
+      "filePattern": "code",
+      "fanIn": 2,
+      "fanOut": 2,
+      "tags": [
+        "updates-check",
+        "github-api",
+        "lockfile",
+        "security",
+        "services",
+        "tested"
+      ],
+      "summary": "Read-only update checker that compares locked GitHub skill folder SHAs against live repository trees fetched from the GitHub Trees API. Enforces strict tree completeness checks, null-prototype result maps, per-entry lock diagnostics, and inconclusive-status reporting for truncated or missing folders."
+    },
+    {
+      "id": "file:src/core/skills-client.ts",
+      "type": "file",
+      "filePath": "src/core/skills-client.ts",
+      "subGroup": "src/core",
+      "filePattern": "code",
+      "fanIn": 11,
+      "fanOut": 1,
+      "tags": [
+        "skills-cli",
+        "subprocess",
+        "env-sanitization",
+        "spawn-queue",
+        "core",
+        "tested"
+      ],
+      "summary": "Subprocess client for the external `skills` CLI executable with runtime binary resolution, allowlist/denylist environment sanitization, serialized spawn-queue execution, timeout enforcement, and version probing."
+    },
+    {
+      "id": "file:src/core/spawn-queue.ts",
+      "type": "file",
+      "filePath": "src/core/spawn-queue.ts",
+      "subGroup": "src/core",
+      "filePattern": "code",
+      "fanIn": 2,
+      "fanOut": 0,
+      "tags": [
+        "spawn-queue",
+        "concurrency",
+        "semaphore",
+        "hardening",
+        "core",
+        "tested"
+      ],
+      "summary": "Bounded FIFO async semaphore that serializes `skills` CLI child processes and rejects overflow requests immediately with SkillsBusyError to defend against request storms."
+    },
+    {
+      "id": "file:tests/hosted-auth.test.ts",
+      "type": "file",
+      "filePath": "tests/hosted-auth.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 1,
+      "tags": [
+        "unit-test",
+        "integration-test",
+        "hosted-auth",
+        "cors",
+        "security"
+      ],
+      "summary": "Unit and HTTP integration test suite verifying hosted-UI bearer token generation/persistence, Host and Origin allowlists, CORS preflight behavior, token-free `/api/version` probing, and cross-origin bearer enforcement."
+    },
+    {
+      "id": "file:tests/locks.test.ts",
+      "type": "file",
+      "filePath": "tests/locks.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 3,
+      "tags": [
+        "unit-test",
+        "integration-test",
+        "lockfile",
+        "updates-check",
+        "security"
+      ],
+      "summary": "Test suite covering per-entry lockfile validation and diagnostics, container-level InvalidLockFileError 400 mapping on `/api/updates`, `__proto__` prototype safety, and strict GitHub tree completeness/inconclusive-result handling."
+    },
+    {
+      "id": "file:tests/sanitize.test.ts",
+      "type": "file",
+      "filePath": "tests/sanitize.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 1,
+      "tags": [
+        "unit-test",
+        "integration-test",
+        "sanitization",
+        "security",
+        "cwe-150"
+      ],
+      "summary": "Unit and end-to-end ingress sanitization tests confirming ANSI/C1 escape and control-character stripping across `stripEscapes`, `sanitizeMetadata`, `sanitizeBody`, CLI service wrappers (`ls`, `install --list`, `add`), and HTTP API responses."
+    },
+    {
+      "id": "file:tests/serve-hardening.test.ts",
+      "type": "file",
+      "filePath": "tests/serve-hardening.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 3,
+      "tags": [
+        "security-test",
+        "integration-test",
+        "hardening",
+        "rate-limiting",
+        "spawn-queue"
+      ],
+      "summary": "Hostile-input security and resilience test suite verifying timing-safe bearer matching, FIFO spawn-queue overflow (503), GitHub tree URL encoding/completeness, cross-site fetch-metadata rejection, argv/shape boundary validation, 1 MiB body caps, rate limiting, and slow-handler idle timeouts."
+    },
+    {
+      "id": "file:src/core/disk-index.ts",
+      "type": "file",
+      "filePath": "src/core/disk-index.ts",
+      "subGroup": "src/core",
+      "filePattern": "code",
+      "fanIn": 3,
+      "fanOut": 1,
+      "tags": [
+        "disk-cache",
+        "stale-while-revalidate",
+        "persistence",
+        "sanitization",
+        "tested"
+      ],
+      "summary": "Persists per-scope stale-while-revalidate caches of enriched installed skills to ~/.cache/skills-ui using atomic tmp-plus-rename writes and strict input sanitization. Partitions project-scope caches by SHA-256 hash and canonical projectRoot realpath while keeping global caches shared across projects."
+    },
+    {
+      "id": "file:src/core/index.ts",
+      "type": "file",
+      "filePath": "src/core/index.ts",
+      "subGroup": "src/core",
+      "filePattern": "entry",
+      "fanIn": 8,
+      "fanOut": 0,
+      "tags": [
+        "barrel-export",
+        "core-api",
+        "services"
+      ],
+      "summary": "Core barrel module that re-exports skill filtering, CLI subprocess helpers, installed/search/mutation/update/lock services, post-mutation hooks, and health checkers for TUI and web consumers."
+    },
+    {
+      "id": "file:src/core/prefs.ts",
+      "type": "file",
+      "filePath": "src/core/prefs.ts",
+      "subGroup": "src/core",
+      "filePattern": "code",
+      "fanIn": 11,
+      "fanOut": 0,
+      "tags": [
+        "preferences",
+        "configuration",
+        "persistence",
+        "migration",
+        "tested"
+      ],
+      "summary": "Manages persistent UI preferences (theme, sound, reduceMotion, port, listWidth) stored in ~/.config/skills-ui/prefs.json with schema normalization and one-time migration from the upstream skills CLI."
+    },
+    {
+      "id": "file:src/core/seed.ts",
+      "type": "file",
+      "filePath": "src/core/seed.ts",
+      "subGroup": "src/core",
+      "filePattern": "code",
+      "fanIn": 5,
+      "fanOut": 0,
+      "tags": [
+        "cli-parsing",
+        "ui-seed",
+        "startup-state",
+        "tested"
+      ],
+      "summary": "Parses CLI command arguments (add, update, remove and aliases) into a structured UiSeed describing which tab, query, or skill selections the UI should pre-populate on launch."
+    },
+    {
+      "id": "file:src/core/theme.ts",
+      "type": "file",
+      "filePath": "src/core/theme.ts",
+      "subGroup": "src/core",
+      "filePattern": "code",
+      "fanIn": 4,
+      "fanOut": 1,
+      "tags": [
+        "theming",
+        "catppuccin",
+        "wcag-contrast",
+        "ansi",
+        "syntax-highlighting",
+        "tested"
+      ],
+      "summary": "Defines Catppuccin Mocha and Latte color palettes, WCAG 2.x contrast calculations, AA-compliant semantic theme tokens, ANSI terminal color painters, and OpenTUI TextMate syntax highlighting themes."
+    },
+    {
+      "id": "file:src/tui/Views.tsx",
+      "type": "file",
+      "filePath": "src/tui/Views.tsx",
+      "subGroup": "src/tui",
+      "filePattern": "code",
+      "fanIn": 1,
+      "fanOut": 8,
+      "tags": [
+        "tui",
+        "react-views",
+        "opentui",
+        "ui-components",
+        "tested"
+      ],
+      "summary": "OpenTUI React view layer that subscribes to the Elm-style TuiModel store via useSyncExternalStore and renders the splash screen, header, installed/search/settings tabs, 3D graph host, footer, and animated overlays."
+    },
+    {
+      "id": "file:src/tui/app.ts",
+      "type": "file",
+      "filePath": "src/tui/app.ts",
+      "subGroup": "src/tui",
+      "filePattern": "code",
+      "fanIn": 4,
+      "fanOut": 7,
+      "tags": [
+        "tui-runtime",
+        "keyboard-controller",
+        "effects",
+        "stale-while-revalidate",
+        "tested"
+      ],
+      "summary": "Imperative TUI runtime orchestrating signal crash guards, real core service dependencies with scope list caching, Elm-store dispatch, SWR disk-index loading, debounced search, post-mutation hooks, and the full keyboard contract."
+    },
+    {
+      "id": "file:src/tui/art.ts",
+      "type": "file",
+      "filePath": "src/tui/art.ts",
+      "subGroup": "src/tui",
+      "filePattern": "code",
+      "fanIn": 1,
+      "fanOut": 1,
+      "tags": [
+        "procedural-art",
+        "native-image",
+        "identicon",
+        "tui",
+        "tested"
+      ],
+      "summary": "Generates procedural RGBA pixel art (startup splash gradient banner and deterministic 4x2 source identicon badges) using OpenTUI NativeImage and Catppuccin palettes so the binary ships zero image assets."
+    },
+    {
+      "id": "file:src/tui/audio.ts",
+      "type": "file",
+      "filePath": "src/tui/audio.ts",
+      "subGroup": "src/tui",
+      "filePattern": "code",
+      "fanIn": 2,
+      "fanOut": 1,
+      "tags": [
+        "audio-synth",
+        "pcm",
+        "opentui-audio",
+        "tui"
+      ],
+      "summary": "Synthesizes preference-gated UI feedback sounds (select, confirm, success, error) as 44.1 kHz f32le PCM sine envelopes streamed through OpenTUI's Audio engine with silent failure degradation."
+    },
+    {
+      "id": "file:src/tui/model.ts",
+      "type": "file",
+      "filePath": "src/tui/model.ts",
+      "subGroup": "src/tui",
+      "filePattern": "code",
+      "fanIn": 5,
+      "fanOut": 3,
+      "tags": [
+        "elm-architecture",
+        "state-machine",
+        "tui-model",
+        "pure-functions",
+        "tested"
+      ],
+      "summary": "Pure renderer-agnostic Elm-style state store for the TUI defining TuiModel, Action union, filtering/sorting projections, scope-isolated update-check records, and immutable state transitions."
+    },
+    {
+      "id": "file:src/tui/renderer-ready.ts",
+      "type": "file",
+      "filePath": "src/tui/renderer-ready.ts",
+      "subGroup": "src/tui",
+      "filePattern": "code",
+      "fanIn": 3,
+      "fanOut": 0,
+      "tags": [
+        "renderer-readiness",
+        "testing-utility",
+        "opentui",
+        "async-polling",
+        "tested"
+      ],
+      "summary": "Provides structural FrameDriver typing and bounded frame polling so in-memory renderer tests and --selftest wait deterministically for asynchronous React and tree-sitter frames instead of sleeping."
+    },
+    {
+      "id": "file:src/tui/three-scene.ts",
+      "type": "file",
+      "filePath": "src/tui/three-scene.ts",
+      "subGroup": "src/tui",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 2,
+      "tags": [
+        "3d-visualization",
+        "threejs",
+        "opentui-three",
+        "graph-layout",
+        "tested"
+      ],
+      "summary": "Builds and manages a per-renderer 3D Fibonacci-sphere skills graph using @opentui/three, coloring skill points by source hash and linking consecutive skills that share an agent."
+    },
+    {
+      "id": "file:src/web/client/core.ts",
+      "type": "file",
+      "filePath": "src/web/client/core.ts",
+      "subGroup": "src/web",
+      "filePattern": "code",
+      "fanIn": 1,
+      "fanOut": 1,
+      "tags": [
+        "web-client",
+        "browser-runtime",
+        "hosted-auth",
+        "webaudio",
+        "ui-state",
+        "tested"
+      ],
+      "summary": "Exports the CLIENT_CORE_JS browser runtime template string shared by the local and hosted web UI, implementing client state, sessionStorage-backed Bearer API calls, WebAudio sound synthesis, preference syncing, hosted backend probing, health popover controls, and unified button busy/disabled state management."
+    },
+    {
+      "id": "file:tests/filter-parity.test.ts",
+      "type": "file",
+      "filePath": "tests/filter-parity.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 4,
+      "tags": [
+        "unit-test",
+        "filter-parity",
+        "cross-surface",
+        "web-tui"
+      ],
+      "summary": "Cross-surface parity test suite proving that the web UI's skillMatches predicate and the TUI's visibleSkills pipeline return identical results across name, source, agent-only, and description queries, and that renderPage embeds the shared predicate."
+    },
+    {
+      "id": "file:tests/hooks-health.test.ts",
+      "type": "file",
+      "filePath": "tests/hooks-health.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 5,
+      "tags": [
+        "integration-test",
+        "hooks",
+        "health-check",
+        "provenance",
+        "api-security"
+      ],
+      "summary": "Integration test suite covering global lock file resolution, symlink/locked/local provenance classification, disk-index provenance persistence, env-var sanitization, post-mutation hook execution/timeouts, health checker TTL caching, and API auth/CORS enforcement."
+    },
+    {
+      "id": "file:tests/selftest.test.ts",
+      "type": "file",
+      "filePath": "tests/selftest.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 2,
+      "tags": [
+        "smoke-test",
+        "selftest",
+        "tree-sitter",
+        "opentui"
+      ],
+      "summary": "Smoke test suite verifying OpenTUI markdown/code tree-sitter rendering via buildSpikeScreen and waitForFrame, plus end-to-end execution of `src/main.ts --selftest`."
+    },
+    {
+      "id": "file:tests/tui-disk-index.test.ts",
+      "type": "file",
+      "filePath": "tests/tui-disk-index.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 8,
+      "tags": [
+        "integration-test",
+        "disk-cache",
+        "stale-while-revalidate",
+        "tui"
+      ],
+      "summary": "Unit and renderer integration tests for disk-index serialization, hostile-input immunity, canonical project-directory partitioning, stale cache sweeping, SWR instant painting, swap reconciliation, and mutation fresh-truth invariants."
+    },
+    {
+      "id": "file:tests/tui.test.ts",
+      "type": "file",
+      "filePath": "tests/tui.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 7,
+      "tags": [
+        "integration-test",
+        "unit-test",
+        "tui",
+        "keymap",
+        "rendering"
+      ],
+      "summary": "Comprehensive TUI test suite exercising in-memory rendering, keyboard contracts, search/queue workflows, double-press quit, scope-isolated update checks, crash guards, pure model reducers, procedural art badges, match highlighting, and health/provenance overlays."
+    },
+    {
+      "id": "file:scripts/export-page.ts",
+      "type": "file",
+      "filePath": "scripts/export-page.ts",
+      "subGroup": "scripts",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 2,
+      "tags": [
+        "build-script",
+        "static-export",
+        "hosted-webui",
+        "html-generator"
+      ],
+      "summary": "CLI build script that renders the hosted WebUI HTML via renderPage with hosted mode enabled and writes it to a target path (defaulting to docs/app.html)."
+    },
+    {
+      "id": "file:scripts/perf/budget.ts",
+      "type": "file",
+      "filePath": "scripts/perf/budget.ts",
+      "subGroup": "scripts",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 6,
+      "tags": [
+        "perf-harness",
+        "benchmark",
+        "playwright-probes",
+        "budget-report"
+      ],
+      "summary": "Performance budget harness that benchmarks API list/detail latency, search overhead and deduplication, filter matching, and Playwright browser probes against synthetic or real skill corpora, emitting a Markdown verdict report."
+    },
+    {
+      "id": "file:src/core/version.ts",
+      "type": "file",
+      "filePath": "src/core/version.ts",
+      "subGroup": "src/core",
+      "filePattern": "code",
+      "fanIn": 7,
+      "fanOut": 1,
+      "tags": [
+        "app-version",
+        "build-define",
+        "metadata",
+        "core",
+        "tested"
+      ],
+      "summary": "Exports the single source of truth APP_VERSION constant, preferring the bundle-time __APP_VERSION__ define in compiled binaries and falling back to package.json during development and tests."
+    },
+    {
+      "id": "file:src/main.ts",
+      "type": "file",
+      "filePath": "src/main.ts",
+      "subGroup": "src (root)",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 2,
+      "tags": [
+        "cli-entrypoint",
+        "mode-dispatch",
+        "tui",
+        "web-server",
+        "tested"
+      ],
+      "summary": "Primary CLI entrypoint for skills-ui that parses --port and dispatches between --version, --selftest, headless serve, interactive --web, and the default OpenTUI terminal application."
+    },
+    {
+      "id": "file:tests/api.test.ts",
+      "type": "file",
+      "filePath": "tests/api.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 4,
+      "tags": [
+        "api-tests",
+        "integration-test",
+        "cache-invalidation",
+        "http-validation"
+      ],
+      "summary": "Integration test suite for the loopback HTTP API covering version, skill listing, detail-by-path exact matching, search failure discrimination, install/remove/update validation, description cache invalidation across generations, prefs, CSP headers, and 413 body limits."
+    },
+    {
+      "id": "file:tests/page-smoke.test.ts",
+      "type": "file",
+      "filePath": "tests/page-smoke.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 1,
+      "tags": [
+        "playwright-test",
+        "webui-smoke",
+        "split-pane",
+        "ui-regression"
+      ],
+      "summary": "Playwright smoke test suite verifying live WebUI behaviors including checkbox clearing, conditional Update button visibility, icon-only header toggles, tri-state Select all, split-pane resizing and persistence, and unified Search/Install flows."
+    },
+    {
+      "id": "file:tests/perf/filter-dom.test.ts",
+      "type": "file",
+      "filePath": "tests/perf/filter-dom.test.ts",
+      "subGroup": "tests/perf",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 2,
+      "tags": [
+        "perf-test",
+        "playwright-test",
+        "dom-identity",
+        "css-animation"
+      ],
+      "summary": "Playwright behavioral performance tests pinning filter DOM row-identity preservation on same-result keystrokes, zero animation replay during filtering, and single-run entrance stagger on initial page load."
+    },
+    {
+      "id": "file:tests/perf/helpers.ts",
+      "type": "file",
+      "filePath": "tests/perf/helpers.ts",
+      "subGroup": "tests/perf",
+      "filePattern": "code",
+      "fanIn": 7,
+      "fanOut": 0,
+      "tags": [
+        "perf-helpers",
+        "synthetic-corpus",
+        "search-stub",
+        "spawn-log"
+      ],
+      "summary": "Shared performance harness utilities used by both perf tests and scripts/perf/budget.ts for generating synthetic SKILL.md corpora, parsing shim spawn logs, running a fixed-RTT search registry stub, and computing latency stats."
+    },
+    {
+      "id": "file:tests/perf/playwright-probes.ts",
+      "type": "file",
+      "filePath": "tests/perf/playwright-probes.ts",
+      "subGroup": "tests/perf",
+      "filePattern": "code",
+      "fanIn": 2,
+      "fanOut": 0,
+      "tags": [
+        "playwright-probes",
+        "perf-instrumentation",
+        "dom-observer",
+        "webui-testing"
+      ],
+      "summary": "Reusable Playwright browser instrumentation probes that observe filter render work, DOM identity preservation, animation replays, scope-switch first paint, and stale search overwrite behavior on the shipped WebUI."
+    },
+    {
+      "id": "file:tests/perf/search-stub.test.ts",
+      "type": "file",
+      "filePath": "tests/perf/search-stub.test.ts",
+      "subGroup": "tests/perf",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 1,
+      "tags": [
+        "perf-test",
+        "search-dedup",
+        "registry-stub",
+        "api-tests"
+      ],
+      "summary": "Behavioral performance tests verifying /api/search forwarding to SKILLS_UI_API_URL, single-call handling of sequential distinct queries, and in-flight deduplication of three concurrent identical searches."
+    },
+    {
+      "id": "file:tests/perf/spawn-count.test.ts",
+      "type": "file",
+      "filePath": "tests/perf/spawn-count.test.ts",
+      "subGroup": "tests/perf",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 1,
+      "tags": [
+        "perf-test",
+        "spawn-counting",
+        "request-coalescing",
+        "list-cache"
+      ],
+      "summary": "Count-based performance tests using SKILLS_SHIM_CALLLOG to verify per-server list caching, scope-keyed request coalescing, zero-spawn detail-by-path lookups, bounded remove spawns, and mutation cache invalidation."
+    },
+    {
+      "id": "file:tests/version.test.ts",
+      "type": "file",
+      "filePath": "tests/version.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 2,
+      "tags": [
+        "unit-test",
+        "app-version",
+        "semver"
+      ],
+      "summary": "Unit tests verifying that APP_VERSION falls back to package.json when __APP_VERSION__ is undefined and matches a 3- or 4-segment semver format."
+    },
+    {
+      "id": "file:tests/web-055.test.ts",
+      "type": "file",
+      "filePath": "tests/web-055.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 1,
+      "tags": [
+        "playwright-test",
+        "provenance-ui",
+        "health-popover",
+        "hook-toast"
+      ],
+      "summary": "Playwright UI tests verifying 0.5.5 WebUI features: provenance badges and #provRow filtering, non-locked remove confirmation warnings, post-mutation hook failure toasts, and the capability-gated health popover."
+    },
+    {
+      "id": "file:src/web/client/installed.ts",
+      "type": "file",
+      "filePath": "src/web/client/installed.ts",
+      "subGroup": "src/web",
+      "filePattern": "code",
+      "fanIn": 1,
+      "fanOut": 0,
+      "tags": [
+        "web-client",
+        "installed-skills",
+        "dom-reconciliation",
+        "markdown-renderer",
+        "skill-mutations",
+        "tested"
+      ],
+      "summary": "Builds the browser client JavaScript fragment managing the installed-skills list, debounced DOM-reusing row reconciliation, detail view, escape-first SKILL.md markdown renderer, and install/update/remove flows. Injects the transpiled shared skillMatches predicate so web filtering stays in exact parity with the TUI."
+    },
+    {
+      "id": "file:src/web/client/search-and-boot.ts",
+      "type": "file",
+      "filePath": "src/web/client/search-and-boot.ts",
+      "subGroup": "src/web",
+      "filePattern": "code",
+      "fanIn": 1,
+      "fanOut": 0,
+      "tags": [
+        "web-client",
+        "registry-search",
+        "install-queue",
+        "dom-bootstrap",
+        "keyboard-shortcuts",
+        "tested"
+      ],
+      "summary": "Exports the CLIENT_SEARCH_AND_BOOT_JS browser script fragment handling skills.sh registry search, source-sibling browsing, batch install queue execution, tab/scope switching, and keyboard/splitter event wiring. Completes the client IIFE by bootstrapping hosted-mode connection probing, legacy storage migration, and initial seed application on DOMContentLoaded."
+    },
+    {
+      "id": "file:src/web/page.ts",
+      "type": "file",
+      "filePath": "src/web/page.ts",
+      "subGroup": "src/web",
+      "filePattern": "code",
+      "fanIn": 8,
+      "fanOut": 8,
+      "tags": [
+        "web-page",
+        "html-renderer",
+        "csp-hardening",
+        "catppuccin-theme",
+        "single-file-ui",
+        "tested"
+      ],
+      "summary": "Assembles and renders the standalone single-file skills-ui HTML dashboard from Catppuccin theme tokens, APP_CSS, and the concatenated client JavaScript fragments (APP_JS). Computes deterministic SHA-256 hash-pinned Content-Security-Policy directives and exports renderPage, pageCspFor, APP_JS, skillMatches, and webPageRenderer."
+    },
+    {
+      "id": "file:src/web/styles.ts",
+      "type": "file",
+      "filePath": "src/web/styles.ts",
+      "subGroup": "src/web",
+      "filePattern": "code",
+      "fanIn": 1,
+      "fanOut": 0,
+      "tags": [
+        "stylesheet",
+        "css-tokens",
+        "responsive-layout",
+        "reduced-motion",
+        "web-ui",
+        "tested"
+      ],
+      "summary": "Exports the complete APP_CSS stylesheet for the skills-ui web dashboard built on Catppuccin CSS custom properties and a 4px spacing scale. Covers responsive split-pane layout, reduced-motion overrides, list/search cards, rendered SKILL.md typography, settings drawer, modals, and status toasts."
+    },
+    {
+      "id": "file:tests/dash-sweep.test.ts",
+      "type": "file",
+      "filePath": "tests/dash-sweep.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 1,
+      "tags": [
+        "copy-lint",
+        "lexer-test",
+        "typography-gate",
+        "web-tui-parity"
+      ],
+      "summary": "Enforces the Hallmark dash-sweep gate across web APP_JS and TUI source files (Views.tsx, app.ts, model.ts) so no en-dash, em-dash, Unicode escape, or HTML entity appears in user-facing runtime copy. Uses a comment- and regex-aware single-pass lexer plus JSX text extraction and asserts against vacuous passes."
+    },
+    {
+      "id": "file:tests/fixtures/audit-web-server.ts",
+      "type": "file",
+      "filePath": "tests/fixtures/audit-web-server.ts",
+      "subGroup": "tests/fixtures",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 2,
+      "tags": [
+        "test-fixture",
+        "audit-server",
+        "loopback-origin",
+        "subprocess"
+      ],
+      "summary": "Minimal subprocess fixture that boots createSkillsUiServer with webPageRenderer enabled and rate limiting disabled for Playwright and audit tests. Prints the bound loopback origin as a JSON-tagged AUDIT_ORIGIN line and exits cleanly on SIGTERM."
+    },
+    {
+      "id": "file:tests/markdown-render.test.ts",
+      "type": "file",
+      "filePath": "tests/markdown-render.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 1,
+      "tags": [
+        "markdown-test",
+        "xss-defense",
+        "shipped-bytes",
+        "web-unit-test"
+      ],
+      "summary": "Verifies the shipped browser renderMarkdown implementation extracted directly from renderPage's emitted APP_JS script block. Covers the supported SKILL.md markdown subset, non-navigating link rendering, hostile XSS/HTML-breakout escaping invariants, zero raw backticks, and byte-identical render determinism."
+    },
+    {
+      "id": "file:tests/page-hardening.test.ts",
+      "type": "file",
+      "filePath": "tests/page-hardening.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 1,
+      "tags": [
+        "security-test",
+        "csp-verification",
+        "xss-prevention",
+        "session-storage"
+      ],
+      "summary": "Tests web page security hardening invariants including SHA-256 hash-pinned CSP without script unsafe-inline, </script>-safe bootstrap JSON escaping, sessionStorage token persistence with legacy localStorage migration, and Node syntax validation of emitted APP_JS. Also spins up createSkillsUiServer to verify CSP, nosniff, and no-referrer response headers on GET /."
+    },
+    {
+      "id": "file:tests/terminology.test.ts",
+      "type": "file",
+      "filePath": "tests/terminology.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 1,
+      "tags": [
+        "terminology-test",
+        "copy-regression",
+        "web-tui-parity",
+        "ux-consistency"
+      ],
+      "summary": "Asserts ratified 0.5.2 UI terminology across both the TUI source files (Views.tsx, app.ts) and the rendered web dashboard HTML. Ensures the queue is named 'install list', destructive actions use 'remove' instead of 'delete', and confirm prompts match bound cancel keys."
+    },
+    {
+      "id": "file:tests/e2e/audit-remediation.e2e.ts",
+      "type": "file",
+      "filePath": "tests/e2e/audit-remediation.e2e.ts",
+      "subGroup": "tests/e2e",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 2,
+      "tags": [
+        "playwright",
+        "e2e-tests",
+        "audit-remediation",
+        "race-conditions",
+        "web-ui"
+      ],
+      "summary": "Playwright end-to-end regression suite verifying web UI audit-remediation invariants against the real audit backend and stubbed API routes. Covers batch install scope capture, wildcard seed installs, stale list/detail/update-check race guards, composite busy-state button locking, keyboard checkbox accessibility, and responsive search-card layout."
+    },
+    {
+      "id": "file:tests/e2e/helpers/audit-fixture.ts",
+      "type": "file",
+      "filePath": "tests/e2e/helpers/audit-fixture.ts",
+      "subGroup": "tests/e2e",
+      "filePattern": "code",
+      "fanIn": 1,
+      "fanOut": 1,
+      "tags": [
+        "playwright",
+        "test-helper",
+        "e2e-fixture",
+        "web-server"
+      ],
+      "summary": "Playwright test harness helpers for the audit-remediation e2e suite. Manages spawning and stopping the local audit web server subprocess, opening route-stubbed browser pages with pageerror tracking, building fixture skill rows, and settling browser responses across animation frames."
+    },
+    {
+      "id": "file:tests/helpers/audit-state.ts",
+      "type": "file",
+      "filePath": "tests/helpers/audit-state.ts",
+      "subGroup": "tests/helpers",
+      "filePattern": "code",
+      "fanIn": 7,
+      "fanOut": 0,
+      "tags": [
+        "test-helper",
+        "workspace-fixture",
+        "env-isolation",
+        "deferred-promise"
+      ],
+      "summary": "Shared test-state utilities providing deferred promise gates and isolated temporary workspace fixtures. Configures sandboxed environment variables pointing at the skills CLI shim, temporary prefs/cache/XDG directories, and a dead API port to prevent real host side effects."
+    },
+    {
+      "id": "file:tests/helpers/installer-fixture.ts",
+      "type": "file",
+      "filePath": "tests/helpers/installer-fixture.ts",
+      "subGroup": "tests/helpers",
+      "filePattern": "code",
+      "fanIn": 1,
+      "fanOut": 1,
+      "tags": [
+        "installer-fixture",
+        "shell-shims",
+        "fault-injection",
+        "test-helper"
+      ],
+      "summary": "Builds a hermetic sandbox fixture for testing scripts/install.sh without network access or modifying host directories. Generates fake uname, curl, and chmod shims plus SHA-256 checksum payloads with fault-injection flags."
+    },
+    {
+      "id": "file:tests/installer.test.ts",
+      "type": "file",
+      "filePath": "tests/installer.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 1,
+      "tags": [
+        "bun-test",
+        "installer",
+        "shell-script-tests",
+        "atomic-install"
+      ],
+      "summary": "Bun integration test suite for scripts/install.sh verifying atomic binary installation and rollback safety. Exercises successful installation, chmod failure, SHA-256 checksum mismatch, and interrupted downloads to confirm old executables stay intact and temporary files are swept."
+    },
+    {
+      "id": "pipeline:.github/workflows/claude-code-review.yml",
+      "type": "pipeline",
+      "filePath": ".github/workflows/claude-code-review.yml",
+      "subGroup": ".github/workflows",
+      "filePattern": "ci-cd",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "github-actions",
+        "ci-workflow",
+        "code-review",
+        "claude-code",
+        "pull-request"
+      ],
+      "summary": "GitHub Actions workflow ('Claude Code Review') triggered on pull request opened, synchronize, ready_for_review, and reopened events. Checks out the repository and runs anthropics/claude-code-action@v1 with the code-review plugin and inline-comment MCP tool authenticated via CLAUDE_CODE_OAUTH_TOKEN."
+    },
+    {
+      "id": "pipeline:.github/workflows/claude.yml",
+      "type": "pipeline",
+      "filePath": ".github/workflows/claude.yml",
+      "subGroup": ".github/workflows",
+      "filePattern": "ci-cd",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "github-actions",
+        "ci-workflow",
+        "claude-code",
+        "issue-automation",
+        "mention-trigger"
+      ],
+      "summary": "GitHub Actions workflow ('Claude Code') triggered when @claude is mentioned in issue comments, PR review comments, PR reviews, or issue titles and bodies. Checks out the repository and runs anthropics/claude-code-action@v1 with read access to contents, pull requests, issues, and CI actions."
+    },
+    {
+      "id": "document:AGENTS.md",
+      "type": "document",
+      "filePath": "AGENTS.md",
+      "subGroup": "root",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "agent-contract",
+        "repository-guide",
+        "environment-variables",
+        "workflow-rules",
+        "documentation"
+      ],
+      "summary": "Repository-level agent contract for skills-ui defining architecture layout, SKILLS_UI_* environment variables, development commands, git worktree workflow, Linear planning rules, and documentation authority. Routes agents to domain, issue-tracker, and triage-label guidance under docs/agents/."
+    },
+    {
+      "id": "document:CONTEXT.md",
+      "type": "document",
+      "filePath": "CONTEXT.md",
+      "subGroup": "root",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "domain-glossary",
+        "ubiquitous-language",
+        "ui-terminology",
+        "provenance",
+        "documentation"
+      ],
+      "summary": "Canonical domain glossary for skills-ui establishing ubiquitous terminology across the WebUI and TUI surfaces. Defines layout containers (Frame, Filter List Panel, Detail Panel), Filter List Card anatomy, Skill Provenance, Post-Mutation Hook, and Health Pill along with terms to avoid."
+    },
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "filePath": "README.md",
+      "subGroup": "root",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "readme",
+        "project-overview",
+        "installation",
+        "cli-usage",
+        "documentation"
+      ],
+      "summary": "Primary user and contributor documentation introducing skills-ui as a single-binary Bun wrapper for the skills CLI across OpenTUI, local WebUI, headless serve API, and hosted GitHub Pages modes. Details v0.5.3 performance benchmarks, checksum-verified curl installation via scripts/install.sh, CLI usage, development commands, and MIT licensing."
+    },
+    {
+      "id": "document:ROADMAP.md",
+      "type": "document",
+      "filePath": "ROADMAP.md",
+      "subGroup": "root",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "roadmap",
+        "milestones",
+        "release-history",
+        "architecture-decisions",
+        "documentation"
+      ],
+      "summary": "Milestone ledger and forward roadmap for skills-ui (versioned 0.x.y indefinitely), mirroring the canonical Linear Roadmap from v0.0.x through v0.5.5 and unversioned future goals. Records ratified Hosted UI decisions and guardrails, the v0.5.1-v0.5.3 hardening series, split-pane ergonomics, and hub integration milestones."
+    },
+    {
+      "id": "config:mise.toml",
+      "type": "config",
+      "filePath": "mise.toml",
+      "subGroup": "root",
+      "filePattern": "config",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "mise-config",
+        "toolchain-pin",
+        "bun-runtime",
+        "dev-environment"
+      ],
+      "summary": "Minimal mise toolchain configuration pinning the project's Bun runtime to version 1.4.4 for reproducible local development, test runs, and binary compilation."
+    },
+    {
+      "id": "config:package.json",
+      "type": "config",
+      "filePath": "package.json",
+      "subGroup": "root",
+      "filePattern": "config",
+      "fanIn": 2,
+      "fanOut": 0,
+      "tags": [
+        "package-manifest",
+        "npm-scripts",
+        "dependencies",
+        "opentui",
+        "bun-config"
+      ],
+      "summary": "ESM package manifest for skills-ui v0.5.5 declaring the Bun >=1.4 engine requirement, OpenTUI and React 19 runtime dependencies (including local vendor @opentui/three), and Playwright/Bun devDependencies. Defines scripts for dev, selftest, test, build, export:page, pty-smoke, and perf:budget."
+    },
+    {
+      "id": "config:tsconfig.json",
+      "type": "config",
+      "filePath": "tsconfig.json",
+      "subGroup": "root",
+      "filePattern": "config",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "typescript-config",
+        "compiler-options",
+        "strict-mode",
+        "bun-types"
+      ],
+      "summary": "Strict TypeScript compiler configuration targeting ESNext modules with bundler module resolution, Bun ambient types, noUncheckedIndexedAccess, verbatimModuleSyntax, and noEmit typechecking across src, tests, and scripts."
+    },
+    {
+      "id": "config:docs/_config.yml",
+      "type": "config",
+      "filePath": "docs/_config.yml",
+      "subGroup": "docs",
+      "filePattern": "config",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "jekyll-config",
+        "github-pages",
+        "just-the-docs",
+        "documentation-site",
+        "yaml-config"
+      ],
+      "summary": "Jekyll site configuration for the skills-ui GitHub Pages documentation site published at https://s-a-c.github.io/skills-ui. Configures the just-the-docs remote theme, jekyll-remote-theme plugin, default page layout, and GitHub repository and release navigation links."
+    },
+    {
+      "id": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "type": "document",
+      "filePath": "docs/archify-findings-review-and-report-2026-11-26.md",
+      "subGroup": "docs",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "archify-report",
+        "architecture-audit",
+        "refactoring-record",
+        "complexity-remediation",
+        "code-analysis"
+      ],
+      "summary": "Full review and remediation transcript documenting 18 Archify static-analysis findings and the three-wave Option A refactoring on phase/archify-remediation. Details decoupling src/core from src/web via PageRenderer injection and src/core/filter.ts, decomposing high-complexity hotspots across TUI, API, and benchmark modules, and modularizing src/web/page.ts into styles and client chunks."
+    },
+    {
+      "id": "document:docs/index.md",
+      "type": "document",
+      "filePath": "docs/index.md",
+      "subGroup": "docs",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "documentation-home",
+        "github-pages",
+        "installation-guide",
+        "cli-overview",
+        "getting-started"
+      ],
+      "summary": "GitHub Pages home page (nav_order 1) introducing skills-ui, its single-binary install methods, CLI invocation modes (--web, serve, --selftest), and hosted web UI. Links users and contributors to the roadmap and repository agent-convention pages."
+    },
+    {
+      "id": "document:docs/release.md",
+      "type": "document",
+      "filePath": "docs/release.md",
+      "subGroup": "docs",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "release-runbook",
+        "checksum-verification",
+        "build-matrix",
+        "signed-tags",
+        "deployment-guide"
+      ],
+      "summary": "Step-by-step release runbook for skills-ui v0.5.1+ covering cross-platform Bun dependency setup, test and PTY smoke gates, matrix compilation, signed-tag checksum manifests, GitHub Release publishing, and hosted page export. Verifies end-to-end installer checksum enforcement against committed tag manifests."
+    },
+    {
+      "id": "document:docs/upstream-issue-draft.md",
+      "type": "document",
+      "filePath": "docs/upstream-issue-draft.md",
+      "subGroup": "docs",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "upstream-bug-report",
+        "performance-investigation",
+        "skills-cli",
+        "issue-draft",
+        "io-profiling"
+      ],
+      "summary": "Ready-to-file upstream bug report draft for vercel-labs/skills documenting O(canonical × corpus) SKILL.md re-parsing in skills ls v1.7.4 that stalls listings for ~60 seconds. Includes bisection timings, duplicate warning evidence, sample(1) I/O profile, #1389 cross-reference, and memoization and indexing fix proposals."
+    },
+    {
+      "id": "document:docs/upstream-ls-memoization.md",
+      "type": "document",
+      "filePath": "docs/upstream-ls-memoization.md",
+      "subGroup": "docs",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "performance-memo",
+        "upstream-issue",
+        "skills-cli",
+        "request-coalescing",
+        "caching-mitigation"
+      ],
+      "summary": "Source performance memo (S-153, filed as vercel-labs/skills#2644) analyzing why skills ls re-parses SKILL.md files per agent directory and documenting downstream mitigations in skills-ui. Details per-scope list caching, in-flight spawn coalescing, mutation invalidation, and cached pre-removal reuse."
+    },
+    {
+      "id": "document:docs/agents/domain.md",
+      "type": "document",
+      "filePath": "docs/agents/domain.md",
+      "subGroup": "docs/agents",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "agent-conventions",
+        "domain-modeling",
+        "glossary-rules",
+        "adr-guidance",
+        "skill-routing"
+      ],
+      "summary": "Agent convention guide specifying how engineering skills discover and apply repository domain documentation (CONTEXT.md and docs/adr/). Requires consistent use of glossary vocabulary, silent progression when optional files are absent, and explicit flagging of ADR conflicts."
+    },
+    {
+      "id": "document:docs/agents/issue-tracker.md",
+      "type": "document",
+      "filePath": "docs/agents/issue-tracker.md",
+      "subGroup": "docs/agents",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "agent-conventions",
+        "linear-tracker",
+        "issue-workflow",
+        "wayfinder-process",
+        "skill-routing"
+      ],
+      "summary": "Issue-tracking routing guide binding skills-ui to the Linear project P-S-4 (team S-a-c) via Linear MCP tools rather than GitHub Issues. Defines milestone attachment, Wayfinder map and child-issue workflow conventions, and Linear document alignment with ROADMAP.md."
+    },
+    {
+      "id": "document:docs/agents/triage-labels.md",
+      "type": "document",
+      "filePath": "docs/agents/triage-labels.md",
+      "subGroup": "docs/agents",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "agent-conventions",
+        "triage-labels",
+        "linear-tracker",
+        "issue-triage",
+        "skill-routing"
+      ],
+      "summary": "Triage label mapping table translating five canonical skill triage roles (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix) to Linear workspace label strings in the s-a-c workspace."
+    },
+    {
+      "id": "document:docs/agents/workspace.md",
+      "type": "document",
+      "filePath": "docs/agents/workspace.md",
+      "subGroup": "docs/agents",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "workspace-contract",
+        "multi-worktree",
+        "agent-instructions",
+        "dox-hierarchy",
+        "git-topology"
+      ],
+      "summary": "Workspace-level agent contract (canonical source symlinked as root AGENTS.md) defining instruction priority, multi-worktree git topology around .bare/ and main/, retained audit worktrees, and SKILLS_UI_ environment-variable conventions. Routes planning to Linear project P-S-4 and repo-local agent conventions to main/docs/agents/."
+    },
+    {
+      "id": "config:tests/fixtures/contract/add-hostile.json",
+      "type": "config",
+      "filePath": "tests/fixtures/contract/add-hostile.json",
+      "subGroup": "tests/fixtures",
+      "filePattern": "config",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "contract-fixture",
+        "json-fixture",
+        "sanitization",
+        "skills-add"
+      ],
+      "summary": "Contract JSON fixture simulating hostile skills add --json output with ANSI SGR/OSC escape sequences, NUL bytes, and mixed installed and failed entries. Used by tests/sanitize.test.ts via SKILLS_SHIM_ADD to verify that install ingress strips terminal escape sequences and control characters."
+    },
+    {
+      "id": "config:tests/fixtures/contract/add.json",
+      "type": "config",
+      "filePath": "tests/fixtures/contract/add.json",
+      "subGroup": "tests/fixtures",
+      "filePattern": "config",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "contract-fixture",
+        "json-fixture",
+        "skills-add",
+        "test-shim"
+      ],
+      "summary": "Default contract JSON fixture for skills add --json output containing one installed skill entry (alpha) and one failed skill entry (beta). Loaded by tests/fixtures/skills-shim.mjs to exercise install result parsing and partial-failure reporting."
+    },
+    {
+      "id": "config:tests/fixtures/contract/ls-empty.json",
+      "type": "config",
+      "filePath": "tests/fixtures/contract/ls-empty.json",
+      "subGroup": "tests/fixtures",
+      "filePattern": "config",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "contract-fixture",
+        "json-fixture",
+        "empty-state",
+        "skills-ls"
+      ],
+      "summary": "Empty JSON array contract fixture representing a skills ls --json response with zero installed skills. Used by tests/e2e/hosted.e2e.ts via SKILLS_SHIM_LS_PROJECT to verify hosted UI empty-state rendering and behavior."
+    },
+    {
+      "id": "config:tests/fixtures/contract/ls-global.json",
+      "type": "config",
+      "filePath": "tests/fixtures/contract/ls-global.json",
+      "subGroup": "tests/fixtures",
+      "filePattern": "config",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "contract-fixture",
+        "json-fixture",
+        "global-scope",
+        "skills-ls"
+      ],
+      "summary": "Empty JSON array contract fixture serving as the default global-scope skills ls --json response. Loaded by tests/fixtures/skills-shim.mjs when testing global-scope skill listing and filtering."
+    },
+    {
+      "id": "config:tests/fixtures/contract/ls-hostile.json",
+      "type": "config",
+      "filePath": "tests/fixtures/contract/ls-hostile.json",
+      "subGroup": "tests/fixtures",
+      "filePattern": "config",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "contract-fixture",
+        "json-fixture",
+        "sanitization",
+        "skills-ls"
+      ],
+      "summary": "Contract JSON fixture simulating hostile skills ls --json payloads containing ANSI CSI/OSC/C1 escapes, BEL/NUL controls, non-string field types, and a reference to tests/fixtures/contract/hostile-skill. Used by tests/sanitize.test.ts via SKILLS_SHIM_LS_PROJECT to verify end-to-end installed-skill sanitization."
+    },
+    {
+      "id": "config:tests/fixtures/contract/ls-project.json",
+      "type": "config",
+      "filePath": "tests/fixtures/contract/ls-project.json",
+      "subGroup": "tests/fixtures",
+      "filePattern": "config",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "contract-fixture",
+        "json-fixture",
+        "project-scope",
+        "skills-ls"
+      ],
+      "summary": "Default contract JSON fixture for project-scope skills ls --json output containing two skills (tdd with null source and code-review from anthropics/skills on GitHub). Consumed by tests/fixtures/skills-shim.mjs, tests/fixtures/slow-skills-shim.mjs, and tests/perf/spawn-count.test.ts to test installed-skill mapping and cache-population spawn counts."
+    },
+    {
+      "id": "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "type": "document",
+      "filePath": "docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "subGroup": "docs/designs",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "design-doc",
+        "ui-ergonomics",
+        "split-pane",
+        "tui-parity"
+      ],
+      "summary": "Design specification for skills-ui v0.5.4.1 unifying list-card checkbox layout, proportional 10%-50% list-panel width preferences with legacy pixel migration, and WebUI/TUI split-pane search and 3-mode sort parity. Maps goals, CUJs, and alternatives directly to target files across core preferences, WebUI, TUI, and test suites."
+    },
+    {
+      "id": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "type": "document",
+      "filePath": "docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "subGroup": "docs/designs",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "design-doc",
+        "provenance",
+        "health-check",
+        "hooks"
+      ],
+      "summary": "Design specification for skills-ui v0.5.5 covering .skill-lock.json global lock resolution, locked/linked/local skill provenance guardrails, env-only post-mutation hooks, and the read-only header health check pill. Documents ratified decisions (S-313) and strict OSS/personal-hub separation."
+    },
+    {
+      "id": "file:playwright.config.ts",
+      "type": "file",
+      "filePath": "playwright.config.ts",
+      "subGroup": "root",
+      "filePattern": "config",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "playwright",
+        "e2e-config",
+        "testing"
+      ],
+      "summary": "Playwright Test configuration targeting tests/e2e/**/*.e2e.ts with single-worker serial execution, 30-second timeouts, and list reporting. Keeps Playwright e2e specs separated from Bun's native test runner."
+    },
+    {
+      "id": "file:scripts/build.ts",
+      "type": "file",
+      "filePath": "scripts/build.ts",
+      "subGroup": "scripts",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "build-script",
+        "bun-compile",
+        "release-artifacts",
+        "checksums"
+      ],
+      "summary": "Cross-platform build script that compiles src/main.ts into standalone Bun executables for darwin-arm64, darwin-x64, linux-x64, and linux-arm64 with embedded __APP_VERSION__ and macOS JIT entitlements codesigning. Prunes stale versioned binaries from dist/ and generates the SHA-256 checksums manifest."
+    },
+    {
+      "id": "file:scripts/install.sh",
+      "type": "file",
+      "filePath": "scripts/install.sh",
+      "subGroup": "scripts",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "installer",
+        "shell-script",
+        "checksum-verification",
+        "release",
+        "tested"
+      ],
+      "summary": "POSIX shell installer that detects OS and CPU architecture, downloads the versioned skills-ui release binary, verifies its SHA-256 checksum against the tag-committed manifest (with release-asset fallback), and atomically installs it into SKILLS_UI_INSTALL_DIR. Fails closed on unsupported platforms or checksum mismatches without clobbering an existing executable."
+    },
+    {
+      "id": "document:scripts/perf/report-2026-11-01-real.md",
+      "type": "document",
+      "filePath": "scripts/perf/report-2026-11-01-real.md",
+      "subGroup": "scripts",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "performance",
+        "benchmark-report",
+        "real-corpus"
+      ],
+      "summary": "Performance budget benchmark report generated by the S-177 harness against a real machine corpus of 1 project and 300 global skills. Records cold/warm API latency, search deduplication, filter DOM identity preservation, and the cold global first-paint baseline."
+    },
+    {
+      "id": "document:scripts/perf/report-2026-11-01.md",
+      "type": "document",
+      "filePath": "scripts/perf/report-2026-11-01.md",
+      "subGroup": "scripts",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "performance",
+        "benchmark-report",
+        "synthetic-baseline"
+      ],
+      "summary": "Synthetic performance budget baseline report generated by the S-177 harness against 390 project and 40 global skills-shim fixtures. Captures initial BUDGET-MISS baselines for concurrent search deduplication, filter DOM rebuilds, animation replays, and stale search overwrite behavior."
+    },
+    {
+      "id": "document:scripts/pty-smoke/README.md",
+      "type": "document",
+      "filePath": "scripts/pty-smoke/README.md",
+      "subGroup": "scripts",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "documentation",
+        "pty-smoke",
+        "tui-testing"
+      ],
+      "summary": "Documentation for the real-terminal PTY smoke harness (S-95) explaining how to run smoke.py with pyte, the role of each harness file, and terminal-testing pitfalls such as os.execvpe environment passing, key pacing, and TIOCSWINSZ sizing."
+    },
+    {
+      "id": "file:scripts/pty-smoke/bin/skills",
+      "type": "file",
+      "filePath": "scripts/pty-smoke/bin/skills",
+      "subGroup": "scripts",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "path-shim",
+        "shell-wrapper",
+        "pty-smoke"
+      ],
+      "summary": "Relocatable POSIX shell PATH shim placed in scripts/pty-smoke/bin that delegates all skills CLI invocations via bun run to scripts/pty-smoke/skills-smoke-bin.ts. Ensures the PTY smoke harness intercepts skills lookups reliably without relying on environment-variable binary overrides."
+    },
+    {
+      "id": "document:scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "type": "document",
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "subGroup": "scripts",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "test-fixture",
+        "skill-doc",
+        "pty-smoke"
+      ],
+      "summary": "Multi-paragraph fixture SKILL.md document for skill-001 used by the PTY smoke harness to provide scrollable markdown height in the TUI detail pane."
+    },
+    {
+      "id": "document:scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "type": "document",
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "subGroup": "scripts",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "test-fixture",
+        "skill-doc",
+        "pty-smoke"
+      ],
+      "summary": "Multi-paragraph fixture SKILL.md document for skill-002 used by the PTY smoke harness to exercise TUI detail-pane markdown rendering and scrolling."
+    },
+    {
+      "id": "document:scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "type": "document",
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "subGroup": "scripts",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "test-fixture",
+        "skill-doc",
+        "pty-smoke"
+      ],
+      "summary": "Multi-paragraph fixture SKILL.md document for skill-003 used by the PTY smoke harness to exercise TUI detail-pane markdown rendering and scrolling."
+    },
+    {
+      "id": "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "type": "config",
+      "filePath": "scripts/pty-smoke/fixtures/ls-global-long.json",
+      "subGroup": "scripts",
+      "filePattern": "config",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "json-fixture",
+        "pty-smoke",
+        "global-skills"
+      ],
+      "summary": "JSON fixture listing 120 global skills for the PTY smoke harness, testing large-list scrolling, END/HOME/PgDn cursor following, and live filtering in a real terminal."
+    },
+    {
+      "id": "config:scripts/pty-smoke/fixtures/ls-project.json",
+      "type": "config",
+      "filePath": "scripts/pty-smoke/fixtures/ls-project.json",
+      "subGroup": "scripts",
+      "filePattern": "config",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "json-fixture",
+        "pty-smoke",
+        "project-skills"
+      ],
+      "summary": "Two-entry project-scope skills JSON fixture (tdd and code-review) returned by skills-smoke-bin.ts at TUI startup before switching to the 120-skill global scope."
+    },
+    {
+      "id": "file:scripts/pty-smoke/runner.py",
+      "type": "file",
+      "filePath": "scripts/pty-smoke/runner.py",
+      "subGroup": "scripts",
+      "filePattern": "code",
+      "fanIn": 1,
+      "fanOut": 0,
+      "tags": [
+        "python",
+        "pty-runner",
+        "pyte",
+        "tui-testing"
+      ],
+      "summary": "Python PTY test runner (S-95) providing the PtyApp class to fork skills-ui inside a real pseudoterminal, reconstruct screen rows with pyte, and feed paced keystrokes and mouse events."
+    },
+    {
+      "id": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "type": "file",
+      "filePath": "scripts/pty-smoke/skills-smoke-bin.ts",
+      "subGroup": "scripts",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "cli-shim",
+        "pty-smoke",
+        "fixture-loader"
+      ],
+      "summary": "Minimal env-proof skills CLI stand-in for the PTY smoke harness that responds to --version and ls --json [-g] by serving fixture files resolved relative to its own module directory."
+    },
+    {
+      "id": "file:scripts/pty-smoke/smoke.py",
+      "type": "file",
+      "filePath": "scripts/pty-smoke/smoke.py",
+      "subGroup": "scripts",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 1,
+      "tags": [
+        "pty-smoke",
+        "tui-e2e",
+        "python",
+        "terminal-assertions"
+      ],
+      "summary": "Real-terminal PTY smoke test suite driving src/main.ts via PtyApp and asserting frame integrity, global-scope transitions, END/HOME/PgDn cursor following, mouse clicks, live filtering, and registry search paging against a local HTTP fixture server."
+    },
+    {
+      "id": "file:scripts/verify-build-targets.ts",
+      "type": "file",
+      "filePath": "scripts/verify-build-targets.ts",
+      "subGroup": "scripts",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "build-verification",
+        "checksums",
+        "binary-formats"
+      ],
+      "summary": "Post-build verification script that inspects all four compiled binaries in dist/ with the file utility to confirm Mach-O/ELF target architectures and asserts every binary's SHA-256 digest matches checksums-<version>.txt."
+    },
+    {
+      "id": "file:src/core/filter.ts",
+      "type": "file",
+      "filePath": "src/core/filter.ts",
+      "subGroup": "src/core",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "core-logic",
+        "filtering",
+        "cross-surface-parity",
+        "tested"
+      ],
+      "summary": "Defines the shared installed-skill filter predicate (F1 filter parity, S-164) consumed by both the TUI model and the inlined WebUI client script. Enforces template-literal-safe syntax so its transpiled source can be interpolated verbatim into APP_JS."
+    },
+    {
+      "id": "file:src/tui/spike.ts",
+      "type": "file",
+      "filePath": "src/tui/spike.ts",
+      "subGroup": "src/tui",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "tui",
+        "opentui",
+        "selftest",
+        "markdown-rendering",
+        "tested"
+      ],
+      "summary": "OpenTUI proof-of-concept and selftest screen module defining Catppuccin Mocha syntax tokens and a markdown-rendering panel backed by the tree-sitter worker. Used by --selftest and standalone spike launches to verify native markdown rendering in compiled binaries."
+    },
+    {
+      "id": "file:tests/e2e/hosted.e2e.ts",
+      "type": "file",
+      "filePath": "tests/e2e/hosted.e2e.ts",
+      "subGroup": "tests/e2e",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "playwright-e2e",
+        "hosted-ui",
+        "web-semantics",
+        "security-testing"
+      ],
+      "summary": "Playwright end-to-end test suite exercising the hosted GitHub Pages frontend and local serve WebUI against live skills-ui serve subprocesses backed by skills-shim.mjs. Verifies Local Network Access gating, token auth, honest error toasts, search in-flight ordering, keyboard/sort semantics, and XSS-safe markdown detail rendering."
+    },
+    {
+      "id": "document:tests/fixtures/contract/hostile-skill/SKILL.md",
+      "type": "document",
+      "filePath": "tests/fixtures/contract/hostile-skill/SKILL.md",
+      "subGroup": "tests/fixtures",
+      "filePattern": "documentation",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "security-fixture",
+        "ansi-injection",
+        "sanitization-test"
+      ],
+      "summary": "Adversarial SKILL.md contract fixture embedding ANSI/OSC/DCS escape sequences and C1 control characters in frontmatter and body text to test terminal and HTML sanitization."
+    },
+    {
+      "id": "file:tests/fixtures/skills-shim.mjs",
+      "type": "file",
+      "filePath": "tests/fixtures/skills-shim.mjs",
+      "subGroup": "tests/fixtures",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "cli-shim",
+        "test-fixture",
+        "contract-mock",
+        "call-logging"
+      ],
+      "summary": "Executable fixture shim emulating the upstream skills CLI subprocess contract (--version, ls --json, install --list, add --json, rm, update) with persistent state files, env-sanitization snapshots, optional failure injection, and JSONL call logging for performance budgets."
+    },
+    {
+      "id": "file:tests/fixtures/slow-skills-shim.mjs",
+      "type": "file",
+      "filePath": "tests/fixtures/slow-skills-shim.mjs",
+      "subGroup": "tests/fixtures",
+      "filePattern": "code",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "cli-shim",
+        "concurrency-testing",
+        "delay-fixture"
+      ],
+      "summary": "Delayed skills CLI shim that sleeps SKILLS_SHIM_DELAY_MS (default 150 ms) before answering ls requests so concurrency and subprocess spawn-queue tests can deterministically trigger queuing."
+    },
+    {
+      "id": "file:tests/image.test.ts",
+      "type": "file",
+      "filePath": "tests/image.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "unit-test",
+        "opentui-image",
+        "vendored-fork",
+        "jimp-free"
+      ],
+      "summary": "Bun unit test verifying that OpenTUI ImageRenderable constructs and renders a PNG via the blocks protocol in-memory, and pinning the vendored Jimp-free @opentui/three fork's unsupported-operation throws for file-image APIs (S-228)."
+    },
+    {
+      "id": "file:tests/services.test.ts",
+      "type": "file",
+      "filePath": "tests/services.test.ts",
+      "subGroup": "tests",
+      "filePattern": "test",
+      "fanIn": 0,
+      "fanOut": 0,
+      "tags": [
+        "unit-tests",
+        "core-services",
+        "search-dedup",
+        "skills-shim"
+      ],
+      "summary": "Unit and integration test suite for skills-ui core services, preferences, CLI seed parsing, WCAG theme tokens, and registry search fallback and in-flight deduplication. Exercises core modules dynamically against the tests/fixtures/skills-shim.mjs CLI shim and ephemeral loopback Bun HTTP registry stubs."
+    }
+  ]
+}

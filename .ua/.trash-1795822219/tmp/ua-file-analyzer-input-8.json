@@ -1,0 +1,49 @@
+{
+  "projectRoot": "/Users/s-a-c/Projects/s-a-c/skills-ui/main",
+  "batchFiles": [
+    {
+      "path": "docs/_config.yml",
+      "language": "yaml",
+      "sizeLines": 21,
+      "fileCategory": "config"
+    },
+    {
+      "path": "docs/archify-findings-review-and-report-2026-11-26.md",
+      "language": "markdown",
+      "sizeLines": 879,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/index.md",
+      "language": "markdown",
+      "sizeLines": 40,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/release.md",
+      "language": "markdown",
+      "sizeLines": 39,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/upstream-issue-draft.md",
+      "language": "markdown",
+      "sizeLines": 62,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/upstream-ls-memoization.md",
+      "language": "markdown",
+      "sizeLines": 85,
+      "fileCategory": "docs"
+    }
+  ],
+  "batchImportData": {
+    "docs/_config.yml": [],
+    "docs/archify-findings-review-and-report-2026-11-26.md": [],
+    "docs/index.md": [],
+    "docs/release.md": [],
+    "docs/upstream-issue-draft.md": [],
+    "docs/upstream-ls-memoization.md": []
+  }
+}

@@ -1,0 +1,1037 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/tui/app.ts",
+      "type": "file",
+      "name": "app.ts",
+      "filePath": "src/tui/app.ts",
+      "language": "typescript",
+      "summary": "Imperative TUI runtime orchestrating signal crash guards, real core service dependencies with scope list caching, Elm-store dispatch, SWR disk-index loading, debounced search, post-mutation hooks, and the full keyboard contract.",
+      "tags": [
+        "tui-runtime",
+        "keyboard-controller",
+        "effects",
+        "stale-while-revalidate"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/tui/app.ts:installCrashGuard",
+      "type": "function",
+      "name": "installCrashGuard",
+      "filePath": "src/tui/app.ts",
+      "lineRange": [
+        46,
+        93
+      ],
+      "language": "typescript",
+      "summary": "Registers idempotent SIGINT, SIGTERM, SIGHUP, uncaughtException, and exit handlers so terminal state and audio resources are always restored before process exit.",
+      "tags": [
+        "crash-guard",
+        "signal-handling",
+        "cleanup"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/app.ts:runTui",
+      "type": "function",
+      "name": "runTui",
+      "filePath": "src/tui/app.ts",
+      "lineRange": [
+        187,
+        211
+      ],
+      "language": "typescript",
+      "summary": "Production TUI entrypoint that verifies TTY output, constructs a CliRenderer, installs the crash guard, runs runTuiOn, and disposes audio on exit.",
+      "tags": [
+        "tui-entrypoint",
+        "tty",
+        "lifecycle"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/app.ts:runTuiOn",
+      "type": "function",
+      "name": "runTuiOn",
+      "filePath": "src/tui/app.ts",
+      "lineRange": [
+        214,
+        1002
+      ],
+      "language": "typescript",
+      "summary": "Mounts the TUI React view tree on any real or in-memory CliRenderer, wiring store subscriptions, FIFO toasts, SWR skill loading, stale-guarded search/update checks, mutation hooks, resize handling, and modal/text/command keymaps.",
+      "tags": [
+        "tui-controller",
+        "keymap",
+        "async-effects",
+        "state-orchestration"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/tui/art.ts",
+      "type": "file",
+      "name": "art.ts",
+      "filePath": "src/tui/art.ts",
+      "language": "typescript",
+      "summary": "Generates procedural RGBA pixel art (startup splash gradient banner and deterministic 4x2 source identicon badges) using OpenTUI NativeImage and Catppuccin palettes so the binary ships zero image assets.",
+      "tags": [
+        "procedural-art",
+        "native-image",
+        "identicon",
+        "tui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/art.ts:splashImage",
+      "type": "function",
+      "name": "splashImage",
+      "filePath": "src/tui/art.ts",
+      "lineRange": [
+        32,
+        57
+      ],
+      "language": "typescript",
+      "summary": "Synthesizes and caches a 96x28 RGBA diagonal Catppuccin accent gradient NativeImage with soft horizontal edge fade for the startup splash screen.",
+      "tags": [
+        "procedural-art",
+        "splash-screen",
+        "rgba",
+        "caching"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/art.ts:sourceBadge",
+      "type": "function",
+      "name": "sourceBadge",
+      "filePath": "src/tui/art.ts",
+      "lineRange": [
+        75,
+        97
+      ],
+      "language": "typescript",
+      "summary": "Generates and caches a deterministic 2-color 4x2 RGBA identicon NativeImage hashed from a search result's source string and active theme.",
+      "tags": [
+        "procedural-art",
+        "identicon",
+        "hashing",
+        "caching"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/tui/audio.ts",
+      "type": "file",
+      "name": "audio.ts",
+      "filePath": "src/tui/audio.ts",
+      "language": "typescript",
+      "summary": "Synthesizes preference-gated UI feedback sounds (select, confirm, success, error) as 44.1 kHz f32le PCM sine envelopes streamed through OpenTUI's Audio engine with silent failure degradation.",
+      "tags": [
+        "audio-synth",
+        "pcm",
+        "opentui-audio",
+        "tui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/audio.ts:ensure",
+      "type": "function",
+      "name": "ensure",
+      "filePath": "src/tui/audio.ts",
+      "lineRange": [
+        34,
+        49
+      ],
+      "language": "typescript",
+      "summary": "Lazily imports and initializes OpenTUI's Audio engine singleton, caching failure state so missing audio hardware degrades silently without blocking the TUI.",
+      "tags": [
+        "audio-init",
+        "lazy-loading",
+        "graceful-degradation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/audio.ts:toneBytes",
+      "type": "function",
+      "name": "toneBytes",
+      "filePath": "src/tui/audio.ts",
+      "lineRange": [
+        52,
+        67
+      ],
+      "language": "typescript",
+      "summary": "Async generator yielding 44.1 kHz mono f32le PCM byte chunks for a decaying sine-wave tone envelope.",
+      "tags": [
+        "audio-synth",
+        "pcm",
+        "async-generator"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/audio.ts:playSound",
+      "type": "function",
+      "name": "playSound",
+      "filePath": "src/tui/audio.ts",
+      "lineRange": [
+        76,
+        96
+      ],
+      "language": "typescript",
+      "summary": "Streams the note sequence for a SoundKind through OpenTUI Audio when sound preferences are enabled, catching and silencing playback errors.",
+      "tags": [
+        "audio-playback",
+        "preferences",
+        "tui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/audio.ts:disposeAudio",
+      "type": "function",
+      "name": "disposeAudio",
+      "filePath": "src/tui/audio.ts",
+      "lineRange": [
+        98,
+        107
+      ],
+      "language": "typescript",
+      "summary": "Best-effort teardown that disposes the active OpenTUI Audio instance and clears the singleton reference during app shutdown.",
+      "tags": [
+        "audio-cleanup",
+        "lifecycle",
+        "shutdown"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/tui/model.ts",
+      "type": "file",
+      "name": "model.ts",
+      "filePath": "src/tui/model.ts",
+      "language": "typescript",
+      "summary": "Pure renderer-agnostic Elm-style state store for the TUI defining TuiModel, Action union, filtering/sorting projections, scope-isolated update-check records, and immutable state transitions.",
+      "tags": [
+        "elm-architecture",
+        "state-machine",
+        "tui-model",
+        "pure-functions"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/tui/model.ts:createTuiModel",
+      "type": "function",
+      "name": "createTuiModel",
+      "filePath": "src/tui/model.ts",
+      "lineRange": [
+        104,
+        147
+      ],
+      "language": "typescript",
+      "summary": "Constructs the initial TuiModel state populated with user preferences, empty per-scope update maps, splash flag, and default filter/sort settings.",
+      "tags": [
+        "state-init",
+        "tui-model",
+        "pure-function"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/model.ts:applySeed",
+      "type": "function",
+      "name": "applySeed",
+      "filePath": "src/tui/model.ts",
+      "lineRange": [
+        149,
+        160
+      ],
+      "language": "typescript",
+      "summary": "Applies a CLI UiSeed to a freshly created TuiModel, pre-selecting the search tab/query for add or pre-checking target skills for update/remove.",
+      "tags": [
+        "ui-seed",
+        "state-init",
+        "tui-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/model.ts:visibleSkills",
+      "type": "function",
+      "name": "visibleSkills",
+      "filePath": "src/tui/model.ts",
+      "lineRange": [
+        168,
+        186
+      ],
+      "language": "typescript",
+      "summary": "Computes the filtered and sorted view of installed skills intersecting text match (via skillMatches), agent multi-select, provenance filter, and checked/name/load sort order.",
+      "tags": [
+        "filtering",
+        "sorting",
+        "projection",
+        "tui-model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/model.ts:visibleSearchResults",
+      "type": "function",
+      "name": "visibleSearchResults",
+      "filePath": "src/tui/model.ts",
+      "lineRange": [
+        190,
+        199
+      ],
+      "language": "typescript",
+      "summary": "Returns search results ordered by load relevance, queued-first, or alphabetical name according to model.searchSortBy.",
+      "tags": [
+        "sorting",
+        "search-results",
+        "projection"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/model.ts:applySkillsLoaded",
+      "type": "function",
+      "name": "applySkillsLoaded",
+      "filePath": "src/tui/model.ts",
+      "lineRange": [
+        264,
+        278
+      ],
+      "language": "typescript",
+      "summary": "Reconciles newly loaded skills (including SWR stale-to-fresh swaps) by preserving cursor focus on the same skill name and pruning vanished checked skills.",
+      "tags": [
+        "state-reconciliation",
+        "stale-while-revalidate",
+        "tui-model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/model.ts:applyMove",
+      "type": "function",
+      "name": "applyMove",
+      "filePath": "src/tui/model.ts",
+      "lineRange": [
+        280,
+        290
+      ],
+      "language": "typescript",
+      "summary": "Advances and clamps the active list cursor across installed skills, search results (capped at SEARCH_RENDER_CAP), or the search install queue.",
+      "tags": [
+        "navigation",
+        "cursor-clamping",
+        "tui-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/model.ts:applyHomeEnd",
+      "type": "function",
+      "name": "applyHomeEnd",
+      "filePath": "src/tui/model.ts",
+      "lineRange": [
+        292,
+        303
+      ],
+      "language": "typescript",
+      "summary": "Jumps the active cursor to the first or last rendered row in the installed list, search results, or search queue pane.",
+      "tags": [
+        "navigation",
+        "cursor-clamping",
+        "tui-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/model.ts:applyCheckAction",
+      "type": "function",
+      "name": "applyCheckAction",
+      "filePath": "src/tui/model.ts",
+      "lineRange": [
+        305,
+        332
+      ],
+      "language": "typescript",
+      "summary": "Handles single-row check toggling, check-all, toggle-all, invert-checks, and clear-checks over the currently visible installed skills.",
+      "tags": [
+        "selection",
+        "batch-actions",
+        "tui-model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/model.ts:applyAgentSelectAction",
+      "type": "function",
+      "name": "applyAgentSelectAction",
+      "filePath": "src/tui/model.ts",
+      "lineRange": [
+        334,
+        369
+      ],
+      "language": "typescript",
+      "summary": "Updates cursor navigation, staged toggles, toggle-all, and filter application for the multi-select agent filter overlay.",
+      "tags": [
+        "agent-filter",
+        "overlay-state",
+        "tui-model"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/model.ts:applySortToggle",
+      "type": "function",
+      "name": "applySortToggle",
+      "filePath": "src/tui/model.ts",
+      "lineRange": [
+        371,
+        381
+      ],
+      "language": "typescript",
+      "summary": "Cycles the active sort mode between checked, name, and load for either the installed tab or the search tab and clamps selection.",
+      "tags": [
+        "sorting",
+        "state-transition",
+        "tui-model"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/model.ts:update",
+      "type": "function",
+      "name": "update",
+      "filePath": "src/tui/model.ts",
+      "lineRange": [
+        523,
+        567
+      ],
+      "language": "typescript",
+      "summary": "Pure Elm reducer that clones mutable collections, dispatches an Action through ACTION_HANDLERS with per-dispatch memoization, and updates precomputed visible and visibleResults riders.",
+      "tags": [
+        "elm-reducer",
+        "immutable-update",
+        "memoization",
+        "tui-model"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/tui/model.ts:tabFor",
+      "type": "function",
+      "name": "tabFor",
+      "filePath": "src/tui/model.ts",
+      "lineRange": [
+        572,
+        577
+      ],
+      "language": "typescript",
+      "summary": "Maps single-key tab shortcuts ('i', '/', ',') to their corresponding Tab identifier or null.",
+      "tags": [
+        "keymap",
+        "navigation",
+        "pure-function"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/tui/app.ts:installCrashGuard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/tui/app.ts:installCrashGuard",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/tui/app.ts:runTui",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/tui/app.ts:runTui",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/tui/app.ts:runTuiOn",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/tui/app.ts:runTuiOn",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/core/disk-index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/tui/Views.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/tui/audio.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/tui/app.ts:runTui",
+      "target": "function:src/tui/app.ts:installCrashGuard",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/app.ts:runTui",
+      "target": "function:src/tui/audio.ts:disposeAudio",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/app.ts:runTui",
+      "target": "function:src/tui/app.ts:runTuiOn",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/app.ts:runTuiOn",
+      "target": "function:src/tui/model.ts:createTuiModel",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/app.ts:runTuiOn",
+      "target": "function:src/core/prefs.ts:loadUiPreferences",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/app.ts:runTuiOn",
+      "target": "function:src/tui/model.ts:applySeed",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/app.ts:runTuiOn",
+      "target": "function:src/tui/model.ts:update",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/app.ts:runTuiOn",
+      "target": "function:src/core/disk-index.ts:loadDiskIndex",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/app.ts:runTuiOn",
+      "target": "function:src/tui/model.ts:tabFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/app.ts:runTuiOn",
+      "target": "function:src/tui/Views.tsx:mountApp",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/core/services/installed.ts:listInstalled",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/core/services/skill-doc.ts:readSkillDoc",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/core/services/skill-doc.ts:skillBody",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/core/services/install.ts:install",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/core/services/remove.ts:remove",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/core/services/update.ts:update",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/core/services/source.ts:listSourceSkills",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/core/services/updates-check.ts:checkForUpdates",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/core/services/hooks.ts:isHealthCmdConfigured",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/core/services/hooks.ts:checkHealth",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/core/services/hooks.ts:runPostMutationHook",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/core/skills-client.ts:skillsVersion",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/core/disk-index.ts:saveDiskIndex",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/core/prefs.ts:saveUiPreferences",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "function:src/tui/audio.ts:playSound",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/art.ts",
+      "target": "function:src/tui/art.ts:splashImage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/art.ts",
+      "target": "function:src/tui/art.ts:splashImage",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/art.ts",
+      "target": "function:src/tui/art.ts:sourceBadge",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/art.ts",
+      "target": "function:src/tui/art.ts:sourceBadge",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/art.ts",
+      "target": "file:src/core/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/tui/art.ts:splashImage",
+      "target": "function:src/core/theme.ts:hexToRgb",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/art.ts:sourceBadge",
+      "target": "function:src/core/theme.ts:hexToRgb",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/audio.ts",
+      "target": "function:src/tui/audio.ts:ensure",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/audio.ts",
+      "target": "function:src/tui/audio.ts:toneBytes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/audio.ts",
+      "target": "function:src/tui/audio.ts:playSound",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/audio.ts",
+      "target": "function:src/tui/audio.ts:playSound",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/audio.ts",
+      "target": "function:src/tui/audio.ts:disposeAudio",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/audio.ts",
+      "target": "function:src/tui/audio.ts:disposeAudio",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/audio.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/tui/audio.ts:playSound",
+      "target": "function:src/tui/audio.ts:ensure",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/audio.ts:playSound",
+      "target": "function:src/tui/audio.ts:toneBytes",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:createTuiModel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:createTuiModel",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:applySeed",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:applySeed",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:visibleSkills",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:visibleSkills",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:visibleSearchResults",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:visibleSearchResults",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:applySkillsLoaded",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:applyMove",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:applyHomeEnd",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:applyCheckAction",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:applyAgentSelectAction",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:applySortToggle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:update",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:update",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:tabFor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "function:src/tui/model.ts:tabFor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/tui/model.ts:visibleSkills",
+      "target": "function:src/core/filter.ts:skillMatches",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/model.ts:update",
+      "target": "function:src/tui/model.ts:visibleSkills",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/model.ts:update",
+      "target": "function:src/tui/model.ts:visibleSearchResults",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/model.ts:update",
+      "target": "function:src/tui/model.ts:applySkillsLoaded",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/model.ts:update",
+      "target": "function:src/tui/model.ts:applyMove",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/model.ts:update",
+      "target": "function:src/tui/model.ts:applyHomeEnd",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/model.ts:update",
+      "target": "function:src/tui/model.ts:applyCheckAction",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/model.ts:update",
+      "target": "function:src/tui/model.ts:applyAgentSelectAction",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/model.ts:update",
+      "target": "function:src/tui/model.ts:applySortToggle",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

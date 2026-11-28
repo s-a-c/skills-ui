@@ -1,0 +1,722 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/tui/renderer-ready.ts",
+      "type": "file",
+      "name": "renderer-ready.ts",
+      "filePath": "src/tui/renderer-ready.ts",
+      "language": "typescript",
+      "summary": "Provides structural FrameDriver typing and bounded frame polling so in-memory renderer tests and --selftest wait deterministically for asynchronous React and tree-sitter frames instead of sleeping.",
+      "tags": [
+        "renderer-readiness",
+        "testing-utility",
+        "opentui",
+        "async-polling"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/renderer-ready.ts:waitForFrame",
+      "type": "function",
+      "name": "waitForFrame",
+      "filePath": "src/tui/renderer-ready.ts",
+      "lineRange": [
+        20,
+        36
+      ],
+      "language": "typescript",
+      "summary": "Repeatedly renders, flushes, and captures character frames from a FrameDriver until a predicate matches or throws with the last captured frame on timeout.",
+      "tags": [
+        "async-polling",
+        "renderer-readiness",
+        "frame-assertion"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/tui/three-scene.ts",
+      "type": "file",
+      "name": "three-scene.ts",
+      "filePath": "src/tui/three-scene.ts",
+      "language": "typescript",
+      "summary": "Builds and manages a per-renderer 3D Fibonacci-sphere skills graph using @opentui/three, coloring skill points by source hash and linking consecutive skills that share an agent.",
+      "tags": [
+        "3d-visualization",
+        "threejs",
+        "opentui-three",
+        "graph-layout"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/three-scene.ts:getGraphView",
+      "type": "function",
+      "name": "getGraphView",
+      "filePath": "src/tui/three-scene.ts",
+      "lineRange": [
+        66,
+        89
+      ],
+      "language": "typescript",
+      "summary": "Maintains a WeakMap-keyed singleton ThreeRenderable per CliRenderer to avoid early-WebGPU-dispose crashes, swapping scenes only when the theme or skill set changes.",
+      "tags": [
+        "3d-visualization",
+        "singleton-cache",
+        "opentui-three"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/three-scene.ts:buildSkillGraph",
+      "type": "function",
+      "name": "buildSkillGraph",
+      "filePath": "src/tui/three-scene.ts",
+      "lineRange": [
+        91,
+        176
+      ],
+      "language": "typescript",
+      "summary": "Constructs a Three.js scene placing skills on a Fibonacci sphere with Catppuccin vertex colors, agent-chain line segments, perspective camera, and rotation/dispose hooks.",
+      "tags": [
+        "3d-visualization",
+        "fibonacci-sphere",
+        "threejs",
+        "geometry"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/web/client/core.ts",
+      "type": "file",
+      "name": "core.ts",
+      "filePath": "src/web/client/core.ts",
+      "language": "typescript",
+      "summary": "Exports the CLIENT_CORE_JS browser runtime template string shared by the local and hosted web UI, implementing client state, sessionStorage-backed Bearer API calls, WebAudio sound synthesis, preference syncing, hosted backend probing, health popover controls, and unified button busy/disabled state management.",
+      "tags": [
+        "web-client",
+        "browser-runtime",
+        "hosted-auth",
+        "webaudio",
+        "ui-state"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/filter-parity.test.ts",
+      "type": "file",
+      "name": "filter-parity.test.ts",
+      "filePath": "tests/filter-parity.test.ts",
+      "language": "typescript",
+      "summary": "Cross-surface parity test suite proving that the web UI's skillMatches predicate and the TUI's visibleSkills pipeline return identical results across name, source, agent-only, and description queries, and that renderPage embeds the shared predicate.",
+      "tags": [
+        "unit-test",
+        "filter-parity",
+        "cross-surface",
+        "web-tui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/hooks-health.test.ts",
+      "type": "file",
+      "name": "hooks-health.test.ts",
+      "filePath": "tests/hooks-health.test.ts",
+      "language": "typescript",
+      "summary": "Integration test suite covering global lock file resolution, symlink/locked/local provenance classification, disk-index provenance persistence, env-var sanitization, post-mutation hook execution/timeouts, health checker TTL caching, and API auth/CORS enforcement.",
+      "tags": [
+        "integration-test",
+        "hooks",
+        "health-check",
+        "provenance",
+        "api-security"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/selftest.test.ts",
+      "type": "file",
+      "name": "selftest.test.ts",
+      "filePath": "tests/selftest.test.ts",
+      "language": "typescript",
+      "summary": "Smoke test suite verifying OpenTUI markdown/code tree-sitter rendering via buildSpikeScreen and waitForFrame, plus end-to-end execution of `src/main.ts --selftest`.",
+      "tags": [
+        "smoke-test",
+        "selftest",
+        "tree-sitter",
+        "opentui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/tui-disk-index.test.ts",
+      "type": "file",
+      "name": "tui-disk-index.test.ts",
+      "filePath": "tests/tui-disk-index.test.ts",
+      "language": "typescript",
+      "summary": "Unit and renderer integration tests for disk-index serialization, hostile-input immunity, canonical project-directory partitioning, stale cache sweeping, SWR instant painting, swap reconciliation, and mutation fresh-truth invariants.",
+      "tags": [
+        "integration-test",
+        "disk-cache",
+        "stale-while-revalidate",
+        "tui"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/tui-disk-index.test.ts:writeIndex",
+      "type": "function",
+      "name": "writeIndex",
+      "filePath": "tests/tui-disk-index.test.ts",
+      "lineRange": [
+        61,
+        71
+      ],
+      "language": "typescript",
+      "summary": "Test helper that writes a version-2 persisted disk index envelope for a scope, attaching projectIdentity() for project-scope fixtures.",
+      "tags": [
+        "test-helper",
+        "disk-cache",
+        "fixtures"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/tui-disk-index.test.ts:deferredListDeps",
+      "type": "function",
+      "name": "deferredListDeps",
+      "filePath": "tests/tui-disk-index.test.ts",
+      "lineRange": [
+        76,
+        90
+      ],
+      "language": "typescript",
+      "summary": "Creates controllable TuiDeps whose listInstalled calls stay pending behind deferred promises until explicitly resolved by the test.",
+      "tags": [
+        "test-helper",
+        "deferred-async",
+        "mock-deps"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/tui-disk-index.test.ts:waitFor",
+      "type": "function",
+      "name": "waitFor",
+      "filePath": "tests/tui-disk-index.test.ts",
+      "lineRange": [
+        93,
+        104
+      ],
+      "language": "typescript",
+      "summary": "Polls an assertion callback until it succeeds without throwing or rejects after a bounded timeout.",
+      "tags": [
+        "test-helper",
+        "async-polling",
+        "assertions"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/tui.test.ts",
+      "type": "file",
+      "name": "tui.test.ts",
+      "filePath": "tests/tui.test.ts",
+      "language": "typescript",
+      "summary": "Comprehensive TUI test suite exercising in-memory rendering, keyboard contracts, search/queue workflows, double-press quit, scope-isolated update checks, crash guards, pure model reducers, procedural art badges, match highlighting, and health/provenance overlays.",
+      "tags": [
+        "integration-test",
+        "unit-test",
+        "tui",
+        "keymap",
+        "rendering"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/tui.test.ts:fakeDeps",
+      "type": "function",
+      "name": "fakeDeps",
+      "filePath": "tests/tui.test.ts",
+      "lineRange": [
+        40,
+        60
+      ],
+      "language": "typescript",
+      "summary": "Builds an in-memory TuiDeps stub returning deterministic installed skills, search results, markdown detail bodies, and update-check responses.",
+      "tags": [
+        "test-helper",
+        "mock-deps",
+        "tui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/tui.test.ts:waitFor",
+      "type": "function",
+      "name": "waitFor",
+      "filePath": "tests/tui.test.ts",
+      "lineRange": [
+        64,
+        78
+      ],
+      "language": "typescript",
+      "summary": "Polls a boolean or assertion predicate at 25ms intervals until true or rethrows the last error when the timeout expires.",
+      "tags": [
+        "test-helper",
+        "async-polling",
+        "assertions"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/tui/renderer-ready.ts",
+      "target": "function:src/tui/renderer-ready.ts:waitForFrame",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/renderer-ready.ts",
+      "target": "function:src/tui/renderer-ready.ts:waitForFrame",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/three-scene.ts",
+      "target": "function:src/tui/three-scene.ts:getGraphView",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/three-scene.ts",
+      "target": "function:src/tui/three-scene.ts:getGraphView",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/three-scene.ts",
+      "target": "function:src/tui/three-scene.ts:buildSkillGraph",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/three-scene.ts",
+      "target": "function:src/tui/three-scene.ts:buildSkillGraph",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/three-scene.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/three-scene.ts",
+      "target": "file:src/core/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/tui/three-scene.ts:getGraphView",
+      "target": "function:src/tui/three-scene.ts:buildSkillGraph",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/three-scene.ts:buildSkillGraph",
+      "target": "function:src/core/theme.ts:hexToRgb",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/web/client/core.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/filter-parity.test.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/filter-parity.test.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/filter-parity.test.ts",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/filter-parity.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/filter.ts",
+      "target": "file:tests/filter-parity.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:tests/filter-parity.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/filter-parity.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/api.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/disk-index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/hooks-health.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "file:tests/hooks-health.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "file:tests/hooks-health.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:tests/hooks-health.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "file:tests/hooks-health.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "file:tests/hooks-health.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/selftest.test.ts",
+      "target": "file:src/tui/app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/selftest.test.ts",
+      "target": "file:src/tui/renderer-ready.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:tests/selftest.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/renderer-ready.ts",
+      "target": "file:tests/selftest.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/spike.ts",
+      "target": "file:tests/selftest.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "function:tests/tui-disk-index.test.ts:writeIndex",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "function:tests/tui-disk-index.test.ts:deferredListDeps",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "function:tests/tui-disk-index.test.ts:waitFor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/core/disk-index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/tui/app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/tui/renderer-ready.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:tests/tui-disk-index.test.ts:writeIndex",
+      "target": "function:src/core/disk-index.ts:projectIdentity",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/tui-disk-index.test.ts:writeIndex",
+      "target": "function:src/core/disk-index.ts:diskIndexPath",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/tui-disk-index.test.ts:deferredListDeps",
+      "target": "function:tests/helpers/audit-state.ts:deferred",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "file:tests/tui-disk-index.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:tests/tui-disk-index.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:tests/tui-disk-index.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "function:tests/tui.test.ts:fakeDeps",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "function:tests/tui.test.ts:waitFor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/tui/app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/tui/renderer-ready.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:tests/tui.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:tests/tui.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/art.ts",
+      "target": "file:tests/tui.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:tests/tui.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

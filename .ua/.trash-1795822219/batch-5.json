@@ -1,0 +1,473 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/e2e/audit-remediation.e2e.ts",
+      "type": "file",
+      "name": "audit-remediation.e2e.ts",
+      "filePath": "tests/e2e/audit-remediation.e2e.ts",
+      "summary": "Playwright end-to-end test suite verifying web UI audit-remediation invariants across 20 browser scenarios. Covers install-queue scope capture and partial failures, wildcard seed installation, stale list/detail/update-check race guards, busy-state and semantic disabled-button arbitration, keyboard checkbox accessibility, and responsive search-card layout.",
+      "tags": [
+        "e2e-tests",
+        "playwright",
+        "web-ui",
+        "race-conditions",
+        "accessibility"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/e2e/helpers/audit-fixture.ts",
+      "type": "file",
+      "name": "audit-fixture.ts",
+      "filePath": "tests/e2e/helpers/audit-fixture.ts",
+      "summary": "Playwright E2E fixture helpers that manage the audit web backend subprocess, construct synthetic skill rows, stub default `/api/**` browser routes, track page errors, and wait for post-response DOM paint frames.",
+      "tags": [
+        "e2e-helpers",
+        "playwright",
+        "test-fixture",
+        "route-mocking"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/e2e/helpers/audit-fixture.ts:closeAuditPages",
+      "type": "function",
+      "name": "closeAuditPages",
+      "filePath": "tests/e2e/helpers/audit-fixture.ts",
+      "lineRange": [6, 8],
+      "summary": "Drains all Playwright browser contexts registered by `openAuditPage`, asserting that each context recorded zero `pageerror` events before closing it in a `finally` block.",
+      "tags": [
+        "playwright",
+        "teardown",
+        "error-assertion"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/e2e/helpers/audit-fixture.ts:startAuditBackend",
+      "type": "function",
+      "name": "startAuditBackend",
+      "filePath": "tests/e2e/helpers/audit-fixture.ts",
+      "lineRange": [9, 31],
+      "summary": "Spawns `bun run tests/fixtures/audit-web-server.ts` inside an isolated workspace fixture, parses its `AUDIT_ORIGIN` stdout JSON line within a 10-second timeout, and returns the origin URL with an async `stop()` teardown handler.",
+      "tags": [
+        "test-server",
+        "subprocess",
+        "e2e-fixture",
+        "lifecycle"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/e2e/helpers/audit-fixture.ts:row",
+      "type": "function",
+      "name": "row",
+      "filePath": "tests/e2e/helpers/audit-fixture.ts",
+      "lineRange": [32, 35],
+      "summary": "Builds a synthetic installed-skill row payload for a given `name` and `scope` (defaulting to `'project'`) with fixture path, Claude Code agent, and GitHub source metadata.",
+      "tags": [
+        "fixture-data",
+        "skill-row",
+        "test-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/e2e/helpers/audit-fixture.ts:openAuditPage",
+      "type": "function",
+      "name": "openAuditPage",
+      "filePath": "tests/e2e/helpers/audit-fixture.ts",
+      "lineRange": [36, 55],
+      "summary": "Opens a tracked Playwright browser context and page with `pageerror` capture, intercepts `/api/skills`, `/api/skill`, `/api/updates`, `/api/search`, and `/api/install` with deterministic fixtures, and navigates to `origin` until initial rows and README render.",
+      "tags": [
+        "playwright",
+        "route-mocking",
+        "browser-context",
+        "e2e-setup"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/e2e/helpers/audit-fixture.ts:settleResponse",
+      "type": "function",
+      "name": "settleResponse",
+      "filePath": "tests/e2e/helpers/audit-fixture.ts",
+      "lineRange": [56, 60],
+      "summary": "Waits for a Playwright network `Response` to finish and then flushes two browser `requestAnimationFrame` cycles so asynchronous DOM updates settle before assertions run.",
+      "tags": [
+        "playwright",
+        "async-sync",
+        "animation-frame"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/helpers/audit-state.ts",
+      "type": "file",
+      "name": "audit-state.ts",
+      "filePath": "tests/helpers/audit-state.ts",
+      "summary": "Shared test-isolation utility providing a `deferred` promise helper and a temporary workspace fixture that redirects `SKILLS_UI_*`, shim, and XDG environment variables into `.agents/tmp`.",
+      "tags": [
+        "test-helpers",
+        "env-isolation",
+        "workspace-fixture",
+        "async-testing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/helpers/audit-state.ts:deferred",
+      "type": "function",
+      "name": "deferred",
+      "filePath": "tests/helpers/audit-state.ts",
+      "lineRange": [3, 7],
+      "summary": "Returns an externally controlled `{ promise, resolve, reject }` handle via `Promise.withResolvers<T>()` to deterministically hold and release async requests in concurrency tests.",
+      "tags": [
+        "promise-helper",
+        "async-gate",
+        "concurrency-testing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/helpers/audit-state.ts:createWorkspaceFixture",
+      "type": "function",
+      "name": "createWorkspaceFixture",
+      "filePath": "tests/helpers/audit-state.ts",
+      "lineRange": [8, 29],
+      "summary": "Creates a temporary directory under `.agents/tmp/skills-ui-test-*` and builds an isolated environment pointing `SKILLS_UI_SKILLS_BIN` at `tests/fixtures/skills-shim.mjs` and `SKILLS_UI_API_URL` at a dead loopback port, returning `activate()` and `cleanup()` hooks.",
+      "tags": [
+        "workspace-fixture",
+        "env-isolation",
+        "temp-dir",
+        "test-setup"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/helpers/installer-fixture.ts",
+      "type": "file",
+      "name": "installer-fixture.ts",
+      "filePath": "tests/helpers/installer-fixture.ts",
+      "summary": "Test fixture builder for `scripts/install.sh` that constructs a hermetic sandbox with a pre-installed binary, payload, SHA-256 checksum manifest, and stubbed `uname`, `curl`, and `chmod` commands.",
+      "tags": [
+        "installer-testing",
+        "test-fixture",
+        "shell-stubs",
+        "checksum"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/helpers/installer-fixture.ts:createInstallerFixture",
+      "type": "function",
+      "name": "createInstallerFixture",
+      "filePath": "tests/helpers/installer-fixture.ts",
+      "lineRange": [8, 25],
+      "summary": "Builds an isolated installer workspace containing an existing `skills-ui` executable, a replacement shell payload, a SHA-256 checksum file, and PATH-prepended `uname`/`curl`/`chmod` shims controlled by `chmodFails`, `checksumFails`, and `downloadFails` flags.",
+      "tags": [
+        "installer-fixture",
+        "sha256",
+        "cli-stubs",
+        "fault-injection"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/installer.test.ts",
+      "type": "file",
+      "name": "installer.test.ts",
+      "filePath": "tests/installer.test.ts",
+      "summary": "Bun test suite exercising `scripts/install.sh` against hermetic installer fixtures to verify atomic installation, executable publishing, temp-file cleanup, and preservation of the prior binary on `chmod`, checksum, and download failures.",
+      "tags": [
+        "installer-tests",
+        "bun-test",
+        "shell-script",
+        "fault-tolerance"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:closeAuditPages",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:startAuditBackend",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:row",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:openAuditPage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:settleResponse",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/helpers/audit-state.ts",
+      "target": "function:tests/helpers/audit-state.ts:deferred",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/helpers/audit-state.ts",
+      "target": "function:tests/helpers/audit-state.ts:createWorkspaceFixture",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/helpers/installer-fixture.ts",
+      "target": "function:tests/helpers/installer-fixture.ts:createInstallerFixture",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:closeAuditPages",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:startAuditBackend",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:row",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:openAuditPage",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:settleResponse",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/helpers/audit-state.ts",
+      "target": "function:tests/helpers/audit-state.ts:deferred",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/helpers/audit-state.ts",
+      "target": "function:tests/helpers/audit-state.ts:createWorkspaceFixture",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/helpers/installer-fixture.ts",
+      "target": "function:tests/helpers/installer-fixture.ts:createInstallerFixture",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/e2e/audit-remediation.e2e.ts",
+      "target": "file:tests/e2e/helpers/audit-fixture.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/e2e/audit-remediation.e2e.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/helpers/installer-fixture.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/installer.test.ts",
+      "target": "file:tests/helpers/installer-fixture.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/e2e/audit-remediation.e2e.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:startAuditBackend",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/e2e/audit-remediation.e2e.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:closeAuditPages",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/e2e/audit-remediation.e2e.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:openAuditPage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/e2e/audit-remediation.e2e.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:row",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/e2e/audit-remediation.e2e.ts",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:settleResponse",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/e2e/audit-remediation.e2e.ts",
+      "target": "function:tests/helpers/audit-state.ts:deferred",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/e2e/helpers/audit-fixture.ts:startAuditBackend",
+      "target": "function:tests/helpers/audit-state.ts:createWorkspaceFixture",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/e2e/helpers/audit-fixture.ts:openAuditPage",
+      "target": "function:tests/e2e/helpers/audit-fixture.ts:row",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/helpers/installer-fixture.ts:createInstallerFixture",
+      "target": "function:tests/helpers/audit-state.ts:createWorkspaceFixture",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/installer.test.ts",
+      "target": "function:tests/helpers/installer-fixture.ts:createInstallerFixture",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "file:tests/fixtures/audit-web-server.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/helpers/audit-state.ts",
+      "target": "file:tests/fixtures/skills-shim.mjs",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/install.sh",
+      "target": "file:tests/installer.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/e2e/audit-remediation.e2e.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/e2e/audit-remediation.e2e.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/client/core.ts",
+      "target": "file:tests/e2e/audit-remediation.e2e.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/client/installed.ts",
+      "target": "file:tests/e2e/audit-remediation.e2e.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/client/search-and-boot.ts",
+      "target": "file:tests/e2e/audit-remediation.e2e.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/styles.ts",
+      "target": "file:tests/e2e/audit-remediation.e2e.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

@@ -1,0 +1,3870 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 20,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 20,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 20,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "src/core/api.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 654,
+      "nonEmptyLines": 601,
+      "functions": [
+        {
+          "name": "json",
+          "startLine": 84,
+          "endLine": 92,
+          "params": [
+            "body",
+            "status"
+          ]
+        },
+        {
+          "name": "readJsonBody",
+          "startLine": 96,
+          "endLine": 110,
+          "params": [
+            "req"
+          ]
+        },
+        {
+          "name": "validText",
+          "startLine": 124,
+          "endLine": 128,
+          "params": [
+            "value",
+            "max"
+          ]
+        },
+        {
+          "name": "validSkillName",
+          "startLine": 131,
+          "endLine": 134,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "validSource",
+          "startLine": 137,
+          "endLine": 149,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "validQuery",
+          "startLine": 152,
+          "endLine": 155,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "createLimiter",
+          "startLine": 159,
+          "endLine": 170,
+          "params": [
+            "capacity",
+            "refillPerSec"
+          ]
+        },
+        {
+          "name": "scopeParam",
+          "startLine": 172,
+          "endLine": 174,
+          "params": [
+            "url"
+          ]
+        },
+        {
+          "name": "createSkillsUiServer",
+          "startLine": 178,
+          "endLine": 652,
+          "params": [
+            "options"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "BodyTooLarge",
+          "startLine": 112,
+          "endLine": 112,
+          "methods": [],
+          "properties": []
+        },
+        {
+          "name": "BadJson",
+          "startLine": 113,
+          "endLine": 113,
+          "methods": [],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "createSkillsUiServer",
+          "line": 178,
+          "isDefault": false
+        },
+        {
+          "name": "DEFAULT_UI_PREFERENCES",
+          "line": 654,
+          "isDefault": false
+        },
+        {
+          "name": "uiPrefsPath",
+          "line": 654,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "json",
+          "callee": "JSON.stringify",
+          "lineNumber": 85
+        },
+        {
+          "caller": "readJsonBody",
+          "callee": "req.text",
+          "lineNumber": 97
+        },
+        {
+          "caller": "readJsonBody",
+          "callee": "JSON.parse",
+          "lineNumber": 101
+        },
+        {
+          "caller": "readJsonBody",
+          "callee": "Array.isArray",
+          "lineNumber": 102
+        },
+        {
+          "caller": "validText",
+          "callee": "CONTROL_CHARS_RE.test",
+          "lineNumber": 125
+        },
+        {
+          "caller": "validText",
+          "callee": "value.startsWith",
+          "lineNumber": 126
+        },
+        {
+          "caller": "validSkillName",
+          "callee": "validText",
+          "lineNumber": 132
+        },
+        {
+          "caller": "validSkillName",
+          "callee": "SKILL_NAME_RE.test",
+          "lineNumber": 133
+        },
+        {
+          "caller": "validSource",
+          "callee": "validText",
+          "lineNumber": 138
+        },
+        {
+          "caller": "validSource",
+          "callee": "/^https?:\\/\\//i.test",
+          "lineNumber": 140
+        },
+        {
+          "caller": "validQuery",
+          "callee": "CONTROL_CHARS_RE.test",
+          "lineNumber": 153
+        },
+        {
+          "caller": "createLimiter",
+          "callee": "Date.now",
+          "lineNumber": 161
+        },
+        {
+          "caller": "createLimiter",
+          "callee": "Date.now",
+          "lineNumber": 163
+        },
+        {
+          "caller": "createLimiter",
+          "callee": "Math.min",
+          "lineNumber": 164
+        },
+        {
+          "caller": "scopeParam",
+          "callee": "url.searchParams.get",
+          "lineNumber": 173
+        },
+        {
+          "caller": "createSkillsUiServer",
+          "callee": "loadUiPreferences",
+          "lineNumber": 186
+        },
+        {
+          "caller": "copyRows",
+          "callee": "skills.map",
+          "lineNumber": 226
+        },
+        {
+          "caller": "cachedListInstalled",
+          "callee": "listCache.get",
+          "lineNumber": 229
+        },
+        {
+          "caller": "cachedListInstalled",
+          "callee": "copyRows",
+          "lineNumber": 230
+        },
+        {
+          "caller": "cachedListInstalled",
+          "callee": "inFlightLists.get",
+          "lineNumber": 232
+        },
+        {
+          "caller": "cachedListInstalled",
+          "callee": "listInstalled(scope).then",
+          "lineNumber": 234
+        },
+        {
+          "caller": "cachedListInstalled",
+          "callee": "listInstalled",
+          "lineNumber": 234
+        },
+        {
+          "caller": "cachedListInstalled",
+          "callee": "listCache.set",
+          "lineNumber": 238
+        },
+        {
+          "caller": "cachedListInstalled",
+          "callee": "flight.then",
+          "lineNumber": 243
+        },
+        {
+          "caller": "cachedListInstalled",
+          "callee": "inFlightLists.get",
+          "lineNumber": 245
+        },
+        {
+          "caller": "cachedListInstalled",
+          "callee": "inFlightLists.delete",
+          "lineNumber": 245
+        },
+        {
+          "caller": "cachedListInstalled",
+          "callee": "inFlightLists.get",
+          "lineNumber": 248
+        },
+        {
+          "caller": "cachedListInstalled",
+          "callee": "inFlightLists.delete",
+          "lineNumber": 248
+        },
+        {
+          "caller": "cachedListInstalled",
+          "callee": "inFlightLists.set",
+          "lineNumber": 251
+        },
+        {
+          "caller": "cachedListInstalled",
+          "callee": "flight.then",
+          "lineNumber": 253
+        },
+        {
+          "caller": "invalidateListCache",
+          "callee": "listCache.clear",
+          "lineNumber": 262
+        },
+        {
+          "caller": "invalidateListCache",
+          "callee": "inFlightLists.clear",
+          "lineNumber": 263
+        },
+        {
+          "caller": "invalidateListCache",
+          "callee": "descriptionCache.clear",
+          "lineNumber": 264
+        },
+        {
+          "caller": "createSkillsUiServer",
+          "callee": "createHealthChecker",
+          "lineNumber": 278
+        },
+        {
+          "caller": "descriptionFor",
+          "callee": "descriptionCache.get",
+          "lineNumber": 282
+        },
+        {
+          "caller": "descriptionFor",
+          "callee": "readSkillDoc",
+          "lineNumber": 284
+        },
+        {
+          "caller": "descriptionFor",
+          "callee": "doc?.match",
+          "lineNumber": 285
+        },
+        {
+          "caller": "descriptionFor",
+          "callee": "sanitizeMetadata",
+          "lineNumber": 287
+        },
+        {
+          "caller": "descriptionFor",
+          "callee": "descriptionCache.set",
+          "lineNumber": 288
+        },
+        {
+          "caller": "finalizeMutation",
+          "callee": "healthChecker.invalidate",
+          "lineNumber": 298
+        },
+        {
+          "caller": "finalizeMutation",
+          "callee": "runPostMutationHook",
+          "lineNumber": 300
+        },
+        {
+          "caller": "handleGetPage",
+          "callee": "json",
+          "lineNumber": 305
+        },
+        {
+          "caller": "handleGetPage",
+          "callee": "options.pageRenderer.renderPage",
+          "lineNumber": 306
+        },
+        {
+          "caller": "handleGetPage",
+          "callee": "options.pageRenderer.pageCspFor",
+          "lineNumber": 313
+        },
+        {
+          "caller": "handleGetVersion",
+          "callee": "skillsVersion",
+          "lineNumber": 323
+        },
+        {
+          "caller": "handleGetVersion",
+          "callee": "json",
+          "lineNumber": 327
+        },
+        {
+          "caller": "handleGetVersion",
+          "callee": "isHealthCmdConfigured",
+          "lineNumber": 333
+        },
+        {
+          "caller": "handleGetVersion",
+          "callee": "isPostMutationHookConfigured",
+          "lineNumber": 334
+        },
+        {
+          "caller": "handleGetHealthCheck",
+          "callee": "json",
+          "lineNumber": 340
+        },
+        {
+          "caller": "handleGetHealthCheck",
+          "callee": "healthChecker.check",
+          "lineNumber": 340
+        },
+        {
+          "caller": "handleGetHealthCheck",
+          "callee": "url.searchParams.get",
+          "lineNumber": 340
+        },
+        {
+          "caller": "handleGetSkills",
+          "callee": "scopeParam",
+          "lineNumber": 343
+        },
+        {
+          "caller": "handleGetSkills",
+          "callee": "cachedListInstalled",
+          "lineNumber": 352
+        },
+        {
+          "caller": "handleGetSkills",
+          "callee": "json",
+          "lineNumber": 353
+        },
+        {
+          "caller": "handleGetSkills",
+          "callee": "skills.map",
+          "lineNumber": 355
+        },
+        {
+          "caller": "handleGetSkills",
+          "callee": "descriptionFor",
+          "lineNumber": 357
+        },
+        {
+          "caller": "handleGetSkill",
+          "callee": "scopeParam",
+          "lineNumber": 368
+        },
+        {
+          "caller": "handleGetSkill",
+          "callee": "cachedListInstalled",
+          "lineNumber": 372
+        },
+        {
+          "caller": "handleGetSkill",
+          "callee": "url.searchParams.get",
+          "lineNumber": 376
+        },
+        {
+          "caller": "handleGetSkill",
+          "callee": "skills.find",
+          "lineNumber": 379
+        },
+        {
+          "caller": "handleGetSkill",
+          "callee": "url.searchParams.get",
+          "lineNumber": 381
+        },
+        {
+          "caller": "handleGetSkill",
+          "callee": "json",
+          "lineNumber": 382
+        },
+        {
+          "caller": "handleGetSkill",
+          "callee": "validSkillName",
+          "lineNumber": 383
+        },
+        {
+          "caller": "handleGetSkill",
+          "callee": "json",
+          "lineNumber": 383
+        },
+        {
+          "caller": "handleGetSkill",
+          "callee": "skills.find",
+          "lineNumber": 384
+        },
+        {
+          "caller": "handleGetSkill",
+          "callee": "json",
+          "lineNumber": 386
+        },
+        {
+          "caller": "handleGetSkill",
+          "callee": "skillBody",
+          "lineNumber": 387
+        },
+        {
+          "caller": "handleGetSkill",
+          "callee": "json",
+          "lineNumber": 388
+        },
+        {
+          "caller": "handleGetSearch",
+          "callee": "url.searchParams.get",
+          "lineNumber": 392
+        },
+        {
+          "caller": "handleGetSearch",
+          "callee": "q.trim",
+          "lineNumber": 393
+        },
+        {
+          "caller": "handleGetSearch",
+          "callee": "json",
+          "lineNumber": 393
+        },
+        {
+          "caller": "handleGetSearch",
+          "callee": "validQuery",
+          "lineNumber": 394
+        },
+        {
+          "caller": "handleGetSearch",
+          "callee": "json",
+          "lineNumber": 394
+        },
+        {
+          "caller": "handleGetSearch",
+          "callee": "searchWithFallback",
+          "lineNumber": 395
+        },
+        {
+          "caller": "handleGetSearch",
+          "callee": "json",
+          "lineNumber": 398
+        },
+        {
+          "caller": "parseInstallSkills",
+          "callee": "Array.isArray",
+          "lineNumber": 404
+        },
+        {
+          "caller": "parseInstallSkills",
+          "callee": "body.skills.every",
+          "lineNumber": 405
+        },
+        {
+          "caller": "parseInstallSkills",
+          "callee": "json",
+          "lineNumber": 406
+        },
+        {
+          "caller": "parseInstallSkills",
+          "callee": "json",
+          "lineNumber": 410
+        },
+        {
+          "caller": "parseInstallSkills",
+          "callee": "skillsList.every",
+          "lineNumber": 413
+        },
+        {
+          "caller": "parseInstallSkills",
+          "callee": "validSkillName",
+          "lineNumber": 413
+        },
+        {
+          "caller": "parseInstallSkills",
+          "callee": "json",
+          "lineNumber": 414
+        },
+        {
+          "caller": "handlePostInstall",
+          "callee": "readJsonBody",
+          "lineNumber": 420
+        },
+        {
+          "caller": "handlePostInstall",
+          "callee": "json",
+          "lineNumber": 422
+        },
+        {
+          "caller": "handlePostInstall",
+          "callee": "validSource",
+          "lineNumber": 423
+        },
+        {
+          "caller": "handlePostInstall",
+          "callee": "json",
+          "lineNumber": 423
+        },
+        {
+          "caller": "handlePostInstall",
+          "callee": "parseInstallSkills",
+          "lineNumber": 424
+        },
+        {
+          "caller": "handlePostInstall",
+          "callee": "install",
+          "lineNumber": 427
+        },
+        {
+          "caller": "handlePostInstall",
+          "callee": "invalidateListCache",
+          "lineNumber": 428
+        },
+        {
+          "caller": "handlePostInstall",
+          "callee": "JSON.stringify",
+          "lineNumber": 429
+        },
+        {
+          "caller": "handlePostInstall",
+          "callee": "healthChecker.invalidate",
+          "lineNumber": 431
+        },
+        {
+          "caller": "handlePostInstall",
+          "callee": "json",
+          "lineNumber": 432
+        },
+        {
+          "caller": "handlePostInstall",
+          "callee": "result.results\n      .filter((r) => r.status === \"installed\" && r.name)\n      .map",
+          "lineNumber": 434
+        },
+        {
+          "caller": "handlePostInstall",
+          "callee": "result.results\n      .filter",
+          "lineNumber": 434
+        },
+        {
+          "caller": "handlePostInstall",
+          "callee": "finalizeMutation",
+          "lineNumber": 437
+        },
+        {
+          "caller": "handlePostInstall",
+          "callee": "json",
+          "lineNumber": 443
+        },
+        {
+          "caller": "handleGetSourceSkills",
+          "callee": "url.searchParams.get",
+          "lineNumber": 447
+        },
+        {
+          "caller": "handleGetSourceSkills",
+          "callee": "json",
+          "lineNumber": 448
+        },
+        {
+          "caller": "handleGetSourceSkills",
+          "callee": "validSource",
+          "lineNumber": 449
+        },
+        {
+          "caller": "handleGetSourceSkills",
+          "callee": "json",
+          "lineNumber": 449
+        },
+        {
+          "caller": "handleGetSourceSkills",
+          "callee": "listSourceSkills",
+          "lineNumber": 450
+        },
+        {
+          "caller": "handleGetSourceSkills",
+          "callee": "json",
+          "lineNumber": 451
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "readJsonBody",
+          "lineNumber": 455
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "Array.isArray",
+          "lineNumber": 456
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "body.skills.every",
+          "lineNumber": 456
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "json",
+          "lineNumber": 457
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "names.every",
+          "lineNumber": 460
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "validSkillName",
+          "lineNumber": 460
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "json",
+          "lineNumber": 461
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "remove",
+          "lineNumber": 467
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "cachedListInstalled",
+          "lineNumber": 468
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "invalidateListCache",
+          "lineNumber": 470
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "cachedListInstalled",
+          "lineNumber": 471
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "invalidateListCache",
+          "lineNumber": 475
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "finalizeMutation",
+          "lineNumber": 478
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "result.removed.join",
+          "lineNumber": 480
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "result.removed.join",
+          "lineNumber": 481
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "result.missing.join",
+          "lineNumber": 481
+        },
+        {
+          "caller": "handlePostRemove",
+          "callee": "json",
+          "lineNumber": 482
+        },
+        {
+          "caller": "handlePostUpdate",
+          "callee": "readJsonBody",
+          "lineNumber": 486
+        },
+        {
+          "caller": "handlePostUpdate",
+          "callee": "Object.hasOwn",
+          "lineNumber": 488
+        },
+        {
+          "caller": "handlePostUpdate",
+          "callee": "Array.isArray",
+          "lineNumber": 491
+        },
+        {
+          "caller": "handlePostUpdate",
+          "callee": "body.skills.every",
+          "lineNumber": 491
+        },
+        {
+          "caller": "handlePostUpdate",
+          "callee": "json",
+          "lineNumber": 493
+        },
+        {
+          "caller": "handlePostUpdate",
+          "callee": "names.every",
+          "lineNumber": 496
+        },
+        {
+          "caller": "handlePostUpdate",
+          "callee": "validSkillName",
+          "lineNumber": 496
+        },
+        {
+          "caller": "handlePostUpdate",
+          "callee": "json",
+          "lineNumber": 497
+        },
+        {
+          "caller": "handlePostUpdate",
+          "callee": "update",
+          "lineNumber": 500
+        },
+        {
+          "caller": "handlePostUpdate",
+          "callee": "invalidateListCache",
+          "lineNumber": 501
+        },
+        {
+          "caller": "handlePostUpdate",
+          "callee": "finalizeMutation",
+          "lineNumber": 502
+        },
+        {
+          "caller": "handlePostUpdate",
+          "callee": "json",
+          "lineNumber": 503
+        },
+        {
+          "caller": "handleGetUpdates",
+          "callee": "scopeParam",
+          "lineNumber": 507
+        },
+        {
+          "caller": "handleGetUpdates",
+          "callee": "json",
+          "lineNumber": 509
+        },
+        {
+          "caller": "handleGetUpdates",
+          "callee": "checkForUpdates",
+          "lineNumber": 509
+        },
+        {
+          "caller": "handleGetUpdates",
+          "callee": "json",
+          "lineNumber": 513
+        },
+        {
+          "caller": "handleGetPrefs",
+          "callee": "json",
+          "lineNumber": 519
+        },
+        {
+          "caller": "handleGetPrefs",
+          "callee": "loadUiPreferences",
+          "lineNumber": 519
+        },
+        {
+          "caller": "handlePutPrefs",
+          "callee": "readJsonBody",
+          "lineNumber": 522
+        },
+        {
+          "caller": "handlePutPrefs",
+          "callee": "normalizePreferences",
+          "lineNumber": 523
+        },
+        {
+          "caller": "handlePutPrefs",
+          "callee": "loadUiPreferences",
+          "lineNumber": 523
+        },
+        {
+          "caller": "handlePutPrefs",
+          "callee": "saveUiPreferences",
+          "lineNumber": 524
+        },
+        {
+          "caller": "handlePutPrefs",
+          "callee": "json",
+          "lineNumber": 525
+        },
+        {
+          "caller": "route",
+          "callee": "target",
+          "lineNumber": 550
+        },
+        {
+          "caller": "route",
+          "callee": "json",
+          "lineNumber": 550
+        },
+        {
+          "caller": "route",
+          "callee": "json",
+          "lineNumber": 552
+        },
+        {
+          "caller": "route",
+          "callee": "json",
+          "lineNumber": 553
+        },
+        {
+          "caller": "route",
+          "callee": "json",
+          "lineNumber": 555
+        },
+        {
+          "caller": "route",
+          "callee": "console.error",
+          "lineNumber": 558
+        },
+        {
+          "caller": "route",
+          "callee": "json",
+          "lineNumber": 559
+        },
+        {
+          "caller": "createSkillsUiServer",
+          "callee": "getOrCreateHostedToken",
+          "lineNumber": 566
+        },
+        {
+          "caller": "createSkillsUiServer",
+          "callee": "options.onToken",
+          "lineNumber": 567
+        },
+        {
+          "caller": "withCors",
+          "callee": "Object.fromEntries",
+          "lineNumber": 573
+        },
+        {
+          "caller": "withCors",
+          "callee": "res.headers.entries",
+          "lineNumber": 573
+        },
+        {
+          "caller": "withCors",
+          "callee": "corsHeaders",
+          "lineNumber": 573
+        },
+        {
+          "caller": "createSkillsUiServer",
+          "callee": "createLimiter",
+          "lineNumber": 582
+        },
+        {
+          "caller": "handler",
+          "callee": "req.headers.get",
+          "lineNumber": 585
+        },
+        {
+          "caller": "handler",
+          "callee": "isAllowedHost",
+          "lineNumber": 586
+        },
+        {
+          "caller": "handler",
+          "callee": "json",
+          "lineNumber": 586
+        },
+        {
+          "caller": "handler",
+          "callee": "isCrossSiteFetch",
+          "lineNumber": 590
+        },
+        {
+          "caller": "handler",
+          "callee": "json",
+          "lineNumber": 590
+        },
+        {
+          "caller": "handler",
+          "callee": "limiter",
+          "lineNumber": 592
+        },
+        {
+          "caller": "handler",
+          "callee": "json",
+          "lineNumber": 592
+        },
+        {
+          "caller": "handler",
+          "callee": "req.headers.get",
+          "lineNumber": 594
+        },
+        {
+          "caller": "handler",
+          "callee": "isSameOrigin",
+          "lineNumber": 595
+        },
+        {
+          "caller": "handler",
+          "callee": "isAllowedOrigin",
+          "lineNumber": 596
+        },
+        {
+          "caller": "handler",
+          "callee": "json",
+          "lineNumber": 597
+        },
+        {
+          "caller": "handler",
+          "callee": "preflightResponse",
+          "lineNumber": 601
+        },
+        {
+          "caller": "handler",
+          "callee": "json",
+          "lineNumber": 601
+        },
+        {
+          "caller": "handler",
+          "callee": "req.headers.get",
+          "lineNumber": 605
+        },
+        {
+          "caller": "handler",
+          "callee": "bearerMatches",
+          "lineNumber": 606
+        },
+        {
+          "caller": "handler",
+          "callee": "withCors",
+          "lineNumber": 609
+        },
+        {
+          "caller": "handler",
+          "callee": "json",
+          "lineNumber": 609
+        },
+        {
+          "caller": "handler",
+          "callee": "withCors",
+          "lineNumber": 612
+        },
+        {
+          "caller": "handler",
+          "callee": "route",
+          "lineNumber": 612
+        },
+        {
+          "caller": "listen",
+          "callee": "Bun.serve",
+          "lineNumber": 618
+        },
+        {
+          "caller": "createSkillsUiServer",
+          "callee": "listen",
+          "lineNumber": 636
+        },
+        {
+          "caller": "createSkillsUiServer",
+          "callee": "listen",
+          "lineNumber": 640
+        },
+        {
+          "caller": "createSkillsUiServer",
+          "callee": "options.onReady",
+          "lineNumber": 646
+        },
+        {
+          "caller": "createSkillsUiServer",
+          "callee": "server.stop",
+          "lineNumber": 650
+        }
+      ],
+      "metrics": {
+        "importCount": 10,
+        "exportCount": 3,
+        "functionCount": 9,
+        "classCount": 2
+      }
+    },
+    {
+      "path": "src/core/hosted-auth.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 125,
+      "nonEmptyLines": 111,
+      "functions": [
+        {
+          "name": "hostedTokenPath",
+          "startLine": 25,
+          "endLine": 30,
+          "params": []
+        },
+        {
+          "name": "getOrCreateHostedToken",
+          "startLine": 33,
+          "endLine": 49,
+          "params": [
+            "path"
+          ]
+        },
+        {
+          "name": "bearerMatches",
+          "startLine": 55,
+          "endLine": 59,
+          "params": [
+            "authHeader",
+            "token"
+          ]
+        },
+        {
+          "name": "isCrossSiteFetch",
+          "startLine": 68,
+          "endLine": 73,
+          "params": [
+            "req"
+          ]
+        },
+        {
+          "name": "isAllowedHost",
+          "startLine": 76,
+          "endLine": 89,
+          "params": [
+            "host"
+          ]
+        },
+        {
+          "name": "extraOrigins",
+          "startLine": 91,
+          "endLine": 96,
+          "params": []
+        },
+        {
+          "name": "isAllowedOrigin",
+          "startLine": 99,
+          "endLine": 102,
+          "params": [
+            "origin"
+          ]
+        },
+        {
+          "name": "isSameOrigin",
+          "startLine": 105,
+          "endLine": 107,
+          "params": [
+            "origin",
+            "host"
+          ]
+        },
+        {
+          "name": "corsHeaders",
+          "startLine": 110,
+          "endLine": 112,
+          "params": [
+            "origin"
+          ]
+        },
+        {
+          "name": "preflightResponse",
+          "startLine": 115,
+          "endLine": 125,
+          "params": [
+            "origin"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "hostedTokenPath",
+          "line": 25,
+          "isDefault": false
+        },
+        {
+          "name": "getOrCreateHostedToken",
+          "line": 33,
+          "isDefault": false
+        },
+        {
+          "name": "bearerMatches",
+          "line": 55,
+          "isDefault": false
+        },
+        {
+          "name": "isCrossSiteFetch",
+          "line": 68,
+          "isDefault": false
+        },
+        {
+          "name": "isAllowedHost",
+          "line": 76,
+          "isDefault": false
+        },
+        {
+          "name": "isAllowedOrigin",
+          "line": 99,
+          "isDefault": false
+        },
+        {
+          "name": "isSameOrigin",
+          "line": 105,
+          "isDefault": false
+        },
+        {
+          "name": "corsHeaders",
+          "line": 110,
+          "isDefault": false
+        },
+        {
+          "name": "preflightResponse",
+          "line": 115,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "hostedTokenPath",
+          "callee": "join",
+          "lineNumber": 28
+        },
+        {
+          "caller": "hostedTokenPath",
+          "callee": "homedir",
+          "lineNumber": 28
+        },
+        {
+          "caller": "hostedTokenPath",
+          "callee": "join",
+          "lineNumber": 29
+        },
+        {
+          "caller": "getOrCreateHostedToken",
+          "callee": "hostedTokenPath",
+          "lineNumber": 33
+        },
+        {
+          "caller": "getOrCreateHostedToken",
+          "callee": "process.env[TOKEN_ENV]?.trim",
+          "lineNumber": 34
+        },
+        {
+          "caller": "getOrCreateHostedToken",
+          "callee": "existsSync",
+          "lineNumber": 37
+        },
+        {
+          "caller": "getOrCreateHostedToken",
+          "callee": "readFileSync(path, \"utf-8\").trim",
+          "lineNumber": 37
+        },
+        {
+          "caller": "getOrCreateHostedToken",
+          "callee": "readFileSync",
+          "lineNumber": 37
+        },
+        {
+          "caller": "getOrCreateHostedToken",
+          "callee": "randomBytes(32).toString",
+          "lineNumber": 41
+        },
+        {
+          "caller": "getOrCreateHostedToken",
+          "callee": "randomBytes",
+          "lineNumber": 41
+        },
+        {
+          "caller": "getOrCreateHostedToken",
+          "callee": "mkdirSync",
+          "lineNumber": 43
+        },
+        {
+          "caller": "getOrCreateHostedToken",
+          "callee": "dirname",
+          "lineNumber": 43
+        },
+        {
+          "caller": "getOrCreateHostedToken",
+          "callee": "writeFileSync",
+          "lineNumber": 44
+        },
+        {
+          "caller": "bearerMatches",
+          "callee": "createHash(\"sha256\").update(authHeader).digest",
+          "lineNumber": 56
+        },
+        {
+          "caller": "bearerMatches",
+          "callee": "createHash(\"sha256\").update",
+          "lineNumber": 56
+        },
+        {
+          "caller": "bearerMatches",
+          "callee": "createHash",
+          "lineNumber": 56
+        },
+        {
+          "caller": "bearerMatches",
+          "callee": "createHash(\"sha256\").update(`Bearer ${token}`).digest",
+          "lineNumber": 57
+        },
+        {
+          "caller": "bearerMatches",
+          "callee": "createHash(\"sha256\").update",
+          "lineNumber": 57
+        },
+        {
+          "caller": "bearerMatches",
+          "callee": "createHash",
+          "lineNumber": 57
+        },
+        {
+          "caller": "bearerMatches",
+          "callee": "timingSafeEqual",
+          "lineNumber": 58
+        },
+        {
+          "caller": "isCrossSiteFetch",
+          "callee": "req.headers.get",
+          "lineNumber": 70
+        },
+        {
+          "caller": "isCrossSiteFetch",
+          "callee": "req.headers.get(\"sec-fetch-site\")?.toLowerCase",
+          "lineNumber": 71
+        },
+        {
+          "caller": "isCrossSiteFetch",
+          "callee": "req.headers.get",
+          "lineNumber": 71
+        },
+        {
+          "caller": "isAllowedHost",
+          "callee": "host.trim().toLowerCase",
+          "lineNumber": 78
+        },
+        {
+          "caller": "isAllowedHost",
+          "callee": "host.trim",
+          "lineNumber": 78
+        },
+        {
+          "caller": "isAllowedHost",
+          "callee": "name.startsWith",
+          "lineNumber": 79
+        },
+        {
+          "caller": "isAllowedHost",
+          "callee": "name.indexOf",
+          "lineNumber": 81
+        },
+        {
+          "caller": "isAllowedHost",
+          "callee": "name.slice",
+          "lineNumber": 82
+        },
+        {
+          "caller": "isAllowedHost",
+          "callee": "name.lastIndexOf",
+          "lineNumber": 84
+        },
+        {
+          "caller": "isAllowedHost",
+          "callee": "name.indexOf",
+          "lineNumber": 86
+        },
+        {
+          "caller": "isAllowedHost",
+          "callee": "name.slice",
+          "lineNumber": 86
+        },
+        {
+          "caller": "extraOrigins",
+          "callee": "(process.env[ORIGINS_ENV] ?? \"\")\n    .split(\",\")\n    .map((s) => s.trim())\n    .filter",
+          "lineNumber": 92
+        },
+        {
+          "caller": "extraOrigins",
+          "callee": "(process.env[ORIGINS_ENV] ?? \"\")\n    .split(\",\")\n    .map",
+          "lineNumber": 92
+        },
+        {
+          "caller": "extraOrigins",
+          "callee": "(process.env[ORIGINS_ENV] ?? \"\")\n    .split",
+          "lineNumber": 92
+        },
+        {
+          "caller": "extraOrigins",
+          "callee": "s.trim",
+          "lineNumber": 94
+        },
+        {
+          "caller": "isAllowedOrigin",
+          "callee": "origin.trim().toLowerCase",
+          "lineNumber": 100
+        },
+        {
+          "caller": "isAllowedOrigin",
+          "callee": "origin.trim",
+          "lineNumber": 100
+        },
+        {
+          "caller": "isAllowedOrigin",
+          "callee": "BUILTIN_ORIGINS.includes",
+          "lineNumber": 101
+        },
+        {
+          "caller": "isAllowedOrigin",
+          "callee": "LOCAL_ORIGIN_RE.test",
+          "lineNumber": 101
+        },
+        {
+          "caller": "isAllowedOrigin",
+          "callee": "extraOrigins().includes",
+          "lineNumber": 101
+        },
+        {
+          "caller": "isAllowedOrigin",
+          "callee": "extraOrigins",
+          "lineNumber": 101
+        },
+        {
+          "caller": "isSameOrigin",
+          "callee": "origin.trim().toLowerCase",
+          "lineNumber": 106
+        },
+        {
+          "caller": "isSameOrigin",
+          "callee": "origin.trim",
+          "lineNumber": 106
+        },
+        {
+          "caller": "isSameOrigin",
+          "callee": "host.trim().toLowerCase",
+          "lineNumber": 106
+        },
+        {
+          "caller": "isSameOrigin",
+          "callee": "host.trim",
+          "lineNumber": 106
+        },
+        {
+          "caller": "preflightResponse",
+          "callee": "corsHeaders",
+          "lineNumber": 119
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 9,
+        "functionCount": 10,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/core/services/hooks.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 244,
+      "nonEmptyLines": 223,
+      "functions": [
+        {
+          "name": "envCmd",
+          "startLine": 13,
+          "endLine": 16,
+          "params": [
+            "name"
+          ]
+        },
+        {
+          "name": "isPostMutationHookConfigured",
+          "startLine": 18,
+          "endLine": 20,
+          "params": []
+        },
+        {
+          "name": "isHealthCmdConfigured",
+          "startLine": 22,
+          "endLine": 24,
+          "params": []
+        },
+        {
+          "name": "clipSanitized",
+          "startLine": 26,
+          "endLine": 29,
+          "params": [
+            "raw",
+            "max"
+          ]
+        },
+        {
+          "name": "spawnExecutable",
+          "startLine": 31,
+          "endLine": 77,
+          "params": [
+            "exe",
+            "opts"
+          ]
+        },
+        {
+          "name": "runPostMutationHook",
+          "startLine": 79,
+          "endLine": 132,
+          "params": [
+            "opts"
+          ]
+        },
+        {
+          "name": "createHealthChecker",
+          "startLine": 139,
+          "endLine": 234,
+          "params": [
+            "opts"
+          ]
+        },
+        {
+          "name": "checkHealth",
+          "startLine": 238,
+          "endLine": 240,
+          "params": [
+            "options"
+          ]
+        },
+        {
+          "name": "invalidateHealthCache",
+          "startLine": 242,
+          "endLine": 244,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "POST_MUTATION_HOOK_ENV",
+          "line": 5,
+          "isDefault": false
+        },
+        {
+          "name": "HEALTH_CMD_ENV",
+          "line": 6,
+          "isDefault": false
+        },
+        {
+          "name": "isPostMutationHookConfigured",
+          "line": 18,
+          "isDefault": false
+        },
+        {
+          "name": "isHealthCmdConfigured",
+          "line": 22,
+          "isDefault": false
+        },
+        {
+          "name": "runPostMutationHook",
+          "line": 79,
+          "isDefault": false
+        },
+        {
+          "name": "createHealthChecker",
+          "line": 139,
+          "isDefault": false
+        },
+        {
+          "name": "checkHealth",
+          "line": 238,
+          "isDefault": false
+        },
+        {
+          "name": "invalidateHealthCache",
+          "line": 242,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "envCmd",
+          "callee": "process.env[name]?.trim",
+          "lineNumber": 14
+        },
+        {
+          "caller": "isPostMutationHookConfigured",
+          "callee": "envCmd",
+          "lineNumber": 19
+        },
+        {
+          "caller": "isHealthCmdConfigured",
+          "callee": "envCmd",
+          "lineNumber": 23
+        },
+        {
+          "caller": "clipSanitized",
+          "callee": "sanitizeMetadata(raw).trim",
+          "lineNumber": 27
+        },
+        {
+          "caller": "clipSanitized",
+          "callee": "sanitizeMetadata",
+          "lineNumber": 27
+        },
+        {
+          "caller": "clipSanitized",
+          "callee": "clean.slice",
+          "lineNumber": 28
+        },
+        {
+          "caller": "spawnExecutable",
+          "callee": "sanitizeEnv",
+          "lineNumber": 35
+        },
+        {
+          "caller": "spawnExecutable",
+          "callee": "Object.assign",
+          "lineNumber": 36
+        },
+        {
+          "caller": "spawnExecutable",
+          "callee": "Bun.spawn",
+          "lineNumber": 40
+        },
+        {
+          "caller": "spawnExecutable",
+          "callee": "String",
+          "lineNumber": 53
+        },
+        {
+          "caller": "spawnExecutable",
+          "callee": "setTimeout",
+          "lineNumber": 58
+        },
+        {
+          "caller": "spawnExecutable",
+          "callee": "proc.kill",
+          "lineNumber": 61
+        },
+        {
+          "caller": "spawnExecutable",
+          "callee": "Promise.all",
+          "lineNumber": 68
+        },
+        {
+          "caller": "spawnExecutable",
+          "callee": "new Response(proc.stdout).text",
+          "lineNumber": 69
+        },
+        {
+          "caller": "spawnExecutable",
+          "callee": "new Response(proc.stderr).text",
+          "lineNumber": 70
+        },
+        {
+          "caller": "spawnExecutable",
+          "callee": "clearTimeout",
+          "lineNumber": 75
+        },
+        {
+          "caller": "runPostMutationHook",
+          "callee": "envCmd",
+          "lineNumber": 86
+        },
+        {
+          "caller": "runPostMutationHook",
+          "callee": "process.cwd",
+          "lineNumber": 90
+        },
+        {
+          "caller": "runPostMutationHook",
+          "callee": "spawnExecutable",
+          "lineNumber": 91
+        },
+        {
+          "caller": "runPostMutationHook",
+          "callee": "opts.skills.join",
+          "lineNumber": 97
+        },
+        {
+          "caller": "runPostMutationHook",
+          "callee": "clipSanitized",
+          "lineNumber": 108
+        },
+        {
+          "caller": "runPostMutationHook",
+          "callee": "clipSanitized",
+          "lineNumber": 112
+        },
+        {
+          "caller": "runPostMutationHook",
+          "callee": "[res.stderr, res.stdout].filter(Boolean).join",
+          "lineNumber": 112
+        },
+        {
+          "caller": "runPostMutationHook",
+          "callee": "[res.stderr, res.stdout].filter",
+          "lineNumber": 112
+        },
+        {
+          "caller": "runOnce",
+          "callee": "new Date().toISOString",
+          "lineNumber": 146
+        },
+        {
+          "caller": "runOnce",
+          "callee": "spawnExecutable",
+          "lineNumber": 147
+        },
+        {
+          "caller": "runOnce",
+          "callee": "[clipSanitized(res.spawnError)].filter",
+          "lineNumber": 153
+        },
+        {
+          "caller": "runOnce",
+          "callee": "clipSanitized",
+          "lineNumber": 153
+        },
+        {
+          "caller": "runOnce",
+          "callee": "clipSanitized",
+          "lineNumber": 158
+        },
+        {
+          "caller": "runOnce",
+          "callee": "[res.stderr, res.stdout].filter(Boolean).join",
+          "lineNumber": 158
+        },
+        {
+          "caller": "runOnce",
+          "callee": "[res.stderr, res.stdout].filter",
+          "lineNumber": 158
+        },
+        {
+          "caller": "runOnce",
+          "callee": "JSON.parse",
+          "lineNumber": 168
+        },
+        {
+          "caller": "runOnce",
+          "callee": "Array.isArray",
+          "lineNumber": 172
+        },
+        {
+          "caller": "runOnce",
+          "callee": "clipSanitized",
+          "lineNumber": 179
+        },
+        {
+          "caller": "runOnce",
+          "callee": "Array.isArray",
+          "lineNumber": 180
+        },
+        {
+          "caller": "runOnce",
+          "callee": "raw.details.slice(0, 32).map((d) => clipSanitized(String(d), 400)).filter",
+          "lineNumber": 181
+        },
+        {
+          "caller": "runOnce",
+          "callee": "raw.details.slice(0, 32).map",
+          "lineNumber": 181
+        },
+        {
+          "caller": "runOnce",
+          "callee": "raw.details.slice",
+          "lineNumber": 181
+        },
+        {
+          "caller": "runOnce",
+          "callee": "clipSanitized",
+          "lineNumber": 181
+        },
+        {
+          "caller": "runOnce",
+          "callee": "String",
+          "lineNumber": 181
+        },
+        {
+          "caller": "runOnce",
+          "callee": "clipSanitized",
+          "lineNumber": 191
+        },
+        {
+          "caller": "runOnce",
+          "callee": "[res.stderr, res.stdout].filter(Boolean).join",
+          "lineNumber": 191
+        },
+        {
+          "caller": "runOnce",
+          "callee": "[res.stderr, res.stdout].filter",
+          "lineNumber": 191
+        },
+        {
+          "caller": "check",
+          "callee": "envCmd",
+          "lineNumber": 204
+        },
+        {
+          "caller": "check",
+          "callee": "new Date().toISOString",
+          "lineNumber": 211
+        },
+        {
+          "caller": "check",
+          "callee": "Date.now",
+          "lineNumber": 214
+        },
+        {
+          "caller": "check",
+          "callee": "runOnce(cmd)\n          .then((result) => {\n            cached = { cmd, expiresAt: Date.now() + ttlMs, result };\n            return result;\n          })\n          .finally",
+          "lineNumber": 219
+        },
+        {
+          "caller": "check",
+          "callee": "runOnce(cmd)\n          .then",
+          "lineNumber": 219
+        },
+        {
+          "caller": "check",
+          "callee": "runOnce",
+          "lineNumber": 219
+        },
+        {
+          "caller": "check",
+          "callee": "Date.now",
+          "lineNumber": 221
+        },
+        {
+          "caller": "checkHealth",
+          "callee": "defaultHealthChecker.check",
+          "lineNumber": 239
+        },
+        {
+          "caller": "invalidateHealthCache",
+          "callee": "defaultHealthChecker.invalidate",
+          "lineNumber": 243
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 8,
+        "functionCount": 9,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/core/services/install.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 57,
+      "nonEmptyLines": 53,
+      "functions": [
+        {
+          "name": "install",
+          "startLine": 23,
+          "endLine": 57,
+          "params": [
+            "opts"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "install",
+          "line": 23,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "install",
+          "callee": "args.push",
+          "lineNumber": 25
+        },
+        {
+          "caller": "install",
+          "callee": "args.push",
+          "lineNumber": 27
+        },
+        {
+          "caller": "install",
+          "callee": "args.push",
+          "lineNumber": 29
+        },
+        {
+          "caller": "install",
+          "callee": "args.push",
+          "lineNumber": 31
+        },
+        {
+          "caller": "install",
+          "callee": "runSkills",
+          "lineNumber": 32
+        },
+        {
+          "caller": "install",
+          "callee": "JSON.parse",
+          "lineNumber": 36
+        },
+        {
+          "caller": "install",
+          "callee": "Array.isArray",
+          "lineNumber": 37
+        },
+        {
+          "caller": "install",
+          "callee": "stdout.slice",
+          "lineNumber": 41
+        },
+        {
+          "caller": "clean",
+          "callee": "sanitizeMetadata",
+          "lineNumber": 45
+        },
+        {
+          "caller": "clean",
+          "callee": "String",
+          "lineNumber": 45
+        },
+        {
+          "caller": "install",
+          "callee": "results.map",
+          "lineNumber": 46
+        },
+        {
+          "caller": "install",
+          "callee": "clean",
+          "lineNumber": 48
+        },
+        {
+          "caller": "install",
+          "callee": "clean",
+          "lineNumber": 49
+        },
+        {
+          "caller": "install",
+          "callee": "clean",
+          "lineNumber": 50
+        },
+        {
+          "caller": "install",
+          "callee": "clean",
+          "lineNumber": 51
+        },
+        {
+          "caller": "install",
+          "callee": "clean",
+          "lineNumber": 52
+        },
+        {
+          "caller": "install",
+          "callee": "clean",
+          "lineNumber": 53
+        },
+        {
+          "caller": "install",
+          "callee": "results.every",
+          "lineNumber": 55
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/core/services/installed.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 78,
+      "nonEmptyLines": 75,
+      "functions": [
+        {
+          "name": "classifyProvenance",
+          "startLine": 11,
+          "endLine": 25,
+          "params": [
+            "skillPath",
+            "name",
+            "lockedNames"
+          ]
+        },
+        {
+          "name": "listInstalled",
+          "startLine": 32,
+          "endLine": 73,
+          "params": [
+            "scope"
+          ]
+        },
+        {
+          "name": "findInstalled",
+          "startLine": 75,
+          "endLine": 78,
+          "params": [
+            "name",
+            "scope"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "classifyProvenance",
+          "line": 11,
+          "isDefault": false
+        },
+        {
+          "name": "listInstalled",
+          "line": 32,
+          "isDefault": false
+        },
+        {
+          "name": "findInstalled",
+          "line": 75,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "classifyProvenance",
+          "callee": "lstatSync(skillPath).isSymbolicLink",
+          "lineNumber": 18
+        },
+        {
+          "caller": "classifyProvenance",
+          "callee": "lstatSync",
+          "lineNumber": 18
+        },
+        {
+          "caller": "classifyProvenance",
+          "callee": "lockedNames.has",
+          "lineNumber": 23
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "args.push",
+          "lineNumber": 34
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "runSkills",
+          "lineNumber": 35
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "JSON.parse",
+          "lineNumber": 43
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "stdout.slice",
+          "lineNumber": 45
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "Array.isArray",
+          "lineNumber": 47
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "Object.keys",
+          "lineNumber": 52
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "readLock",
+          "lineNumber": 52
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "(parsed as Array<Record<string, unknown>>).map",
+          "lineNumber": 56
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "sanitizeMetadata",
+          "lineNumber": 60
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "String",
+          "lineNumber": 60
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "String",
+          "lineNumber": 61
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "Array.isArray",
+          "lineNumber": 66
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "raw.agents.map",
+          "lineNumber": 66
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "sanitizeMetadata",
+          "lineNumber": 66
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "String",
+          "lineNumber": 66
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "sanitizeMetadata",
+          "lineNumber": 67
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "String",
+          "lineNumber": 67
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "sanitizeMetadata",
+          "lineNumber": 68
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "String",
+          "lineNumber": 68
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "sanitizeMetadata",
+          "lineNumber": 69
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "String",
+          "lineNumber": 69
+        },
+        {
+          "caller": "listInstalled",
+          "callee": "classifyProvenance",
+          "lineNumber": 70
+        },
+        {
+          "caller": "findInstalled",
+          "callee": "listInstalled",
+          "lineNumber": 76
+        },
+        {
+          "caller": "findInstalled",
+          "callee": "all.find",
+          "lineNumber": 77
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 3,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/core/services/locks.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 104,
+      "nonEmptyLines": 93,
+      "functions": [
+        {
+          "name": "record",
+          "startLine": 47,
+          "endLine": 49,
+          "params": [
+            "v"
+          ]
+        },
+        {
+          "name": "validEntry",
+          "startLine": 51,
+          "endLine": 58,
+          "params": [
+            "v"
+          ]
+        },
+        {
+          "name": "normalizeLock",
+          "startLine": 60,
+          "endLine": 74,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "projectLockPath",
+          "startLine": 76,
+          "endLine": 78,
+          "params": [
+            "cwd"
+          ]
+        },
+        {
+          "name": "globalLockPath",
+          "startLine": 80,
+          "endLine": 87,
+          "params": []
+        },
+        {
+          "name": "readLock",
+          "startLine": 89,
+          "endLine": 104,
+          "params": [
+            "scope",
+            "cwd"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "InvalidLockFileError",
+          "startLine": 36,
+          "endLine": 36,
+          "methods": [],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "InvalidLockFileError",
+          "line": 36,
+          "isDefault": false
+        },
+        {
+          "name": "projectLockPath",
+          "line": 76,
+          "isDefault": false
+        },
+        {
+          "name": "globalLockPath",
+          "line": 80,
+          "isDefault": false
+        },
+        {
+          "name": "readLock",
+          "line": 89,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "record",
+          "callee": "Array.isArray",
+          "lineNumber": 48
+        },
+        {
+          "caller": "validEntry",
+          "callee": "record",
+          "lineNumber": 53
+        },
+        {
+          "caller": "validEntry",
+          "callee": "optionalFields.every",
+          "lineNumber": 56
+        },
+        {
+          "caller": "normalizeLock",
+          "callee": "record",
+          "lineNumber": 61
+        },
+        {
+          "caller": "normalizeLock",
+          "callee": "record",
+          "lineNumber": 61
+        },
+        {
+          "caller": "normalizeLock",
+          "callee": "Object.entries",
+          "lineNumber": 66
+        },
+        {
+          "caller": "normalizeLock",
+          "callee": "validEntry",
+          "lineNumber": 67
+        },
+        {
+          "caller": "normalizeLock",
+          "callee": "good.push",
+          "lineNumber": 67
+        },
+        {
+          "caller": "normalizeLock",
+          "callee": "bad.push",
+          "lineNumber": 68
+        },
+        {
+          "caller": "normalizeLock",
+          "callee": "Object.fromEntries",
+          "lineNumber": 73
+        },
+        {
+          "caller": "normalizeLock",
+          "callee": "Object.fromEntries",
+          "lineNumber": 73
+        },
+        {
+          "caller": "projectLockPath",
+          "callee": "process.cwd",
+          "lineNumber": 76
+        },
+        {
+          "caller": "projectLockPath",
+          "callee": "join",
+          "lineNumber": 77
+        },
+        {
+          "caller": "globalLockPath",
+          "callee": "join",
+          "lineNumber": 82
+        },
+        {
+          "caller": "globalLockPath",
+          "callee": "join",
+          "lineNumber": 82
+        },
+        {
+          "caller": "globalLockPath",
+          "callee": "homedir",
+          "lineNumber": 82
+        },
+        {
+          "caller": "globalLockPath",
+          "callee": "join",
+          "lineNumber": 83
+        },
+        {
+          "caller": "globalLockPath",
+          "callee": "join",
+          "lineNumber": 84
+        },
+        {
+          "caller": "globalLockPath",
+          "callee": "existsSync",
+          "lineNumber": 85
+        },
+        {
+          "caller": "globalLockPath",
+          "callee": "existsSync",
+          "lineNumber": 85
+        },
+        {
+          "caller": "readLock",
+          "callee": "process.cwd",
+          "lineNumber": 89
+        },
+        {
+          "caller": "readLock",
+          "callee": "globalLockPath",
+          "lineNumber": 90
+        },
+        {
+          "caller": "readLock",
+          "callee": "projectLockPath",
+          "lineNumber": 90
+        },
+        {
+          "caller": "readLock",
+          "callee": "existsSync",
+          "lineNumber": 91
+        },
+        {
+          "caller": "readLock",
+          "callee": "JSON.parse",
+          "lineNumber": 94
+        },
+        {
+          "caller": "readLock",
+          "callee": "readFileSync",
+          "lineNumber": 94
+        },
+        {
+          "caller": "readLock",
+          "callee": "normalizeLock",
+          "lineNumber": 103
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 4,
+        "functionCount": 6,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/core/services/remove.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 60,
+      "nonEmptyLines": 56,
+      "functions": [
+        {
+          "name": "remove",
+          "startLine": 38,
+          "endLine": 60,
+          "params": [
+            "names",
+            "scope",
+            "options"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "remove",
+          "line": 38,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "remove",
+          "callee": "listInstalled",
+          "lineNumber": 44
+        },
+        {
+          "caller": "remove",
+          "callee": "beforeList.map",
+          "lineNumber": 45
+        },
+        {
+          "caller": "remove",
+          "callee": "args.push",
+          "lineNumber": 47
+        },
+        {
+          "caller": "remove",
+          "callee": "runSkills",
+          "lineNumber": 48
+        },
+        {
+          "caller": "remove",
+          "callee": "options.listAfter",
+          "lineNumber": 49
+        },
+        {
+          "caller": "remove",
+          "callee": "listInstalled",
+          "lineNumber": 49
+        },
+        {
+          "caller": "remove",
+          "callee": "afterList.map",
+          "lineNumber": 50
+        },
+        {
+          "caller": "remove",
+          "callee": "before.has",
+          "lineNumber": 55
+        },
+        {
+          "caller": "remove",
+          "callee": "after.has",
+          "lineNumber": 55
+        },
+        {
+          "caller": "remove",
+          "callee": "removed.push",
+          "lineNumber": 55
+        },
+        {
+          "caller": "remove",
+          "callee": "after.has",
+          "lineNumber": 56
+        },
+        {
+          "caller": "remove",
+          "callee": "removed.push",
+          "lineNumber": 56
+        },
+        {
+          "caller": "remove",
+          "callee": "missing.push",
+          "lineNumber": 57
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/core/services/sanitize.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 41,
+      "nonEmptyLines": 37,
+      "functions": [
+        {
+          "name": "stripEscapes",
+          "startLine": 18,
+          "endLine": 25,
+          "params": [
+            "str"
+          ]
+        },
+        {
+          "name": "sanitizeMetadata",
+          "startLine": 31,
+          "endLine": 33,
+          "params": [
+            "str"
+          ]
+        },
+        {
+          "name": "sanitizeBody",
+          "startLine": 39,
+          "endLine": 41,
+          "params": [
+            "str"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "stripEscapes",
+          "line": 18,
+          "isDefault": false
+        },
+        {
+          "name": "sanitizeMetadata",
+          "line": 31,
+          "isDefault": false
+        },
+        {
+          "name": "sanitizeBody",
+          "line": 39,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "stripEscapes",
+          "callee": "str\n    .replace(OSC_RE, \"\")\n    .replace(DCS_RE, \"\")\n    .replace(CSI_RE, \"\")\n    .replace(C1_CSI_RE, \"\")\n    .replace",
+          "lineNumber": 19
+        },
+        {
+          "caller": "stripEscapes",
+          "callee": "str\n    .replace(OSC_RE, \"\")\n    .replace(DCS_RE, \"\")\n    .replace(CSI_RE, \"\")\n    .replace",
+          "lineNumber": 19
+        },
+        {
+          "caller": "stripEscapes",
+          "callee": "str\n    .replace(OSC_RE, \"\")\n    .replace(DCS_RE, \"\")\n    .replace",
+          "lineNumber": 19
+        },
+        {
+          "caller": "stripEscapes",
+          "callee": "str\n    .replace(OSC_RE, \"\")\n    .replace",
+          "lineNumber": 19
+        },
+        {
+          "caller": "stripEscapes",
+          "callee": "str\n    .replace",
+          "lineNumber": 19
+        },
+        {
+          "caller": "sanitizeMetadata",
+          "callee": "stripEscapes(str).replace(CONTROL_RE, \"\").replace(/[\\r\\n]+/g, \" \").trim",
+          "lineNumber": 32
+        },
+        {
+          "caller": "sanitizeMetadata",
+          "callee": "stripEscapes(str).replace(CONTROL_RE, \"\").replace",
+          "lineNumber": 32
+        },
+        {
+          "caller": "sanitizeMetadata",
+          "callee": "stripEscapes(str).replace",
+          "lineNumber": 32
+        },
+        {
+          "caller": "sanitizeMetadata",
+          "callee": "stripEscapes",
+          "lineNumber": 32
+        },
+        {
+          "caller": "sanitizeBody",
+          "callee": "stripEscapes(str).replace",
+          "lineNumber": 40
+        },
+        {
+          "caller": "sanitizeBody",
+          "callee": "stripEscapes",
+          "lineNumber": 40
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 3,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/core/services/search.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 168,
+      "nonEmptyLines": 152,
+      "functions": [
+        {
+          "name": "apiBase",
+          "startLine": 16,
+          "endLine": 18,
+          "params": []
+        },
+        {
+          "name": "searchRegistryFuzzyOnce",
+          "startLine": 45,
+          "endLine": 73,
+          "params": [
+            "query",
+            "owner"
+          ]
+        },
+        {
+          "name": "searchRegistryFuzzy",
+          "startLine": 75,
+          "endLine": 87,
+          "params": [
+            "query",
+            "owner"
+          ]
+        },
+        {
+          "name": "mapConcurrent",
+          "startLine": 103,
+          "endLine": 114,
+          "params": [
+            "items",
+            "fn",
+            "limit"
+          ]
+        },
+        {
+          "name": "makeSearchWithFallback",
+          "startLine": 116,
+          "endLine": 166,
+          "params": [
+            "search"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "sanitizeMetadata",
+          "line": 20,
+          "isDefault": false
+        },
+        {
+          "name": "searchRegistryFuzzy",
+          "line": 75,
+          "isDefault": false
+        },
+        {
+          "name": "makeSearchWithFallback",
+          "line": 116,
+          "isDefault": false
+        },
+        {
+          "name": "searchWithFallback",
+          "line": 168,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "searchRegistryFuzzyOnce",
+          "callee": "params.set",
+          "lineNumber": 51
+        },
+        {
+          "caller": "searchRegistryFuzzyOnce",
+          "callee": "fetch",
+          "lineNumber": 52
+        },
+        {
+          "caller": "searchRegistryFuzzyOnce",
+          "callee": "apiBase",
+          "lineNumber": 52
+        },
+        {
+          "caller": "searchRegistryFuzzyOnce",
+          "callee": "params.toString",
+          "lineNumber": 52
+        },
+        {
+          "caller": "searchRegistryFuzzyOnce",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 53
+        },
+        {
+          "caller": "searchRegistryFuzzyOnce",
+          "callee": "res.json",
+          "lineNumber": 56
+        },
+        {
+          "caller": "searchRegistryFuzzyOnce",
+          "callee": "(data.skills ?? [])\n        .map((skill) => ({\n          name: sanitizeMetadata(skill.name),\n          slug: sanitizeMetadata(skill.id),\n          source: sanitizeMetadata(skill.source || \"\"),\n          installs: skill.installs,\n        }))\n        .sort",
+          "lineNumber": 60
+        },
+        {
+          "caller": "searchRegistryFuzzyOnce",
+          "callee": "(data.skills ?? [])\n        .map",
+          "lineNumber": 60
+        },
+        {
+          "caller": "searchRegistryFuzzyOnce",
+          "callee": "sanitizeMetadata",
+          "lineNumber": 62
+        },
+        {
+          "caller": "searchRegistryFuzzyOnce",
+          "callee": "sanitizeMetadata",
+          "lineNumber": 63
+        },
+        {
+          "caller": "searchRegistryFuzzyOnce",
+          "callee": "sanitizeMetadata",
+          "lineNumber": 64
+        },
+        {
+          "caller": "searchRegistryFuzzy",
+          "callee": "JSON.stringify",
+          "lineNumber": 79
+        },
+        {
+          "caller": "searchRegistryFuzzy",
+          "callee": "inFlight.get",
+          "lineNumber": 80
+        },
+        {
+          "caller": "searchRegistryFuzzy",
+          "callee": "searchRegistryFuzzyOnce(query, owner).finally",
+          "lineNumber": 82
+        },
+        {
+          "caller": "searchRegistryFuzzy",
+          "callee": "searchRegistryFuzzyOnce",
+          "lineNumber": 82
+        },
+        {
+          "caller": "searchRegistryFuzzy",
+          "callee": "inFlight.get",
+          "lineNumber": 83
+        },
+        {
+          "caller": "searchRegistryFuzzy",
+          "callee": "inFlight.delete",
+          "lineNumber": 83
+        },
+        {
+          "caller": "searchRegistryFuzzy",
+          "callee": "inFlight.set",
+          "lineNumber": 85
+        },
+        {
+          "caller": "mapConcurrent",
+          "callee": "Array.from",
+          "lineNumber": 106
+        },
+        {
+          "caller": "mapConcurrent",
+          "callee": "Math.min",
+          "lineNumber": 106
+        },
+        {
+          "caller": "mapConcurrent",
+          "callee": "fn",
+          "lineNumber": 109
+        },
+        {
+          "caller": "mapConcurrent",
+          "callee": "Promise.all",
+          "lineNumber": 112
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "query.trim",
+          "lineNumber": 120
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "trimmed.toLowerCase().match",
+          "lineNumber": 121
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "trimmed.toLowerCase",
+          "lineNumber": 121
+        },
+        {
+          "caller": "gate",
+          "callee": "trimmed.includes",
+          "lineNumber": 123
+        },
+        {
+          "caller": "gate",
+          "callee": "results.filter",
+          "lineNumber": 125
+        },
+        {
+          "caller": "gate",
+          "callee": "r.name.toLowerCase().includes",
+          "lineNumber": 126
+        },
+        {
+          "caller": "gate",
+          "callee": "r.name.toLowerCase",
+          "lineNumber": 126
+        },
+        {
+          "caller": "gate",
+          "callee": "r.source.toLowerCase().includes",
+          "lineNumber": 126
+        },
+        {
+          "caller": "gate",
+          "callee": "r.source.toLowerCase",
+          "lineNumber": 126
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "search",
+          "lineNumber": 129
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "gate",
+          "lineNumber": 130
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "/[a-z0-9]$/i.test",
+          "lineNumber": 136
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "trimmed.toLowerCase",
+          "lineNumber": 137
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "\"abcdefghijklmnopqrstuvwxyz0123456789\".split(\"\").map",
+          "lineNumber": 138
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "\"abcdefghijklmnopqrstuvwxyz0123456789\".split",
+          "lineNumber": 138
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "mapConcurrent",
+          "lineNumber": 139
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "search(q, owner)\n          .then((o) => o.results)\n          .catch",
+          "lineNumber": 140
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "search(q, owner)\n          .then",
+          "lineNumber": 140
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "search",
+          "lineNumber": 140
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "r.name.toLowerCase().includes",
+          "lineNumber": 147
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "r.name.toLowerCase",
+          "lineNumber": 147
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "bySlug.has",
+          "lineNumber": 148
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "bySlug.set",
+          "lineNumber": 148
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "[...bySlug.values()].sort",
+          "lineNumber": 151
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "bySlug.values",
+          "lineNumber": 151
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "shortened.slice",
+          "lineNumber": 159
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "gate",
+          "lineNumber": 161
+        },
+        {
+          "caller": "makeSearchWithFallback",
+          "callee": "search",
+          "lineNumber": 161
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 4,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/core/services/skill-doc.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 36,
+      "nonEmptyLines": 33,
+      "functions": [
+        {
+          "name": "readSkillDoc",
+          "startLine": 10,
+          "endLine": 21,
+          "params": [
+            "path"
+          ]
+        },
+        {
+          "name": "stripFrontmatter",
+          "startLine": 24,
+          "endLine": 29,
+          "params": [
+            "doc"
+          ]
+        },
+        {
+          "name": "skillBody",
+          "startLine": 31,
+          "endLine": 36,
+          "params": [
+            "path"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "readSkillDoc",
+          "line": 10,
+          "isDefault": false
+        },
+        {
+          "name": "stripFrontmatter",
+          "line": 24,
+          "isDefault": false
+        },
+        {
+          "name": "skillBody",
+          "line": 31,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "readSkillDoc",
+          "callee": "join",
+          "lineNumber": 11
+        },
+        {
+          "caller": "readSkillDoc",
+          "callee": "statSync(candidate).isDirectory",
+          "lineNumber": 14
+        },
+        {
+          "caller": "readSkillDoc",
+          "callee": "statSync",
+          "lineNumber": 14
+        },
+        {
+          "caller": "readSkillDoc",
+          "callee": "readFileSync",
+          "lineNumber": 15
+        },
+        {
+          "caller": "stripFrontmatter",
+          "callee": "doc.startsWith",
+          "lineNumber": 25
+        },
+        {
+          "caller": "stripFrontmatter",
+          "callee": "doc.indexOf",
+          "lineNumber": 26
+        },
+        {
+          "caller": "stripFrontmatter",
+          "callee": "doc.slice(end + 4).replace",
+          "lineNumber": 28
+        },
+        {
+          "caller": "stripFrontmatter",
+          "callee": "doc.slice",
+          "lineNumber": 28
+        },
+        {
+          "caller": "skillBody",
+          "callee": "readSkillDoc",
+          "lineNumber": 32
+        },
+        {
+          "caller": "skillBody",
+          "callee": "sanitizeBody",
+          "lineNumber": 35
+        },
+        {
+          "caller": "skillBody",
+          "callee": "stripFrontmatter",
+          "lineNumber": 35
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 3,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/core/services/source.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 31,
+      "nonEmptyLines": 28,
+      "functions": [
+        {
+          "name": "listSourceSkills",
+          "startLine": 18,
+          "endLine": 31,
+          "params": [
+            "source"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "listSourceSkills",
+          "line": 18,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "listSourceSkills",
+          "callee": "runSkills",
+          "lineNumber": 19
+        },
+        {
+          "caller": "listSourceSkills",
+          "callee": "combined.matchAll",
+          "lineNumber": 24
+        },
+        {
+          "caller": "listSourceSkills",
+          "callee": "sanitizeMetadata",
+          "lineNumber": 27
+        },
+        {
+          "caller": "listSourceSkills",
+          "callee": "name.includes",
+          "lineNumber": 28
+        },
+        {
+          "caller": "listSourceSkills",
+          "callee": "names.includes",
+          "lineNumber": 28
+        },
+        {
+          "caller": "listSourceSkills",
+          "callee": "names.push",
+          "lineNumber": 28
+        },
+        {
+          "caller": "listSourceSkills",
+          "callee": "names.map",
+          "lineNumber": 30
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/core/services/types.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 68,
+      "nonEmptyLines": 60,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/core/services/update.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 16,
+      "nonEmptyLines": 15,
+      "functions": [
+        {
+          "name": "update",
+          "startLine": 11,
+          "endLine": 16,
+          "params": [
+            "names",
+            "scope"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "update",
+          "line": 11,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "update",
+          "callee": "runSkills",
+          "lineNumber": 13
+        },
+        {
+          "caller": "update",
+          "callee": "sanitizeMetadata",
+          "lineNumber": 15
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/core/services/updates-check.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 158,
+      "nonEmptyLines": 147,
+      "functions": [
+        {
+          "name": "record",
+          "startLine": 37,
+          "endLine": 38,
+          "params": [
+            "v"
+          ]
+        },
+        {
+          "name": "isTreeEntry",
+          "startLine": 40,
+          "endLine": 41,
+          "params": [
+            "v"
+          ]
+        },
+        {
+          "name": "fetchRepoTree",
+          "startLine": 43,
+          "endLine": 81,
+          "params": [
+            "source",
+            "ref"
+          ]
+        },
+        {
+          "name": "treeHashFor",
+          "startLine": 83,
+          "endLine": 87,
+          "params": [
+            "tree",
+            "skillPath"
+          ]
+        },
+        {
+          "name": "checkForUpdates",
+          "startLine": 89,
+          "endLine": 158,
+          "params": [
+            "scope"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "fetchRepoTree",
+          "line": 43,
+          "isDefault": false
+        },
+        {
+          "name": "checkForUpdates",
+          "line": 89,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "record",
+          "callee": "Array.isArray",
+          "lineNumber": 38
+        },
+        {
+          "caller": "isTreeEntry",
+          "callee": "record",
+          "lineNumber": 41
+        },
+        {
+          "caller": "fetchRepoTree",
+          "callee": "encodeURIComponent",
+          "lineNumber": 49
+        },
+        {
+          "caller": "fetchRepoTree",
+          "callee": "source\n    .split(\"/\")\n    .filter(Boolean)\n    .map(encodeURIComponent)\n    .join",
+          "lineNumber": 52
+        },
+        {
+          "caller": "fetchRepoTree",
+          "callee": "source\n    .split(\"/\")\n    .filter(Boolean)\n    .map",
+          "lineNumber": 52
+        },
+        {
+          "caller": "fetchRepoTree",
+          "callee": "source\n    .split(\"/\")\n    .filter",
+          "lineNumber": 52
+        },
+        {
+          "caller": "fetchRepoTree",
+          "callee": "source\n    .split",
+          "lineNumber": 52
+        },
+        {
+          "caller": "fetchRepoTree",
+          "callee": "fetch",
+          "lineNumber": 58
+        },
+        {
+          "caller": "fetchRepoTree",
+          "callee": "AbortSignal.timeout",
+          "lineNumber": 64
+        },
+        {
+          "caller": "fetchRepoTree",
+          "callee": "res.json",
+          "lineNumber": 72
+        },
+        {
+          "caller": "fetchRepoTree",
+          "callee": "record",
+          "lineNumber": 74
+        },
+        {
+          "caller": "fetchRepoTree",
+          "callee": "Array.isArray",
+          "lineNumber": 76
+        },
+        {
+          "caller": "fetchRepoTree",
+          "callee": "data.tree.every",
+          "lineNumber": 77
+        },
+        {
+          "caller": "treeHashFor",
+          "callee": "skillPath.replace(/^\\.\\//, \"\").replace",
+          "lineNumber": 84
+        },
+        {
+          "caller": "treeHashFor",
+          "callee": "skillPath.replace",
+          "lineNumber": 84
+        },
+        {
+          "caller": "treeHashFor",
+          "callee": "tree.find",
+          "lineNumber": 85
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "readLock",
+          "lineNumber": 90
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "Object.create",
+          "lineNumber": 94
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "Object.entries",
+          "lineNumber": 105
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "status",
+          "lineNumber": 106
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "Object.entries",
+          "lineNumber": 110
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "githubGroups.get",
+          "lineNumber": 113
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "group.push",
+          "lineNumber": 114
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "githubGroups.set",
+          "lineNumber": 115
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "status",
+          "lineNumber": 117
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "status",
+          "lineNumber": 119
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "status",
+          "lineNumber": 121
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "Promise.all",
+          "lineNumber": 125
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "[...githubGroups.values()].map",
+          "lineNumber": 126
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "githubGroups.values",
+          "lineNumber": 126
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "fetchRepoTree",
+          "lineNumber": 130
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "status",
+          "lineNumber": 136
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "treeHashFor",
+          "lineNumber": 139
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "status",
+          "lineNumber": 144
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "status",
+          "lineNumber": 152
+        },
+        {
+          "caller": "checkForUpdates",
+          "callee": "Object.keys",
+          "lineNumber": 157
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 2,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/core/skills-client.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 155,
+      "nonEmptyLines": 138,
+      "functions": [
+        {
+          "name": "sanitizeEnv",
+          "startLine": 70,
+          "endLine": 82,
+          "params": [
+            "base"
+          ]
+        },
+        {
+          "name": "resolveSkillsBin",
+          "startLine": 92,
+          "endLine": 96,
+          "params": []
+        },
+        {
+          "name": "resetSkillsBinCache",
+          "startLine": 98,
+          "endLine": 100,
+          "params": []
+        },
+        {
+          "name": "runSkills",
+          "startLine": 104,
+          "endLine": 106,
+          "params": [
+            "args",
+            "options"
+          ]
+        },
+        {
+          "name": "runSkillsUnqueued",
+          "startLine": 108,
+          "endLine": 145,
+          "params": [
+            "args",
+            "options"
+          ]
+        },
+        {
+          "name": "skillsVersion",
+          "startLine": 148,
+          "endLine": 155,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "SkillsCliError",
+          "startLine": 86,
+          "endLine": 86,
+          "methods": [],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "SkillsBusyError",
+          "line": 18,
+          "isDefault": false
+        },
+        {
+          "name": "sanitizeEnv",
+          "line": 70,
+          "isDefault": false
+        },
+        {
+          "name": "SkillsCliError",
+          "line": 86,
+          "isDefault": false
+        },
+        {
+          "name": "resolveSkillsBin",
+          "line": 92,
+          "isDefault": false
+        },
+        {
+          "name": "resetSkillsBinCache",
+          "line": 98,
+          "isDefault": false
+        },
+        {
+          "name": "runSkills",
+          "line": 104,
+          "isDefault": false
+        },
+        {
+          "name": "skillsVersion",
+          "line": 148,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "sanitizeEnv",
+          "callee": "Object.entries",
+          "lineNumber": 74
+        },
+        {
+          "caller": "sanitizeEnv",
+          "callee": "ENV_DENYLIST.has",
+          "lineNumber": 76
+        },
+        {
+          "caller": "sanitizeEnv",
+          "callee": "ENV_ALLOWLIST.has",
+          "lineNumber": 77
+        },
+        {
+          "caller": "sanitizeEnv",
+          "callee": "ENV_PREFIX_ALLOWLIST.some",
+          "lineNumber": 77
+        },
+        {
+          "caller": "sanitizeEnv",
+          "callee": "key.startsWith",
+          "lineNumber": 77
+        },
+        {
+          "caller": "resolveSkillsBin",
+          "callee": "process.env.SKILLS_UI_SKILLS_BIN?.trim",
+          "lineNumber": 94
+        },
+        {
+          "caller": "runSkills",
+          "callee": "spawnQueue.run",
+          "lineNumber": 105
+        },
+        {
+          "caller": "runSkills",
+          "callee": "runSkillsUnqueued",
+          "lineNumber": 105
+        },
+        {
+          "caller": "runSkillsUnqueued",
+          "callee": "resolveSkillsBin",
+          "lineNumber": 112
+        },
+        {
+          "caller": "runSkillsUnqueued",
+          "callee": "sanitizeEnv",
+          "lineNumber": 113
+        },
+        {
+          "caller": "runSkillsUnqueued",
+          "callee": "Object.assign",
+          "lineNumber": 117
+        },
+        {
+          "caller": "runSkillsUnqueued",
+          "callee": "Bun.spawn",
+          "lineNumber": 121
+        },
+        {
+          "caller": "runSkillsUnqueued",
+          "callee": "String",
+          "lineNumber": 130
+        },
+        {
+          "caller": "runSkillsUnqueued",
+          "callee": "setTimeout",
+          "lineNumber": 134
+        },
+        {
+          "caller": "runSkillsUnqueued",
+          "callee": "proc.kill",
+          "lineNumber": 134
+        },
+        {
+          "caller": "runSkillsUnqueued",
+          "callee": "Promise.all",
+          "lineNumber": 136
+        },
+        {
+          "caller": "runSkillsUnqueued",
+          "callee": "new Response(proc.stdout).text",
+          "lineNumber": 137
+        },
+        {
+          "caller": "runSkillsUnqueued",
+          "callee": "new Response(proc.stderr).text",
+          "lineNumber": 138
+        },
+        {
+          "caller": "runSkillsUnqueued",
+          "callee": "clearTimeout",
+          "lineNumber": 143
+        },
+        {
+          "caller": "skillsVersion",
+          "callee": "runSkills",
+          "lineNumber": 149
+        },
+        {
+          "caller": "skillsVersion",
+          "callee": "stdout.trim",
+          "lineNumber": 150
+        },
+        {
+          "caller": "skillsVersion",
+          "callee": "/^\\d+\\.\\d+\\.\\d+/.test",
+          "lineNumber": 151
+        },
+        {
+          "caller": "skillsVersion",
+          "callee": "JSON.stringify",
+          "lineNumber": 152
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 7,
+        "functionCount": 6,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "src/core/spawn-queue.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 56,
+      "nonEmptyLines": 50,
+      "functions": [
+        {
+          "name": "queueCap",
+          "startLine": 20,
+          "endLine": 23,
+          "params": []
+        },
+        {
+          "name": "createSpawnQueue",
+          "startLine": 29,
+          "endLine": 56,
+          "params": [
+            "maxConcurrent"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "SkillsBusyError",
+          "startLine": 8,
+          "endLine": 13,
+          "methods": [
+            "constructor"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "SkillsBusyError",
+          "line": 8,
+          "isDefault": false
+        },
+        {
+          "name": "queueCap",
+          "line": 20,
+          "isDefault": false
+        },
+        {
+          "name": "createSpawnQueue",
+          "line": 29,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "constructor",
+          "callee": "super",
+          "lineNumber": 10
+        },
+        {
+          "caller": "queueCap",
+          "callee": "Number",
+          "lineNumber": 21
+        },
+        {
+          "caller": "queueCap",
+          "callee": "Number.isFinite",
+          "lineNumber": 22
+        },
+        {
+          "caller": "queueCap",
+          "callee": "Math.floor",
+          "lineNumber": 22
+        },
+        {
+          "caller": "start",
+          "callee": "task()\n          .then(resolve, reject)\n          .finally",
+          "lineNumber": 37
+        },
+        {
+          "caller": "start",
+          "callee": "task()\n          .then",
+          "lineNumber": 37
+        },
+        {
+          "caller": "start",
+          "callee": "task",
+          "lineNumber": 37
+        },
+        {
+          "caller": "start",
+          "callee": "waiting.shift()?.resolve",
+          "lineNumber": 41
+        },
+        {
+          "caller": "start",
+          "callee": "waiting.shift",
+          "lineNumber": 41
+        },
+        {
+          "caller": "run",
+          "callee": "start",
+          "lineNumber": 45
+        },
+        {
+          "caller": "run",
+          "callee": "queueCap",
+          "lineNumber": 48
+        },
+        {
+          "caller": "run",
+          "callee": "reject",
+          "lineNumber": 49
+        },
+        {
+          "caller": "run",
+          "callee": "waiting.push",
+          "lineNumber": 52
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 3,
+        "functionCount": 2,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "tests/hosted-auth.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 190,
+      "nonEmptyLines": 172,
+      "functions": [
+        {
+          "name": "start",
+          "startLine": 43,
+          "endLine": 56,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "start",
+          "callee": "import",
+          "lineNumber": 44
+        },
+        {
+          "caller": "start",
+          "callee": "import",
+          "lineNumber": 45
+        },
+        {
+          "caller": "start",
+          "callee": "createSkillsUiServer",
+          "lineNumber": 47
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/locks.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 402,
+      "nonEmptyLines": 373,
+      "functions": [
+        {
+          "name": "startServer",
+          "startLine": 54,
+          "endLine": 57,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "startServer",
+          "callee": "import",
+          "lineNumber": 55
+        },
+        {
+          "caller": "startServer",
+          "callee": "createSkillsUiServer",
+          "lineNumber": 56
+        },
+        {
+          "caller": "writeLock",
+          "callee": "writeFileSync",
+          "lineNumber": 263
+        },
+        {
+          "caller": "writeLock",
+          "callee": "join",
+          "lineNumber": 263
+        },
+        {
+          "caller": "writeLock",
+          "callee": "JSON.stringify",
+          "lineNumber": 263
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/sanitize.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 152,
+      "nonEmptyLines": 136,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/serve-hardening.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 395,
+      "nonEmptyLines": 367,
+      "functions": [
+        {
+          "name": "start",
+          "startLine": 46,
+          "endLine": 57,
+          "params": [
+            "rateLimit"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "start",
+          "callee": "import",
+          "lineNumber": 49
+        },
+        {
+          "caller": "start",
+          "callee": "import",
+          "lineNumber": 50
+        },
+        {
+          "caller": "start",
+          "callee": "createSkillsUiServer",
+          "lineNumber": 51
+        },
+        {
+          "caller": "run",
+          "callee": "queue.run",
+          "lineNumber": 75
+        },
+        {
+          "caller": "run",
+          "callee": "finished.push",
+          "lineNumber": 77
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    }
+  ]
+}

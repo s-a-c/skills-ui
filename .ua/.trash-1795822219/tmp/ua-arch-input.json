@@ -1,0 +1,5256 @@
+{
+  "fileNodes": [
+    {
+      "id": "file:src/core/api.ts",
+      "type": "file",
+      "name": "api.ts",
+      "filePath": "src/core/api.ts",
+      "summary": "Implements the authenticated loopback HTTP API server (127.0.0.1 only) exposing skill listing, detail/body lookup, registry search, install/remove/update mutations, lockfile update checks, health checks, preferences persistence, and optional WebUI HTML serving. Enforces Host allowlisting, cross-site fetch-metadata rejection, CORS and timing-safe Bearer auth for hosted cross-origin clients, token-bucket rate limiting, and a 1 MiB transport/body cap.",
+      "tags": [
+        "http-api",
+        "loopback-server",
+        "security-gate",
+        "rest-endpoints",
+        "caching",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/hosted-auth.ts",
+      "type": "file",
+      "name": "hosted-auth.ts",
+      "filePath": "src/core/hosted-auth.ts",
+      "summary": "Provides the hosted WebUI authentication and browser-boundary defense primitives for the loopback API server. Implements persisted Bearer token management, constant-time SHA-256 token verification, DNS-rebinding Host allowlisting, Sec-Fetch-Site cross-site rejection, origin allowlisting, and CORS preflight responses.",
+      "tags": [
+        "hosted-auth",
+        "bearer-token",
+        "cors",
+        "dns-rebinding-defense",
+        "security",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/services/hooks.ts",
+      "type": "file",
+      "name": "hooks.ts",
+      "filePath": "src/core/services/hooks.ts",
+      "summary": "Manages operator-configured post-mutation hooks (SKILLS_UI_POST_MUTATION_HOOK) and external health-check executables (SKILLS_UI_HEALTH_CMD). Spawns executables directly without a shell using a sanitized environment, enforces timeouts, scrubs output, and caches health check results with TTL and in-flight coalescing.",
+      "tags": [
+        "hooks",
+        "health-check",
+        "subprocess",
+        "caching",
+        "core-service"
+      ]
+    },
+    {
+      "id": "file:src/core/services/install.ts",
+      "type": "file",
+      "name": "install.ts",
+      "filePath": "src/core/services/install.ts",
+      "summary": "Wraps `skills add --yes --json` to install one, several, or all (`*`) skills from a source into project or global scope. Parses the upstream JSON result array, sanitizes all text fields at ingress, and surfaces unparseable output as a failed entry.",
+      "tags": [
+        "skill-install",
+        "cli-wrapper",
+        "input-sanitization",
+        "core-service",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/services/installed.ts",
+      "type": "file",
+      "name": "installed.ts",
+      "filePath": "src/core/services/installed.ts",
+      "summary": "Lists and queries installed skills by invoking `skills ls --json [-g]`, enriching each record with lockfile- and symlink-based provenance while sanitizing display metadata at ingress and keeping filesystem paths raw.",
+      "tags": [
+        "installed-skills",
+        "provenance",
+        "cli-wrapper",
+        "core-service",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/services/locks.ts",
+      "type": "file",
+      "name": "locks.ts",
+      "filePath": "src/core/services/locks.ts",
+      "summary": "Provides read-only access and per-entry schema validation for project (`skills-lock.json`) and global XDG state (`.skill-lock.json` / legacy `skills-lock.json`) lockfiles. Isolates malformed entries into per-entry diagnostics while raising InvalidLockFileError on container-level corruption.",
+      "tags": [
+        "lockfile",
+        "schema-validation",
+        "diagnostics",
+        "xdg-state",
+        "core-service",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/services/remove.ts",
+      "type": "file",
+      "name": "remove.ts",
+      "filePath": "src/core/services/remove.ts",
+      "summary": "Removes installed skills via `skills rm -y [-g]` and verifies actual removal by diffing before and after installed skill lists. Accepts optional cached listing callbacks so the HTTP server avoids redundant `skills ls` spawns.",
+      "tags": [
+        "skill-remove",
+        "cli-wrapper",
+        "verification",
+        "core-service",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/services/sanitize.ts",
+      "type": "file",
+      "name": "sanitize.ts",
+      "filePath": "src/core/services/sanitize.ts",
+      "summary": "Implements CWE-150 ingress sanitization that strips ANSI CSI/C1-CSI/OSC/DCS/two-byte terminal escape sequences and unsafe control characters from untrusted CLI, lockfile, SKILL.md, and registry strings.",
+      "tags": [
+        "sanitization",
+        "ansi-stripping",
+        "cwe-150",
+        "security",
+        "core-service",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/services/search.ts",
+      "type": "file",
+      "name": "search.ts",
+      "filePath": "src/core/services/search.ts",
+      "summary": "Queries the skills.sh HTTP search registry with in-flight promise deduplication, ingress metadata sanitization, and progressive fallback strategies (prefix continuation fan-out and query shortening) that short-circuit cleanly on upstream HTTP failures.",
+      "tags": [
+        "registry-search",
+        "fallback-search",
+        "deduplication",
+        "http-client",
+        "core-service",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/services/skill-doc.ts",
+      "type": "file",
+      "name": "skill-doc.ts",
+      "filePath": "src/core/services/skill-doc.ts",
+      "summary": "Reads SKILL.md files from either a direct file path or a skill directory, strips leading YAML frontmatter blocks, and sanitizes Markdown bodies at ingress for safe TUI and WebUI display.",
+      "tags": [
+        "skill-doc",
+        "markdown",
+        "frontmatter",
+        "filesystem",
+        "core-service",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/services/source.ts",
+      "type": "file",
+      "name": "source.ts",
+      "filePath": "src/core/services/source.ts",
+      "summary": "Discovers installable skills advertised by a remote or local source by running `skills install <source> --list --yes` with FORCE_COLOR=1 and extracting sanitized skill names from SGR cyan ANSI spans.",
+      "tags": [
+        "source-discovery",
+        "ansi-parsing",
+        "cli-wrapper",
+        "core-service",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/services/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "src/core/services/types.ts",
+      "summary": "Defines shared TypeScript domain types and data contracts across core services, the HTTP API, and the TUI, including Scope, SkillProvenance, MutationEvent, InstalledSkill, SearchSkill, AddResultEntry, UpdatesResult, PostMutationHookResult, and HealthCheckResult.",
+      "tags": [
+        "typescript-types",
+        "domain-contracts",
+        "interfaces",
+        "core-service"
+      ]
+    },
+    {
+      "id": "file:src/core/services/update.ts",
+      "type": "file",
+      "name": "update.ts",
+      "filePath": "src/core/services/update.ts",
+      "summary": "Wraps `skills update -p|-g -y [names]` to update installed skills in project or global scope and sanitizes the combined CLI output for UI toast display.",
+      "tags": [
+        "skill-update",
+        "cli-wrapper",
+        "sanitization",
+        "core-service",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/services/updates-check.ts",
+      "type": "file",
+      "name": "updates-check.ts",
+      "filePath": "src/core/services/updates-check.ts",
+      "summary": "Checks locked GitHub skills for upstream updates by querying the GitHub Git Trees API per unique repo/ref and comparing folder SHAs against lockfile hashes. Treats truncated trees, malformed payloads, or missing folders in complete trees as inconclusive rather than falsely current, and isolates entry names in a null-prototype map.",
+      "tags": [
+        "update-check",
+        "github-api",
+        "lockfile",
+        "tree-hash",
+        "core-service",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/skills-client.ts",
+      "type": "file",
+      "name": "skills-client.ts",
+      "filePath": "src/core/skills-client.ts",
+      "summary": "Central subprocess boundary for executing the upstream `skills` CLI executable via Bun.spawn. Applies an allowlist/denylist environment sanitizer, caches executable resolution, serializes invocations behind a bounded spawn queue, enforces timeouts, and parses `skills --version`.",
+      "tags": [
+        "skills-cli",
+        "subprocess",
+        "env-sanitization",
+        "spawn-queue",
+        "core-client",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/spawn-queue.ts",
+      "type": "file",
+      "name": "spawn-queue.ts",
+      "filePath": "src/core/spawn-queue.ts",
+      "summary": "Implements a bounded FIFO concurrency semaphore for `skills` CLI subprocesses so request bursts cannot fan out long-running child processes. Rejects excess waiters immediately with SkillsBusyError when the queue reaches SKILLS_UI_SPAWN_QUEUE_CAP.",
+      "tags": [
+        "spawn-queue",
+        "semaphore",
+        "backpressure",
+        "dos-defense",
+        "core-utility",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:tests/hosted-auth.test.ts",
+      "type": "file",
+      "name": "hosted-auth.test.ts",
+      "filePath": "tests/hosted-auth.test.ts",
+      "summary": "Unit and API integration test suite verifying hosted-auth token persistence, environment overrides, Host and Origin allowlists, same-origin checks, CORS preflight behavior, token-free /api/version probes, and 401/403 enforcement on createSkillsUiServer.",
+      "tags": [
+        "unit-tests",
+        "integration-tests",
+        "hosted-auth",
+        "cors",
+        "bun-test"
+      ]
+    },
+    {
+      "id": "file:tests/locks.test.ts",
+      "type": "file",
+      "name": "locks.test.ts",
+      "filePath": "tests/locks.test.ts",
+      "summary": "Regression test suite covering CORE-03 per-entry lockfile validation, controlled InvalidLockFileError 400 responses on GET /api/updates, __proto__ key safety, and CORE-04 inconclusive handling for truncated or incomplete GitHub tree responses.",
+      "tags": [
+        "unit-tests",
+        "integration-tests",
+        "lockfile",
+        "update-check",
+        "bun-test"
+      ]
+    },
+    {
+      "id": "file:tests/sanitize.test.ts",
+      "type": "file",
+      "name": "sanitize.test.ts",
+      "filePath": "tests/sanitize.test.ts",
+      "summary": "Security test suite verifying ANSI/C1 escape stripping and control-character scrubbing in sanitize.ts as well as end-to-end ingress sanitization across listInstalled, listSourceSkills, install, and HTTP API skill descriptions and SKILL.md bodies.",
+      "tags": [
+        "security-tests",
+        "sanitization",
+        "cwe-150",
+        "ingress-tests",
+        "bun-test"
+      ]
+    },
+    {
+      "id": "file:tests/serve-hardening.test.ts",
+      "type": "file",
+      "name": "serve-hardening.test.ts",
+      "filePath": "tests/serve-hardening.test.ts",
+      "summary": "Hostile-input hardening test suite covering timing-safe bearerMatches, spawn-queue backpressure, fetchRepoTree URL encoding and completeness checks, cross-site Sec-Fetch-Site rejection, API argv/shape validation, transport body caps, rate limiting, and slow-handler idle timeouts.",
+      "tags": [
+        "security-tests",
+        "hardening",
+        "rate-limiting",
+        "spawn-queue",
+        "bun-test"
+      ]
+    },
+    {
+      "id": "file:src/core/disk-index.ts",
+      "type": "file",
+      "name": "disk-index.ts",
+      "filePath": "src/core/disk-index.ts",
+      "summary": "Persists a per-scope stale-while-revalidate cache of enriched installed skills under the user cache directory so TUI sessions paint immediately before subprocess refreshes settle. Partitions project-scope caches by canonical realpath hash and envelope projectRoot, rejects corrupt or oversized files safely, and writes atomically with stale temp/project sweeps.",
+      "tags": [
+        "disk-cache",
+        "stale-while-revalidate",
+        "persistence",
+        "atomic-write",
+        "core",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "src/core/index.ts",
+      "summary": "Barrel entrypoint that re-exports core skill types, filter matching, CLI runner utilities, installed/search/mutation services, lock-file helpers, update checks, and post-mutation hook and health check APIs. Provides a single import surface for the TUI, HTTP API, and test suites.",
+      "tags": [
+        "barrel-export",
+        "core-api",
+        "skills-services",
+        "public-surface",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/prefs.ts",
+      "type": "file",
+      "name": "prefs.ts",
+      "filePath": "src/core/prefs.ts",
+      "summary": "Manages persisted UI preferences (Catppuccin theme, sound effects, reduced motion, fixed web port, and list-pane width percentage) under the skills-ui config directory. Normalizes partial or legacy preference files safely and supports one-time migration from the upstream skills CLI preference file.",
+      "tags": [
+        "preferences",
+        "configuration",
+        "persistence",
+        "migration",
+        "core",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/seed.ts",
+      "type": "file",
+      "name": "seed.ts",
+      "filePath": "src/core/seed.ts",
+      "summary": "Parses CLI command-line arguments into structured UiSeed intents for launching the TUI or Web UI pre-seeded with add, update, or remove actions. Performs flag-aware positional extraction so value-taking options do not pollute skill or source arguments.",
+      "tags": [
+        "cli-parsing",
+        "ui-seed",
+        "argument-parser",
+        "core",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/core/theme.ts",
+      "type": "file",
+      "name": "theme.ts",
+      "filePath": "src/core/theme.ts",
+      "summary": "Defines Catppuccin Mocha and Latte color palettes, WCAG 2.x luminance and contrast utilities, contrast-enforced semantic theme tokens, truecolor/256-color ANSI terminal painters, and OpenTUI tree-sitter syntax highlighting scopes. Serves as the single color token source for both TUI and web surfaces.",
+      "tags": [
+        "catppuccin-theme",
+        "wcag-contrast",
+        "design-tokens",
+        "ansi-colors",
+        "syntax-highlighting",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/tui/Views.tsx",
+      "type": "file",
+      "name": "Views.tsx",
+      "filePath": "src/tui/Views.tsx",
+      "summary": "Implements the OpenTUI React view tree mounted on a single root and subscribed to the Elm-style TuiModel store via useSyncExternalStore. Renders the startup splash, optional 3D skill graph, installed and registry-search split panes with match highlighting, settings panel, constant footer legend, and animated modal overlays.",
+      "tags": [
+        "opentui-react",
+        "tui-views",
+        "split-pane",
+        "overlays",
+        "search-highlighting",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/tui/app.ts",
+      "type": "file",
+      "name": "app.ts",
+      "filePath": "src/tui/app.ts",
+      "summary": "Orchestrates the interactive OpenTUI application lifecycle, wiring the pure Elm-style TuiModel store, React view mounting, keyboard dispatch, stale-while-revalidate disk-index hydration, async search/update/mutation workflows, crash-guard signal cleanup, and injectable production dependencies. Re-exports spike screen helpers for selftest verification.",
+      "tags": [
+        "tui-runtime",
+        "event-loop",
+        "keybindings",
+        "dependency-injection",
+        "crash-guard",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/tui/art.ts",
+      "type": "file",
+      "name": "art.ts",
+      "filePath": "src/tui/art.ts",
+      "summary": "Generates procedural RGBA pixel art via OpenTUI NativeImage for the startup splash gradient banner and deterministic per-source search identicon badges. Caches generated images per theme and source key so the standalone binary ships zero external image assets.",
+      "tags": [
+        "procedural-art",
+        "native-image",
+        "identicons",
+        "tui-visuals",
+        "catppuccin-theme",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/tui/audio.ts",
+      "type": "file",
+      "name": "audio.ts",
+      "filePath": "src/tui/audio.ts",
+      "summary": "Synthesizes short mono f32le PCM sine-wave UI feedback tones (select, confirm, success, error) streamed through OpenTUI's Audio engine. Gates playback on user sound preferences, disposes resources cleanly on exit, and degrades silently when audio hardware is unavailable.",
+      "tags": [
+        "pcm-audio",
+        "sound-synthesis",
+        "tui-feedback",
+        "graceful-degradation"
+      ]
+    },
+    {
+      "id": "file:src/tui/model.ts",
+      "type": "file",
+      "name": "model.ts",
+      "filePath": "src/tui/model.ts",
+      "summary": "Implements the renderer-agnostic Elm-style state model and pure action reducer for the TUI, covering installed and search tabs, scope-keyed update/error tracking, text/agent/provenance filtering, sort modes, batch checks, install queue, and modal overlays. Memoizes one filter-and-sort pass per dispatch onto model.visible and model.visibleResults.",
+      "tags": [
+        "elm-architecture",
+        "state-machine",
+        "pure-reducer",
+        "tui-model",
+        "filtering",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/tui/renderer-ready.ts",
+      "type": "file",
+      "name": "renderer-ready.ts",
+      "filePath": "src/tui/renderer-ready.ts",
+      "summary": "Provides a bounded frame-polling helper (waitForFrame) that flushes and captures character frames from an in-memory OpenTUI test renderer until a predicate holds or a timeout expires. Eliminates flaky fixed sleeps when awaiting asynchronous React commits and tree-sitter highlighting.",
+      "tags": [
+        "test-utility",
+        "frame-polling",
+        "opentui-testing",
+        "async-readiness",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/tui/three-scene.ts",
+      "type": "file",
+      "name": "three-scene.ts",
+      "filePath": "src/tui/three-scene.ts",
+      "summary": "Builds and caches an interactive 3D Three.js skill graph on an OpenTUI ThreeRenderable using Fibonacci-sphere point layout colored by source/agent accents and line edges connecting shared-agent skills. Dynamically loaded by Views.tsx so environments without WebGPU avoid paying startup or compatibility costs.",
+      "tags": [
+        "three-js",
+        "3d-visualization",
+        "skill-graph",
+        "opentui-three",
+        "tui-visuals",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/web/client/core.ts",
+      "type": "file",
+      "name": "core.ts",
+      "filePath": "src/web/client/core.ts",
+      "summary": "Exports the CLIENT_CORE_JS browser script foundation embedded into the web UI page, holding global client state, sessionStorage migration, authenticated fetch wrapper, Web Audio feedback synth, theme/list-width preference sync, hosted backend probing, health popover, and toast notifications.",
+      "tags": [
+        "web-client",
+        "browser-state",
+        "api-client",
+        "web-audio",
+        "javascript-template"
+      ]
+    },
+    {
+      "id": "file:tests/filter-parity.test.ts",
+      "type": "file",
+      "name": "filter-parity.test.ts",
+      "filePath": "tests/filter-parity.test.ts",
+      "summary": "Verifies cross-surface filter parity between the TUI visibleSkills pipeline and the web UI skillMatches predicate across text, agent-only, source, description, and empty queries. Also asserts that renderPage embeds the shared skillMatches function rather than a divergent copy.",
+      "tags": [
+        "unit-test",
+        "filter-parity",
+        "cross-surface",
+        "regression-test"
+      ]
+    },
+    {
+      "id": "file:tests/hooks-health.test.ts",
+      "type": "file",
+      "name": "hooks-health.test.ts",
+      "filePath": "tests/hooks-health.test.ts",
+      "summary": "Tests global lock-file resolution and malformed lock error propagation, symlink/locked/local skill provenance classification, disk-index provenance round-tripping, subprocess environment sanitization, post-mutation hook execution, TTL health-check caching, and API security enforcement on /api/version and /api/health-check.",
+      "tags": [
+        "integration-test",
+        "provenance",
+        "hooks",
+        "health-check",
+        "api-security"
+      ]
+    },
+    {
+      "id": "file:tests/selftest.test.ts",
+      "type": "file",
+      "name": "selftest.test.ts",
+      "filePath": "tests/selftest.test.ts",
+      "summary": "Exercises the OpenTUI tree-sitter markdown spike screen both in-memory via buildSpikeScreen and waitForFrame and end-to-end by spawning `src/main.ts --selftest`. Confirms asynchronous syntax-worker markers render reliably within bounded deadlines.",
+      "tags": [
+        "selftest",
+        "opentui-testing",
+        "tree-sitter",
+        "smoke-test"
+      ]
+    },
+    {
+      "id": "file:tests/tui-disk-index.test.ts",
+      "type": "file",
+      "name": "tui-disk-index.test.ts",
+      "filePath": "tests/tui-disk-index.test.ts",
+      "summary": "Covers unit and in-memory renderer behavior for stale-while-revalidate disk indexing, including atomic writes, hostile/oversized payload rejection, canonical project-root partitioning across symlinks and processes, stale cache sweeping, instant stale paints before subprocess completion, and swap reconciliation.",
+      "tags": [
+        "integration-test",
+        "disk-cache",
+        "stale-while-revalidate",
+        "opentui-testing",
+        "partitioning"
+      ]
+    },
+    {
+      "id": "file:tests/tui.test.ts",
+      "type": "file",
+      "name": "tui.test.ts",
+      "filePath": "tests/tui.test.ts",
+      "summary": "Comprehensive in-memory OpenTUI and pure-model test suite covering installed and search workflows, keyboard contracts, scope-threaded installs and updates, double-press quit safety, FIFO toasts, stale search and update-check race rejection, 3D graph and splash views, list-width resizing, provenance badges, and health overlays.",
+      "tags": [
+        "integration-test",
+        "tui-suite",
+        "keybindings",
+        "race-conditions",
+        "opentui-testing"
+      ]
+    },
+    {
+      "id": "file:scripts/export-page.ts",
+      "type": "file",
+      "name": "export-page.ts",
+      "filePath": "scripts/export-page.ts",
+      "summary": "Build helper script that renders the hosted single-file WebUI HTML via renderPage with APP_VERSION and writes it to docs/app.html or a CLI-provided destination for GitHub Pages deployment.",
+      "tags": [
+        "build-script",
+        "web-ui",
+        "static-export",
+        "github-pages",
+        "html-generation"
+      ]
+    },
+    {
+      "id": "file:scripts/perf/budget.ts",
+      "type": "file",
+      "name": "budget.ts",
+      "filePath": "scripts/perf/budget.ts",
+      "summary": "End-to-end performance budget harness that benchmarks filter matching, cold and warm API listings, stubbed registry search concurrency, and Playwright DOM/paint probes against synthetic or real skill corpora. Emits Markdown budget reports and supports strict gating via CLI flags.",
+      "tags": [
+        "performance-harness",
+        "benchmarking",
+        "playwright-probes",
+        "budget-reporting",
+        "cli-script"
+      ]
+    },
+    {
+      "id": "file:src/core/version.ts",
+      "type": "file",
+      "name": "version.ts",
+      "filePath": "src/core/version.ts",
+      "summary": "Exports APP_VERSION as the single source of truth for the wrapper version across the TUI, WebUI, GET /api/version, and --version. Uses the build-time __APP_VERSION__ define when compiled and falls back to package.json during development and tests.",
+      "tags": [
+        "versioning",
+        "core-module",
+        "build-define",
+        "metadata",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/main.ts",
+      "type": "file",
+      "name": "main.ts",
+      "filePath": "src/main.ts",
+      "summary": "Primary CLI entrypoint for skills-ui that parses shared --port arguments and dispatches between --version, --selftest, headless serve, --web browser mode, and the default OpenTUI terminal application.",
+      "tags": [
+        "cli-entrypoint",
+        "mode-dispatch",
+        "tui-launcher",
+        "web-launcher"
+      ]
+    },
+    {
+      "id": "file:tests/api.test.ts",
+      "type": "file",
+      "name": "api.test.ts",
+      "filePath": "tests/api.test.ts",
+      "summary": "Comprehensive HTTP API integration test suite covering /api/version, /api/skills listing and caching, /api/skill detail-by-name and detail-by-path validation, install/remove/update mutations, preferences persistence, and security/host-header hardening against the skills shim.",
+      "tags": [
+        "integration-tests",
+        "http-api",
+        "skills-shim",
+        "cache-validation",
+        "bun-test"
+      ]
+    },
+    {
+      "id": "file:tests/page-smoke.test.ts",
+      "type": "file",
+      "name": "page-smoke.test.ts",
+      "filePath": "tests/page-smoke.test.ts",
+      "summary": "Playwright browser smoke and regression test suite against the live served WebUI page. Pins row checkbox clear behavior, conditional detail-pane update button rendering, layout geometry, and DOM reconciliation invariants.",
+      "tags": [
+        "playwright-tests",
+        "web-ui",
+        "smoke-tests",
+        "regression-pins",
+        "dom-reconciliation"
+      ]
+    },
+    {
+      "id": "file:tests/perf/filter-dom.test.ts",
+      "type": "file",
+      "name": "filter-dom.test.ts",
+      "filePath": "tests/perf/filter-dom.test.ts",
+      "summary": "Playwright behavioral performance tests for the served WebUI filter input on a 60-row synthetic corpus. Asserts exact match row counts, zero-mutation DOM node identity preservation on same-result keystrokes, and zero entrance animation replays.",
+      "tags": [
+        "performance-tests",
+        "playwright-tests",
+        "dom-reuse",
+        "filter-behavior",
+        "animation-regression"
+      ]
+    },
+    {
+      "id": "file:tests/perf/helpers.ts",
+      "type": "file",
+      "name": "helpers.ts",
+      "filePath": "tests/perf/helpers.ts",
+      "summary": "Shared performance harness utility module used by both perf tests and scripts/perf/budget.ts. Provides synthetic SKILL.md corpus generation, shim call-log parsing and spawn counting, a fixed-RTT stub skills.sh registry server, and median/millisecond formatting helpers.",
+      "tags": [
+        "performance-harness",
+        "test-helpers",
+        "synthetic-corpus",
+        "registry-stub",
+        "spawn-counting"
+      ]
+    },
+    {
+      "id": "file:tests/perf/playwright-probes.ts",
+      "type": "file",
+      "name": "playwright-probes.ts",
+      "filePath": "tests/perf/playwright-probes.ts",
+      "summary": "Reusable Playwright browser instrumentation probes for measuring filter render work, DOM identity preservation, animation replays, scope-switch first paint, and stale search overwrite resistance on the shipped WebUI page.",
+      "tags": [
+        "playwright-probes",
+        "performance-harness",
+        "browser-instrumentation",
+        "dom-metrics",
+        "web-ui"
+      ]
+    },
+    {
+      "id": "file:tests/perf/search-stub.test.ts",
+      "type": "file",
+      "name": "search-stub.test.ts",
+      "filePath": "tests/perf/search-stub.test.ts",
+      "summary": "Count-based performance tests exercising /api/search against the fixed-RTT stub registry server to verify payload mapping, single-call sequential routing, and in-flight deduplication of concurrent identical searches.",
+      "tags": [
+        "performance-tests",
+        "registry-search",
+        "request-dedup",
+        "http-api",
+        "bun-test"
+      ]
+    },
+    {
+      "id": "file:tests/perf/spawn-count.test.ts",
+      "type": "file",
+      "name": "spawn-count.test.ts",
+      "filePath": "tests/perf/spawn-count.test.ts",
+      "summary": "Spawn-count performance test suite asserting per-server list caching, scope-keyed request coalescing, zero-spawn detail-by-name and detail-by-path reads, and cache invalidation across mutations via the shim call log.",
+      "tags": [
+        "performance-tests",
+        "spawn-counting",
+        "list-cache",
+        "request-coalescing",
+        "bun-test"
+      ]
+    },
+    {
+      "id": "file:tests/version.test.ts",
+      "type": "file",
+      "name": "version.test.ts",
+      "filePath": "tests/version.test.ts",
+      "summary": "Unit tests verifying that APP_VERSION falls back to package.json when the build-time __APP_VERSION__ define is absent and matches a 3- or 4-segment semver string.",
+      "tags": [
+        "unit-tests",
+        "versioning",
+        "semver-validation",
+        "bun-test"
+      ]
+    },
+    {
+      "id": "file:tests/web-055.test.ts",
+      "type": "file",
+      "name": "web-055.test.ts",
+      "filePath": "tests/web-055.test.ts",
+      "summary": "Playwright browser test suite for WebUI v0.5.5 features, verifying skill provenance badges (locked, linked, local) and conditional health-check capability and status UI against stubbed API routes.",
+      "tags": [
+        "playwright-tests",
+        "web-ui",
+        "provenance-badges",
+        "health-check",
+        "bun-test"
+      ]
+    },
+    {
+      "id": "file:src/web/client/installed.ts",
+      "type": "file",
+      "name": "installed.ts",
+      "filePath": "src/web/client/installed.ts",
+      "summary": "Generates the client-side JavaScript bundle section that manages the installed skills list, DOM-reusing filter and sort rendering, escape-first Markdown SKILL.md detail viewer, removal confirmation, seed-install flows, and update checks. Interpolates the shared skillMatches predicate source so web filtering matches the TUI.",
+      "tags": [
+        "web-client",
+        "installed-skills",
+        "markdown-renderer",
+        "dom-rendering",
+        "javascript-template",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/web/client/search-and-boot.ts",
+      "type": "file",
+      "name": "search-and-boot.ts",
+      "filePath": "src/web/client/search-and-boot.ts",
+      "summary": "Exports the CLIENT_SEARCH_AND_BOOT_JS script fragment powering skills.sh registry search, install-list queueing and batch installation, tab and scope switching, agent filter popover, settings drawer, resizable list-pane splitter, keyboard shortcuts, and application boot.",
+      "tags": [
+        "web-client",
+        "registry-search",
+        "install-queue",
+        "ui-bootstrap",
+        "keyboard-shortcuts"
+      ]
+    },
+    {
+      "id": "file:src/web/page.ts",
+      "type": "file",
+      "name": "page.ts",
+      "filePath": "src/web/page.ts",
+      "summary": "Assembles and renders the complete single-file HTML web UI over the skills-ui /api contract, combining Catppuccin Mocha and Latte CSS variables, APP_CSS, concatenated APP_JS client scripts, </script>-safe JSON bootstrap state, and SHA-256 hash-pinned Content-Security-Policy headers. Re-exports skillMatches and exposes webPageRenderer for local serve and static hosted exports.",
+      "tags": [
+        "web-ui",
+        "html-renderer",
+        "csp-hardening",
+        "catppuccin-theme",
+        "single-file-app",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/web/styles.ts",
+      "type": "file",
+      "name": "styles.ts",
+      "filePath": "src/web/styles.ts",
+      "summary": "Exports the APP_CSS stylesheet string for the skills-ui web interface, defining responsive layout rules, 4px-scale spacing, Catppuccin token consumption, reduced-motion overrides, Markdown detail typography, settings drawer transitions, modal scrims, and toast styling.",
+      "tags": [
+        "css",
+        "web-styles",
+        "responsive-design",
+        "reduced-motion",
+        "catppuccin-theme"
+      ]
+    },
+    {
+      "id": "file:tests/dash-sweep.test.ts",
+      "type": "file",
+      "name": "dash-sweep.test.ts",
+      "filePath": "tests/dash-sweep.test.ts",
+      "summary": "Enforces the S-184 runtime copy gate by lexing emitted web APP_JS and TUI source files (Views.tsx, app.ts, model.ts) to ensure no en-dash, em-dash, or escaped/entity dash variants appear in user-facing strings or JSX text runs.",
+      "tags": [
+        "test-suite",
+        "copy-linting",
+        "lexer",
+        "web-ui",
+        "tui"
+      ]
+    },
+    {
+      "id": "file:tests/fixtures/audit-web-server.ts",
+      "type": "file",
+      "name": "audit-web-server.ts",
+      "filePath": "tests/fixtures/audit-web-server.ts",
+      "summary": "Minimal test fixture script that launches an unthrottled local skills-ui HTTP server with webPageRenderer enabled, prints the bound loopback AUDIT_ORIGIN JSON payload, and cleanly stops on SIGTERM.",
+      "tags": [
+        "test-fixture",
+        "web-server",
+        "audit-harness",
+        "loopback-api"
+      ]
+    },
+    {
+      "id": "file:tests/markdown-render.test.ts",
+      "type": "file",
+      "name": "markdown-render.test.ts",
+      "filePath": "tests/markdown-render.test.ts",
+      "summary": "Tests the shipped web renderMarkdown implementation sliced directly from renderPage's emitted APP_JS, verifying CommonMark/GFM subset rendering, non-navigable links, sink-side XSS neutralization against hostile payloads, zero raw backticks, and byte-identical output determinism.",
+      "tags": [
+        "test-suite",
+        "markdown-renderer",
+        "xss-security",
+        "shipped-bytes",
+        "web-ui"
+      ]
+    },
+    {
+      "id": "file:tests/page-hardening.test.ts",
+      "type": "file",
+      "name": "page-hardening.test.ts",
+      "filePath": "tests/page-hardening.test.ts",
+      "summary": "Verifies web page security hardening including SHA-256 hash-pinned CSP headers and meta tags, </script>-safe JSON bootstrap embedding, sessionStorage token persistence with legacy localStorage migration, APP_JS Node syntax validity, and serve-side nosniff/no-referrer headers.",
+      "tags": [
+        "test-suite",
+        "security-hardening",
+        "csp",
+        "session-storage",
+        "web-ui"
+      ]
+    },
+    {
+      "id": "file:tests/terminology.test.ts",
+      "type": "file",
+      "name": "terminology.test.ts",
+      "filePath": "tests/terminology.test.ts",
+      "summary": "Guards ratified skills-ui vocabulary across both TUI source files (Views.tsx, app.ts) and emitted renderPage HTML, asserting consistent use of 'install list', 'remove' instead of 'delete', and matching confirmation key prompts.",
+      "tags": [
+        "test-suite",
+        "terminology",
+        "copy-consistency",
+        "web-ui",
+        "tui"
+      ]
+    },
+    {
+      "id": "file:tests/e2e/audit-remediation.e2e.ts",
+      "type": "file",
+      "name": "audit-remediation.e2e.ts",
+      "filePath": "tests/e2e/audit-remediation.e2e.ts",
+      "summary": "Playwright end-to-end test suite verifying web UI audit-remediation invariants across 20 browser scenarios. Covers install-queue scope capture and partial failures, wildcard seed installation, stale list/detail/update-check race guards, busy-state and semantic disabled-button arbitration, keyboard checkbox accessibility, and responsive search-card layout.",
+      "tags": [
+        "e2e-tests",
+        "playwright",
+        "web-ui",
+        "race-conditions",
+        "accessibility"
+      ]
+    },
+    {
+      "id": "file:tests/e2e/helpers/audit-fixture.ts",
+      "type": "file",
+      "name": "audit-fixture.ts",
+      "filePath": "tests/e2e/helpers/audit-fixture.ts",
+      "summary": "Playwright E2E fixture helpers that manage the audit web backend subprocess, construct synthetic skill rows, stub default `/api/**` browser routes, track page errors, and wait for post-response DOM paint frames.",
+      "tags": [
+        "e2e-helpers",
+        "playwright",
+        "test-fixture",
+        "route-mocking"
+      ]
+    },
+    {
+      "id": "file:tests/helpers/audit-state.ts",
+      "type": "file",
+      "name": "audit-state.ts",
+      "filePath": "tests/helpers/audit-state.ts",
+      "summary": "Shared test-isolation utility providing a `deferred` promise helper and a temporary workspace fixture that redirects `SKILLS_UI_*`, shim, and XDG environment variables into `.agents/tmp`.",
+      "tags": [
+        "test-helpers",
+        "env-isolation",
+        "workspace-fixture",
+        "async-testing"
+      ]
+    },
+    {
+      "id": "file:tests/helpers/installer-fixture.ts",
+      "type": "file",
+      "name": "installer-fixture.ts",
+      "filePath": "tests/helpers/installer-fixture.ts",
+      "summary": "Test fixture builder for `scripts/install.sh` that constructs a hermetic sandbox with a pre-installed binary, payload, SHA-256 checksum manifest, and stubbed `uname`, `curl`, and `chmod` commands.",
+      "tags": [
+        "installer-testing",
+        "test-fixture",
+        "shell-stubs",
+        "checksum"
+      ]
+    },
+    {
+      "id": "file:tests/installer.test.ts",
+      "type": "file",
+      "name": "installer.test.ts",
+      "filePath": "tests/installer.test.ts",
+      "summary": "Bun test suite exercising `scripts/install.sh` against hermetic installer fixtures to verify atomic installation, executable publishing, temp-file cleanup, and preservation of the prior binary on `chmod`, checksum, and download failures.",
+      "tags": [
+        "installer-tests",
+        "bun-test",
+        "shell-script",
+        "fault-tolerance"
+      ]
+    },
+    {
+      "id": "pipeline:.github/workflows/claude-code-review.yml",
+      "type": "pipeline",
+      "name": "claude-code-review.yml",
+      "filePath": ".github/workflows/claude-code-review.yml",
+      "summary": "GitHub Actions workflow that runs automated Claude Code reviews on pull request open, synchronize, ready-for-review, and reopen events using anthropics/claude-code-action@v1 with the code-review plugin and inline comment tool.",
+      "tags": [
+        "ci",
+        "github-actions",
+        "code-review",
+        "claude-code",
+        "pull-request"
+      ]
+    },
+    {
+      "id": "pipeline:.github/workflows/claude.yml",
+      "type": "pipeline",
+      "name": "claude.yml",
+      "filePath": ".github/workflows/claude.yml",
+      "summary": "GitHub Actions workflow triggered by @claude mentions in issue bodies, issue comments, PR review comments, and PR reviews, invoking anthropics/claude-code-action@v1 with read access to repository contents, PRs, issues, and CI actions.",
+      "tags": [
+        "ci",
+        "github-actions",
+        "claude-code",
+        "issue-automation",
+        "pr-assistant"
+      ]
+    },
+    {
+      "id": "document:AGENTS.md",
+      "type": "document",
+      "name": "AGENTS.md",
+      "filePath": "AGENTS.md",
+      "summary": "Repository-level agent contract defining the skills-ui tech stack, directory layout, SKILLS_UI_* environment variables, development commands, git worktree conventions, Linear wayfinder process, and documentation authority hierarchy.",
+      "tags": [
+        "agent-instructions",
+        "documentation",
+        "conventions",
+        "environment-variables",
+        "workflow"
+      ]
+    },
+    {
+      "id": "document:CONTEXT.md",
+      "type": "document",
+      "name": "CONTEXT.md",
+      "filePath": "CONTEXT.md",
+      "summary": "Domain ubiquitous-language glossary standardizing canonical UI layout names (Frame, Filter List Panel, Detail Panel), card anatomy terms, Skill Provenance states, Post-Mutation Hook semantics, and the Health Pill across WebUI and TUI.",
+      "tags": [
+        "domain-glossary",
+        "ubiquitous-language",
+        "documentation",
+        "ui-terminology",
+        "architecture"
+      ]
+    },
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "README.md",
+      "summary": "Primary user and developer guide for skills-ui describing its three runtime modes, hosted zero-install WebUI, 0.5.3 performance benchmarks, checksum-verified curl installer, CLI usage, development workflow, and subprocess wrapping of upstream skills.",
+      "tags": [
+        "documentation",
+        "readme",
+        "installation",
+        "usage-guide",
+        "performance"
+      ]
+    },
+    {
+      "id": "document:ROADMAP.md",
+      "type": "document",
+      "name": "ROADMAP.md",
+      "filePath": "ROADMAP.md",
+      "summary": "Milestone roadmap and delivery ledger spanning 0.0.x through 0.5.5, documenting HTTP API and OpenTUI parity, rich rendering, packaging matrix, Hosted UI architecture guardrails, hardening series, UI ergonomics, hub provenance/health features, and future targets.",
+      "tags": [
+        "roadmap",
+        "milestones",
+        "release-history",
+        "documentation",
+        "architecture"
+      ]
+    },
+    {
+      "id": "config:mise.toml",
+      "type": "config",
+      "name": "mise.toml",
+      "filePath": "mise.toml",
+      "summary": "Toolchain configuration pinning Bun 1.4.4 via mise for consistent local development, test execution, and compiled binary builds.",
+      "tags": [
+        "toolchain",
+        "mise",
+        "bun",
+        "config",
+        "version-pin"
+      ]
+    },
+    {
+      "id": "config:package.json",
+      "type": "config",
+      "name": "package.json",
+      "filePath": "package.json",
+      "summary": "ESM package manifest for skills-ui v0.5.5 declaring the Bun >=1.4 engine requirement, dev/selftest/test/build/export:page/pty-smoke/perf:budget scripts, OpenTUI and React 19 dependencies, and Playwright/Bun type devDependencies.",
+      "tags": [
+        "package-manifest",
+        "bun",
+        "scripts",
+        "dependencies",
+        "config"
+      ]
+    },
+    {
+      "id": "config:tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "filePath": "tsconfig.json",
+      "summary": "TypeScript compiler configuration targeting ESNext with bundler module resolution, Bun global types, strict checking, noUncheckedIndexedAccess, verbatimModuleSyntax, and noEmit across src, tests, and scripts.",
+      "tags": [
+        "typescript",
+        "compiler-config",
+        "typechecking",
+        "bundler-resolution",
+        "config"
+      ]
+    },
+    {
+      "id": "config:docs/_config.yml",
+      "type": "config",
+      "name": "_config.yml",
+      "filePath": "docs/_config.yml",
+      "summary": "Jekyll and GitHub Pages site configuration for skills-ui using the just-the-docs remote theme, setting the site URL (https://s-a-c.github.io) and /skills-ui baseurl, auxiliary GitHub and Releases links, and the default page layout.",
+      "tags": [
+        "jekyll",
+        "github-pages",
+        "just-the-docs",
+        "site-config"
+      ]
+    },
+    {
+      "id": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "type": "document",
+      "name": "archify-findings-review-and-report-2026-11-26.md",
+      "filePath": "docs/archify-findings-review-and-report-2026-11-26.md",
+      "summary": "Session transcript and architecture report auditing all 18 Archify code-analysis findings on skills-ui and documenting the completed 3-wave Option A remediation: decoupling src/core from src/web via PageRenderer injection and src/core/filter.ts, decomposing 6 high-complexity functions (app.ts:onKey, api.ts:route, model.ts:update, Views.tsx:SearchBody/InstalledBody, budget.ts:main), modularizing src/web/page.ts byte-identically, and achieving a none-found Archify gate.",
+      "tags": [
+        "archify",
+        "code-analysis",
+        "refactoring-report",
+        "architecture-audit"
+      ]
+    },
+    {
+      "id": "document:docs/index.md",
+      "type": "document",
+      "name": "index.md",
+      "filePath": "docs/index.md",
+      "summary": "GitHub Pages landing page (layout: home) for skills-ui presenting pinned and rolling curl-to-sh installation via scripts/install.sh, CLI invocation modes (OpenTUI, --web, serve, --selftest), hosted zero-install web UI highlights, and links to ROADMAP.md and repo/agent conventions.",
+      "tags": [
+        "github-pages",
+        "landing-page",
+        "installation",
+        "cli-overview"
+      ]
+    },
+    {
+      "id": "document:docs/release.md",
+      "type": "document",
+      "name": "release.md",
+      "filePath": "docs/release.md",
+      "summary": "Release runbook for v0.5.1+ detailing cross-platform matrix dependency installation, pre-release verification gates (bun test, pty-smoke, build --all, --selftest), SHA-256 checksum manifest commitment, signed git tagging, GitHub Release publishing, hosted docs/app.html export, and clean-directory installer verification.",
+      "tags": [
+        "release-process",
+        "checksums",
+        "signed-tags",
+        "runbook"
+      ]
+    },
+    {
+      "id": "document:docs/upstream-issue-draft.md",
+      "type": "document",
+      "name": "upstream-issue-draft.md",
+      "filePath": "docs/upstream-issue-draft.md",
+      "summary": "Ready-to-file GitHub bug report draft for vercel-labs/skills (cross-referencing #1389) diagnosing the O(canonical x corpus) SKILL.md re-parse storm in skills ls (v1.7.4 listInstalledSkills) with bisection timings, duplicate warning counts, sample(1) I/O-wait profile, and proposed memoization and per-agent index fixes.",
+      "tags": [
+        "upstream-bug",
+        "performance",
+        "skills-cli",
+        "issue-draft"
+      ]
+    },
+    {
+      "id": "document:docs/upstream-ls-memoization.md",
+      "type": "document",
+      "name": "upstream-ls-memoization.md",
+      "filePath": "docs/upstream-ls-memoization.md",
+      "summary": "Technical investigation memo (S-153, filed upstream as vercel-labs/skills#2644) analyzing the minute-long skills ls SKILL.md re-parse storm via corpus bisection and CPU/IO profiling, proposing upstream parseSkillMd memoization and per-agent indexing, and recording skills-ui's downstream caching, request coalescing, and remove-path optimizations.",
+      "tags": [
+        "upstream-memo",
+        "performance",
+        "memoization",
+        "caching"
+      ]
+    },
+    {
+      "id": "document:docs/agents/domain.md",
+      "type": "document",
+      "name": "domain.md",
+      "filePath": "docs/agents/domain.md",
+      "summary": "Agent-skill convention guide explaining how to consume skills-ui's single-context domain documentation (CONTEXT.md and docs/adr/), enforce canonical glossary vocabulary across code and issues, and explicitly surface any ADR conflicts.",
+      "tags": [
+        "agent-conventions",
+        "domain-modeling",
+        "glossary",
+        "adr"
+      ]
+    },
+    {
+      "id": "document:docs/agents/issue-tracker.md",
+      "type": "document",
+      "name": "issue-tracker.md",
+      "filePath": "docs/agents/issue-tracker.md",
+      "summary": "Agent-skill routing contract specifying Linear (project skills-ui / P-S-4, team S-a-c, workspace s-a-c) as the issue tracker via Linear MCP tools rather than gh, including milestone alignment with ROADMAP.md, Wayfinder map/ticket workflow, and triage label references.",
+      "tags": [
+        "agent-conventions",
+        "linear",
+        "issue-tracker",
+        "wayfinder"
+      ]
+    },
+    {
+      "id": "document:docs/agents/triage-labels.md",
+      "type": "document",
+      "name": "triage-labels.md",
+      "filePath": "docs/agents/triage-labels.md",
+      "summary": "Mapping table translating the five canonical triage roles (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix) to matching Linear workspace labels in the s-a-c workspace for skills-ui issues.",
+      "tags": [
+        "agent-conventions",
+        "triage-labels",
+        "linear",
+        "workflow"
+      ]
+    },
+    {
+      "id": "document:docs/agents/workspace.md",
+      "type": "document",
+      "name": "workspace.md",
+      "filePath": "docs/agents/workspace.md",
+      "summary": "Canonical multi-worktree workspace-level agent contract (symlinked from the workspace root AGENTS.md) defining DOX instruction priority, bare-repo plus worktree topology (.bare/, main/, retained audit/remediation worktrees), phase worktree lifecycle commands, Linear planning routing, and SKILLS_UI_ environment variable rules.",
+      "tags": [
+        "agent-contract",
+        "worktree-topology",
+        "dox-hierarchy",
+        "workspace-rules"
+      ]
+    },
+    {
+      "id": "config:tests/fixtures/contract/add-hostile.json",
+      "type": "config",
+      "name": "add-hostile.json",
+      "filePath": "tests/fixtures/contract/add-hostile.json",
+      "summary": "Hostile contract test fixture for skills add --json output containing ANSI CSI color codes, OSC terminal title injection sequences, BEL characters, and NUL bytes across installed and failed entries. Used by the sanitization test suite to verify escape stripping on add-command ingress.",
+      "tags": [
+        "test-fixture",
+        "contract-json",
+        "sanitization",
+        "hostile-input"
+      ]
+    },
+    {
+      "id": "config:tests/fixtures/contract/add.json",
+      "type": "config",
+      "name": "add.json",
+      "filePath": "tests/fixtures/contract/add.json",
+      "summary": "Baseline contract test fixture modeling skills add --json output with one installed skill (alpha) and one failed skill (beta) to exercise partial-failure detection. Loaded by default by skills-shim.mjs when emulating add and install subcommands.",
+      "tags": [
+        "test-fixture",
+        "contract-json",
+        "skills-cli",
+        "install-service"
+      ]
+    },
+    {
+      "id": "config:tests/fixtures/contract/ls-empty.json",
+      "type": "config",
+      "name": "ls-empty.json",
+      "filePath": "tests/fixtures/contract/ls-empty.json",
+      "summary": "Empty JSON array contract fixture representing a skills ls --json response with zero installed skills. Injected via SKILLS_SHIM_LS_PROJECT in hosted end-to-end tests to verify empty-state behavior.",
+      "tags": [
+        "test-fixture",
+        "contract-json",
+        "empty-state",
+        "e2e-testing"
+      ]
+    },
+    {
+      "id": "config:tests/fixtures/contract/ls-global.json",
+      "type": "config",
+      "name": "ls-global.json",
+      "filePath": "tests/fixtures/contract/ls-global.json",
+      "summary": "Default global-scope contract test fixture containing an empty JSON array for skills ls --json -g output. Loaded by skills-shim.mjs as the initial global skill list and exercised by service tests verifying global-scope filtering.",
+      "tags": [
+        "test-fixture",
+        "contract-json",
+        "global-scope",
+        "skills-cli"
+      ]
+    },
+    {
+      "id": "config:tests/fixtures/contract/ls-hostile.json",
+      "type": "config",
+      "name": "ls-hostile.json",
+      "filePath": "tests/fixtures/contract/ls-hostile.json",
+      "summary": "Hostile contract test fixture for skills ls --json output pairing a valid skill referencing tests/fixtures/contract/hostile-skill with entries carrying ANSI CSI/OSC/C1 escape sequences, BEL and NUL bytes, and malformed non-string field types. Consumed by the sanitization test suite to validate untrusted CLI ingress hardening.",
+      "tags": [
+        "test-fixture",
+        "contract-json",
+        "sanitization",
+        "hostile-input"
+      ]
+    },
+    {
+      "id": "config:tests/fixtures/contract/ls-project.json",
+      "type": "config",
+      "name": "ls-project.json",
+      "filePath": "tests/fixtures/contract/ls-project.json",
+      "summary": "Baseline project-scope contract test fixture modeling skills ls --json output with two installed skills (tdd with null source metadata across four agents and code-review sourced from anthropics/skills on GitHub). Loaded by default by skills-shim.mjs, slow-skills-shim.mjs, and spawn-count performance tests.",
+      "tags": [
+        "test-fixture",
+        "contract-json",
+        "project-scope",
+        "skills-cli"
+      ]
+    },
+    {
+      "id": "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "type": "document",
+      "name": "v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "filePath": "docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "summary": "Design specification for skills-ui v0.5.4.1 covering unbreakable name-checkbox units on list cards, proportional 10%-50% list-panel widths with v0.5.4 pixel migration, merging right-justified card action groups, and TUI split-pane search and 3-mode sort parity with the WebUI.",
+      "tags": [
+        "design-doc",
+        "ui-ergonomics",
+        "split-pane",
+        "tui-parity"
+      ]
+    },
+    {
+      "id": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "type": "document",
+      "name": "v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "filePath": "docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "summary": "Ratified design specification for skills-ui v0.5.5 defining global .skill-lock.json resolution, locked/linked/local skill provenance badges and removal guardrails, host-environment post-mutation hooks, and a read-only health-check endpoint and header Health Pill.",
+      "tags": [
+        "design-doc",
+        "provenance",
+        "hooks",
+        "health-check"
+      ]
+    },
+    {
+      "id": "file:playwright.config.ts",
+      "type": "file",
+      "name": "playwright.config.ts",
+      "filePath": "playwright.config.ts",
+      "summary": "Playwright test runner configuration targeting tests/e2e/**/*.e2e.ts with a 30-second timeout, single-worker serial execution, and list reporter so Bun's test runner ignores E2E specs.",
+      "tags": [
+        "playwright",
+        "e2e-config",
+        "testing",
+        "browser-automation"
+      ]
+    },
+    {
+      "id": "file:scripts/build.ts",
+      "type": "file",
+      "name": "build.ts",
+      "filePath": "scripts/build.ts",
+      "summary": "Cross-platform Bun compile build script that produces self-contained skills-ui executables for darwin-arm64, darwin-x64, linux-x64, and linux-arm64 with embedded __APP_VERSION__, macOS JIT entitlements codesigning, stale dist artifact pruning, and SHA-256 checksum manifest generation.",
+      "tags": [
+        "build-script",
+        "bun-compile",
+        "codesign",
+        "checksums"
+      ]
+    },
+    {
+      "id": "file:scripts/install.sh",
+      "type": "file",
+      "name": "install.sh",
+      "filePath": "scripts/install.sh",
+      "summary": "POSIX shell installer that detects OS and CPU architecture, resolves the requested or latest GitHub release binary, verifies its SHA-256 hash against the tag-committed checksum manifest (falling back to the release asset), and atomically installs skills-ui into SKILLS_UI_INSTALL_DIR.",
+      "tags": [
+        "installer",
+        "shell-script",
+        "checksum-verification",
+        "release",
+        "tested"
+      ]
+    },
+    {
+      "id": "document:scripts/perf/report-2026-11-01-real.md",
+      "type": "document",
+      "name": "report-2026-11-01-real.md",
+      "filePath": "scripts/perf/report-2026-11-01-real.md",
+      "summary": "Performance budget benchmark report generated against the real local skills CLI corpus (1 project and 300 global skills) measuring serve API latency, search deduplication, filter matching and DOM rendering, and cold global first-paint timing.",
+      "tags": [
+        "performance-report",
+        "benchmarks",
+        "real-corpus",
+        "latency"
+      ]
+    },
+    {
+      "id": "document:scripts/perf/report-2026-11-01.md",
+      "type": "document",
+      "name": "report-2026-11-01.md",
+      "filePath": "scripts/perf/report-2026-11-01.md",
+      "summary": "Baseline performance budget report generated against the synthetic skills-shim fixture corpus (390 project and 40 global skills) documenting baseline verdicts for serve API latency, concurrent search deduplication, DOM filter rebuilds, and stale-response guards.",
+      "tags": [
+        "performance-report",
+        "benchmarks",
+        "synthetic-corpus",
+        "baseline"
+      ]
+    },
+    {
+      "id": "document:scripts/pty-smoke/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "scripts/pty-smoke/README.md",
+      "summary": "Documentation for the PTY-based real-terminal TUI smoke harness describing how to run smoke.py via uv/pyte, the role of each harness file, and critical PTY gotchas including os.execvpe env passing, key pacing, and TIOCSWINSZ sizing.",
+      "tags": [
+        "documentation",
+        "pty-smoke",
+        "tui-testing",
+        "harness"
+      ]
+    },
+    {
+      "id": "file:scripts/pty-smoke/bin/skills",
+      "type": "file",
+      "name": "skills",
+      "filePath": "scripts/pty-smoke/bin/skills",
+      "summary": "Relocatable POSIX shell PATH shim placed ahead of system binaries during PTY smoke tests that resolves its sibling directory and execs bun run on scripts/pty-smoke/skills-smoke-bin.ts.",
+      "tags": [
+        "pty-smoke",
+        "path-shim",
+        "shell-wrapper",
+        "cli-stub"
+      ]
+    },
+    {
+      "id": "document:scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "summary": "Multi-paragraph markdown SKILL.md fixture for skill-001 referenced by ls-global-long.json to supply realistic scrollable markdown detail height during PTY smoke testing.",
+      "tags": [
+        "fixture",
+        "pty-smoke",
+        "skill-doc",
+        "markdown"
+      ]
+    },
+    {
+      "id": "document:scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "summary": "Multi-paragraph markdown SKILL.md fixture for skill-002 referenced by ls-global-long.json to provide scrollable detail-pane content in PTY smoke runs.",
+      "tags": [
+        "fixture",
+        "pty-smoke",
+        "skill-doc",
+        "markdown"
+      ]
+    },
+    {
+      "id": "document:scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "summary": "Multi-paragraph markdown SKILL.md fixture for skill-003 referenced by ls-global-long.json to provide scrollable detail-pane content in PTY smoke runs.",
+      "tags": [
+        "fixture",
+        "pty-smoke",
+        "skill-doc",
+        "markdown"
+      ]
+    },
+    {
+      "id": "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "type": "config",
+      "name": "ls-global-long.json",
+      "filePath": "scripts/pty-smoke/fixtures/ls-global-long.json",
+      "summary": "120-skill global scope JSON fixture served by skills-smoke-bin.ts to stress-test TUI scrolling, paging, mouse selection, filtering, and viewport follow in PTY smoke tests.",
+      "tags": [
+        "fixture",
+        "json-data",
+        "pty-smoke",
+        "global-skills"
+      ]
+    },
+    {
+      "id": "config:scripts/pty-smoke/fixtures/ls-project.json",
+      "type": "config",
+      "name": "ls-project.json",
+      "filePath": "scripts/pty-smoke/fixtures/ls-project.json",
+      "summary": "Two-skill project scope JSON fixture (tdd and code-review) returned by skills-smoke-bin.ts for initial project-scope startup checks in PTY smoke tests.",
+      "tags": [
+        "fixture",
+        "json-data",
+        "pty-smoke",
+        "project-skills"
+      ]
+    },
+    {
+      "id": "file:scripts/pty-smoke/runner.py",
+      "type": "file",
+      "name": "runner.py",
+      "filePath": "scripts/pty-smoke/runner.py",
+      "summary": "Python PTY test harness that forks skills-ui inside a real pseudo-terminal with isolated prefs/cache paths and the smoke skills shim on PATH, feeding output into a pyte virtual screen for row-accurate assertions.",
+      "tags": [
+        "pty-runner",
+        "python",
+        "pyte",
+        "tui-testing"
+      ]
+    },
+    {
+      "id": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "type": "file",
+      "name": "skills-smoke-bin.ts",
+      "filePath": "scripts/pty-smoke/skills-smoke-bin.ts",
+      "summary": "Minimal Bun-executed skills CLI stand-in invoked via the PATH shim that answers --version with 1.7.4 and serves ls-global-long.json or ls-project.json for ls/list commands without relying on environment variables.",
+      "tags": [
+        "cli-stub",
+        "pty-smoke",
+        "bun-script",
+        "fixtures"
+      ]
+    },
+    {
+      "id": "file:scripts/pty-smoke/smoke.py",
+      "type": "file",
+      "name": "smoke.py",
+      "filePath": "scripts/pty-smoke/smoke.py",
+      "summary": "End-to-end real-terminal smoke test suite that starts an ephemeral fixture search HTTP server and drives skills-ui through PtyApp to verify startup layout, global scope jumps, Home/End/PgDn scrolling, SGR mouse clicks, live filtering, space checks, 3D graph toggling, and search queue navigation.",
+      "tags": [
+        "smoke-test",
+        "pty-testing",
+        "tui-e2e",
+        "python"
+      ]
+    },
+    {
+      "id": "file:scripts/verify-build-targets.ts",
+      "type": "file",
+      "name": "verify-build-targets.ts",
+      "filePath": "scripts/verify-build-targets.ts",
+      "summary": "Post-build verification script that inspects all four compiled binaries in dist/ with the file command to confirm Mach-O/ELF target architectures and asserts every binary's SHA-256 digest matches checksums-<version>.txt.",
+      "tags": [
+        "build-verification",
+        "checksums",
+        "binary-format",
+        "release-check"
+      ]
+    },
+    {
+      "id": "file:src/core/filter.ts",
+      "type": "file",
+      "name": "filter.ts",
+      "filePath": "src/core/filter.ts",
+      "summary": "Shared single source of truth for installed-skill substring filtering across both WebUI (embedded via toString() into APP_JS) and TUI, deliberately avoiding template and regex literals for verbatim script interpolation.",
+      "tags": [
+        "core-filter",
+        "search-matching",
+        "cross-surface-parity",
+        "shared-logic",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:src/tui/spike.ts",
+      "type": "file",
+      "name": "spike.ts",
+      "filePath": "src/tui/spike.ts",
+      "summary": "Phase-0 OpenTUI markdown rendering spike used by selftest and standalone spike verification to prove tree-sitter worker embedding, Catppuccin Mocha syntax styling, and BoxRenderable/MarkdownRenderable composition.",
+      "tags": [
+        "tui-spike",
+        "opentui",
+        "markdown-rendering",
+        "selftest",
+        "tested"
+      ]
+    },
+    {
+      "id": "file:tests/e2e/hosted.e2e.ts",
+      "type": "file",
+      "name": "hosted.e2e.ts",
+      "filePath": "tests/e2e/hosted.e2e.ts",
+      "summary": "Playwright end-to-end test suite exercising the live GitHub Pages hosted UI against local serve subprocesses (LNA permission, bearer auth, empty state) plus local web-mode honesty, error toasts, search in-flight race guards, sort/filter/scope semantics, and hostile SKILL.md XSS safety.",
+      "tags": [
+        "e2e-tests",
+        "playwright",
+        "hosted-ui",
+        "web-security"
+      ]
+    },
+    {
+      "id": "document:tests/fixtures/contract/hostile-skill/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "tests/fixtures/contract/hostile-skill/SKILL.md",
+      "summary": "Adversarial SKILL.md fixture embedding ANSI SGR, OSC, DCS, and C1 control sequences alongside normal tabs and text to verify terminal and web sanitization strips dangerous escapes while preserving readable structure.",
+      "tags": [
+        "security-fixture",
+        "ansi-injection",
+        "sanitization",
+        "contract-test"
+      ]
+    },
+    {
+      "id": "file:tests/fixtures/skills-shim.mjs",
+      "type": "file",
+      "name": "skills-shim.mjs",
+      "filePath": "tests/fixtures/skills-shim.mjs",
+      "summary": "Stateful fixture stand-in for the skills CLI implementing --version, ls --json, install --list, add --json, rm (with optional SKILLS_SHIM_RM_KEEP partial failures), update, environment snapshots, and JSONL call logging for unit, API, E2E, and performance tests.",
+      "tags": [
+        "cli-shim",
+        "test-fixture",
+        "subprocess-contract",
+        "stateful-mock"
+      ]
+    },
+    {
+      "id": "file:tests/fixtures/slow-skills-shim.mjs",
+      "type": "file",
+      "name": "slow-skills-shim.mjs",
+      "filePath": "tests/fixtures/slow-skills-shim.mjs",
+      "summary": "Delayed skills CLI test shim that sleeps SKILLS_SHIM_DELAY_MS milliseconds before answering ls requests from ls-project.json so serve-hardening tests can exercise subprocess spawn-queue saturation and concurrency limits.",
+      "tags": [
+        "cli-shim",
+        "test-fixture",
+        "spawn-queue",
+        "latency-simulation"
+      ]
+    },
+    {
+      "id": "file:tests/image.test.ts",
+      "type": "file",
+      "name": "image.test.ts",
+      "filePath": "tests/image.test.ts",
+      "summary": "Bun unit tests verifying OpenTUI ImageRenderable blocks-protocol rendering in an in-memory test renderer and pinning that the vendored Jimp-free @opentui/three fork throws unsupported-operation errors on file-image utilities.",
+      "tags": [
+        "unit-tests",
+        "opentui-image",
+        "opentui-three",
+        "capability-proof"
+      ]
+    },
+    {
+      "id": "file:tests/services.test.ts",
+      "type": "file",
+      "name": "services.test.ts",
+      "filePath": "tests/services.test.ts",
+      "summary": "Comprehensive Bun unit and integration test suite covering skills-client env sanitization and versioning, core skill services (installed, install, remove, source, update, skill-doc), registry search fallback, failure signaling, in-flight deduplication, byte-pinned search semantics, CLI seed parsing, preference persistence and width normalization, and Catppuccin theme WCAG AA contrast compliance.",
+      "tags": [
+        "unit-tests",
+        "core-services",
+        "search-dedup",
+        "skills-client",
+        "wcag-theme"
+      ]
+    }
+  ],
+  "importEdges": [
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/hosted-auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/services/skill-doc.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/remove.ts",
+      "target": "file:src/core/services/installed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/remove.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/remove.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/skill-doc.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/source.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/source.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/update.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/update.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/update.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/updates-check.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/updates-check.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "file:src/core/spawn-queue.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hosted-auth.test.ts",
+      "target": "file:src/core/hosted-auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/locks.test.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/locks.test.ts",
+      "target": "file:src/core/services/updates-check.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/locks.test.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/sanitize.test.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/serve-hardening.test.ts",
+      "target": "file:src/core/hosted-auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/serve-hardening.test.ts",
+      "target": "file:src/core/services/updates-check.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/serve-hardening.test.ts",
+      "target": "file:src/core/spawn-queue.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/tui/art.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/tui/audio.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/core/disk-index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/tui/Views.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/tui/audio.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/art.ts",
+      "target": "file:src/core/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/audio.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/three-scene.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/three-scene.ts",
+      "target": "file:src/core/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/client/core.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/filter-parity.test.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/filter-parity.test.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/filter-parity.test.ts",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/filter-parity.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/api.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/disk-index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/selftest.test.ts",
+      "target": "file:src/tui/app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/selftest.test.ts",
+      "target": "file:src/tui/renderer-ready.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/core/disk-index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/tui/app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/tui/renderer-ready.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/tui/app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/tui/renderer-ready.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/export-page.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/export-page.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:src/core/api.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:tests/perf/playwright-probes.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/version.ts",
+      "target": "config:package.json",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/tui/app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/page-smoke.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "file:tests/perf/playwright-probes.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/perf/search-stub.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/perf/spawn-count.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/version.test.ts",
+      "target": "config:package.json",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/version.test.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/web-055.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/core/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/web/client/core.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/web/client/installed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/web/client/search-and-boot.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/web/styles.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/dash-sweep.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/fixtures/audit-web-server.ts",
+      "target": "file:src/core/api.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/fixtures/audit-web-server.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/markdown-render.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/page-hardening.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/terminology.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/e2e/audit-remediation.e2e.ts",
+      "target": "file:tests/e2e/helpers/audit-fixture.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/e2e/audit-remediation.e2e.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/helpers/installer-fixture.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/installer.test.ts",
+      "target": "file:tests/helpers/installer-fixture.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/pty-smoke/smoke.py",
+      "target": "file:scripts/pty-smoke/runner.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    }
+  ],
+  "allEdges": [
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/hosted-auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/services/skill-doc.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/hosted-auth.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/locks.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/sanitize.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/serve-hardening.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "file:tests/hosted-auth.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "file:tests/serve-hardening.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "file:tests/sanitize.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:tests/sanitize.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "file:tests/locks.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/remove.ts",
+      "target": "file:src/core/services/installed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/remove.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/remove.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/sanitize.ts",
+      "target": "file:tests/sanitize.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/skill-doc.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/source.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/source.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/source.ts",
+      "target": "file:tests/sanitize.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/update.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/update.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/update.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/updates-check.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/updates-check.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/updates-check.ts",
+      "target": "file:tests/locks.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/updates-check.ts",
+      "target": "file:tests/serve-hardening.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "file:src/core/spawn-queue.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/spawn-queue.ts",
+      "target": "file:tests/serve-hardening.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/hosted-auth.test.ts",
+      "target": "file:src/core/hosted-auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/locks.test.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/locks.test.ts",
+      "target": "file:src/core/services/updates-check.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/locks.test.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/sanitize.test.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/serve-hardening.test.ts",
+      "target": "file:src/core/hosted-auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/serve-hardening.test.ts",
+      "target": "file:src/core/services/updates-check.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/serve-hardening.test.ts",
+      "target": "file:src/core/spawn-queue.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/tui/art.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/tui/audio.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/core/disk-index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/tui/Views.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/tui/audio.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/art.ts",
+      "target": "file:src/core/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/audio.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/three-scene.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/three-scene.ts",
+      "target": "file:src/core/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/client/core.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/filter-parity.test.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/filter-parity.test.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/filter-parity.test.ts",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/filter-parity.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:tests/filter-parity.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/filter-parity.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/api.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/disk-index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hooks-health.test.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/hooks-health.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "file:tests/hooks-health.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/index.ts",
+      "target": "file:tests/hooks-health.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "file:tests/hooks-health.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "file:tests/hooks-health.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/selftest.test.ts",
+      "target": "file:src/tui/app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/selftest.test.ts",
+      "target": "file:src/tui/renderer-ready.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:tests/selftest.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/renderer-ready.ts",
+      "target": "file:tests/selftest.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/core/disk-index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/tui/app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:src/tui/renderer-ready.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui-disk-index.test.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "file:tests/tui-disk-index.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:tests/tui-disk-index.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:tests/tui-disk-index.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/renderer-ready.ts",
+      "target": "file:tests/tui-disk-index.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/tui/app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/tui/renderer-ready.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:tests/tui.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:tests/tui.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/renderer-ready.ts",
+      "target": "file:tests/tui.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:tests/tui.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/art.ts",
+      "target": "file:tests/tui.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:scripts/export-page.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/export-page.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:src/core/api.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:tests/perf/playwright-probes.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/version.ts",
+      "target": "config:package.json",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/tui/app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/api.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/version.ts",
+      "target": "file:tests/api.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "file:tests/api.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/api.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/page-smoke.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/page-smoke.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/page-smoke.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "file:tests/perf/playwright-probes.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/perf/filter-dom.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/perf/filter-dom.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/perf/search-stub.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/perf/search-stub.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/perf/spawn-count.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/perf/spawn-count.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/version.test.ts",
+      "target": "config:package.json",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/version.test.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/version.ts",
+      "target": "file:tests/version.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/web-055.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/web-055.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/web-055.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/core/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/web/client/core.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/web/client/installed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/web/client/search-and-boot.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/web/styles.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/dash-sweep.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/fixtures/audit-web-server.ts",
+      "target": "file:src/core/api.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/fixtures/audit-web-server.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/markdown-render.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/page-hardening.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/terminology.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/dash-sweep.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:tests/dash-sweep.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:tests/dash-sweep.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:tests/dash-sweep.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/markdown-render.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/client/installed.ts",
+      "target": "file:tests/markdown-render.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/page-hardening.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/page-hardening.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/terminology.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:tests/terminology.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:tests/terminology.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/e2e/audit-remediation.e2e.ts",
+      "target": "file:tests/e2e/helpers/audit-fixture.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/e2e/audit-remediation.e2e.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/helpers/installer-fixture.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/installer.test.ts",
+      "target": "file:tests/helpers/installer-fixture.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/e2e/helpers/audit-fixture.ts",
+      "target": "file:tests/fixtures/audit-web-server.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/helpers/audit-state.ts",
+      "target": "file:tests/fixtures/skills-shim.mjs",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/install.sh",
+      "target": "file:tests/installer.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "pipeline:.github/workflows/claude-code-review.yml",
+      "target": "pipeline:.github/workflows/claude.yml",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "pipeline:.github/workflows/claude-code-review.yml",
+      "target": "document:AGENTS.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "pipeline:.github/workflows/claude.yml",
+      "target": "document:AGENTS.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "file:src/main.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "file:src/tui/app.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "file:src/web/page.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "file:scripts/build.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "config:mise.toml",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "document:README.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "document:ROADMAP.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "document:CONTEXT.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "document:docs/agents/workspace.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "document:docs/agents/issue-tracker.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "document:docs/agents/triage-labels.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "document:docs/agents/domain.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:CONTEXT.md",
+      "target": "file:src/web/page.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:CONTEXT.md",
+      "target": "file:src/tui/app.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:CONTEXT.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:CONTEXT.md",
+      "target": "document:docs/agents/domain.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/main.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/tui/app.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:src/web/page.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:scripts/build.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "file:scripts/perf/budget.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "document:ROADMAP.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "config:package.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "config:mise.toml",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:ROADMAP.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:ROADMAP.md",
+      "target": "file:src/web/page.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:ROADMAP.md",
+      "target": "file:src/tui/app.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:ROADMAP.md",
+      "target": "file:scripts/build.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:ROADMAP.md",
+      "target": "file:scripts/export-page.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:ROADMAP.md",
+      "target": "file:scripts/perf/budget.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:ROADMAP.md",
+      "target": "document:CONTEXT.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:mise.toml",
+      "target": "config:package.json",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:mise.toml",
+      "target": "file:scripts/build.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:package.json",
+      "target": "file:src/main.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:package.json",
+      "target": "file:scripts/build.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:package.json",
+      "target": "file:scripts/export-page.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:package.json",
+      "target": "file:scripts/perf/budget.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:package.json",
+      "target": "config:tsconfig.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:tsconfig.json",
+      "target": "file:src/main.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tsconfig.json",
+      "target": "file:src/core/api.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tsconfig.json",
+      "target": "file:src/tui/app.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tsconfig.json",
+      "target": "file:src/web/page.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tsconfig.json",
+      "target": "file:scripts/build.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tsconfig.json",
+      "target": "file:scripts/export-page.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tsconfig.json",
+      "target": "file:scripts/perf/budget.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:docs/_config.yml",
+      "target": "document:docs/index.md",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:docs/_config.yml",
+      "target": "document:docs/agents/issue-tracker.md",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:docs/_config.yml",
+      "target": "document:docs/agents/triage-labels.md",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:docs/_config.yml",
+      "target": "document:docs/agents/domain.md",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:docs/index.md",
+      "target": "file:scripts/install.sh",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/index.md",
+      "target": "file:src/main.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/index.md",
+      "target": "document:README.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/index.md",
+      "target": "document:ROADMAP.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/index.md",
+      "target": "document:docs/agents/issue-tracker.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/index.md",
+      "target": "document:docs/agents/triage-labels.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/index.md",
+      "target": "document:docs/agents/domain.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/release.md",
+      "target": "file:scripts/build.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/release.md",
+      "target": "file:scripts/export-page.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/release.md",
+      "target": "file:scripts/install.sh",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/release.md",
+      "target": "file:scripts/pty-smoke/smoke.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/release.md",
+      "target": "config:package.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-issue-draft.md",
+      "target": "document:docs/upstream-ls-memoization.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-issue-draft.md",
+      "target": "file:src/core/skills-client.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-issue-draft.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-ls-memoization.md",
+      "target": "document:docs/upstream-issue-draft.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-ls-memoization.md",
+      "target": "file:src/core/services/installed.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-ls-memoization.md",
+      "target": "file:src/core/services/remove.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-ls-memoization.md",
+      "target": "file:src/core/skills-client.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-ls-memoization.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-ls-memoization.md",
+      "target": "document:scripts/perf/report-2026-11-01-real.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/core/filter.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/core/index.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/main.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/tui/app.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/tui/model.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/tui/Views.tsx",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/web/page.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/web/styles.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/web/client/core.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/web/client/installed.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/web/client/search-and-boot.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:scripts/perf/budget.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:tests/dash-sweep.test.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "document:CONTEXT.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "document:AGENTS.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "document:docs/agents/workspace.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "document:docs/index.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "file:tests/terminology.test.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/issue-tracker.md",
+      "target": "document:docs/agents/triage-labels.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/issue-tracker.md",
+      "target": "document:ROADMAP.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/issue-tracker.md",
+      "target": "document:AGENTS.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/issue-tracker.md",
+      "target": "document:docs/agents/workspace.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/issue-tracker.md",
+      "target": "document:docs/index.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/triage-labels.md",
+      "target": "document:docs/agents/issue-tracker.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/triage-labels.md",
+      "target": "document:docs/agents/workspace.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/triage-labels.md",
+      "target": "document:docs/index.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:AGENTS.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:README.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "config:package.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:docs/agents/issue-tracker.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:docs/agents/triage-labels.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:docs/agents/domain.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/sanitize.test.ts",
+      "target": "config:tests/fixtures/contract/add-hostile.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tests/fixtures/contract/add-hostile.json",
+      "target": "file:tests/fixtures/skills-shim.mjs",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:tests/fixtures/contract/add-hostile.json",
+      "target": "config:tests/fixtures/contract/add.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/fixtures/skills-shim.mjs",
+      "target": "config:tests/fixtures/contract/add.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tests/fixtures/contract/add.json",
+      "target": "file:tests/services.test.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/e2e/hosted.e2e.ts",
+      "target": "config:tests/fixtures/contract/ls-empty.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tests/fixtures/contract/ls-empty.json",
+      "target": "file:tests/fixtures/skills-shim.mjs",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/fixtures/skills-shim.mjs",
+      "target": "config:tests/fixtures/contract/ls-global.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tests/fixtures/contract/ls-global.json",
+      "target": "file:tests/services.test.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/sanitize.test.ts",
+      "target": "config:tests/fixtures/contract/ls-hostile.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tests/fixtures/contract/ls-hostile.json",
+      "target": "file:tests/fixtures/skills-shim.mjs",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:tests/fixtures/contract/ls-hostile.json",
+      "target": "document:tests/fixtures/contract/hostile-skill/SKILL.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:tests/fixtures/contract/ls-hostile.json",
+      "target": "config:tests/fixtures/contract/ls-project.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/fixtures/skills-shim.mjs",
+      "target": "config:tests/fixtures/contract/ls-project.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/fixtures/slow-skills-shim.mjs",
+      "target": "config:tests/fixtures/contract/ls-project.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/perf/spawn-count.test.ts",
+      "target": "config:tests/fixtures/contract/ls-project.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tests/fixtures/contract/ls-project.json",
+      "target": "file:tests/services.test.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "target": "file:src/core/prefs.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "target": "file:src/web/page.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "target": "file:src/tui/model.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "target": "file:src/tui/app.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "target": "file:src/tui/Views.tsx",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "target": "file:src/core/services/locks.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "target": "file:src/core/services/installed.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "target": "file:src/core/services/hooks.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "target": "file:src/web/page.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "target": "file:src/tui/Views.tsx",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:playwright.config.ts",
+      "target": "file:tests/e2e/hosted.e2e.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:playwright.config.ts",
+      "target": "file:tests/e2e/audit-remediation.e2e.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/build.ts",
+      "target": "config:package.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/build.ts",
+      "target": "file:src/main.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/build.ts",
+      "target": "file:src/core/version.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:scripts/build.ts",
+      "target": "file:scripts/verify-build-targets.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:scripts/install.sh",
+      "target": "file:scripts/build.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/install.sh",
+      "target": "document:docs/release.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/perf/report-2026-11-01-real.md",
+      "target": "file:scripts/perf/budget.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/perf/report-2026-11-01-real.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/perf/report-2026-11-01-real.md",
+      "target": "file:src/core/filter.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/perf/report-2026-11-01-real.md",
+      "target": "document:scripts/perf/report-2026-11-01.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/perf/report-2026-11-01.md",
+      "target": "file:scripts/perf/budget.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/perf/report-2026-11-01.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/perf/report-2026-11-01.md",
+      "target": "file:src/core/filter.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/pty-smoke/README.md",
+      "target": "file:scripts/pty-smoke/runner.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/pty-smoke/README.md",
+      "target": "file:scripts/pty-smoke/smoke.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/pty-smoke/README.md",
+      "target": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/pty-smoke/README.md",
+      "target": "file:scripts/pty-smoke/bin/skills",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:scripts/pty-smoke/bin/skills",
+      "target": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "target": "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "target": "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "target": "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "target": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:scripts/pty-smoke/fixtures/ls-project.json",
+      "target": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/pty-smoke/runner.py",
+      "target": "file:src/main.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/pty-smoke/runner.py",
+      "target": "file:scripts/pty-smoke/bin/skills",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "target": "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "target": "config:scripts/pty-smoke/fixtures/ls-project.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/pty-smoke/smoke.py",
+      "target": "file:scripts/pty-smoke/runner.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/verify-build-targets.ts",
+      "target": "config:package.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/verify-build-targets.ts",
+      "target": "file:scripts/build.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/core/filter.ts",
+      "target": "file:tests/filter-parity.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/spike.ts",
+      "target": "file:tests/selftest.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/e2e/hosted.e2e.ts",
+      "target": "file:tests/fixtures/skills-shim.mjs",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:tests/fixtures/contract/hostile-skill/SKILL.md",
+      "target": "config:tests/fixtures/contract/ls-hostile.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:tests/fixtures/contract/hostile-skill/SKILL.md",
+      "target": "file:tests/sanitize.test.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/fixtures/skills-shim.mjs",
+      "target": "file:src/core/skills-client.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/fixtures/slow-skills-shim.mjs",
+      "target": "file:tests/fixtures/skills-shim.mjs",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/fixtures/slow-skills-shim.mjs",
+      "target": "file:src/core/spawn-queue.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/fixtures/slow-skills-shim.mjs",
+      "target": "file:tests/serve-hardening.test.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/three-scene.ts",
+      "target": "file:tests/image.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/services.test.ts",
+      "target": "file:tests/fixtures/skills-shim.mjs",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/remove.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/source.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/update.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/skill-doc.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/seed.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/prefs.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

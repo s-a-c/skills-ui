@@ -1,0 +1,132 @@
+{
+  "projectRoot": "/Users/s-a-c/Projects/s-a-c/skills-ui/main",
+  "batchFiles": [
+    {
+      "path": "scripts/export-page.ts",
+      "language": "typescript",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/perf/budget.ts",
+      "language": "typescript",
+      "sizeLines": 644,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/version.ts",
+      "language": "typescript",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main.ts",
+      "language": "typescript",
+      "sizeLines": 104,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/api.test.ts",
+      "language": "typescript",
+      "sizeLines": 730,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/page-smoke.test.ts",
+      "language": "typescript",
+      "sizeLines": 448,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/perf/filter-dom.test.ts",
+      "language": "typescript",
+      "sizeLines": 237,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/perf/helpers.ts",
+      "language": "typescript",
+      "sizeLines": 251,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/perf/playwright-probes.ts",
+      "language": "typescript",
+      "sizeLines": 407,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/perf/search-stub.test.ts",
+      "language": "typescript",
+      "sizeLines": 133,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/perf/spawn-count.test.ts",
+      "language": "typescript",
+      "sizeLines": 346,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/version.test.ts",
+      "language": "typescript",
+      "sizeLines": 19,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/web-055.test.ts",
+      "language": "typescript",
+      "sizeLines": 219,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "scripts/export-page.ts": [
+      "src/core/version.ts",
+      "src/web/page.ts"
+    ],
+    "scripts/perf/budget.ts": [
+      "src/core/api.ts",
+      "src/core/index.ts",
+      "src/core/version.ts",
+      "src/web/page.ts",
+      "tests/perf/helpers.ts",
+      "tests/perf/playwright-probes.ts"
+    ],
+    "src/core/version.ts": [
+      "package.json"
+    ],
+    "src/main.ts": [
+      "src/core/version.ts",
+      "src/tui/app.ts"
+    ],
+    "tests/api.test.ts": [
+      "src/core/skills-client.ts",
+      "src/core/version.ts",
+      "tests/helpers/audit-state.ts",
+      "tests/perf/helpers.ts"
+    ],
+    "tests/page-smoke.test.ts": [
+      "tests/perf/helpers.ts"
+    ],
+    "tests/perf/filter-dom.test.ts": [
+      "tests/perf/helpers.ts",
+      "tests/perf/playwright-probes.ts"
+    ],
+    "tests/perf/helpers.ts": [],
+    "tests/perf/playwright-probes.ts": [],
+    "tests/perf/search-stub.test.ts": [
+      "tests/perf/helpers.ts"
+    ],
+    "tests/perf/spawn-count.test.ts": [
+      "tests/perf/helpers.ts"
+    ],
+    "tests/version.test.ts": [
+      "package.json",
+      "src/core/version.ts"
+    ],
+    "tests/web-055.test.ts": [
+      "tests/perf/helpers.ts"
+    ]
+  }
+}

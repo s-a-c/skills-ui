@@ -1,0 +1,2097 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 24,
+  "filesSkipped": [
+    "scripts/pty-smoke/bin/skills"
+  ],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 24,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 12,
+      "failed": 0,
+      "skipped": 12
+    }
+  },
+  "results": [
+    {
+      "path": "docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 310,
+      "nonEmptyLines": 236,
+      "sections": [
+        {
+          "heading": "skills-ui v0.5.4.1 — List-Card Ergonomics & Split-Pane Parity",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Overview",
+          "level": 2,
+          "line": 9
+        },
+        {
+          "heading": "The Problem",
+          "level": 2,
+          "line": 19
+        },
+        {
+          "heading": "Goals",
+          "level": 2,
+          "line": 28
+        },
+        {
+          "heading": "Non-Goals",
+          "level": 2,
+          "line": 35
+        },
+        {
+          "heading": "Open Questions",
+          "level": 2,
+          "line": 41
+        },
+        {
+          "heading": "Critical User Journeys (CUJs)",
+          "level": 2,
+          "line": 45
+        },
+        {
+          "heading": "CUJ 1: Resizing the Filter List Panel Across `10%–50%` Without Breaking Card Anatomy",
+          "level": 3,
+          "line": 47
+        },
+        {
+          "heading": "CUJ 2: Inspecting Search Results and Adjusting Layout & Sort Order in the TUI",
+          "level": 3,
+          "line": 56
+        },
+        {
+          "heading": "Technical Plan (Architecture)",
+          "level": 2,
+          "line": 67
+        },
+        {
+          "heading": "1. Shared Proportional List Width & Migration (`src/core/prefs.ts`)",
+          "level": 3,
+          "line": 104
+        },
+        {
+          "heading": "2. WebUI Card Anatomy & `10%–50%` Resizable Frame (`src/web/page.ts`)",
+          "level": 3,
+          "line": 114
+        },
+        {
+          "heading": "3. TUI Parity (`src/tui/model.ts`, `src/tui/app.ts`, `src/tui/Views.tsx`)",
+          "level": 3,
+          "line": 131
+        },
+        {
+          "heading": "Non-Functional Requirements",
+          "level": 2,
+          "line": 154
+        },
+        {
+          "heading": "Alternatives Considered",
+          "level": 2,
+          "line": 162
+        },
+        {
+          "heading": "Alternative A: Clamp Legacy `v0.5.4` Pixel `listWidth` Values (`240..640`) to `LIST_WIDTH_MAX` (`50%`)",
+          "level": 3,
+          "line": 164
+        },
+        {
+          "heading": "Alternative B: Use a JavaScript `ResizeObserver` to Toggle `.result-actions` Between Lines",
+          "level": 3,
+          "line": 170
+        },
+        {
+          "heading": "Alternative C: Replace the TUI Search `install list (N)` Sub-Section with a Modal Overlay",
+          "level": 3,
+          "line": 176
+        },
+        {
+          "heading": "Additional Resources",
+          "level": 3,
+          "line": 184
+        },
+        {
+          "heading": "Future Improvements",
+          "level": 3,
+          "line": 192
+        },
+        {
+          "heading": "Detailed Implementation Plan",
+          "level": 2,
+          "line": 198
+        },
+        {
+          "heading": "Target Files to Create/Modify",
+          "level": 3,
+          "line": 200
+        },
+        {
+          "heading": "1. [`./package.json`](./package.json) (Modify)",
+          "level": 4,
+          "line": 202
+        },
+        {
+          "heading": "2. [`./src/core/prefs.ts`](./src/core/prefs.ts) (Modify)",
+          "level": 4,
+          "line": 207
+        },
+        {
+          "heading": "3. [`./src/web/page.ts`](./src/web/page.ts) (Modify)",
+          "level": 4,
+          "line": 215
+        },
+        {
+          "heading": "4. [`./docs/app.html`](./docs/app.html) (Modify — Generated)",
+          "level": 4,
+          "line": 231
+        },
+        {
+          "heading": "5. [`./src/tui/model.ts`](./src/tui/model.ts) (Modify)",
+          "level": 4,
+          "line": 236
+        },
+        {
+          "heading": "6. [`./src/tui/app.ts`](./src/tui/app.ts) (Modify)",
+          "level": 4,
+          "line": 247
+        },
+        {
+          "heading": "7. [`./src/tui/Views.tsx`](./src/tui/Views.tsx) (Modify)",
+          "level": 4,
+          "line": 257
+        },
+        {
+          "heading": "8. [`./tests/services.test.ts`](./tests/services.test.ts) (Modify)",
+          "level": 4,
+          "line": 267
+        },
+        {
+          "heading": "9. [`./tests/page-smoke.test.ts`](./tests/page-smoke.test.ts) & [`./tests/e2e/audit-remediation.e2e.ts`](./tests/e2e/audit-remediation.e2e.ts) (Modify)",
+          "level": 4,
+          "line": 272
+        },
+        {
+          "heading": "10. [`./tests/tui.test.ts`](./tests/tui.test.ts) (Modify)",
+          "level": 4,
+          "line": 279
+        },
+        {
+          "heading": "11. [`./CONTEXT.md`](./CONTEXT.md), [`./ROADMAP.md`](./ROADMAP.md), & [`./GATES-0.5.4.1.md`](./GATES-0.5.4.1.md) (Create / Modify)",
+          "level": 4,
+          "line": 287
+        },
+        {
+          "heading": "Verification Plan",
+          "level": 3,
+          "line": 295
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 34
+      }
+    },
+    {
+      "path": "docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 207,
+      "nonEmptyLines": 154,
+      "sections": [
+        {
+          "heading": "skills-ui v0.5.5 — Hub Integration, Provenance Guardrails & Read-Only Health Strip",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Overview",
+          "level": 2,
+          "line": 9
+        },
+        {
+          "heading": "The Problem",
+          "level": 2,
+          "line": 20
+        },
+        {
+          "heading": "Goals",
+          "level": 2,
+          "line": 27
+        },
+        {
+          "heading": "Non-Goals",
+          "level": 2,
+          "line": 35
+        },
+        {
+          "heading": "Ratified Decisions (`S-313` / `D1`)",
+          "level": 2,
+          "line": 41
+        },
+        {
+          "heading": "Critical User Journeys (CUJs)",
+          "level": 2,
+          "line": 52
+        },
+        {
+          "heading": "CUJ 1: Updating Locked Global Skills Without Drift",
+          "level": 3,
+          "line": 54
+        },
+        {
+          "heading": "CUJ 2: Inspecting Provenance & Safely Attempting Removal of Non-Locked Skills",
+          "level": 3,
+          "line": 60
+        },
+        {
+          "heading": "CUJ 3: Installing a New Global Skill Through the Hub Guard",
+          "level": 3,
+          "line": 66
+        },
+        {
+          "heading": "CUJ 4: Running Vanilla `skills-ui` Without Hooks or Health Command",
+          "level": 3,
+          "line": 72
+        },
+        {
+          "heading": "Technical Architecture",
+          "level": 2,
+          "line": 80
+        },
+        {
+          "heading": "1. Lockfile & Skill Provenance (`src/core/services/locks.ts`, `installed.ts`, `types.ts`)",
+          "level": 3,
+          "line": 103
+        },
+        {
+          "heading": "2. Env-Only Hooks & Health Service (`src/core/services/hooks.ts` + `src/core/api.ts`)",
+          "level": 3,
+          "line": 113
+        },
+        {
+          "heading": "3. WebUI & TUI Surfaces (`src/web/page.ts`, `src/tui/{model,app,Views}.tsx`)",
+          "level": 3,
+          "line": 130
+        },
+        {
+          "heading": "Non-Functional Requirements",
+          "level": 2,
+          "line": 144
+        },
+        {
+          "heading": "Alternatives Considered",
+          "level": 2,
+          "line": 152
+        },
+        {
+          "heading": "Alternative A: Configure Hook and Health Commands in `~/.config/skills-ui/prefs.json`",
+          "level": 3,
+          "line": 154
+        },
+        {
+          "heading": "Alternative B: Shell-Wrap Hook Commands via `/bin/sh -c`",
+          "level": 3,
+          "line": 160
+        },
+        {
+          "heading": "Alternative C: Build Projection and Chezmoi Sync Directly Inside `skills-ui`",
+          "level": 3,
+          "line": 166
+        },
+        {
+          "heading": "Additional Resources",
+          "level": 3,
+          "line": 174
+        },
+        {
+          "heading": "Detailed Implementation Plan (`S-314`–`S-319`)",
+          "level": 2,
+          "line": 184
+        },
+        {
+          "heading": "Verification Plan",
+          "level": 3,
+          "line": 195
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 23
+      }
+    },
+    {
+      "path": "playwright.config.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 15,
+      "nonEmptyLines": 14,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/build.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 113,
+      "nonEmptyLines": 103,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/install.sh",
+      "language": "shell",
+      "fileCategory": "script",
+      "totalLines": 100,
+      "nonEmptyLines": 87,
+      "functions": [
+        {
+          "name": "say",
+          "startLine": 21,
+          "endLine": 21,
+          "params": []
+        },
+        {
+          "name": "die",
+          "startLine": 22,
+          "endLine": 22,
+          "params": []
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/perf/report-2026-11-01-real.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 33,
+      "nonEmptyLines": 29,
+      "sections": [
+        {
+          "heading": "skills-ui performance budget report",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "observations",
+          "level": 2,
+          "line": 25
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "scripts/perf/report-2026-11-01.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 32,
+      "nonEmptyLines": 29,
+      "sections": [
+        {
+          "heading": "skills-ui performance budget report",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "observations",
+          "level": 2,
+          "line": 24
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    },
+    {
+      "path": "scripts/pty-smoke/README.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 44,
+      "nonEmptyLines": 35,
+      "sections": [
+        {
+          "heading": "pty-smoke",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Run",
+          "level": 2,
+          "line": 8
+        },
+        {
+          "heading": "Files",
+          "level": 2,
+          "line": 21
+        },
+        {
+          "heading": "Hard-won gotchas (do not rediscover)",
+          "level": 2,
+          "line": 29
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": "scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 66,
+      "nonEmptyLines": 35,
+      "sections": [
+        {
+          "heading": "Skill 001",
+          "level": 1,
+          "line": 6
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 66,
+      "nonEmptyLines": 35,
+      "sections": [
+        {
+          "heading": "Skill 002",
+          "level": 1,
+          "line": 6
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 66,
+      "nonEmptyLines": 35,
+      "sections": [
+        {
+          "heading": "Skill 003",
+          "level": 1,
+          "line": 6
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "scripts/pty-smoke/fixtures/ls-global-long.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 1502,
+      "nonEmptyLines": 1502,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 0
+      }
+    },
+    {
+      "path": "scripts/pty-smoke/fixtures/ls-project.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 20,
+      "nonEmptyLines": 20,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 0
+      }
+    },
+    {
+      "path": "scripts/pty-smoke/runner.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 97,
+      "nonEmptyLines": 86,
+      "classes": [
+        {
+          "name": "PtyApp",
+          "startLine": 37,
+          "endLine": 97,
+          "methods": [
+            "__init__",
+            "read",
+            "send",
+            "lines",
+            "find",
+            "stop"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "PtyApp",
+          "line": 37,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "__init__",
+          "callee": "str",
+          "lineNumber": 40
+        },
+        {
+          "caller": "__init__",
+          "callee": "bytearray",
+          "lineNumber": 43
+        },
+        {
+          "caller": "__init__",
+          "callee": "pyte.Screen",
+          "lineNumber": 44
+        },
+        {
+          "caller": "__init__",
+          "callee": "pyte.ByteStream",
+          "lineNumber": 45
+        },
+        {
+          "caller": "__init__",
+          "callee": "pty.fork",
+          "lineNumber": 46
+        },
+        {
+          "caller": "__init__",
+          "callee": "dict",
+          "lineNumber": 48
+        },
+        {
+          "caller": "__init__",
+          "callee": "env.get",
+          "lineNumber": 50
+        },
+        {
+          "caller": "__init__",
+          "callee": "env.get",
+          "lineNumber": 51
+        },
+        {
+          "caller": "__init__",
+          "callee": "str",
+          "lineNumber": 55
+        },
+        {
+          "caller": "__init__",
+          "callee": "Path",
+          "lineNumber": 55
+        },
+        {
+          "caller": "__init__",
+          "callee": "e.get",
+          "lineNumber": 56
+        },
+        {
+          "caller": "__init__",
+          "callee": "e.update",
+          "lineNumber": 57
+        },
+        {
+          "caller": "__init__",
+          "callee": "os.chdir",
+          "lineNumber": 58
+        },
+        {
+          "caller": "__init__",
+          "callee": "os.execvpe",
+          "lineNumber": 62
+        },
+        {
+          "caller": "__init__",
+          "callee": "fcntl.ioctl",
+          "lineNumber": 63
+        },
+        {
+          "caller": "__init__",
+          "callee": "struct.pack",
+          "lineNumber": 63
+        },
+        {
+          "caller": "read",
+          "callee": "time.time",
+          "lineNumber": 66
+        },
+        {
+          "caller": "read",
+          "callee": "time.time",
+          "lineNumber": 67
+        },
+        {
+          "caller": "read",
+          "callee": "select.select",
+          "lineNumber": 68
+        },
+        {
+          "caller": "read",
+          "callee": "os.read",
+          "lineNumber": 71
+        },
+        {
+          "caller": "read",
+          "callee": "self.raw.extend",
+          "lineNumber": 76
+        },
+        {
+          "caller": "read",
+          "callee": "self.stream.feed",
+          "lineNumber": 77
+        },
+        {
+          "caller": "send",
+          "callee": "os.write",
+          "lineNumber": 80
+        },
+        {
+          "caller": "send",
+          "callee": "keys.encode",
+          "lineNumber": 80
+        },
+        {
+          "caller": "send",
+          "callee": "self.read",
+          "lineNumber": 81
+        },
+        {
+          "caller": "lines",
+          "callee": "\"\".join(row).rstrip",
+          "lineNumber": 84
+        },
+        {
+          "caller": "lines",
+          "callee": "\"\".join",
+          "lineNumber": 84
+        },
+        {
+          "caller": "find",
+          "callee": "enumerate",
+          "lineNumber": 87
+        },
+        {
+          "caller": "find",
+          "callee": "self.lines",
+          "lineNumber": 87
+        },
+        {
+          "caller": "stop",
+          "callee": "os.kill",
+          "lineNumber": 94
+        },
+        {
+          "caller": "stop",
+          "callee": "os.waitpid",
+          "lineNumber": 95
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "scripts/pty-smoke/skills-smoke-bin.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 33,
+      "nonEmptyLines": 28,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/pty-smoke/smoke.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 169,
+      "nonEmptyLines": 146,
+      "functions": [
+        {
+          "name": "check",
+          "startLine": 45,
+          "endLine": 48,
+          "params": [
+            "name",
+            "ok",
+            "detail"
+          ]
+        },
+        {
+          "name": "main",
+          "startLine": 51,
+          "endLine": 165,
+          "params": []
+        }
+      ],
+      "classes": [
+        {
+          "name": "_SearchFixtureHandler",
+          "startLine": 24,
+          "endLine": 42,
+          "methods": [
+            "do_GET",
+            "log_message"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "_SearchFixtureHandler",
+          "line": 24,
+          "isDefault": false
+        },
+        {
+          "name": "check",
+          "line": 45,
+          "isDefault": false
+        },
+        {
+          "name": "main",
+          "line": 51,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "do_GET",
+          "callee": "range",
+          "lineNumber": 32
+        },
+        {
+          "caller": "do_GET",
+          "callee": "json.dumps({\"skills\": skills}).encode",
+          "lineNumber": 34
+        },
+        {
+          "caller": "do_GET",
+          "callee": "json.dumps",
+          "lineNumber": 34
+        },
+        {
+          "caller": "do_GET",
+          "callee": "self.send_response",
+          "lineNumber": 35
+        },
+        {
+          "caller": "do_GET",
+          "callee": "self.send_header",
+          "lineNumber": 36
+        },
+        {
+          "caller": "do_GET",
+          "callee": "self.send_header",
+          "lineNumber": 37
+        },
+        {
+          "caller": "do_GET",
+          "callee": "str",
+          "lineNumber": 37
+        },
+        {
+          "caller": "do_GET",
+          "callee": "len",
+          "lineNumber": 37
+        },
+        {
+          "caller": "do_GET",
+          "callee": "self.end_headers",
+          "lineNumber": 38
+        },
+        {
+          "caller": "do_GET",
+          "callee": "self.wfile.write",
+          "lineNumber": 39
+        },
+        {
+          "caller": "check",
+          "callee": "print",
+          "lineNumber": 46
+        },
+        {
+          "caller": "check",
+          "callee": "FAILURES.append",
+          "lineNumber": 48
+        },
+        {
+          "caller": "main",
+          "callee": "HTTPServer",
+          "lineNumber": 52
+        },
+        {
+          "caller": "main",
+          "callee": "threading.Thread(target=server.serve_forever, daemon=True).start",
+          "lineNumber": 53
+        },
+        {
+          "caller": "main",
+          "callee": "threading.Thread",
+          "lineNumber": 53
+        },
+        {
+          "caller": "main",
+          "callee": "PtyApp",
+          "lineNumber": 54
+        },
+        {
+          "caller": "main",
+          "callee": "app.read",
+          "lineNumber": 56
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 60
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 60
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 61
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 61
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 62
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 62
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 62
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 66
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 67
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 67
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 67
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 68
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 68
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 69
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 69
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 70
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 70
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 70
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 71
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 71
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 75
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 76
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 77
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 78
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 79
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 79
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 82
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 83
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 84
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 85
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 86
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 87
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 87
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 91
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 92
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 93
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 93
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 93
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 94
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 95
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 96
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 96
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 97
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 98
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 101
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 102
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 103
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 103
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 103
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 104
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 104
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 105
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 109
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 110
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 110
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 111
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 111
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 115
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 116
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 117
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 118
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 118
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 119
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 120
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 120
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 121
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 122
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 122
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 123
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 127
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 130
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 131
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 132
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 133
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 134
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 135
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 135
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 136
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 137
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 138
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 139
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 140
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 141
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 142
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 143
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 144
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 145
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 146
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 147
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 148
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 149
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 150
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 151
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 151
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 152
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 152
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 153
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 154
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 154
+        },
+        {
+          "caller": "main",
+          "callee": "app.send",
+          "lineNumber": 155
+        },
+        {
+          "caller": "main",
+          "callee": "check",
+          "lineNumber": 156
+        },
+        {
+          "caller": "main",
+          "callee": "app.find",
+          "lineNumber": 156
+        },
+        {
+          "caller": "main",
+          "callee": "app.stop",
+          "lineNumber": 158
+        },
+        {
+          "caller": "main",
+          "callee": "server.shutdown",
+          "lineNumber": 159
+        },
+        {
+          "caller": "main",
+          "callee": "print",
+          "lineNumber": 161
+        },
+        {
+          "caller": "main",
+          "callee": "print",
+          "lineNumber": 163
+        },
+        {
+          "caller": "main",
+          "callee": "len",
+          "lineNumber": 163
+        },
+        {
+          "caller": "main",
+          "callee": "', '.join",
+          "lineNumber": 163
+        },
+        {
+          "caller": "main",
+          "callee": "sys.exit",
+          "lineNumber": 164
+        },
+        {
+          "caller": "main",
+          "callee": "print",
+          "lineNumber": 165
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 3,
+        "functionCount": 2,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "scripts/verify-build-targets.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 21,
+      "nonEmptyLines": 21,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/core/filter.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 26,
+      "nonEmptyLines": 26,
+      "functions": [
+        {
+          "name": "skillMatches",
+          "startLine": 14,
+          "endLine": 26,
+          "params": [
+            "skill",
+            "needle"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "skillMatches",
+          "line": 14,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "skillMatches",
+          "callee": "needle.trim().toLowerCase",
+          "lineNumber": 18
+        },
+        {
+          "caller": "skillMatches",
+          "callee": "needle.trim",
+          "lineNumber": 18
+        },
+        {
+          "caller": "skillMatches",
+          "callee": "skill.name.toLowerCase().includes",
+          "lineNumber": 21
+        },
+        {
+          "caller": "skillMatches",
+          "callee": "skill.name.toLowerCase",
+          "lineNumber": 21
+        },
+        {
+          "caller": "skillMatches",
+          "callee": "skill.source.toLowerCase().includes",
+          "lineNumber": 22
+        },
+        {
+          "caller": "skillMatches",
+          "callee": "skill.source.toLowerCase",
+          "lineNumber": 22
+        },
+        {
+          "caller": "skillMatches",
+          "callee": "skill.agents.some",
+          "lineNumber": 23
+        },
+        {
+          "caller": "skillMatches",
+          "callee": "a.toLowerCase().includes",
+          "lineNumber": 23
+        },
+        {
+          "caller": "skillMatches",
+          "callee": "a.toLowerCase",
+          "lineNumber": 23
+        },
+        {
+          "caller": "skillMatches",
+          "callee": "skill.description.toLowerCase().includes",
+          "lineNumber": 24
+        },
+        {
+          "caller": "skillMatches",
+          "callee": "skill.description.toLowerCase",
+          "lineNumber": 24
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/tui/spike.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 95,
+      "nonEmptyLines": 87,
+      "functions": [
+        {
+          "name": "spikeSyntaxTokens",
+          "startLine": 46,
+          "endLine": 60,
+          "params": []
+        },
+        {
+          "name": "buildSpikeScreen",
+          "startLine": 62,
+          "endLine": 79,
+          "params": [
+            "renderer"
+          ]
+        },
+        {
+          "name": "runSpikeTui",
+          "startLine": 81,
+          "endLine": 95,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "SPIKE_MARKDOWN",
+          "line": 17,
+          "isDefault": false
+        },
+        {
+          "name": "spikeSyntaxTokens",
+          "line": 46,
+          "isDefault": false
+        },
+        {
+          "name": "buildSpikeScreen",
+          "line": 62,
+          "isDefault": false
+        },
+        {
+          "name": "runSpikeTui",
+          "line": 81,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "buildSpikeScreen",
+          "callee": "SyntaxStyle.fromTheme",
+          "lineNumber": 64
+        },
+        {
+          "caller": "buildSpikeScreen",
+          "callee": "spikeSyntaxTokens",
+          "lineNumber": 64
+        },
+        {
+          "caller": "buildSpikeScreen",
+          "callee": "panel.add",
+          "lineNumber": 75
+        },
+        {
+          "caller": "buildSpikeScreen",
+          "callee": "panel.add",
+          "lineNumber": 76
+        },
+        {
+          "caller": "buildSpikeScreen",
+          "callee": "panel.add",
+          "lineNumber": 77
+        },
+        {
+          "caller": "runSpikeTui",
+          "callee": "console.error",
+          "lineNumber": 83
+        },
+        {
+          "caller": "runSpikeTui",
+          "callee": "import",
+          "lineNumber": 87
+        },
+        {
+          "caller": "runSpikeTui",
+          "callee": "createCliRenderer",
+          "lineNumber": 88
+        },
+        {
+          "caller": "runSpikeTui",
+          "callee": "renderer.root.add",
+          "lineNumber": 89
+        },
+        {
+          "caller": "runSpikeTui",
+          "callee": "buildSpikeScreen",
+          "lineNumber": 89
+        },
+        {
+          "caller": "onKey",
+          "callee": "renderer.destroy",
+          "lineNumber": 91
+        },
+        {
+          "caller": "runSpikeTui",
+          "callee": "renderer.keyInput.on",
+          "lineNumber": 93
+        },
+        {
+          "caller": "runSpikeTui",
+          "callee": "renderer.once",
+          "lineNumber": 94
+        },
+        {
+          "caller": "runSpikeTui",
+          "callee": "renderer.keyInput.off",
+          "lineNumber": 94
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 4,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/e2e/hosted.e2e.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 844,
+      "nonEmptyLines": 795,
+      "functions": [
+        {
+          "name": "startServe",
+          "startLine": 23,
+          "endLine": 60,
+          "params": [
+            "port",
+            "extraEnv",
+            "prefsDirOverride",
+            "cmd"
+          ]
+        },
+        {
+          "name": "connect",
+          "startLine": 86,
+          "endLine": 90,
+          "params": [
+            "page",
+            "tok"
+          ]
+        },
+        {
+          "name": "localOrigin",
+          "startLine": 157,
+          "endLine": 157,
+          "params": [
+            "port"
+          ]
+        },
+        {
+          "name": "quietUpdateCheck",
+          "startLine": 164,
+          "endLine": 172,
+          "params": [
+            "page"
+          ]
+        },
+        {
+          "name": "stubSkillApi",
+          "startLine": 755,
+          "endLine": 790,
+          "params": [
+            "page",
+            "body"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "startServe",
+          "callee": "spawn",
+          "lineNumber": 29
+        },
+        {
+          "caller": "startServe",
+          "callee": "String",
+          "lineNumber": 29
+        },
+        {
+          "caller": "startServe",
+          "callee": "resolve",
+          "lineNumber": 30
+        },
+        {
+          "caller": "startServe",
+          "callee": "join",
+          "lineNumber": 38
+        },
+        {
+          "caller": "startServe",
+          "callee": "resolve",
+          "lineNumber": 39
+        },
+        {
+          "caller": "startServe",
+          "callee": "setTimeout",
+          "lineNumber": 48
+        },
+        {
+          "caller": "startServe",
+          "callee": "reject",
+          "lineNumber": 48
+        },
+        {
+          "caller": "startServe",
+          "callee": "child.stdout.on",
+          "lineNumber": 49
+        },
+        {
+          "caller": "startServe",
+          "callee": "d.toString",
+          "lineNumber": 50
+        },
+        {
+          "caller": "startServe",
+          "callee": "out.includes",
+          "lineNumber": 51
+        },
+        {
+          "caller": "startServe",
+          "callee": "clearTimeout",
+          "lineNumber": 52
+        },
+        {
+          "caller": "startServe",
+          "callee": "resolveDone",
+          "lineNumber": 53
+        },
+        {
+          "caller": "startServe",
+          "callee": "child.stderr.on",
+          "lineNumber": 56
+        },
+        {
+          "caller": "startServe",
+          "callee": "d.toString",
+          "lineNumber": 57
+        },
+        {
+          "caller": "connect",
+          "callee": "import",
+          "lineNumber": 86
+        },
+        {
+          "caller": "connect",
+          "callee": "page.locator(\"#backendInput\").fill",
+          "lineNumber": 87
+        },
+        {
+          "caller": "connect",
+          "callee": "page.locator",
+          "lineNumber": 87
+        },
+        {
+          "caller": "connect",
+          "callee": "page.locator(\"#tokenInput\").fill",
+          "lineNumber": 88
+        },
+        {
+          "caller": "connect",
+          "callee": "page.locator",
+          "lineNumber": 88
+        },
+        {
+          "caller": "connect",
+          "callee": "page.locator(\"#connectBtn\").click",
+          "lineNumber": 89
+        },
+        {
+          "caller": "connect",
+          "callee": "page.locator",
+          "lineNumber": 89
+        },
+        {
+          "caller": "quietUpdateCheck",
+          "callee": "import",
+          "lineNumber": 164
+        },
+        {
+          "caller": "quietUpdateCheck",
+          "callee": "page.route",
+          "lineNumber": 165
+        },
+        {
+          "caller": "quietUpdateCheck",
+          "callee": "route.fulfill",
+          "lineNumber": 166
+        },
+        {
+          "caller": "quietUpdateCheck",
+          "callee": "JSON.stringify",
+          "lineNumber": 169
+        },
+        {
+          "caller": "names",
+          "callee": "(await page.locator(\"#skillList li .skill-name\").allTextContents()).map",
+          "lineNumber": 658
+        },
+        {
+          "caller": "names",
+          "callee": "page.locator(\"#skillList li .skill-name\").allTextContents",
+          "lineNumber": 658
+        },
+        {
+          "caller": "names",
+          "callee": "page.locator",
+          "lineNumber": 658
+        },
+        {
+          "caller": "names",
+          "callee": "t.trim",
+          "lineNumber": 658
+        },
+        {
+          "caller": "stubSkillApi",
+          "callee": "import",
+          "lineNumber": 756
+        },
+        {
+          "caller": "stubSkillApi",
+          "callee": "page.route",
+          "lineNumber": 759
+        },
+        {
+          "caller": "stubSkillApi",
+          "callee": "route.request().url",
+          "lineNumber": 760
+        },
+        {
+          "caller": "stubSkillApi",
+          "callee": "route.request",
+          "lineNumber": 760
+        },
+        {
+          "caller": "stubSkillApi",
+          "callee": "route.fulfill",
+          "lineNumber": 762
+        },
+        {
+          "caller": "stubSkillApi",
+          "callee": "JSON.stringify",
+          "lineNumber": 765
+        },
+        {
+          "caller": "stubSkillApi",
+          "callee": "url.searchParams.get",
+          "lineNumber": 769
+        },
+        {
+          "caller": "stubSkillApi",
+          "callee": "route.fulfill",
+          "lineNumber": 770
+        },
+        {
+          "caller": "stubSkillApi",
+          "callee": "JSON.stringify",
+          "lineNumber": 773
+        },
+        {
+          "caller": "stubSkillApi",
+          "callee": "route.fulfill",
+          "lineNumber": 782
+        },
+        {
+          "caller": "stubSkillApi",
+          "callee": "JSON.stringify",
+          "lineNumber": 785
+        },
+        {
+          "caller": "stubSkillApi",
+          "callee": "route.continue",
+          "lineNumber": 788
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/fixtures/contract/hostile-skill/SKILL.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 10,
+      "nonEmptyLines": 7,
+      "sections": [
+        {
+          "heading": "Hostile skill body",
+          "level": 1,
+          "line": 6
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "tests/fixtures/skills-shim.mjs",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 128,
+      "nonEmptyLines": 117,
+      "functions": [
+        {
+          "name": "loadState",
+          "startLine": 56,
+          "endLine": 62,
+          "params": []
+        },
+        {
+          "name": "saveState",
+          "startLine": 63,
+          "endLine": 66,
+          "params": [
+            "list"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "loadState",
+          "callee": "existsSync",
+          "lineNumber": 57
+        },
+        {
+          "caller": "loadState",
+          "callee": "args.includes",
+          "lineNumber": 58
+        },
+        {
+          "caller": "loadState",
+          "callee": "args.includes",
+          "lineNumber": 58
+        },
+        {
+          "caller": "loadState",
+          "callee": "JSON.parse",
+          "lineNumber": 59
+        },
+        {
+          "caller": "loadState",
+          "callee": "readFileSync",
+          "lineNumber": 59
+        },
+        {
+          "caller": "loadState",
+          "callee": "JSON.parse",
+          "lineNumber": 61
+        },
+        {
+          "caller": "loadState",
+          "callee": "readFileSync",
+          "lineNumber": 61
+        },
+        {
+          "caller": "saveState",
+          "callee": "mkdirSync",
+          "lineNumber": 64
+        },
+        {
+          "caller": "saveState",
+          "callee": "writeFileSync",
+          "lineNumber": 65
+        },
+        {
+          "caller": "saveState",
+          "callee": "JSON.stringify",
+          "lineNumber": 65
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/fixtures/slow-skills-shim.mjs",
+      "language": "javascript",
+      "fileCategory": "code",
+      "totalLines": 27,
+      "nonEmptyLines": 23,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/image.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 51,
+      "nonEmptyLines": 48,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    }
+  ]
+}

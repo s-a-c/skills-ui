@@ -1,0 +1,682 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 5,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 5,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 5,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "tests/e2e/audit-remediation.e2e.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 658,
+      "nonEmptyLines": 630,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/e2e/helpers/audit-fixture.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 60,
+      "nonEmptyLines": 60,
+      "functions": [
+        {
+          "name": "closeAuditPages",
+          "startLine": 6,
+          "endLine": 8,
+          "params": []
+        },
+        {
+          "name": "startAuditBackend",
+          "startLine": 9,
+          "endLine": 31,
+          "params": []
+        },
+        {
+          "name": "row",
+          "startLine": 32,
+          "endLine": 35,
+          "params": [
+            "name",
+            "scope"
+          ]
+        },
+        {
+          "name": "openAuditPage",
+          "startLine": 36,
+          "endLine": 55,
+          "params": [
+            "browser",
+            "origin"
+          ]
+        },
+        {
+          "name": "settleResponse",
+          "startLine": 56,
+          "endLine": 60,
+          "params": [
+            "page",
+            "response"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "closeAuditPages",
+          "line": 6,
+          "isDefault": false
+        },
+        {
+          "name": "startAuditBackend",
+          "line": 9,
+          "isDefault": false
+        },
+        {
+          "name": "row",
+          "line": 32,
+          "isDefault": false
+        },
+        {
+          "name": "openAuditPage",
+          "line": 36,
+          "isDefault": false
+        },
+        {
+          "name": "settleResponse",
+          "line": 56,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "closeAuditPages",
+          "callee": "cases.splice",
+          "lineNumber": 7
+        },
+        {
+          "caller": "closeAuditPages",
+          "callee": "expect(item.errors).toEqual",
+          "lineNumber": 7
+        },
+        {
+          "caller": "closeAuditPages",
+          "callee": "expect",
+          "lineNumber": 7
+        },
+        {
+          "caller": "closeAuditPages",
+          "callee": "item.context.close",
+          "lineNumber": 7
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "createWorkspaceFixture",
+          "lineNumber": 10
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "spawn",
+          "lineNumber": 11
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "setTimeout",
+          "lineNumber": 16
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "reject",
+          "lineNumber": 16
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "child.once",
+          "lineNumber": 17
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "clearTimeout",
+          "lineNumber": 17
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "reject",
+          "lineNumber": 17
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "child.once",
+          "lineNumber": 18
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "clearTimeout",
+          "lineNumber": 18
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "reject",
+          "lineNumber": 18
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "child.stderr.on",
+          "lineNumber": 19
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "b.toString",
+          "lineNumber": 19
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "child.stdout.on",
+          "lineNumber": 20
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "b.toString",
+          "lineNumber": 21
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "output.split('\\n').find",
+          "lineNumber": 22
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "output.split",
+          "lineNumber": 22
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "x.startsWith",
+          "lineNumber": 22
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "clearTimeout",
+          "lineNumber": 23
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "resolve",
+          "lineNumber": 23
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "JSON.parse",
+          "lineNumber": 23
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "line.slice",
+          "lineNumber": 23
+        },
+        {
+          "caller": "stop",
+          "callee": "once",
+          "lineNumber": 27
+        },
+        {
+          "caller": "stop",
+          "callee": "child.kill",
+          "lineNumber": 27
+        },
+        {
+          "caller": "stop",
+          "callee": "fixture.cleanup",
+          "lineNumber": 28
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "child.kill",
+          "lineNumber": 30
+        },
+        {
+          "caller": "startAuditBackend",
+          "callee": "fixture.cleanup",
+          "lineNumber": 30
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "browser.newContext",
+          "lineNumber": 37
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "context.newPage",
+          "lineNumber": 37
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "cases.push",
+          "lineNumber": 38
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "page.on",
+          "lineNumber": 39
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "pageErrors.push",
+          "lineNumber": 39
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "String",
+          "lineNumber": 39
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "page.route",
+          "lineNumber": 40
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "route.request().url",
+          "lineNumber": 41
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "route.request",
+          "lineNumber": 41
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "url.searchParams.get",
+          "lineNumber": 41
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "route.fulfill",
+          "lineNumber": 42
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "row",
+          "lineNumber": 42
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "row",
+          "lineNumber": 42
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "route.fulfill",
+          "lineNumber": 43
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "url.searchParams.get",
+          "lineNumber": 43
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "route.fulfill",
+          "lineNumber": 44
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "route.fulfill",
+          "lineNumber": 45
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "route.fulfill",
+          "lineNumber": 49
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "route.continue",
+          "lineNumber": 50
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "page.goto",
+          "lineNumber": 52
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "expect(page.locator('#skillList')).toContainText",
+          "lineNumber": 52
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "expect",
+          "lineNumber": 52
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "page.locator",
+          "lineNumber": 52
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "expect(page.locator('#readme')).toContainText",
+          "lineNumber": 53
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "expect",
+          "lineNumber": 53
+        },
+        {
+          "caller": "openAuditPage",
+          "callee": "page.locator",
+          "lineNumber": 53
+        },
+        {
+          "caller": "settleResponse",
+          "callee": "response.finished",
+          "lineNumber": 57
+        },
+        {
+          "caller": "settleResponse",
+          "callee": "page.evaluate",
+          "lineNumber": 58
+        },
+        {
+          "caller": "settleResponse",
+          "callee": "requestAnimationFrame",
+          "lineNumber": 59
+        },
+        {
+          "caller": "settleResponse",
+          "callee": "requestAnimationFrame",
+          "lineNumber": 59
+        },
+        {
+          "caller": "settleResponse",
+          "callee": "done",
+          "lineNumber": 59
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 5,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/helpers/audit-state.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 29,
+      "nonEmptyLines": 29,
+      "functions": [
+        {
+          "name": "deferred",
+          "startLine": 3,
+          "endLine": 7,
+          "params": []
+        },
+        {
+          "name": "createWorkspaceFixture",
+          "startLine": 8,
+          "endLine": 29,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "deferred",
+          "line": 3,
+          "isDefault": false
+        },
+        {
+          "name": "createWorkspaceFixture",
+          "line": 8,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "deferred",
+          "callee": "Promise.withResolvers",
+          "lineNumber": 5
+        },
+        {
+          "caller": "createWorkspaceFixture",
+          "callee": "resolve",
+          "lineNumber": 9
+        },
+        {
+          "caller": "createWorkspaceFixture",
+          "callee": "mkdirSync",
+          "lineNumber": 9
+        },
+        {
+          "caller": "createWorkspaceFixture",
+          "callee": "mkdtempSync",
+          "lineNumber": 10
+        },
+        {
+          "caller": "createWorkspaceFixture",
+          "callee": "join",
+          "lineNumber": 10
+        },
+        {
+          "caller": "createWorkspaceFixture",
+          "callee": "resolve",
+          "lineNumber": 12
+        },
+        {
+          "caller": "createWorkspaceFixture",
+          "callee": "join",
+          "lineNumber": 13
+        },
+        {
+          "caller": "createWorkspaceFixture",
+          "callee": "join",
+          "lineNumber": 13
+        },
+        {
+          "caller": "createWorkspaceFixture",
+          "callee": "join",
+          "lineNumber": 14
+        },
+        {
+          "caller": "createWorkspaceFixture",
+          "callee": "join",
+          "lineNumber": 14
+        },
+        {
+          "caller": "createWorkspaceFixture",
+          "callee": "join",
+          "lineNumber": 15
+        },
+        {
+          "caller": "activate",
+          "callee": "keys.map",
+          "lineNumber": 22
+        },
+        {
+          "caller": "cleanup",
+          "callee": "rmSync",
+          "lineNumber": 28
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/helpers/installer-fixture.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 25,
+      "nonEmptyLines": 25,
+      "functions": [
+        {
+          "name": "createInstallerFixture",
+          "startLine": 8,
+          "endLine": 25,
+          "params": [
+            "{chmodFails=false,checksumFails=false,downloadFails=false}"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "createInstallerFixture",
+          "line": 8,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "createInstallerFixture",
+          "callee": "createWorkspaceFixture",
+          "lineNumber": 9
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "join",
+          "lineNumber": 9
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "join",
+          "lineNumber": 9
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "join",
+          "lineNumber": 10
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "mkdirSync",
+          "lineNumber": 10
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "join",
+          "lineNumber": 11
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "writeFileSync",
+          "lineNumber": 11
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "chmodSync",
+          "lineNumber": 11
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "join",
+          "lineNumber": 12
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "writeFileSync",
+          "lineNumber": 12
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "join",
+          "lineNumber": 13
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "createHash('sha256').update(checksumFails?'MISMATCHED PAYLOAD':'#!/bin/sh\\necho FIXTURE_INSTALLED\\n').digest",
+          "lineNumber": 14
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "createHash('sha256').update",
+          "lineNumber": 14
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "createHash",
+          "lineNumber": 14
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "writeFileSync",
+          "lineNumber": 15
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "Object.entries",
+          "lineNumber": 21
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "join",
+          "lineNumber": 21
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "writeFileSync",
+          "lineNumber": 21
+        },
+        {
+          "caller": "createInstallerFixture",
+          "callee": "chmodSync",
+          "lineNumber": 21
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/installer.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 71,
+      "nonEmptyLines": 65,
+      "callGraph": [
+        {
+          "caller": "spawnInstaller",
+          "callee": "chmodSync",
+          "lineNumber": 9
+        },
+        {
+          "caller": "spawnInstaller",
+          "callee": "Bun.spawn",
+          "lineNumber": 10
+        },
+        {
+          "caller": "executableMode",
+          "callee": "statSync",
+          "lineNumber": 15
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    }
+  ]
+}

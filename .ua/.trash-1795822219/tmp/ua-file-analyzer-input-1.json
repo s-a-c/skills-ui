@@ -1,0 +1,206 @@
+{
+  "projectRoot": "/Users/s-a-c/Projects/s-a-c/skills-ui/main",
+  "batchFiles": [
+    {
+      "path": "src/core/api.ts",
+      "language": "typescript",
+      "sizeLines": 654,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/hosted-auth.ts",
+      "language": "typescript",
+      "sizeLines": 125,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/hooks.ts",
+      "language": "typescript",
+      "sizeLines": 244,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/install.ts",
+      "language": "typescript",
+      "sizeLines": 57,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/installed.ts",
+      "language": "typescript",
+      "sizeLines": 78,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/locks.ts",
+      "language": "typescript",
+      "sizeLines": 104,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/remove.ts",
+      "language": "typescript",
+      "sizeLines": 60,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/sanitize.ts",
+      "language": "typescript",
+      "sizeLines": 41,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/search.ts",
+      "language": "typescript",
+      "sizeLines": 168,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/skill-doc.ts",
+      "language": "typescript",
+      "sizeLines": 36,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/source.ts",
+      "language": "typescript",
+      "sizeLines": 31,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/types.ts",
+      "language": "typescript",
+      "sizeLines": 68,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/update.ts",
+      "language": "typescript",
+      "sizeLines": 16,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/updates-check.ts",
+      "language": "typescript",
+      "sizeLines": 158,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/skills-client.ts",
+      "language": "typescript",
+      "sizeLines": 155,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/spawn-queue.ts",
+      "language": "typescript",
+      "sizeLines": 56,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/hosted-auth.test.ts",
+      "language": "typescript",
+      "sizeLines": 190,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/locks.test.ts",
+      "language": "typescript",
+      "sizeLines": 402,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/sanitize.test.ts",
+      "language": "typescript",
+      "sizeLines": 152,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/serve-hardening.test.ts",
+      "language": "typescript",
+      "sizeLines": 395,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/core/api.ts": [
+      "src/core/hosted-auth.ts",
+      "src/core/index.ts",
+      "src/core/prefs.ts",
+      "src/core/seed.ts",
+      "src/core/services/locks.ts",
+      "src/core/services/sanitize.ts",
+      "src/core/services/skill-doc.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts",
+      "src/core/version.ts"
+    ],
+    "src/core/hosted-auth.ts": [],
+    "src/core/services/hooks.ts": [
+      "src/core/services/sanitize.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts"
+    ],
+    "src/core/services/install.ts": [
+      "src/core/services/sanitize.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts"
+    ],
+    "src/core/services/installed.ts": [
+      "src/core/services/locks.ts",
+      "src/core/services/sanitize.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts"
+    ],
+    "src/core/services/locks.ts": [
+      "src/core/services/types.ts"
+    ],
+    "src/core/services/remove.ts": [
+      "src/core/services/installed.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts"
+    ],
+    "src/core/services/sanitize.ts": [],
+    "src/core/services/search.ts": [
+      "src/core/services/sanitize.ts",
+      "src/core/services/types.ts"
+    ],
+    "src/core/services/skill-doc.ts": [
+      "src/core/services/sanitize.ts"
+    ],
+    "src/core/services/source.ts": [
+      "src/core/services/sanitize.ts",
+      "src/core/skills-client.ts"
+    ],
+    "src/core/services/types.ts": [],
+    "src/core/services/update.ts": [
+      "src/core/services/sanitize.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts"
+    ],
+    "src/core/services/updates-check.ts": [
+      "src/core/services/locks.ts",
+      "src/core/services/types.ts"
+    ],
+    "src/core/skills-client.ts": [
+      "src/core/spawn-queue.ts"
+    ],
+    "src/core/spawn-queue.ts": [],
+    "tests/hosted-auth.test.ts": [
+      "src/core/hosted-auth.ts"
+    ],
+    "tests/locks.test.ts": [
+      "src/core/services/locks.ts",
+      "src/core/services/updates-check.ts",
+      "tests/helpers/audit-state.ts"
+    ],
+    "tests/sanitize.test.ts": [
+      "src/core/services/sanitize.ts"
+    ],
+    "tests/serve-hardening.test.ts": [
+      "src/core/hosted-auth.ts",
+      "src/core/services/updates-check.ts",
+      "src/core/spawn-queue.ts"
+    ]
+  }
+}

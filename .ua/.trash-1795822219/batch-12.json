@@ -1,0 +1,156 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/services.test.ts",
+      "type": "file",
+      "name": "services.test.ts",
+      "filePath": "tests/services.test.ts",
+      "language": "typescript",
+      "summary": "Comprehensive Bun unit and integration test suite covering skills-client env sanitization and versioning, core skill services (installed, install, remove, source, update, skill-doc), registry search fallback, failure signaling, in-flight deduplication, byte-pinned search semantics, CLI seed parsing, preference persistence and width normalization, and Catppuccin theme WCAG AA contrast compliance.",
+      "tags": [
+        "unit-tests",
+        "core-services",
+        "search-dedup",
+        "skills-client",
+        "wcag-theme"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/services.test.ts:withStub",
+      "type": "function",
+      "name": "withStub",
+      "filePath": "tests/services.test.ts",
+      "lineRange": [
+        224,
+        243
+      ],
+      "summary": "Async test helper inside the search in-flight deduplication suite that spins up an ephemeral Bun HTTP server routing query parameter q to a custom handler, binds SKILLS_UI_API_URL for the callback, and restores server and environment state in a finally block.",
+      "tags": [
+        "test-helper",
+        "http-stub",
+        "search-dedup",
+        "bun-serve"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/services.test.ts:withQueryStub",
+      "type": "function",
+      "name": "withQueryStub",
+      "filePath": "tests/services.test.ts",
+      "lineRange": [
+        322,
+        348
+      ],
+      "summary": "Async test helper inside the search semantics byte-pin suite that serves deterministic per-query skill arrays over a local Bun HTTP server with a 1 ms simulated round-trip delay, logging every upstream query string in arrival order while handling teardown.",
+      "tags": [
+        "test-helper",
+        "http-stub",
+        "search-semantics",
+        "bun-serve"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/services.test.ts",
+      "target": "function:tests/services.test.ts:withStub",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/services.test.ts",
+      "target": "function:tests/services.test.ts:withQueryStub",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/services.test.ts",
+      "target": "file:tests/fixtures/skills-shim.mjs",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/remove.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/source.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/update.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/skill-doc.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/seed.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/prefs.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

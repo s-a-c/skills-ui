@@ -1,0 +1,212 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/tui.test.ts",
+      "type": "file",
+      "name": "tui.test.ts",
+      "filePath": "tests/tui.test.ts",
+      "language": "typescript",
+      "summary": "Comprehensive in-memory OpenTUI and pure-model test suite covering installed and search workflows, keyboard contracts, scope-threaded installs and updates, double-press quit safety, FIFO toasts, stale search and update-check race rejection, 3D graph and splash views, list-width resizing, provenance badges, and health overlays.",
+      "tags": [
+        "integration-test",
+        "tui-suite",
+        "keybindings",
+        "race-conditions",
+        "opentui-testing"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/tui.test.ts:fakeDeps",
+      "type": "function",
+      "name": "fakeDeps",
+      "filePath": "tests/tui.test.ts",
+      "lineRange": [
+        40,
+        60
+      ],
+      "language": "typescript",
+      "summary": "Constructs an in-memory TuiDeps test double backed by fixture skills and stubbed search, install, remove, update, health, and prefs handlers.",
+      "tags": [
+        "test-helper",
+        "mock-deps",
+        "tui-testing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/tui.test.ts:waitFor",
+      "type": "function",
+      "name": "waitFor",
+      "filePath": "tests/tui.test.ts",
+      "lineRange": [
+        64,
+        78
+      ],
+      "language": "typescript",
+      "summary": "Polls a boolean or throwing assertion predicate at 15 ms intervals until it succeeds or throws after timeoutMs.",
+      "tags": [
+        "test-helper",
+        "async-polling",
+        "assertions"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "function:tests/tui.test.ts:fakeDeps",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "function:tests/tui.test.ts:waitFor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/tui/app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:src/tui/renderer-ready.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:tests/tui.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:tests/tui.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/renderer-ready.ts",
+      "target": "file:tests/tui.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:tests/tui.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/art.ts",
+      "target": "file:tests/tui.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "function:src/tui/app.ts:runTuiOn",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "function:src/tui/app.ts:installCrashGuard",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "function:src/tui/renderer-ready.ts:waitForFrame",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "function:src/tui/model.ts:createTuiModel",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "function:src/tui/model.ts:update",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "function:src/tui/model.ts:visibleSkills",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "function:src/core/skills-client.ts:resetSkillsBinCache",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/tui.test.ts",
+      "target": "function:tests/helpers/audit-state.ts:deferred",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

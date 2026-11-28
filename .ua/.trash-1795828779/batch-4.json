@@ -1,0 +1,561 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/web/client/installed.ts",
+      "type": "file",
+      "name": "installed.ts",
+      "filePath": "src/web/client/installed.ts",
+      "language": "typescript",
+      "summary": "Builds the browser client JavaScript fragment managing the installed-skills list, debounced DOM-reusing row reconciliation, detail view, escape-first SKILL.md markdown renderer, and install/update/remove flows. Injects the transpiled shared skillMatches predicate so web filtering stays in exact parity with the TUI.",
+      "tags": [
+        "web-client",
+        "installed-skills",
+        "dom-reconciliation",
+        "markdown-renderer",
+        "skill-mutations"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/web/client/installed.ts:buildClientInstalledJs",
+      "type": "function",
+      "name": "buildClientInstalledJs",
+      "filePath": "src/web/client/installed.ts",
+      "lineRange": [
+        1,
+        673
+      ],
+      "language": "typescript",
+      "summary": "Interpolates the transpiled skillMatches function source into the client-side JavaScript bundle for installed skills, detail rendering, update checking, and CLI seed workflows. Implements generation-guarded async fetches, signature-keyed row reuse with User Timing marks, non-locked removal warnings, and an XSS-safe zero-dependency markdown renderer.",
+      "tags": [
+        "js-template-builder",
+        "installed-list",
+        "markdown-renderer",
+        "filter-parity",
+        "dom-reuse"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/web/client/search-and-boot.ts",
+      "type": "file",
+      "name": "search-and-boot.ts",
+      "filePath": "src/web/client/search-and-boot.ts",
+      "language": "typescript",
+      "summary": "Exports the CLIENT_SEARCH_AND_BOOT_JS browser script fragment handling skills.sh registry search, source-sibling browsing, batch install queue execution, tab/scope switching, and keyboard/splitter event wiring. Completes the client IIFE by bootstrapping hosted-mode connection probing, legacy storage migration, and initial seed application on DOMContentLoaded.",
+      "tags": [
+        "web-client",
+        "registry-search",
+        "install-queue",
+        "dom-bootstrap",
+        "keyboard-shortcuts"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/web/page.ts",
+      "type": "file",
+      "name": "page.ts",
+      "filePath": "src/web/page.ts",
+      "language": "typescript",
+      "summary": "Assembles and renders the standalone single-file skills-ui HTML dashboard from Catppuccin theme tokens, APP_CSS, and the concatenated client JavaScript fragments (APP_JS). Computes deterministic SHA-256 hash-pinned Content-Security-Policy directives and exports renderPage, pageCspFor, APP_JS, skillMatches, and webPageRenderer.",
+      "tags": [
+        "web-page",
+        "html-renderer",
+        "csp-hardening",
+        "catppuccin-theme",
+        "single-file-ui"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/web/page.ts:cssVarsFor",
+      "type": "function",
+      "name": "cssVarsFor",
+      "filePath": "src/web/page.ts",
+      "lineRange": [
+        28,
+        37
+      ],
+      "language": "typescript",
+      "summary": "Serializes semantic theme tokens and raw Catppuccin palette colors into CSS custom property declarations (--t-* and --a-*) preserving camelCase keys expected by APP_CSS.",
+      "tags": [
+        "css-variables",
+        "theme-tokens",
+        "catppuccin",
+        "styling-helper"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/web/page.ts:pageCspFor",
+      "type": "function",
+      "name": "pageCspFor",
+      "filePath": "src/web/page.ts",
+      "lineRange": [
+        68,
+        87
+      ],
+      "language": "typescript",
+      "summary": "Computes the Content-Security-Policy string for the rendered web page by pinning both deterministic inline script blocks (bootstrap and APP_JS) with SHA-256 base64 hashes instead of unsafe-inline. Switches connect-src between loopback hosts in hosted mode and 'self' when served locally.",
+      "tags": [
+        "csp",
+        "sha256-hash",
+        "security-headers",
+        "hosted-mode"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/web/page.ts:renderPage",
+      "type": "function",
+      "name": "renderPage",
+      "filePath": "src/web/page.ts",
+      "lineRange": [
+        89,
+        312
+      ],
+      "language": "typescript",
+      "summary": "Renders the complete deterministic HTML document for skills-ui, embedding mocha/latte CSS variables, APP_CSS, dashboard layout, settings drawer, modal dialogs, JSON-escaped bootstrap state, and APP_JS. Emits inline meta CSP and no-referrer tags when rendering for hosted static deployment.",
+      "tags": [
+        "html-template",
+        "ssr-page",
+        "csp-meta",
+        "web-dashboard"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/web/styles.ts",
+      "type": "file",
+      "name": "styles.ts",
+      "filePath": "src/web/styles.ts",
+      "language": "typescript",
+      "summary": "Exports the complete APP_CSS stylesheet for the skills-ui web dashboard built on Catppuccin CSS custom properties and a 4px spacing scale. Covers responsive split-pane layout, reduced-motion overrides, list/search cards, rendered SKILL.md typography, settings drawer, modals, and status toasts.",
+      "tags": [
+        "stylesheet",
+        "css-tokens",
+        "responsive-layout",
+        "reduced-motion",
+        "web-ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/dash-sweep.test.ts",
+      "type": "file",
+      "name": "dash-sweep.test.ts",
+      "filePath": "tests/dash-sweep.test.ts",
+      "language": "typescript",
+      "summary": "Enforces the Hallmark dash-sweep gate across web APP_JS and TUI source files (Views.tsx, app.ts, model.ts) so no en-dash, em-dash, Unicode escape, or HTML entity appears in user-facing runtime copy. Uses a comment- and regex-aware single-pass lexer plus JSX text extraction and asserts against vacuous passes.",
+      "tags": [
+        "copy-lint",
+        "lexer-test",
+        "typography-gate",
+        "web-tui-parity"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/dash-sweep.test.ts:lex",
+      "type": "function",
+      "name": "lex",
+      "filePath": "tests/dash-sweep.test.ts",
+      "lineRange": [
+        43,
+        135
+      ],
+      "language": "typescript",
+      "summary": "Single-pass JS/TS lexer that strips line/block comments and regex literals while collecting all string literals and template-literal text chunks, recursively lexing ${...} interpolations. Also returns a layout-preserving blanked source buffer for downstream JSX text-run scanning.",
+      "tags": [
+        "lexer",
+        "string-extraction",
+        "recursive-parser",
+        "test-helper"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/fixtures/audit-web-server.ts",
+      "type": "file",
+      "name": "audit-web-server.ts",
+      "filePath": "tests/fixtures/audit-web-server.ts",
+      "language": "typescript",
+      "summary": "Minimal subprocess fixture that boots createSkillsUiServer with webPageRenderer enabled and rate limiting disabled for Playwright and audit tests. Prints the bound loopback origin as a JSON-tagged AUDIT_ORIGIN line and exits cleanly on SIGTERM.",
+      "tags": [
+        "test-fixture",
+        "audit-server",
+        "loopback-origin",
+        "subprocess"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/markdown-render.test.ts",
+      "type": "file",
+      "name": "markdown-render.test.ts",
+      "filePath": "tests/markdown-render.test.ts",
+      "language": "typescript",
+      "summary": "Verifies the shipped browser renderMarkdown implementation extracted directly from renderPage's emitted APP_JS script block. Covers the supported SKILL.md markdown subset, non-navigating link rendering, hostile XSS/HTML-breakout escaping invariants, zero raw backticks, and byte-identical render determinism.",
+      "tags": [
+        "markdown-test",
+        "xss-defense",
+        "shipped-bytes",
+        "web-unit-test"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/markdown-render.test.ts:loadRenderer",
+      "type": "function",
+      "name": "loadRenderer",
+      "filePath": "tests/markdown-render.test.ts",
+      "lineRange": [
+        26,
+        41
+      ],
+      "language": "typescript",
+      "summary": "Slices the exact shipped esc and renderMarkdown function definitions out of the emitted APP_JS script block and evaluates them with new Function so test fixtures exercise the production bytes rather than a duplicate copy.",
+      "tags": [
+        "test-helper",
+        "dynamic-eval",
+        "shipped-bytes",
+        "markdown-renderer"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/page-hardening.test.ts",
+      "type": "file",
+      "name": "page-hardening.test.ts",
+      "filePath": "tests/page-hardening.test.ts",
+      "language": "typescript",
+      "summary": "Tests web page security hardening invariants including SHA-256 hash-pinned CSP without script unsafe-inline, </script>-safe bootstrap JSON escaping, sessionStorage token persistence with legacy localStorage migration, and Node syntax validation of emitted APP_JS. Also spins up createSkillsUiServer to verify CSP, nosniff, and no-referrer response headers on GET /.",
+      "tags": [
+        "security-test",
+        "csp-verification",
+        "xss-prevention",
+        "session-storage"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/terminology.test.ts",
+      "type": "file",
+      "name": "terminology.test.ts",
+      "filePath": "tests/terminology.test.ts",
+      "language": "typescript",
+      "summary": "Asserts ratified 0.5.2 UI terminology across both the TUI source files (Views.tsx, app.ts) and the rendered web dashboard HTML. Ensures the queue is named 'install list', destructive actions use 'remove' instead of 'delete', and confirm prompts match bound cancel keys.",
+      "tags": [
+        "terminology-test",
+        "copy-regression",
+        "web-tui-parity",
+        "ux-consistency"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/core/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/web/client/core.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/web/client/installed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/web/client/search-and-boot.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:src/web/styles.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/dash-sweep.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/fixtures/audit-web-server.ts",
+      "target": "file:src/core/api.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/fixtures/audit-web-server.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/markdown-render.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/page-hardening.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/terminology.test.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/web/client/installed.ts",
+      "target": "function:src/web/client/installed.ts:buildClientInstalledJs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "function:src/web/page.ts:cssVarsFor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "function:src/web/page.ts:pageCspFor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "function:src/web/page.ts:renderPage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/dash-sweep.test.ts",
+      "target": "function:tests/dash-sweep.test.ts:lex",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/markdown-render.test.ts",
+      "target": "function:tests/markdown-render.test.ts:loadRenderer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/web/client/installed.ts",
+      "target": "function:src/web/client/installed.ts:buildClientInstalledJs",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "function:src/web/page.ts:pageCspFor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "function:src/web/page.ts:renderPage",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "function:src/web/client/installed.ts:buildClientInstalledJs",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/web/page.ts:renderPage",
+      "target": "function:src/web/page.ts:pageCspFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/web/page.ts:renderPage",
+      "target": "function:src/web/page.ts:cssVarsFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/fixtures/audit-web-server.ts",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/markdown-render.test.ts",
+      "target": "function:src/web/page.ts:renderPage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/page-hardening.test.ts",
+      "target": "function:src/web/page.ts:renderPage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/page-hardening.test.ts",
+      "target": "function:src/web/page.ts:pageCspFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/page-hardening.test.ts",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/terminology.test.ts",
+      "target": "function:src/web/page.ts:renderPage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/dash-sweep.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:tests/dash-sweep.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:tests/dash-sweep.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/model.ts",
+      "target": "file:tests/dash-sweep.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/markdown-render.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/client/installed.ts",
+      "target": "file:tests/markdown-render.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/page-hardening.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/page-hardening.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/terminology.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:tests/terminology.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:tests/terminology.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

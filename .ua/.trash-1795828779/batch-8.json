@@ -1,0 +1,354 @@
+{
+  "nodes": [
+    {
+      "id": "config:docs/_config.yml",
+      "type": "config",
+      "name": "_config.yml",
+      "filePath": "docs/_config.yml",
+      "language": "yaml",
+      "summary": "Jekyll site configuration for the skills-ui GitHub Pages documentation site published at https://s-a-c.github.io/skills-ui. Configures the just-the-docs remote theme, jekyll-remote-theme plugin, default page layout, and GitHub repository and release navigation links.",
+      "tags": [
+        "jekyll-config",
+        "github-pages",
+        "just-the-docs",
+        "documentation-site",
+        "yaml-config"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "type": "document",
+      "name": "archify-findings-review-and-report-2026-11-26.md",
+      "filePath": "docs/archify-findings-review-and-report-2026-11-26.md",
+      "language": "markdown",
+      "summary": "Full review and remediation transcript documenting 18 Archify static-analysis findings and the three-wave Option A refactoring on phase/archify-remediation. Details decoupling src/core from src/web via PageRenderer injection and src/core/filter.ts, decomposing high-complexity hotspots across TUI, API, and benchmark modules, and modularizing src/web/page.ts into styles and client chunks.",
+      "tags": [
+        "archify-report",
+        "architecture-audit",
+        "refactoring-record",
+        "complexity-remediation",
+        "code-analysis"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "document:docs/index.md",
+      "type": "document",
+      "name": "index.md",
+      "filePath": "docs/index.md",
+      "language": "markdown",
+      "summary": "GitHub Pages home page (nav_order 1) introducing skills-ui, its single-binary install methods, CLI invocation modes (--web, serve, --selftest), and hosted web UI. Links users and contributors to the roadmap and repository agent-convention pages.",
+      "tags": [
+        "documentation-home",
+        "github-pages",
+        "installation-guide",
+        "cli-overview",
+        "getting-started"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/release.md",
+      "type": "document",
+      "name": "release.md",
+      "filePath": "docs/release.md",
+      "language": "markdown",
+      "summary": "Step-by-step release runbook for skills-ui v0.5.1+ covering cross-platform Bun dependency setup, test and PTY smoke gates, matrix compilation, signed-tag checksum manifests, GitHub Release publishing, and hosted page export. Verifies end-to-end installer checksum enforcement against committed tag manifests.",
+      "tags": [
+        "release-runbook",
+        "checksum-verification",
+        "build-matrix",
+        "signed-tags",
+        "deployment-guide"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/upstream-issue-draft.md",
+      "type": "document",
+      "name": "upstream-issue-draft.md",
+      "filePath": "docs/upstream-issue-draft.md",
+      "language": "markdown",
+      "summary": "Ready-to-file upstream bug report draft for vercel-labs/skills documenting O(canonical × corpus) SKILL.md re-parsing in skills ls v1.7.4 that stalls listings for ~60 seconds. Includes bisection timings, duplicate warning evidence, sample(1) I/O profile, #1389 cross-reference, and memoization and indexing fix proposals.",
+      "tags": [
+        "upstream-bug-report",
+        "performance-investigation",
+        "skills-cli",
+        "issue-draft",
+        "io-profiling"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/upstream-ls-memoization.md",
+      "type": "document",
+      "name": "upstream-ls-memoization.md",
+      "filePath": "docs/upstream-ls-memoization.md",
+      "language": "markdown",
+      "summary": "Source performance memo (S-153, filed as vercel-labs/skills#2644) analyzing why skills ls re-parses SKILL.md files per agent directory and documenting downstream mitigations in skills-ui. Details per-scope list caching, in-flight spawn coalescing, mutation invalidation, and cached pre-removal reuse.",
+      "tags": [
+        "performance-memo",
+        "upstream-issue",
+        "skills-cli",
+        "request-coalescing",
+        "caching-mitigation"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:docs/_config.yml",
+      "target": "document:docs/index.md",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:docs/_config.yml",
+      "target": "document:docs/agents/domain.md",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:docs/_config.yml",
+      "target": "document:docs/agents/issue-tracker.md",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:docs/_config.yml",
+      "target": "document:docs/agents/triage-labels.md",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/core/filter.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/core/index.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/main.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/tui/app.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/tui/model.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/tui/Views.tsx",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/web/page.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/web/styles.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/web/client/core.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/web/client/installed.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:src/web/client/search-and-boot.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:scripts/perf/budget.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "target": "file:tests/dash-sweep.test.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/index.md",
+      "target": "file:scripts/install.sh",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/index.md",
+      "target": "file:src/main.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/index.md",
+      "target": "document:ROADMAP.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/index.md",
+      "target": "document:docs/agents/issue-tracker.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/index.md",
+      "target": "document:docs/agents/triage-labels.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/index.md",
+      "target": "document:docs/agents/domain.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/release.md",
+      "target": "file:scripts/build.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/release.md",
+      "target": "file:scripts/export-page.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/release.md",
+      "target": "file:scripts/install.sh",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/release.md",
+      "target": "config:package.json",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/release.md",
+      "target": "document:docs/index.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-issue-draft.md",
+      "target": "document:docs/upstream-ls-memoization.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-issue-draft.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-ls-memoization.md",
+      "target": "document:docs/upstream-issue-draft.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-ls-memoization.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-ls-memoization.md",
+      "target": "file:src/core/services/installed.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-ls-memoization.md",
+      "target": "file:src/core/services/remove.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/upstream-ls-memoization.md",
+      "target": "file:src/core/spawn-queue.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

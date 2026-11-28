@@ -1,0 +1,179 @@
+{
+  "nodes": [
+    {
+      "id": "config:tests/fixtures/contract/add-hostile.json",
+      "type": "config",
+      "name": "add-hostile.json",
+      "filePath": "tests/fixtures/contract/add-hostile.json",
+      "summary": "Contract JSON fixture simulating hostile skills add --json output with ANSI SGR/OSC escape sequences, NUL bytes, and mixed installed and failed entries. Used by tests/sanitize.test.ts via SKILLS_SHIM_ADD to verify that install ingress strips terminal escape sequences and control characters.",
+      "tags": ["contract-fixture", "json-fixture", "sanitization", "skills-add"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:tests/fixtures/contract/add.json",
+      "type": "config",
+      "name": "add.json",
+      "filePath": "tests/fixtures/contract/add.json",
+      "summary": "Default contract JSON fixture for skills add --json output containing one installed skill entry (alpha) and one failed skill entry (beta). Loaded by tests/fixtures/skills-shim.mjs to exercise install result parsing and partial-failure reporting.",
+      "tags": ["contract-fixture", "json-fixture", "skills-add", "test-shim"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:tests/fixtures/contract/ls-empty.json",
+      "type": "config",
+      "name": "ls-empty.json",
+      "filePath": "tests/fixtures/contract/ls-empty.json",
+      "summary": "Empty JSON array contract fixture representing a skills ls --json response with zero installed skills. Used by tests/e2e/hosted.e2e.ts via SKILLS_SHIM_LS_PROJECT to verify hosted UI empty-state rendering and behavior.",
+      "tags": ["contract-fixture", "json-fixture", "empty-state", "skills-ls"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:tests/fixtures/contract/ls-global.json",
+      "type": "config",
+      "name": "ls-global.json",
+      "filePath": "tests/fixtures/contract/ls-global.json",
+      "summary": "Empty JSON array contract fixture serving as the default global-scope skills ls --json response. Loaded by tests/fixtures/skills-shim.mjs when testing global-scope skill listing and filtering.",
+      "tags": ["contract-fixture", "json-fixture", "global-scope", "skills-ls"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:tests/fixtures/contract/ls-hostile.json",
+      "type": "config",
+      "name": "ls-hostile.json",
+      "filePath": "tests/fixtures/contract/ls-hostile.json",
+      "summary": "Contract JSON fixture simulating hostile skills ls --json payloads containing ANSI CSI/OSC/C1 escapes, BEL/NUL controls, non-string field types, and a reference to tests/fixtures/contract/hostile-skill. Used by tests/sanitize.test.ts via SKILLS_SHIM_LS_PROJECT to verify end-to-end installed-skill sanitization.",
+      "tags": ["contract-fixture", "json-fixture", "sanitization", "skills-ls"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:tests/fixtures/contract/ls-project.json",
+      "type": "config",
+      "name": "ls-project.json",
+      "filePath": "tests/fixtures/contract/ls-project.json",
+      "summary": "Default contract JSON fixture for project-scope skills ls --json output containing two skills (tdd with null source and code-review from anthropics/skills on GitHub). Consumed by tests/fixtures/skills-shim.mjs, tests/fixtures/slow-skills-shim.mjs, and tests/perf/spawn-count.test.ts to test installed-skill mapping and cache-population spawn counts.",
+      "tags": ["contract-fixture", "json-fixture", "project-scope", "skills-ls"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/sanitize.test.ts",
+      "target": "config:tests/fixtures/contract/add-hostile.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/sanitize.test.ts",
+      "target": "config:tests/fixtures/contract/ls-hostile.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tests/fixtures/contract/ls-hostile.json",
+      "target": "document:tests/fixtures/contract/hostile-skill/SKILL.md",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/fixtures/skills-shim.mjs",
+      "target": "config:tests/fixtures/contract/add.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/fixtures/skills-shim.mjs",
+      "target": "config:tests/fixtures/contract/ls-global.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/fixtures/skills-shim.mjs",
+      "target": "config:tests/fixtures/contract/ls-project.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/fixtures/slow-skills-shim.mjs",
+      "target": "config:tests/fixtures/contract/ls-project.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/perf/spawn-count.test.ts",
+      "target": "config:tests/fixtures/contract/ls-project.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/e2e/hosted.e2e.ts",
+      "target": "config:tests/fixtures/contract/ls-empty.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:tests/fixtures/contract/add-hostile.json",
+      "target": "file:src/core/services/install.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:tests/fixtures/contract/add-hostile.json",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:tests/fixtures/contract/add.json",
+      "target": "file:src/core/services/install.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:tests/fixtures/contract/ls-empty.json",
+      "target": "file:src/core/services/installed.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:tests/fixtures/contract/ls-global.json",
+      "target": "file:src/core/services/installed.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:tests/fixtures/contract/ls-hostile.json",
+      "target": "file:src/core/services/installed.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:tests/fixtures/contract/ls-hostile.json",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:tests/fixtures/contract/ls-project.json",
+      "target": "file:src/core/services/installed.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

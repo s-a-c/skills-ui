@@ -1,0 +1,130 @@
+[
+  {
+    "order": 1,
+    "title": "Project Overview",
+    "description": "Start with README.md, CONTEXT.md, and package.json to understand what skills-ui is and the vocabulary shared across its codebase. skills-ui wraps the upstream skills CLI as a standalone Bun executable offering three runtime modes—OpenTUI terminal app, local --web UI, and headless serve API—plus a hosted zero-install page. CONTEXT.md locks down canonical terms like Frame, Filter List Panel, Detail Panel, Skill Provenance, and Health Pill so both UI surfaces stay aligned, while package.json pins the Bun >=1.4 runtime, OpenTUI, and React 19 stack.",
+    "nodeIds": [
+      "document:README.md",
+      "document:CONTEXT.md",
+      "config:package.json"
+    ]
+  },
+  {
+    "order": 2,
+    "title": "Entry Point & Mode Dispatch",
+    "description": "With the project goals in mind, trace how execution begins in src/main.ts. This primary CLI entrypoint parses shared flags like --port and routes execution to --version, --selftest, headless serve, --web browser mode, or the default OpenTUI terminal interface. Supporting it at startup, version.ts provides a single APP_VERSION source of truth across compiled and dev runs, while seed.ts parses flag-aware positional CLI arguments into structured UiSeed intents for pre-seeded install, update, or remove flows.",
+    "nodeIds": [
+      "file:src/main.ts",
+      "file:src/core/version.ts",
+      "file:src/core/seed.ts"
+    ],
+    "languageLesson": "Bun's build-time --define option lets version.ts inline __APP_VERSION__ directly into single-file compiled binaries while falling back to package.json during local development. Strict ESM with TypeScript's verbatimModuleSyntax keeps type-only imports erased cleanly at compile time."
+  },
+  {
+    "order": 3,
+    "title": "Subprocess Boundary & Sanitization",
+    "description": "Because skills-ui never bundles or imports upstream skills code, every CLI operation crosses the hardened boundary in skills-client.ts via Bun.spawn with allowlist/denylist environment scrubbing and cached binary discovery. To prevent bursty UI or HTTP traffic from spawning runaway child processes, spawn-queue.ts serializes invocations behind a bounded FIFO semaphore that fast-fails with SkillsBusyError on saturation. All untrusted strings arriving from CLI output, lockfiles, and SKILL.md files pass through sanitize.ts (CWE-150 ANSI/C1/OSC/DCS escape stripping) before conforming to the shared domain contracts in types.ts.",
+    "nodeIds": [
+      "file:src/core/skills-client.ts",
+      "file:src/core/spawn-queue.ts",
+      "file:src/core/services/sanitize.ts",
+      "file:src/core/services/types.ts"
+    ],
+    "languageLesson": "TypeScript literal unions and structured interface contracts in types.ts (such as Scope, SkillProvenance, and MutationEvent) act as a compile-time protocol between core services, HTTP handlers, and UI renderers, catching mismatched states before runtime."
+  },
+  {
+    "order": 4,
+    "title": "Domain Services & Provenance",
+    "description": "Building on the subprocess runner and types from Step 3, src/core/index.ts exposes the cohesive domain services consumed by both the HTTP API and the TUI. installed.ts runs skills ls --json and enriches each skill with lockfile- and symlink-based provenance, while locks.ts validates project and global XDG lockfiles per entry so a single malformed record produces diagnostics without breaking valid entries. For remote discovery and maintenance, search.ts queries the skills.sh registry with in-flight promise deduplication and progressive fallbacks, and updates-check.ts compares GitHub Git Trees SHAs conservatively—marking truncated or incomplete trees inconclusive rather than falsely current.",
+    "nodeIds": [
+      "file:src/core/index.ts",
+      "file:src/core/services/installed.ts",
+      "file:src/core/services/locks.ts",
+      "file:src/core/services/search.ts",
+      "file:src/core/services/updates-check.ts"
+    ]
+  },
+  {
+    "order": 5,
+    "title": "Caching, Preferences & Hooks",
+    "description": "Upstream skills ls scans can take tens of seconds on large home directories, so this layer shields users from cold-start latency and unifies cross-surface behavior. disk-index.ts persists atomic, realpath-partitioned stale-while-revalidate caches so TUI sessions paint in under a millisecond while fresh data loads behind the scenes. prefs.ts, theme.ts, and filter.ts share Catppuccin Mocha/Latte WCAG-verified tokens, persisted user settings, and the exact substring filter predicate across both terminal and browser UIs, while hooks.ts runs shell-free post-mutation hooks and TTL-cached external health checks.",
+    "nodeIds": [
+      "file:src/core/disk-index.ts",
+      "file:src/core/prefs.ts",
+      "file:src/core/theme.ts",
+      "file:src/core/filter.ts",
+      "file:src/core/services/hooks.ts"
+    ]
+  },
+  {
+    "order": 6,
+    "title": "Loopback HTTP API & Auth",
+    "description": "When launched in serve or --web mode from Step 2, src/core/api.ts exposes the core services over a 127.0.0.1-only HTTP API with per-scope list caching, concurrent read coalescing, token-bucket rate limiting, and a 1 MiB body cap. Mutation endpoints coordinate install.ts and remove.ts while invalidating cached listings and triggering post-mutation hooks cleanly. Because the hosted GitHub Pages UI talks to this local server cross-origin, hosted-auth.ts enforces browser-boundary defenses including DNS-rebinding Host allowlists, Sec-Fetch-Site rejection, CORS preflights, and constant-time SHA-256 Bearer token verification.",
+    "nodeIds": [
+      "file:src/core/api.ts",
+      "file:src/core/hosted-auth.ts",
+      "file:src/core/services/install.ts",
+      "file:src/core/services/remove.ts"
+    ]
+  },
+  {
+    "order": 7,
+    "title": "OpenTUI Model & Lifecycle",
+    "description": "In default terminal mode, src/tui/app.ts orchestrates the interactive OpenTUI lifecycle by wiring keyboard dispatch, disk-index hydration, async search and mutation workflows, and crash-guard signal cleanup. Rather than scattering state across components, model.ts implements a pure Elm-style reducer that tracks scope-keyed updates, sort modes, install queues, and modals while memoizing one filter-and-sort pass per dispatch. Views.tsx subscribes a single React root to that store to render split panes and overlays, and spike.ts provides the tree-sitter Markdown spike screen verified by --selftest.",
+    "nodeIds": [
+      "file:src/tui/app.ts",
+      "file:src/tui/model.ts",
+      "file:src/tui/Views.tsx",
+      "file:src/tui/spike.ts"
+    ],
+    "languageLesson": "Combining a pure Elm-style state reducer (model.ts) with React's useSyncExternalStore inside OpenTUI (Views.tsx) separates business logic from terminal rendering, enabling deterministic in-memory tests of keyboard contracts and async race guards without a real TTY."
+  },
+  {
+    "order": 8,
+    "title": "Procedural Art, Audio & 3D",
+    "description": "To keep the compiled executable self-contained with zero bundled media files, the TUI synthesizes its rich graphics and sound effects on demand. art.ts generates cached RGBA pixel banners and deterministic per-source identicon badges through OpenTUI NativeImage, while audio.ts streams short mono f32le PCM sine-wave cues gated on user preferences and degrades silently when hardware is absent. When users toggle the 3D skill graph, Views.tsx dynamically imports three-scene.ts to lay out skills on a Fibonacci sphere with @opentui/three so terminals without WebGPU pay zero startup cost.",
+    "nodeIds": [
+      "file:src/tui/art.ts",
+      "file:src/tui/audio.ts",
+      "file:src/tui/three-scene.ts"
+    ]
+  },
+  {
+    "order": 9,
+    "title": "Single-File Web UI",
+    "description": "The Web UI uses a zero-bundler architecture centered on src/web/page.ts—the highest fan-in module in the graph—which renders one self-contained HTML document served locally by api.ts and exported statically for GitHub Pages. styles.ts supplies Catppuccin CSS variables and responsive layout rules, while client/core.ts handles authenticated loopback fetches, sessionStorage token persistence, health popovers, and Web Audio cues. client/installed.ts embeds filter.ts's skillMatches source verbatim, reconciles keyed DOM rows without replay flicker, and renders escape-first Markdown details, while client/search-and-boot.ts drives registry search, install queueing, and keyboard shortcuts.",
+    "nodeIds": [
+      "file:src/web/page.ts",
+      "file:src/web/styles.ts",
+      "file:src/web/client/core.ts",
+      "file:src/web/client/installed.ts",
+      "file:src/web/client/search-and-boot.ts"
+    ],
+    "languageLesson": "Assembling browser JavaScript from TypeScript string modules with SHA-256 hash-pinned Content-Security-Policy headers and </script>-escaped JSON bootstrap blocks removes frontend build complexity while defending against inline XSS injection."
+  },
+  {
+    "order": 10,
+    "title": "Cross-Platform Build & Installer",
+    "description": "Turning the TypeScript codebase into distributable artifacts starts in scripts/build.ts, which invokes bun build --compile across darwin-arm64, darwin-x64, linux-x64, and linux-arm64 with embedded __APP_VERSION__, macOS JIT entitlements codesigning, and a SHA-256 checksum manifest. verify-build-targets.ts confirms each binary's Mach-O/ELF architecture and digest, while export-page.ts emits docs/app.html from Step 9's renderer for GitHub Pages. On user machines, scripts/install.sh detects OS and CPU architecture, verifies the downloaded binary against the tag-committed checksum manifest, and installs it atomically—all orchestrated by the release checklist in docs/release.md.",
+    "nodeIds": [
+      "file:scripts/build.ts",
+      "file:scripts/verify-build-targets.ts",
+      "file:scripts/export-page.ts",
+      "file:scripts/install.sh",
+      "document:docs/release.md"
+    ]
+  },
+  {
+    "order": 11,
+    "title": "Testing, Perf Budgets & CI",
+    "description": "Every architectural guarantee in previous steps is continuously pinned by dedicated harnesses, shims, and GitHub Actions workflows. tests/fixtures/skills-shim.mjs emulates the upstream skills CLI statefully with JSONL call logs and configurable partial failures so unit, API, and Playwright tests run hermetically and count exact subprocess spawns. scripts/perf/budget.ts enforces latency and DOM-reconciliation budgets, scripts/pty-smoke/smoke.py drives real pseudo-terminal TUI sessions via Python and pyte, and the two GitHub Actions workflows automate pull request code reviews and @claude issue assistance.",
+    "nodeIds": [
+      "file:tests/fixtures/skills-shim.mjs",
+      "file:scripts/perf/budget.ts",
+      "file:scripts/pty-smoke/smoke.py",
+      "pipeline:.github/workflows/claude-code-review.yml",
+      "pipeline:.github/workflows/claude.yml"
+    ],
+    "languageLesson": "GitHub Actions YAML workflows combine explicit event triggers (on: pull_request, issue_comment) with minimal permissions blocks and pinned action versions (anthropics/claude-code-action@v1) to keep repository automation reproducible and least-privileged."
+  }
+]

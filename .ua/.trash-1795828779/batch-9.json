@@ -1,0 +1,168 @@
+{
+  "nodes": [
+    {
+      "id": "document:docs/agents/domain.md",
+      "type": "document",
+      "name": "domain.md",
+      "filePath": "docs/agents/domain.md",
+      "language": "markdown",
+      "summary": "Agent convention guide specifying how engineering skills discover and apply repository domain documentation (CONTEXT.md and docs/adr/). Requires consistent use of glossary vocabulary, silent progression when optional files are absent, and explicit flagging of ADR conflicts.",
+      "tags": [
+        "agent-conventions",
+        "domain-modeling",
+        "glossary-rules",
+        "adr-guidance",
+        "skill-routing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/agents/issue-tracker.md",
+      "type": "document",
+      "name": "issue-tracker.md",
+      "filePath": "docs/agents/issue-tracker.md",
+      "language": "markdown",
+      "summary": "Issue-tracking routing guide binding skills-ui to the Linear project P-S-4 (team S-a-c) via Linear MCP tools rather than GitHub Issues. Defines milestone attachment, Wayfinder map and child-issue workflow conventions, and Linear document alignment with ROADMAP.md.",
+      "tags": [
+        "agent-conventions",
+        "linear-tracker",
+        "issue-workflow",
+        "wayfinder-process",
+        "skill-routing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/agents/triage-labels.md",
+      "type": "document",
+      "name": "triage-labels.md",
+      "filePath": "docs/agents/triage-labels.md",
+      "language": "markdown",
+      "summary": "Triage label mapping table translating five canonical skill triage roles (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix) to Linear workspace label strings in the s-a-c workspace.",
+      "tags": [
+        "agent-conventions",
+        "triage-labels",
+        "linear-tracker",
+        "issue-triage",
+        "skill-routing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/agents/workspace.md",
+      "type": "document",
+      "name": "workspace.md",
+      "filePath": "docs/agents/workspace.md",
+      "language": "markdown",
+      "summary": "Workspace-level agent contract (canonical source symlinked as root AGENTS.md) defining instruction priority, multi-worktree git topology around .bare/ and main/, retained audit worktrees, and SKILLS_UI_ environment-variable conventions. Routes planning to Linear project P-S-4 and repo-local agent conventions to main/docs/agents/.",
+      "tags": [
+        "workspace-contract",
+        "multi-worktree",
+        "agent-instructions",
+        "dox-hierarchy",
+        "git-topology"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "document:CONTEXT.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "document:AGENTS.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "document:docs/agents/workspace.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/issue-tracker.md",
+      "target": "document:docs/agents/triage-labels.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/issue-tracker.md",
+      "target": "document:ROADMAP.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/issue-tracker.md",
+      "target": "document:AGENTS.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/triage-labels.md",
+      "target": "document:docs/agents/issue-tracker.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/triage-labels.md",
+      "target": "document:AGENTS.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:AGENTS.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:README.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:docs/agents/issue-tracker.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:docs/agents/triage-labels.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:docs/agents/domain.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "config:package.json",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

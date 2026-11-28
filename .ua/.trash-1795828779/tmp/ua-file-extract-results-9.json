@@ -1,0 +1,130 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 4,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 4,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 0,
+      "failed": 0,
+      "skipped": 4
+    }
+  },
+  "results": [
+    {
+      "path": "docs/agents/domain.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 54,
+      "nonEmptyLines": 39,
+      "sections": [
+        {
+          "heading": "Before exploring, read these",
+          "level": 2,
+          "line": 8
+        },
+        {
+          "heading": "File structure",
+          "level": 2,
+          "line": 16
+        },
+        {
+          "heading": "Use the glossary's vocabulary",
+          "level": 2,
+          "line": 44
+        },
+        {
+          "heading": "Flag ADR conflicts",
+          "level": 2,
+          "line": 50
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": "docs/agents/issue-tracker.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 15,
+      "nonEmptyLines": 11,
+      "sections": [
+        {
+          "heading": "Workflow conventions",
+          "level": 2,
+          "line": 10
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "docs/agents/triage-labels.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 18,
+      "nonEmptyLines": 14,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 0
+      }
+    },
+    {
+      "path": "docs/agents/workspace.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 93,
+      "nonEmptyLines": 80,
+      "sections": [
+        {
+          "heading": "skills-ui — Workspace Agent Instructions",
+          "level": 1,
+          "line": 23
+        },
+        {
+          "heading": "1. Instruction priority",
+          "level": 2,
+          "line": 32
+        },
+        {
+          "heading": "2. Workspace topology",
+          "level": 2,
+          "line": 40
+        },
+        {
+          "heading": "3. Project management lives in Linear",
+          "level": 2,
+          "line": 70
+        },
+        {
+          "heading": "4. Workspace-level rules",
+          "level": 2,
+          "line": 80
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 5
+      }
+    }
+  ]
+}

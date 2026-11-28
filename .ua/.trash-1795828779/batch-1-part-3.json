@@ -1,0 +1,232 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/locks.test.ts",
+      "type": "file",
+      "name": "locks.test.ts",
+      "filePath": "tests/locks.test.ts",
+      "language": "typescript",
+      "summary": "Test suite covering per-entry lockfile validation and diagnostics, container-level InvalidLockFileError 400 mapping on `/api/updates`, `__proto__` prototype safety, and strict GitHub tree completeness/inconclusive-result handling.",
+      "tags": [
+        "unit-test",
+        "integration-test",
+        "lockfile",
+        "updates-check",
+        "security"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/sanitize.test.ts",
+      "type": "file",
+      "name": "sanitize.test.ts",
+      "filePath": "tests/sanitize.test.ts",
+      "language": "typescript",
+      "summary": "Unit and end-to-end ingress sanitization tests confirming ANSI/C1 escape and control-character stripping across `stripEscapes`, `sanitizeMetadata`, `sanitizeBody`, CLI service wrappers (`ls`, `install --list`, `add`), and HTTP API responses.",
+      "tags": [
+        "unit-test",
+        "integration-test",
+        "sanitization",
+        "security",
+        "cwe-150"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/serve-hardening.test.ts",
+      "type": "file",
+      "name": "serve-hardening.test.ts",
+      "filePath": "tests/serve-hardening.test.ts",
+      "language": "typescript",
+      "summary": "Hostile-input security and resilience test suite verifying timing-safe bearer matching, FIFO spawn-queue overflow (503), GitHub tree URL encoding/completeness, cross-site fetch-metadata rejection, argv/shape boundary validation, 1 MiB body caps, rate limiting, and slow-handler idle timeouts.",
+      "tags": [
+        "security-test",
+        "integration-test",
+        "hardening",
+        "rate-limiting",
+        "spawn-queue"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/serve-hardening.test.ts:start",
+      "type": "function",
+      "name": "start",
+      "filePath": "tests/serve-hardening.test.ts",
+      "lineRange": [
+        46,
+        57
+      ],
+      "summary": "Test helper that starts a `createSkillsUiServer` instance with optional custom rate-limit configuration and returns its loopback base URL.",
+      "tags": [
+        "test-helper",
+        "http-server",
+        "hardening"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/locks.test.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/locks.test.ts",
+      "target": "file:src/core/services/updates-check.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/locks.test.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/locks.test.ts",
+      "target": "function:src/core/services/locks.ts:readLock",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/locks.test.ts",
+      "target": "function:src/core/services/updates-check.ts:checkForUpdates",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/locks.test.ts",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/locks.test.ts",
+      "target": "function:tests/helpers/audit-state.ts:createWorkspaceFixture",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/sanitize.test.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/sanitize.test.ts",
+      "target": "function:src/core/services/sanitize.ts:stripEscapes",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/sanitize.test.ts",
+      "target": "function:src/core/services/sanitize.ts:sanitizeMetadata",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/sanitize.test.ts",
+      "target": "function:src/core/services/sanitize.ts:sanitizeBody",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/sanitize.test.ts",
+      "target": "function:src/core/services/installed.ts:listInstalled",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/sanitize.test.ts",
+      "target": "function:src/core/services/source.ts:listSourceSkills",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/sanitize.test.ts",
+      "target": "function:src/core/services/install.ts:install",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/sanitize.test.ts",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/serve-hardening.test.ts",
+      "target": "file:src/core/hosted-auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/serve-hardening.test.ts",
+      "target": "file:src/core/services/updates-check.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/serve-hardening.test.ts",
+      "target": "file:src/core/spawn-queue.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/serve-hardening.test.ts",
+      "target": "function:tests/serve-hardening.test.ts:start",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "function:tests/serve-hardening.test.ts:start",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/serve-hardening.test.ts",
+      "target": "function:src/core/hosted-auth.ts:bearerMatches",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/serve-hardening.test.ts",
+      "target": "function:src/core/spawn-queue.ts:createSpawnQueue",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/serve-hardening.test.ts",
+      "target": "function:src/core/services/updates-check.ts:fetchRepoTree",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

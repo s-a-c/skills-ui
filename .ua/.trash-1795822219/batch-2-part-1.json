@@ -1,0 +1,1025 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/core/disk-index.ts",
+      "type": "file",
+      "name": "disk-index.ts",
+      "filePath": "src/core/disk-index.ts",
+      "language": "typescript",
+      "summary": "Persists a per-scope stale-while-revalidate cache of enriched installed skills under the user cache directory so TUI sessions paint immediately before subprocess refreshes settle. Partitions project-scope caches by canonical realpath hash and envelope projectRoot, rejects corrupt or oversized files safely, and writes atomically with stale temp/project sweeps.",
+      "tags": [
+        "disk-cache",
+        "stale-while-revalidate",
+        "persistence",
+        "atomic-write",
+        "core"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/disk-index.ts:sweepStaleTmp",
+      "type": "function",
+      "name": "sweepStaleTmp",
+      "filePath": "src/core/disk-index.ts",
+      "lineRange": [
+        52,
+        63
+      ],
+      "language": "typescript",
+      "summary": "Best-effort cleanup that deletes abandoned per-PID temporary index files older than TMP_SWEEP_MIN_AGE_MS matching the given filename prefix.",
+      "tags": [
+        "disk-cache",
+        "cleanup",
+        "temp-files"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/disk-index.ts:sweepStaleProjectIndexes",
+      "type": "function",
+      "name": "sweepStaleProjectIndexes",
+      "filePath": "src/core/disk-index.ts",
+      "lineRange": [
+        71,
+        83
+      ],
+      "language": "typescript",
+      "summary": "Best-effort bounded-growth sweep that removes untouched hash-suffixed project index files older than 30 days while keeping the active project file and global cache intact.",
+      "tags": [
+        "disk-cache",
+        "cleanup",
+        "cache-eviction"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/disk-index.ts:diskIndexDir",
+      "type": "function",
+      "name": "diskIndexDir",
+      "filePath": "src/core/disk-index.ts",
+      "lineRange": [
+        89,
+        93
+      ],
+      "language": "typescript",
+      "summary": "Resolves the disk-index cache directory, honoring SKILLS_UI_CACHE_DIR or an explicit dirOverride before falling back to ~/.cache/skills-ui.",
+      "tags": [
+        "disk-cache",
+        "path-resolution",
+        "env-override"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/disk-index.ts:projectIdentity",
+      "type": "function",
+      "name": "projectIdentity",
+      "filePath": "src/core/disk-index.ts",
+      "lineRange": [
+        99,
+        101
+      ],
+      "language": "typescript",
+      "summary": "Returns the canonical realpath of the current working directory so symlink aliases resolve to one consistent project cache identity.",
+      "tags": [
+        "disk-cache",
+        "project-identity",
+        "realpath"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/disk-index.ts:diskIndexPath",
+      "type": "function",
+      "name": "diskIndexPath",
+      "filePath": "src/core/disk-index.ts",
+      "lineRange": [
+        103,
+        112
+      ],
+      "language": "typescript",
+      "summary": "Computes the persisted index file path for a scope, appending a 16-hex SHA-256 hash of projectIdentity for project scope while keeping global scope unsuffixed.",
+      "tags": [
+        "disk-cache",
+        "path-resolution",
+        "sha256"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/disk-index.ts:normalizeEntry",
+      "type": "function",
+      "name": "normalizeEntry",
+      "filePath": "src/core/disk-index.ts",
+      "lineRange": [
+        133,
+        156
+      ],
+      "language": "typescript",
+      "summary": "Validates and sanitizes a single untrusted persisted JSON record into an InstalledSkill matching the requested scope, returning null on invalid or mismatched fields.",
+      "tags": [
+        "disk-cache",
+        "validation",
+        "sanitization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/disk-index.ts:normalizeDiskIndex",
+      "type": "function",
+      "name": "normalizeDiskIndex",
+      "filePath": "src/core/disk-index.ts",
+      "lineRange": [
+        160,
+        196
+      ],
+      "language": "typescript",
+      "summary": "Parses raw JSON index content, enforces schema version 2, scope match, and canonical projectRoot partition checks, and drops invalid skill entries.",
+      "tags": [
+        "disk-cache",
+        "deserialization",
+        "validation",
+        "partitioning"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/disk-index.ts:loadDiskIndex",
+      "type": "function",
+      "name": "loadDiskIndex",
+      "filePath": "src/core/disk-index.ts",
+      "lineRange": [
+        200,
+        212
+      ],
+      "language": "typescript",
+      "summary": "Loads and validates the persisted disk index for a scope after checking existence and the 16 MB size ceiling, returning null instead of throwing on any failure.",
+      "tags": [
+        "disk-cache",
+        "file-read",
+        "fault-tolerance"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/disk-index.ts:saveDiskIndex",
+      "type": "function",
+      "name": "saveDiskIndex",
+      "filePath": "src/core/disk-index.ts",
+      "lineRange": [
+        217,
+        246
+      ],
+      "language": "typescript",
+      "summary": "Atomically persists a fresh subprocess-verified skill list to disk via a per-PID temp file and rename after running stale-temp and stale-project-index sweeps.",
+      "tags": [
+        "disk-cache",
+        "atomic-write",
+        "file-write"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/core/index.ts",
+      "type": "file",
+      "name": "index.ts",
+      "filePath": "src/core/index.ts",
+      "language": "typescript",
+      "summary": "Barrel entrypoint that re-exports core skill types, filter matching, CLI runner utilities, installed/search/mutation services, lock-file helpers, update checks, and post-mutation hook and health check APIs. Provides a single import surface for the TUI, HTTP API, and test suites.",
+      "tags": [
+        "barrel-export",
+        "core-api",
+        "skills-services",
+        "public-surface"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/core/prefs.ts",
+      "type": "file",
+      "name": "prefs.ts",
+      "filePath": "src/core/prefs.ts",
+      "language": "typescript",
+      "summary": "Manages persisted UI preferences (Catppuccin theme, sound effects, reduced motion, fixed web port, and list-pane width percentage) under the skills-ui config directory. Normalizes partial or legacy preference files safely and supports one-time migration from the upstream skills CLI preference file.",
+      "tags": [
+        "preferences",
+        "configuration",
+        "persistence",
+        "migration",
+        "core"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/prefs.ts:uiPrefsPath",
+      "type": "function",
+      "name": "uiPrefsPath",
+      "filePath": "src/core/prefs.ts",
+      "lineRange": [
+        39,
+        47
+      ],
+      "language": "typescript",
+      "summary": "Resolves the skills-ui preferences JSON path, respecting SKILLS_UI_PREFS_DIR, an explicit dirOverride, or XDG_CONFIG_HOME / ~/.config/skills-ui.",
+      "tags": [
+        "preferences",
+        "path-resolution",
+        "xdg-config"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/prefs.ts:normalizePreferences",
+      "type": "function",
+      "name": "normalizePreferences",
+      "filePath": "src/core/prefs.ts",
+      "lineRange": [
+        62,
+        94
+      ],
+      "language": "typescript",
+      "summary": "Merges recognized theme, sound, reduceMotion, port, and listWidth fields from untrusted input onto DEFAULT_UI_PREFERENCES, migrating legacy pixel listWidth values cleanly to null.",
+      "tags": [
+        "preferences",
+        "validation",
+        "migration"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/prefs.ts:loadUiPreferences",
+      "type": "function",
+      "name": "loadUiPreferences",
+      "filePath": "src/core/prefs.ts",
+      "lineRange": [
+        96,
+        105
+      ],
+      "language": "typescript",
+      "summary": "Reads and normalizes persisted UI preferences from disk, falling back silently to DEFAULT_UI_PREFERENCES when the file is missing or corrupt.",
+      "tags": [
+        "preferences",
+        "file-read",
+        "fault-tolerance"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/prefs.ts:saveUiPreferences",
+      "type": "function",
+      "name": "saveUiPreferences",
+      "filePath": "src/core/prefs.ts",
+      "lineRange": [
+        107,
+        110
+      ],
+      "language": "typescript",
+      "summary": "Creates the parent directory if needed and writes formatted UI preferences JSON to disk.",
+      "tags": [
+        "preferences",
+        "file-write",
+        "persistence"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/prefs.ts:importSkillsPrefsOnce",
+      "type": "function",
+      "name": "importSkillsPrefsOnce",
+      "filePath": "src/core/prefs.ts",
+      "lineRange": [
+        113,
+        122
+      ],
+      "language": "typescript",
+      "summary": "Performs a one-time read-only copy of the upstream skills CLI ui-prefs.json when skills-ui has no preferences file yet, returning true only when imported.",
+      "tags": [
+        "preferences",
+        "migration",
+        "first-run"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/core/seed.ts",
+      "type": "file",
+      "name": "seed.ts",
+      "filePath": "src/core/seed.ts",
+      "language": "typescript",
+      "summary": "Parses CLI command-line arguments into structured UiSeed intents for launching the TUI or Web UI pre-seeded with add, update, or remove actions. Performs flag-aware positional extraction so value-taking options do not pollute skill or source arguments.",
+      "tags": [
+        "cli-parsing",
+        "ui-seed",
+        "argument-parser",
+        "core"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/seed.ts:positionals",
+      "type": "function",
+      "name": "positionals",
+      "filePath": "src/core/seed.ts",
+      "lineRange": [
+        23,
+        34
+      ],
+      "language": "typescript",
+      "summary": "Extracts bare positional arguments from a CLI argument slice while skipping known value-taking flags and their following option values.",
+      "tags": [
+        "cli-parsing",
+        "argument-parser",
+        "flags"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/seed.ts:flagValues",
+      "type": "function",
+      "name": "flagValues",
+      "filePath": "src/core/seed.ts",
+      "lineRange": [
+        37,
+        48
+      ],
+      "language": "typescript",
+      "summary": "Collects all consecutive non-flag tokens supplied after occurrences of a specified CLI flag such as --skill.",
+      "tags": [
+        "cli-parsing",
+        "argument-parser",
+        "flags"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/seed.ts:parseUiSeed",
+      "type": "function",
+      "name": "parseUiSeed",
+      "filePath": "src/core/seed.ts",
+      "lineRange": [
+        55,
+        83
+      ],
+      "language": "typescript",
+      "summary": "Maps raw CLI argv tokens into a typed UiSeed discriminated union (add, update, remove, or none) for pre-seeding UI flows.",
+      "tags": [
+        "cli-parsing",
+        "ui-seed",
+        "command-routing"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/core/theme.ts",
+      "type": "file",
+      "name": "theme.ts",
+      "filePath": "src/core/theme.ts",
+      "language": "typescript",
+      "summary": "Defines Catppuccin Mocha and Latte color palettes, WCAG 2.x luminance and contrast utilities, contrast-enforced semantic theme tokens, truecolor/256-color ANSI terminal painters, and OpenTUI tree-sitter syntax highlighting scopes. Serves as the single color token source for both TUI and web surfaces.",
+      "tags": [
+        "catppuccin-theme",
+        "wcag-contrast",
+        "design-tokens",
+        "ansi-colors",
+        "syntax-highlighting"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/theme.ts:hexToRgb",
+      "type": "function",
+      "name": "hexToRgb",
+      "filePath": "src/core/theme.ts",
+      "lineRange": [
+        130,
+        140
+      ],
+      "language": "typescript",
+      "summary": "Converts a 6-digit hex color string (with or without leading #) into an [r, g, b] byte tuple.",
+      "tags": [
+        "color-math",
+        "hex-parsing",
+        "theme"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/theme.ts:relativeLuminance",
+      "type": "function",
+      "name": "relativeLuminance",
+      "filePath": "src/core/theme.ts",
+      "lineRange": [
+        148,
+        155
+      ],
+      "language": "typescript",
+      "summary": "Computes WCAG 2.x relative luminance (0 to 1) for a hex color using sRGB linearization coefficients.",
+      "tags": [
+        "wcag-contrast",
+        "color-math",
+        "accessibility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/theme.ts:contrastRatio",
+      "type": "function",
+      "name": "contrastRatio",
+      "filePath": "src/core/theme.ts",
+      "lineRange": [
+        158,
+        163
+      ],
+      "language": "typescript",
+      "summary": "Calculates the WCAG 2.x contrast ratio between foreground and background hex colors in the range 1 to 21.",
+      "tags": [
+        "wcag-contrast",
+        "color-math",
+        "accessibility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/theme.ts:darkenToContrast",
+      "type": "function",
+      "name": "darkenToContrast",
+      "filePath": "src/core/theme.ts",
+      "lineRange": [
+        171,
+        182
+      ],
+      "language": "typescript",
+      "summary": "Iteratively darkens a hex color until its contrast ratio against a light background meets the requested WCAG minimum threshold.",
+      "tags": [
+        "wcag-contrast",
+        "color-adjustment",
+        "accessibility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/theme.ts:buildThemeTokens",
+      "type": "function",
+      "name": "buildThemeTokens",
+      "filePath": "src/core/theme.ts",
+      "lineRange": [
+        207,
+        243
+      ],
+      "language": "typescript",
+      "summary": "Derives the full WCAG-checked ThemeTokens map from a Catppuccin palette, darkening Latte foregrounds and borders as needed to satisfy AA text and UI contrast minimums.",
+      "tags": [
+        "design-tokens",
+        "catppuccin-theme",
+        "wcag-contrast"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/theme.ts:tokensFor",
+      "type": "function",
+      "name": "tokensFor",
+      "filePath": "src/core/theme.ts",
+      "lineRange": [
+        251,
+        253
+      ],
+      "language": "typescript",
+      "summary": "Returns the precomputed semantic ThemeTokens record for the requested Catppuccin theme name (mocha or latte).",
+      "tags": [
+        "design-tokens",
+        "theme-accessor",
+        "catppuccin-theme"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/theme.ts:createAnsiPainter",
+      "type": "function",
+      "name": "createAnsiPainter",
+      "filePath": "src/core/theme.ts",
+      "lineRange": [
+        300,
+        317
+      ],
+      "language": "typescript",
+      "summary": "Creates an AnsiPainter helper that wraps strings in 24-bit truecolor or nearest 256-color ANSI escape sequences for foreground, background, bold, and dim styling.",
+      "tags": [
+        "ansi-colors",
+        "terminal-styling",
+        "truecolor"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/theme.ts:syntaxTokensFor",
+      "type": "function",
+      "name": "syntaxTokensFor",
+      "filePath": "src/core/theme.ts",
+      "lineRange": [
+        340,
+        361
+      ],
+      "language": "typescript",
+      "summary": "Maps a Catppuccin palette into OpenTUI tree-sitter markdown and code highlight scope styles for headings, keywords, strings, comments, links, and punctuation.",
+      "tags": [
+        "syntax-highlighting",
+        "tree-sitter",
+        "catppuccin-theme"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:sweepStaleTmp",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:sweepStaleProjectIndexes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:diskIndexDir",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:diskIndexDir",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:projectIdentity",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:projectIdentity",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:diskIndexPath",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:diskIndexPath",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:normalizeEntry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:normalizeDiskIndex",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:normalizeDiskIndex",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:loadDiskIndex",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:loadDiskIndex",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:saveDiskIndex",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "function:src/core/disk-index.ts:saveDiskIndex",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/disk-index.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/core/disk-index.ts:diskIndexPath",
+      "target": "function:src/core/disk-index.ts:diskIndexDir",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/disk-index.ts:diskIndexPath",
+      "target": "function:src/core/disk-index.ts:projectIdentity",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/disk-index.ts:normalizeDiskIndex",
+      "target": "function:src/core/disk-index.ts:normalizeEntry",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/disk-index.ts:normalizeDiskIndex",
+      "target": "function:src/core/disk-index.ts:projectIdentity",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/disk-index.ts:loadDiskIndex",
+      "target": "function:src/core/disk-index.ts:diskIndexPath",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/disk-index.ts:loadDiskIndex",
+      "target": "function:src/core/disk-index.ts:normalizeDiskIndex",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/disk-index.ts:saveDiskIndex",
+      "target": "function:src/core/disk-index.ts:diskIndexPath",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/disk-index.ts:saveDiskIndex",
+      "target": "function:src/core/disk-index.ts:projectIdentity",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/disk-index.ts:saveDiskIndex",
+      "target": "function:src/core/disk-index.ts:sweepStaleTmp",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/disk-index.ts:saveDiskIndex",
+      "target": "function:src/core/disk-index.ts:sweepStaleProjectIndexes",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/prefs.ts",
+      "target": "function:src/core/prefs.ts:uiPrefsPath",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/prefs.ts",
+      "target": "function:src/core/prefs.ts:uiPrefsPath",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/prefs.ts",
+      "target": "function:src/core/prefs.ts:normalizePreferences",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/prefs.ts",
+      "target": "function:src/core/prefs.ts:normalizePreferences",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/prefs.ts",
+      "target": "function:src/core/prefs.ts:loadUiPreferences",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/prefs.ts",
+      "target": "function:src/core/prefs.ts:loadUiPreferences",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/prefs.ts",
+      "target": "function:src/core/prefs.ts:saveUiPreferences",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/prefs.ts",
+      "target": "function:src/core/prefs.ts:saveUiPreferences",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/prefs.ts",
+      "target": "function:src/core/prefs.ts:importSkillsPrefsOnce",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/prefs.ts",
+      "target": "function:src/core/prefs.ts:importSkillsPrefsOnce",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/prefs.ts:loadUiPreferences",
+      "target": "function:src/core/prefs.ts:uiPrefsPath",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/prefs.ts:loadUiPreferences",
+      "target": "function:src/core/prefs.ts:normalizePreferences",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/prefs.ts:saveUiPreferences",
+      "target": "function:src/core/prefs.ts:uiPrefsPath",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/prefs.ts:importSkillsPrefsOnce",
+      "target": "function:src/core/prefs.ts:uiPrefsPath",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/seed.ts",
+      "target": "function:src/core/seed.ts:positionals",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/seed.ts",
+      "target": "function:src/core/seed.ts:flagValues",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/seed.ts",
+      "target": "function:src/core/seed.ts:parseUiSeed",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/seed.ts",
+      "target": "function:src/core/seed.ts:parseUiSeed",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/seed.ts:parseUiSeed",
+      "target": "function:src/core/seed.ts:positionals",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/seed.ts:parseUiSeed",
+      "target": "function:src/core/seed.ts:flagValues",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:hexToRgb",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:hexToRgb",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:relativeLuminance",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:relativeLuminance",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:contrastRatio",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:contrastRatio",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:darkenToContrast",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:darkenToContrast",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:buildThemeTokens",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:buildThemeTokens",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:tokensFor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:tokensFor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:createAnsiPainter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:createAnsiPainter",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:syntaxTokensFor",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "function:src/core/theme.ts:syntaxTokensFor",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/core/theme.ts:relativeLuminance",
+      "target": "function:src/core/theme.ts:hexToRgb",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/theme.ts:contrastRatio",
+      "target": "function:src/core/theme.ts:relativeLuminance",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/theme.ts:darkenToContrast",
+      "target": "function:src/core/theme.ts:contrastRatio",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/theme.ts:darkenToContrast",
+      "target": "function:src/core/theme.ts:hexToRgb",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/theme.ts:buildThemeTokens",
+      "target": "function:src/core/theme.ts:contrastRatio",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/theme.ts:buildThemeTokens",
+      "target": "function:src/core/theme.ts:darkenToContrast",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/theme.ts:createAnsiPainter",
+      "target": "function:src/core/theme.ts:hexToRgb",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

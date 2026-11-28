@@ -1,0 +1,345 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 7,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 7,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 0,
+      "failed": 0,
+      "skipped": 7
+    }
+  },
+  "results": [
+    {
+      "path": "AGENTS.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 108,
+      "nonEmptyLines": 81,
+      "sections": [
+        {
+          "heading": "skills-ui — Repo Agent Instructions",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Project",
+          "level": 2,
+          "line": 9
+        },
+        {
+          "heading": "Environment variables",
+          "level": 2,
+          "line": 29
+        },
+        {
+          "heading": "Commands",
+          "level": 2,
+          "line": 46
+        },
+        {
+          "heading": "Git",
+          "level": 2,
+          "line": 55
+        },
+        {
+          "heading": "Linear",
+          "level": 2,
+          "line": 62
+        },
+        {
+          "heading": "Agent skills",
+          "level": 2,
+          "line": 77
+        },
+        {
+          "heading": "Issue tracker",
+          "level": 3,
+          "line": 79
+        },
+        {
+          "heading": "Triage labels",
+          "level": 3,
+          "line": 83
+        },
+        {
+          "heading": "Domain docs",
+          "level": 3,
+          "line": 87
+        },
+        {
+          "heading": "Skills for this project",
+          "level": 2,
+          "line": 91
+        },
+        {
+          "heading": "Docs authority",
+          "level": 2,
+          "line": 103
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 12
+      }
+    },
+    {
+      "path": "CONTEXT.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 51,
+      "nonEmptyLines": 36,
+      "sections": [
+        {
+          "heading": "skills-ui",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Language",
+          "level": 2,
+          "line": 5
+        },
+        {
+          "heading": "Layout & Containers",
+          "level": 3,
+          "line": 7
+        },
+        {
+          "heading": "Filter List Cards & Anatomy",
+          "level": 3,
+          "line": 21
+        },
+        {
+          "heading": "Provenance, Hooks & Health",
+          "level": 3,
+          "line": 39
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 5
+      }
+    },
+    {
+      "path": "README.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 75,
+      "nonEmptyLines": 52,
+      "sections": [
+        {
+          "heading": "Skills-UI",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "1. What It Is",
+          "level": 2,
+          "line": 5
+        },
+        {
+          "heading": "2. Performance (0.5.3)",
+          "level": 2,
+          "line": 13
+        },
+        {
+          "heading": "3. Requirements",
+          "level": 2,
+          "line": 23
+        },
+        {
+          "heading": "4. Install",
+          "level": 2,
+          "line": 28
+        },
+        {
+          "heading": "5. Usage",
+          "level": 2,
+          "line": 44
+        },
+        {
+          "heading": "6. Development",
+          "level": 2,
+          "line": 54
+        },
+        {
+          "heading": "7. Relationship to `skills`",
+          "level": 2,
+          "line": 69
+        },
+        {
+          "heading": "8. License",
+          "level": 2,
+          "line": 73
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 9
+      }
+    },
+    {
+      "path": "ROADMAP.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 74,
+      "nonEmptyLines": 57,
+      "sections": [
+        {
+          "heading": "Roadmap",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "1. Milestones",
+          "level": 2,
+          "line": 21
+        },
+        {
+          "heading": "2. Hosted UI (0.5.X, Shipped)",
+          "level": 2,
+          "line": 38
+        },
+        {
+          "heading": "3. Hardening Series (0.5.1–0.5.3, Charted 2026-10-30)",
+          "level": 2,
+          "line": 57
+        },
+        {
+          "heading": "4. Later (Unversioned)",
+          "level": 2,
+          "line": 69
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 5
+      }
+    },
+    {
+      "path": "mise.toml",
+      "language": "toml",
+      "fileCategory": "config",
+      "totalLines": 2,
+      "nonEmptyLines": 2,
+      "sections": [
+        {
+          "heading": "tools",
+          "level": 1,
+          "line": 1
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "package.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 30,
+      "nonEmptyLines": 30,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "version",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "type",
+          "level": 1,
+          "line": 5
+        },
+        {
+          "heading": "license",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "engines",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "scripts",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "dependencies",
+          "level": 1,
+          "line": 19
+        },
+        {
+          "heading": "devDependencies",
+          "level": 1,
+          "line": 26
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 9
+      }
+    },
+    {
+      "path": "tsconfig.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 15,
+      "nonEmptyLines": 15,
+      "sections": [
+        {
+          "heading": "compilerOptions",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "include",
+          "level": 1,
+          "line": 14
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 2
+      }
+    }
+  ]
+}

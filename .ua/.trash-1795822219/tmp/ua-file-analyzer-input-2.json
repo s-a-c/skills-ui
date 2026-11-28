@@ -1,0 +1,198 @@
+{
+  "projectRoot": "/Users/s-a-c/Projects/s-a-c/skills-ui/main",
+  "batchFiles": [
+    {
+      "path": "src/core/disk-index.ts",
+      "language": "typescript",
+      "sizeLines": 246,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/index.ts",
+      "language": "typescript",
+      "sizeLines": 20,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/prefs.ts",
+      "language": "typescript",
+      "sizeLines": 122,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/seed.ts",
+      "language": "typescript",
+      "sizeLines": 83,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/theme.ts",
+      "language": "typescript",
+      "sizeLines": 361,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/Views.tsx",
+      "language": "typescript",
+      "sizeLines": 875,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/app.ts",
+      "language": "typescript",
+      "sizeLines": 1002,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/art.ts",
+      "language": "typescript",
+      "sizeLines": 97,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/audio.ts",
+      "language": "typescript",
+      "sizeLines": 107,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/model.ts",
+      "language": "typescript",
+      "sizeLines": 577,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/renderer-ready.ts",
+      "language": "typescript",
+      "sizeLines": 36,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/three-scene.ts",
+      "language": "typescript",
+      "sizeLines": 176,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/web/client/core.ts",
+      "language": "typescript",
+      "sizeLines": 366,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/filter-parity.test.ts",
+      "language": "typescript",
+      "sizeLines": 103,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/hooks-health.test.ts",
+      "language": "typescript",
+      "sizeLines": 286,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/selftest.test.ts",
+      "language": "typescript",
+      "sizeLines": 32,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/tui-disk-index.test.ts",
+      "language": "typescript",
+      "sizeLines": 727,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/tui.test.ts",
+      "language": "typescript",
+      "sizeLines": 1665,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "src/core/disk-index.ts": [
+      "src/core/services/types.ts"
+    ],
+    "src/core/index.ts": [],
+    "src/core/prefs.ts": [],
+    "src/core/seed.ts": [],
+    "src/core/theme.ts": [
+      "src/core/prefs.ts"
+    ],
+    "src/tui/Views.tsx": [
+      "src/core/index.ts",
+      "src/core/prefs.ts",
+      "src/core/seed.ts",
+      "src/core/theme.ts",
+      "src/core/version.ts",
+      "src/tui/art.ts",
+      "src/tui/audio.ts",
+      "src/tui/model.ts"
+    ],
+    "src/tui/app.ts": [
+      "src/core/disk-index.ts",
+      "src/core/index.ts",
+      "src/core/prefs.ts",
+      "src/core/seed.ts",
+      "src/tui/Views.tsx",
+      "src/tui/audio.ts",
+      "src/tui/model.ts"
+    ],
+    "src/tui/art.ts": [
+      "src/core/theme.ts"
+    ],
+    "src/tui/audio.ts": [
+      "src/core/prefs.ts"
+    ],
+    "src/tui/model.ts": [
+      "src/core/index.ts",
+      "src/core/prefs.ts",
+      "src/core/seed.ts"
+    ],
+    "src/tui/renderer-ready.ts": [],
+    "src/tui/three-scene.ts": [
+      "src/core/index.ts",
+      "src/core/theme.ts"
+    ],
+    "src/web/client/core.ts": [
+      "src/core/prefs.ts"
+    ],
+    "tests/filter-parity.test.ts": [
+      "src/core/prefs.ts",
+      "src/core/services/types.ts",
+      "src/tui/model.ts",
+      "src/web/page.ts"
+    ],
+    "tests/hooks-health.test.ts": [
+      "src/core/api.ts",
+      "src/core/disk-index.ts",
+      "src/core/index.ts",
+      "src/core/services/locks.ts",
+      "src/core/skills-client.ts"
+    ],
+    "tests/selftest.test.ts": [
+      "src/tui/app.ts",
+      "src/tui/renderer-ready.ts"
+    ],
+    "tests/tui-disk-index.test.ts": [
+      "src/core/disk-index.ts",
+      "src/core/prefs.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts",
+      "src/tui/app.ts",
+      "src/tui/model.ts",
+      "src/tui/renderer-ready.ts",
+      "tests/helpers/audit-state.ts"
+    ],
+    "tests/tui.test.ts": [
+      "src/core/prefs.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts",
+      "src/tui/app.ts",
+      "src/tui/model.ts",
+      "src/tui/renderer-ready.ts",
+      "tests/helpers/audit-state.ts"
+    ]
+  }
+}

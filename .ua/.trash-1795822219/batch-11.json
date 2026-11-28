@@ -1,0 +1,961 @@
+{
+  "nodes": [
+    {
+      "id": "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "type": "document",
+      "name": "v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "filePath": "docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "summary": "Design specification for skills-ui v0.5.4.1 covering unbreakable name-checkbox units on list cards, proportional 10%-50% list-panel widths with v0.5.4 pixel migration, merging right-justified card action groups, and TUI split-pane search and 3-mode sort parity with the WebUI.",
+      "tags": ["design-doc", "ui-ergonomics", "split-pane", "tui-parity"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "type": "document",
+      "name": "v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "filePath": "docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "summary": "Ratified design specification for skills-ui v0.5.5 defining global .skill-lock.json resolution, locked/linked/local skill provenance badges and removal guardrails, host-environment post-mutation hooks, and a read-only health-check endpoint and header Health Pill.",
+      "tags": ["design-doc", "provenance", "hooks", "health-check"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:playwright.config.ts",
+      "type": "file",
+      "name": "playwright.config.ts",
+      "filePath": "playwright.config.ts",
+      "language": "typescript",
+      "summary": "Playwright test runner configuration targeting tests/e2e/**/*.e2e.ts with a 30-second timeout, single-worker serial execution, and list reporter so Bun's test runner ignores E2E specs.",
+      "tags": ["playwright", "e2e-config", "testing", "browser-automation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/build.ts",
+      "type": "file",
+      "name": "build.ts",
+      "filePath": "scripts/build.ts",
+      "language": "typescript",
+      "summary": "Cross-platform Bun compile build script that produces self-contained skills-ui executables for darwin-arm64, darwin-x64, linux-x64, and linux-arm64 with embedded __APP_VERSION__, macOS JIT entitlements codesigning, stale dist artifact pruning, and SHA-256 checksum manifest generation.",
+      "tags": ["build-script", "bun-compile", "codesign", "checksums"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/install.sh",
+      "type": "file",
+      "name": "install.sh",
+      "filePath": "scripts/install.sh",
+      "language": "shell",
+      "summary": "POSIX shell installer that detects OS and CPU architecture, resolves the requested or latest GitHub release binary, verifies its SHA-256 hash against the tag-committed checksum manifest (falling back to the release asset), and atomically installs skills-ui into SKILLS_UI_INSTALL_DIR.",
+      "tags": ["installer", "shell-script", "checksum-verification", "release"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:scripts/perf/report-2026-11-01-real.md",
+      "type": "document",
+      "name": "report-2026-11-01-real.md",
+      "filePath": "scripts/perf/report-2026-11-01-real.md",
+      "summary": "Performance budget benchmark report generated against the real local skills CLI corpus (1 project and 300 global skills) measuring serve API latency, search deduplication, filter matching and DOM rendering, and cold global first-paint timing.",
+      "tags": ["performance-report", "benchmarks", "real-corpus", "latency"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:scripts/perf/report-2026-11-01.md",
+      "type": "document",
+      "name": "report-2026-11-01.md",
+      "filePath": "scripts/perf/report-2026-11-01.md",
+      "summary": "Baseline performance budget report generated against the synthetic skills-shim fixture corpus (390 project and 40 global skills) documenting baseline verdicts for serve API latency, concurrent search deduplication, DOM filter rebuilds, and stale-response guards.",
+      "tags": ["performance-report", "benchmarks", "synthetic-corpus", "baseline"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:scripts/pty-smoke/README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "scripts/pty-smoke/README.md",
+      "summary": "Documentation for the PTY-based real-terminal TUI smoke harness describing how to run smoke.py via uv/pyte, the role of each harness file, and critical PTY gotchas including os.execvpe env passing, key pacing, and TIOCSWINSZ sizing.",
+      "tags": ["documentation", "pty-smoke", "tui-testing", "harness"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/pty-smoke/bin/skills",
+      "type": "file",
+      "name": "skills",
+      "filePath": "scripts/pty-smoke/bin/skills",
+      "language": "shell",
+      "summary": "Relocatable POSIX shell PATH shim placed ahead of system binaries during PTY smoke tests that resolves its sibling directory and execs bun run on scripts/pty-smoke/skills-smoke-bin.ts.",
+      "tags": ["pty-smoke", "path-shim", "shell-wrapper", "cli-stub"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "summary": "Multi-paragraph markdown SKILL.md fixture for skill-001 referenced by ls-global-long.json to supply realistic scrollable markdown detail height during PTY smoke testing.",
+      "tags": ["fixture", "pty-smoke", "skill-doc", "markdown"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "summary": "Multi-paragraph markdown SKILL.md fixture for skill-002 referenced by ls-global-long.json to provide scrollable detail-pane content in PTY smoke runs.",
+      "tags": ["fixture", "pty-smoke", "skill-doc", "markdown"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "summary": "Multi-paragraph markdown SKILL.md fixture for skill-003 referenced by ls-global-long.json to provide scrollable detail-pane content in PTY smoke runs.",
+      "tags": ["fixture", "pty-smoke", "skill-doc", "markdown"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "type": "config",
+      "name": "ls-global-long.json",
+      "filePath": "scripts/pty-smoke/fixtures/ls-global-long.json",
+      "summary": "120-skill global scope JSON fixture served by skills-smoke-bin.ts to stress-test TUI scrolling, paging, mouse selection, filtering, and viewport follow in PTY smoke tests.",
+      "tags": ["fixture", "json-data", "pty-smoke", "global-skills"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:scripts/pty-smoke/fixtures/ls-project.json",
+      "type": "config",
+      "name": "ls-project.json",
+      "filePath": "scripts/pty-smoke/fixtures/ls-project.json",
+      "summary": "Two-skill project scope JSON fixture (tdd and code-review) returned by skills-smoke-bin.ts for initial project-scope startup checks in PTY smoke tests.",
+      "tags": ["fixture", "json-data", "pty-smoke", "project-skills"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/pty-smoke/runner.py",
+      "type": "file",
+      "name": "runner.py",
+      "filePath": "scripts/pty-smoke/runner.py",
+      "language": "python",
+      "summary": "Python PTY test harness that forks skills-ui inside a real pseudo-terminal with isolated prefs/cache paths and the smoke skills shim on PATH, feeding output into a pyte virtual screen for row-accurate assertions.",
+      "tags": ["pty-runner", "python", "pyte", "tui-testing"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:scripts/pty-smoke/runner.py:PtyApp",
+      "type": "class",
+      "name": "PtyApp",
+      "filePath": "scripts/pty-smoke/runner.py",
+      "lineRange": [37, 97],
+      "summary": "Manages a forked PTY process running bun run src/main.ts and a pyte virtual terminal screen, exposing paced read, send, lines, find, and stop helpers for deterministic terminal UI assertions.",
+      "tags": ["pty-harness", "pyte-screen", "process-control", "tui-testing"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "type": "file",
+      "name": "skills-smoke-bin.ts",
+      "filePath": "scripts/pty-smoke/skills-smoke-bin.ts",
+      "language": "typescript",
+      "summary": "Minimal Bun-executed skills CLI stand-in invoked via the PATH shim that answers --version with 1.7.4 and serves ls-global-long.json or ls-project.json for ls/list commands without relying on environment variables.",
+      "tags": ["cli-stub", "pty-smoke", "bun-script", "fixtures"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/pty-smoke/smoke.py",
+      "type": "file",
+      "name": "smoke.py",
+      "filePath": "scripts/pty-smoke/smoke.py",
+      "language": "python",
+      "summary": "End-to-end real-terminal smoke test suite that starts an ephemeral fixture search HTTP server and drives skills-ui through PtyApp to verify startup layout, global scope jumps, Home/End/PgDn scrolling, SGR mouse clicks, live filtering, space checks, 3D graph toggling, and search queue navigation.",
+      "tags": ["smoke-test", "pty-testing", "tui-e2e", "python"],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:scripts/pty-smoke/smoke.py:_SearchFixtureHandler",
+      "type": "class",
+      "name": "_SearchFixtureHandler",
+      "filePath": "scripts/pty-smoke/smoke.py",
+      "lineRange": [24, 42],
+      "summary": "BaseHTTPRequestHandler subclass serving a deterministic 120-skill JSON payload (cli-ansi-001 through cli-ansi-120) for /api/search requests while suppressing server request logs.",
+      "tags": ["http-mock", "search-fixture", "pty-smoke", "python"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/pty-smoke/smoke.py:check",
+      "type": "function",
+      "name": "check",
+      "filePath": "scripts/pty-smoke/smoke.py",
+      "lineRange": [45, 48],
+      "summary": "Records a single named PTY smoke assertion by printing PASS or FAIL with optional detail and appending failed check names to the global FAILURES list.",
+      "tags": ["assertion-helper", "pty-smoke", "test-reporting"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/pty-smoke/smoke.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/pty-smoke/smoke.py",
+      "lineRange": [51, 165],
+      "summary": "Orchestrates the full PTY smoke test lifecycle: launches the local search fixture HTTP server and PtyApp, runs eight interactive TUI assertion flows across installed, graph, and search panes, tears down resources, and exits non-zero on any failure.",
+      "tags": ["test-entrypoint", "pty-smoke", "tui-flows", "orchestration"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:scripts/verify-build-targets.ts",
+      "type": "file",
+      "name": "verify-build-targets.ts",
+      "filePath": "scripts/verify-build-targets.ts",
+      "language": "typescript",
+      "summary": "Post-build verification script that inspects all four compiled binaries in dist/ with the file command to confirm Mach-O/ELF target architectures and asserts every binary's SHA-256 digest matches checksums-<version>.txt.",
+      "tags": ["build-verification", "checksums", "binary-format", "release-check"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/core/filter.ts",
+      "type": "file",
+      "name": "filter.ts",
+      "filePath": "src/core/filter.ts",
+      "language": "typescript",
+      "summary": "Shared single source of truth for installed-skill substring filtering across both WebUI (embedded via toString() into APP_JS) and TUI, deliberately avoiding template and regex literals for verbatim script interpolation.",
+      "tags": ["core-filter", "search-matching", "cross-surface-parity", "shared-logic"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/filter.ts:skillMatches",
+      "type": "function",
+      "name": "skillMatches",
+      "filePath": "src/core/filter.ts",
+      "lineRange": [14, 26],
+      "summary": "Performs case-insensitive substring matching of a trimmed filter needle against a skill's name, source, agent names, and description, returning true immediately when the needle is blank.",
+      "tags": ["filter-predicate", "skill-matching", "parity", "pure-function"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/tui/spike.ts",
+      "type": "file",
+      "name": "spike.ts",
+      "filePath": "src/tui/spike.ts",
+      "language": "typescript",
+      "summary": "Phase-0 OpenTUI markdown rendering spike used by selftest and standalone spike verification to prove tree-sitter worker embedding, Catppuccin Mocha syntax styling, and BoxRenderable/MarkdownRenderable composition.",
+      "tags": ["tui-spike", "opentui", "markdown-rendering", "selftest"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/spike.ts:spikeSyntaxTokens",
+      "type": "function",
+      "name": "spikeSyntaxTokens",
+      "filePath": "src/tui/spike.ts",
+      "lineRange": [46, 60],
+      "summary": "Returns a minimal TextMate scope-to-Catppuccin-Mocha ThemeTokenStyle array covering markdown headings, emphasis, code spans, links, and TypeScript syntax tokens for the spike screen.",
+      "tags": ["syntax-highlighting", "catppuccin", "theme-tokens", "opentui"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/spike.ts:buildSpikeScreen",
+      "type": "function",
+      "name": "buildSpikeScreen",
+      "filePath": "src/tui/spike.ts",
+      "lineRange": [62, 79],
+      "summary": "Constructs a rounded-border OpenTUI BoxRenderable containing the spike title, a syntax-styled MarkdownRenderable populated with SPIKE_MARKDOWN, and a quit-hint footer.",
+      "tags": ["screen-builder", "opentui", "markdown-panel", "selftest"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/spike.ts:runSpikeTui",
+      "type": "function",
+      "name": "runSpikeTui",
+      "filePath": "src/tui/spike.ts",
+      "lineRange": [81, 95],
+      "summary": "Launches an interactive OpenTUI CLI renderer displaying buildSpikeScreen when stdout is a TTY, binding the q key to destroy the renderer cleanly and exiting with code 1 when no TTY is attached.",
+      "tags": ["tui-runner", "opentui", "tty-check", "spike"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/e2e/hosted.e2e.ts",
+      "type": "file",
+      "name": "hosted.e2e.ts",
+      "filePath": "tests/e2e/hosted.e2e.ts",
+      "language": "typescript",
+      "summary": "Playwright end-to-end test suite exercising the live GitHub Pages hosted UI against local serve subprocesses (LNA permission, bearer auth, empty state) plus local web-mode honesty, error toasts, search in-flight race guards, sort/filter/scope semantics, and hostile SKILL.md XSS safety.",
+      "tags": ["e2e-tests", "playwright", "hosted-ui", "web-security"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/e2e/hosted.e2e.ts:startServe",
+      "type": "function",
+      "name": "startServe",
+      "filePath": "tests/e2e/hosted.e2e.ts",
+      "lineRange": [23, 60],
+      "summary": "Spawns a skills-ui serve or web subprocess bound to a given port with isolated prefs and skills-shim state directories, waiting up to 10 seconds for the ready banner on stdout before resolving.",
+      "tags": ["test-helper", "subprocess-lifecycle", "serve-harness", "playwright"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/e2e/hosted.e2e.ts:stubSkillApi",
+      "type": "function",
+      "name": "stubSkillApi",
+      "filePath": "tests/e2e/hosted.e2e.ts",
+      "lineRange": [755, 790],
+      "summary": "Intercepts Playwright browser requests to /api/updates, /api/skills, and /api/skill to serve a single deterministic fixture skill whose SKILL.md body matches the supplied markdown or hostile XSS payload.",
+      "tags": ["route-mocking", "playwright", "markdown-testing", "xss-test"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:tests/fixtures/contract/hostile-skill/SKILL.md",
+      "type": "document",
+      "name": "SKILL.md",
+      "filePath": "tests/fixtures/contract/hostile-skill/SKILL.md",
+      "summary": "Adversarial SKILL.md fixture embedding ANSI SGR, OSC, DCS, and C1 control sequences alongside normal tabs and text to verify terminal and web sanitization strips dangerous escapes while preserving readable structure.",
+      "tags": ["security-fixture", "ansi-injection", "sanitization", "contract-test"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/fixtures/skills-shim.mjs",
+      "type": "file",
+      "name": "skills-shim.mjs",
+      "filePath": "tests/fixtures/skills-shim.mjs",
+      "language": "javascript",
+      "summary": "Stateful fixture stand-in for the skills CLI implementing --version, ls --json, install --list, add --json, rm (with optional SKILLS_SHIM_RM_KEEP partial failures), update, environment snapshots, and JSONL call logging for unit, API, E2E, and performance tests.",
+      "tags": ["cli-shim", "test-fixture", "subprocess-contract", "stateful-mock"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/fixtures/slow-skills-shim.mjs",
+      "type": "file",
+      "name": "slow-skills-shim.mjs",
+      "filePath": "tests/fixtures/slow-skills-shim.mjs",
+      "language": "javascript",
+      "summary": "Delayed skills CLI test shim that sleeps SKILLS_SHIM_DELAY_MS milliseconds before answering ls requests from ls-project.json so serve-hardening tests can exercise subprocess spawn-queue saturation and concurrency limits.",
+      "tags": ["cli-shim", "test-fixture", "spawn-queue", "latency-simulation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/image.test.ts",
+      "type": "file",
+      "name": "image.test.ts",
+      "filePath": "tests/image.test.ts",
+      "language": "typescript",
+      "summary": "Bun unit tests verifying OpenTUI ImageRenderable blocks-protocol rendering in an in-memory test renderer and pinning that the vendored Jimp-free @opentui/three fork throws unsupported-operation errors on file-image utilities.",
+      "tags": ["unit-tests", "opentui-image", "opentui-three", "capability-proof"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "target": "file:src/core/prefs.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "target": "file:src/web/page.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "target": "file:src/tui/model.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "target": "file:src/tui/app.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "target": "file:src/tui/Views.tsx",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "target": "file:src/core/services/locks.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "target": "file:src/core/services/installed.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "target": "file:src/core/services/hooks.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "target": "file:src/web/page.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "target": "file:src/tui/Views.tsx",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:playwright.config.ts",
+      "target": "file:tests/e2e/hosted.e2e.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:playwright.config.ts",
+      "target": "file:tests/e2e/audit-remediation.e2e.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/build.ts",
+      "target": "config:package.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/build.ts",
+      "target": "file:src/main.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/build.ts",
+      "target": "file:src/core/version.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:scripts/build.ts",
+      "target": "file:scripts/verify-build-targets.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:scripts/install.sh",
+      "target": "file:tests/installer.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:scripts/install.sh",
+      "target": "file:scripts/build.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/install.sh",
+      "target": "document:docs/release.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/perf/report-2026-11-01-real.md",
+      "target": "file:scripts/perf/budget.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/perf/report-2026-11-01-real.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/perf/report-2026-11-01-real.md",
+      "target": "file:src/core/filter.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/perf/report-2026-11-01-real.md",
+      "target": "document:scripts/perf/report-2026-11-01.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/perf/report-2026-11-01.md",
+      "target": "file:scripts/perf/budget.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/perf/report-2026-11-01.md",
+      "target": "file:src/core/api.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/perf/report-2026-11-01.md",
+      "target": "file:src/core/filter.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/pty-smoke/README.md",
+      "target": "file:scripts/pty-smoke/runner.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/pty-smoke/README.md",
+      "target": "file:scripts/pty-smoke/smoke.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/pty-smoke/README.md",
+      "target": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/pty-smoke/README.md",
+      "target": "file:scripts/pty-smoke/bin/skills",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:scripts/pty-smoke/bin/skills",
+      "target": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "target": "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "target": "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "target": "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "target": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:scripts/pty-smoke/fixtures/ls-project.json",
+      "target": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/pty-smoke/runner.py",
+      "target": "class:scripts/pty-smoke/runner.py:PtyApp",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/pty-smoke/runner.py",
+      "target": "class:scripts/pty-smoke/runner.py:PtyApp",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/pty-smoke/runner.py",
+      "target": "file:src/main.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/pty-smoke/runner.py",
+      "target": "file:scripts/pty-smoke/bin/skills",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "target": "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "target": "config:scripts/pty-smoke/fixtures/ls-project.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/pty-smoke/smoke.py",
+      "target": "file:scripts/pty-smoke/runner.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/pty-smoke/smoke.py",
+      "target": "class:scripts/pty-smoke/smoke.py:_SearchFixtureHandler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/pty-smoke/smoke.py",
+      "target": "class:scripts/pty-smoke/smoke.py:_SearchFixtureHandler",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/pty-smoke/smoke.py",
+      "target": "function:scripts/pty-smoke/smoke.py:check",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/pty-smoke/smoke.py",
+      "target": "function:scripts/pty-smoke/smoke.py:check",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/pty-smoke/smoke.py",
+      "target": "function:scripts/pty-smoke/smoke.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/pty-smoke/smoke.py",
+      "target": "function:scripts/pty-smoke/smoke.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/pty-smoke/smoke.py:main",
+      "target": "class:scripts/pty-smoke/runner.py:PtyApp",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/pty-smoke/smoke.py:main",
+      "target": "function:scripts/pty-smoke/smoke.py:check",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/pty-smoke/smoke.py:main",
+      "target": "class:scripts/pty-smoke/smoke.py:_SearchFixtureHandler",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:scripts/pty-smoke/smoke.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/app.ts",
+      "target": "file:scripts/pty-smoke/smoke.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:scripts/verify-build-targets.ts",
+      "target": "config:package.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:scripts/verify-build-targets.ts",
+      "target": "file:scripts/build.ts",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/core/filter.ts",
+      "target": "function:src/core/filter.ts:skillMatches",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/core/filter.ts",
+      "target": "function:src/core/filter.ts:skillMatches",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/filter.ts",
+      "target": "file:tests/filter-parity.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/spike.ts",
+      "target": "function:src/tui/spike.ts:spikeSyntaxTokens",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/tui/spike.ts",
+      "target": "function:src/tui/spike.ts:spikeSyntaxTokens",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/spike.ts",
+      "target": "function:src/tui/spike.ts:buildSpikeScreen",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/tui/spike.ts",
+      "target": "function:src/tui/spike.ts:buildSpikeScreen",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/spike.ts",
+      "target": "function:src/tui/spike.ts:runSpikeTui",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/tui/spike.ts",
+      "target": "function:src/tui/spike.ts:runSpikeTui",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/spike.ts:buildSpikeScreen",
+      "target": "function:src/tui/spike.ts:spikeSyntaxTokens",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/spike.ts:runSpikeTui",
+      "target": "function:src/tui/spike.ts:buildSpikeScreen",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/spike.ts",
+      "target": "file:tests/selftest.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/e2e/hosted.e2e.ts",
+      "target": "function:tests/e2e/hosted.e2e.ts:startServe",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/e2e/hosted.e2e.ts",
+      "target": "function:tests/e2e/hosted.e2e.ts:stubSkillApi",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/e2e/hosted.e2e.ts",
+      "target": "file:tests/fixtures/skills-shim.mjs",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/e2e/hosted.e2e.ts",
+      "target": "config:tests/fixtures/contract/ls-empty.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:tests/e2e/hosted.e2e.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/e2e/hosted.e2e.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "file:tests/e2e/hosted.e2e.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/e2e/hosted.e2e.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:tests/fixtures/contract/hostile-skill/SKILL.md",
+      "target": "config:tests/fixtures/contract/ls-hostile.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:tests/fixtures/contract/hostile-skill/SKILL.md",
+      "target": "file:tests/sanitize.test.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/fixtures/skills-shim.mjs",
+      "target": "config:tests/fixtures/contract/ls-project.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/fixtures/skills-shim.mjs",
+      "target": "config:tests/fixtures/contract/ls-global.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/fixtures/skills-shim.mjs",
+      "target": "config:tests/fixtures/contract/add.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/fixtures/skills-shim.mjs",
+      "target": "file:src/core/skills-client.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/fixtures/slow-skills-shim.mjs",
+      "target": "config:tests/fixtures/contract/ls-project.json",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/fixtures/slow-skills-shim.mjs",
+      "target": "file:tests/fixtures/skills-shim.mjs",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/fixtures/slow-skills-shim.mjs",
+      "target": "file:src/core/spawn-queue.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/fixtures/slow-skills-shim.mjs",
+      "target": "file:tests/serve-hardening.test.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/tui/three-scene.ts",
+      "target": "file:tests/image.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

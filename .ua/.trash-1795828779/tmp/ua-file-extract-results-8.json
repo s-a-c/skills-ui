@@ -1,0 +1,424 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 6,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 6,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 0,
+      "failed": 0,
+      "skipped": 6
+    }
+  },
+  "results": [
+    {
+      "path": "docs/_config.yml",
+      "language": "yaml",
+      "fileCategory": "config",
+      "totalLines": 21,
+      "nonEmptyLines": 17,
+      "sections": [
+        {
+          "heading": "title",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "remote_theme",
+          "level": 1,
+          "line": 6
+        },
+        {
+          "heading": "plugins",
+          "level": 1,
+          "line": 7
+        },
+        {
+          "heading": "url",
+          "level": 1,
+          "line": 10
+        },
+        {
+          "heading": "baseurl",
+          "level": 1,
+          "line": 11
+        },
+        {
+          "heading": "aux_links",
+          "level": 1,
+          "line": 13
+        },
+        {
+          "heading": "defaults",
+          "level": 1,
+          "line": 17
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 8
+      }
+    },
+    {
+      "path": "docs/archify-findings-review-and-report-2026-11-26.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 879,
+      "nonEmptyLines": 678,
+      "sections": [
+        {
+          "heading": "Archify Findings Review, Assessment, and Remediation Transcript (2026-11-26)",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "1. User (Turn 1 · `2026-11-26T06:00:42Z`)",
+          "level": 2,
+          "line": 49
+        },
+        {
+          "heading": "2. Assistant (`2026-11-26T06:06:08Z` · Step 53)",
+          "level": 2,
+          "line": 103
+        },
+        {
+          "heading": "2.1. Executive Summary",
+          "level": 3,
+          "line": 105
+        },
+        {
+          "heading": "2.2. Collected Artifacts & Run Integrity",
+          "level": 3,
+          "line": 119
+        },
+        {
+          "heading": "2.3. Complete Findings Register (18 / 18)",
+          "level": 3,
+          "line": 139
+        },
+        {
+          "heading": "2.4. Deep Assessment & Concrete Recommendations",
+          "level": 3,
+          "line": 164
+        },
+        {
+          "heading": "2.4.1. Workstream 1 — Break `src/core ↔ src/web` & Unify `skillMatches` *(3-for-1 Payoff)*",
+          "level": 4,
+          "line": 166
+        },
+        {
+          "heading": "2.4.2. Workstream 2 — Decompose the 5 Production Complexity Hotspots",
+          "level": 4,
+          "line": 181
+        },
+        {
+          "heading": "2.4.3. Workstream 3 — Modularize `src/web/page.ts` Safely",
+          "level": 4,
+          "line": 204
+        },
+        {
+          "heading": "2.4.4. Workstream 4 — `src/core` Boundary, Dead Spike, & Benchmark Script",
+          "level": 4,
+          "line": 226
+        },
+        {
+          "heading": "2.4.5. Workstream 5 — Baseline Intentional Signals (Do Not Over-Refactor)",
+          "level": 4,
+          "line": 239
+        },
+        {
+          "heading": "2.5. Recommended Strategy Options",
+          "level": 3,
+          "line": 252
+        },
+        {
+          "heading": "3. User (Turn 2 · `2026-11-26T06:48:57Z`)",
+          "level": 2,
+          "line": 280
+        },
+        {
+          "heading": "3.1. Execution Plan Handoff (`2026-11-26T06:52:21Z` · Step 85)",
+          "level": 3,
+          "line": 312
+        },
+        {
+          "heading": "3.2. Step 0: Create Phase Worktree & Install Dependencies",
+          "level": 3,
+          "line": 323
+        },
+        {
+          "heading": "3.3. Step 1 (Wave 1): Break `src/core ↔ src/web` Coupling, Unify `skillMatches`, Fix Deep Leaks, Remove Dead Spike",
+          "level": 3,
+          "line": 333
+        },
+        {
+          "heading": "3.4. Step 2 (Wave 2): Decompose the 6 High-Complexity Functions",
+          "level": 3,
+          "line": 387
+        },
+        {
+          "heading": "3.5. Step 3 (Wave 3): Modularize `src/web/page.ts` Byte-for-Byte Identically",
+          "level": 3,
+          "line": 439
+        },
+        {
+          "heading": "3.6. Step 4: Archify Config, Baseline Update, & Full Verification",
+          "level": 3,
+          "line": 456
+        },
+        {
+          "heading": "3.7. Re-Plan If",
+          "level": 3,
+          "line": 535
+        },
+        {
+          "heading": "4. Assistant (`2026-11-26T06:57:40Z` · Step 125)",
+          "level": 2,
+          "line": 584
+        },
+        {
+          "heading": "5. Assistant (`2026-11-26T07:06:15Z` · Step 178)",
+          "level": 2,
+          "line": 634
+        },
+        {
+          "heading": "6. Assistant (`2026-11-26T07:07:10Z` · Step 186)",
+          "level": 2,
+          "line": 650
+        },
+        {
+          "heading": "7. Assistant (`2026-11-26T07:13:30Z` · Step 213)",
+          "level": 2,
+          "line": 679
+        },
+        {
+          "heading": "8. Assistant (`2026-11-26T07:17:46Z` · Step 225)",
+          "level": 2,
+          "line": 697
+        },
+        {
+          "heading": "8.1. Plan Review Checkpoint (`2026-11-26T07:20:45Z` · Step 228)",
+          "level": 3,
+          "line": 703
+        },
+        {
+          "heading": "8.2. Execution Plan Handoff (`2026-11-26T07:21:02Z` · Step 231)",
+          "level": 3,
+          "line": 737
+        },
+        {
+          "heading": "9. Assistant (`2026-11-26T07:22:01Z` · Step 238)",
+          "level": 2,
+          "line": 802
+        },
+        {
+          "heading": "10. Assistant (`2026-11-26T07:22:22Z` · Step 242)",
+          "level": 2,
+          "line": 815
+        },
+        {
+          "heading": "10.1. Before Vs. After (Archify)",
+          "level": 3,
+          "line": 819
+        },
+        {
+          "heading": "10.2. Changes Implemented",
+          "level": 3,
+          "line": 831
+        },
+        {
+          "heading": "10.3. Verification Evidence (All Run After Final Source Edit)",
+          "level": 3,
+          "line": 856
+        },
+        {
+          "heading": "10.4. Next Step",
+          "level": 3,
+          "line": 870
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 34
+      }
+    },
+    {
+      "path": "docs/index.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 40,
+      "nonEmptyLines": 29,
+      "sections": [
+        {
+          "heading": "Install",
+          "level": 2,
+          "line": 10
+        },
+        {
+          "heading": "Highlights",
+          "level": 2,
+          "line": 29
+        },
+        {
+          "heading": "Repo & agent conventions",
+          "level": 2,
+          "line": 36
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 3
+      }
+    },
+    {
+      "path": "docs/release.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 39,
+      "nonEmptyLines": 36,
+      "sections": [
+        {
+          "heading": "Release procedure (v0.5.1+)",
+          "level": 1,
+          "line": 1
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "docs/upstream-issue-draft.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 62,
+      "nonEmptyLines": 37,
+      "sections": [
+        {
+          "heading": "`skills ls` re-parses every SKILL.md per agent dir per pass",
+          "level": 1,
+          "line": 13
+        },
+        {
+          "heading": "Symptom",
+          "level": 2,
+          "line": 17
+        },
+        {
+          "heading": "Evidence",
+          "level": 2,
+          "line": 21
+        },
+        {
+          "heading": "Bisection (one `skills ls --json` per row, same machine)",
+          "level": 3,
+          "line": 23
+        },
+        {
+          "heading": "The warning storm is the smoking gun",
+          "level": 3,
+          "line": 41
+        },
+        {
+          "heading": "CPU profile",
+          "level": 3,
+          "line": 45
+        },
+        {
+          "heading": "Root cause (1.7.4 `listInstalledSkills`)",
+          "level": 2,
+          "line": 49
+        },
+        {
+          "heading": "Proposed fix",
+          "level": 2,
+          "line": 53
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 8
+      }
+    },
+    {
+      "path": "docs/upstream-ls-memoization.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 85,
+      "nonEmptyLines": 64,
+      "sections": [
+        {
+          "heading": "Upstream memo: `skills ls` re-parses every SKILL.md per agent dir per pass (S-153)",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Symptom",
+          "level": 2,
+          "line": 11
+        },
+        {
+          "heading": "Evidence",
+          "level": 2,
+          "line": 18
+        },
+        {
+          "heading": "Bisection (one `skills ls --json` per row, same machine, S-153 audit)",
+          "level": 3,
+          "line": 20
+        },
+        {
+          "heading": "CPU profile",
+          "level": 3,
+          "line": 42
+        },
+        {
+          "heading": "The visible signature: hundreds of duplicate warnings per run",
+          "level": 3,
+          "line": 49
+        },
+        {
+          "heading": "Proposed fix (either suffices; both compose)",
+          "level": 2,
+          "line": 62
+        },
+        {
+          "heading": "What skills-ui did meanwhile (downstream, not a fix)",
+          "level": 2,
+          "line": 76
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 8
+      }
+    }
+  ]
+}

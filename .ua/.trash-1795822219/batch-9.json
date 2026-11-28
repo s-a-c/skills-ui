@@ -1,0 +1,195 @@
+{
+  "nodes": [
+    {
+      "id": "document:docs/agents/domain.md",
+      "type": "document",
+      "name": "domain.md",
+      "filePath": "docs/agents/domain.md",
+      "summary": "Agent-skill convention guide explaining how to consume skills-ui's single-context domain documentation (CONTEXT.md and docs/adr/), enforce canonical glossary vocabulary across code and issues, and explicitly surface any ADR conflicts.",
+      "tags": [
+        "agent-conventions",
+        "domain-modeling",
+        "glossary",
+        "adr"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/agents/issue-tracker.md",
+      "type": "document",
+      "name": "issue-tracker.md",
+      "filePath": "docs/agents/issue-tracker.md",
+      "summary": "Agent-skill routing contract specifying Linear (project skills-ui / P-S-4, team S-a-c, workspace s-a-c) as the issue tracker via Linear MCP tools rather than gh, including milestone alignment with ROADMAP.md, Wayfinder map/ticket workflow, and triage label references.",
+      "tags": [
+        "agent-conventions",
+        "linear",
+        "issue-tracker",
+        "wayfinder"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/agents/triage-labels.md",
+      "type": "document",
+      "name": "triage-labels.md",
+      "filePath": "docs/agents/triage-labels.md",
+      "summary": "Mapping table translating the five canonical triage roles (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix) to matching Linear workspace labels in the s-a-c workspace for skills-ui issues.",
+      "tags": [
+        "agent-conventions",
+        "triage-labels",
+        "linear",
+        "workflow"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/agents/workspace.md",
+      "type": "document",
+      "name": "workspace.md",
+      "filePath": "docs/agents/workspace.md",
+      "summary": "Canonical multi-worktree workspace-level agent contract (symlinked from the workspace root AGENTS.md) defining DOX instruction priority, bare-repo plus worktree topology (.bare/, main/, retained audit/remediation worktrees), phase worktree lifecycle commands, Linear planning routing, and SKILLS_UI_ environment variable rules.",
+      "tags": [
+        "agent-contract",
+        "worktree-topology",
+        "dox-hierarchy",
+        "workspace-rules"
+      ],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "document:CONTEXT.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "document:AGENTS.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "document:docs/agents/workspace.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "document:docs/index.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/domain.md",
+      "target": "file:tests/terminology.test.ts",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/issue-tracker.md",
+      "target": "document:docs/agents/triage-labels.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/issue-tracker.md",
+      "target": "document:ROADMAP.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/issue-tracker.md",
+      "target": "document:AGENTS.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/issue-tracker.md",
+      "target": "document:docs/agents/workspace.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/issue-tracker.md",
+      "target": "document:docs/index.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/triage-labels.md",
+      "target": "document:docs/agents/issue-tracker.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/triage-labels.md",
+      "target": "document:docs/agents/workspace.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/triage-labels.md",
+      "target": "document:docs/index.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:AGENTS.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:README.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "config:package.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:docs/agents/issue-tracker.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:docs/agents/triage-labels.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/agents/workspace.md",
+      "target": "document:docs/agents/domain.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

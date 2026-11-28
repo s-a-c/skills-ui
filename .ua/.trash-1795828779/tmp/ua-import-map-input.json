@@ -1,0 +1,585 @@
+{
+  "projectRoot": "/Users/s-a-c/Projects/s-a-c/skills-ui/main",
+  "files": [
+    {
+      "path": ".github/workflows/claude-code-review.yml",
+      "language": "yaml",
+      "fileCategory": "infra"
+    },
+    {
+      "path": ".github/workflows/claude.yml",
+      "language": "yaml",
+      "fileCategory": "infra"
+    },
+    {
+      "path": "AGENTS.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "CONTEXT.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "README.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "ROADMAP.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/_config.yml",
+      "language": "yaml",
+      "fileCategory": "config"
+    },
+    {
+      "path": "docs/agents/domain.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/agents/issue-tracker.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/agents/triage-labels.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/agents/workspace.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/archify-findings-review-and-report-2026-11-26.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/index.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/release.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/upstream-issue-draft.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "docs/upstream-ls-memoization.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "mise.toml",
+      "language": "toml",
+      "fileCategory": "config"
+    },
+    {
+      "path": "package.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": "playwright.config.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/build.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/export-page.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/install.sh",
+      "language": "shell",
+      "fileCategory": "script"
+    },
+    {
+      "path": "scripts/perf/budget.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/perf/report-2026-11-01-real.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "scripts/perf/report-2026-11-01.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "scripts/pty-smoke/README.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "scripts/pty-smoke/bin/skills",
+      "language": "unknown",
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "scripts/pty-smoke/fixtures/ls-global-long.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": "scripts/pty-smoke/fixtures/ls-project.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": "scripts/pty-smoke/runner.py",
+      "language": "python",
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/pty-smoke/skills-smoke-bin.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/pty-smoke/smoke.py",
+      "language": "python",
+      "fileCategory": "code"
+    },
+    {
+      "path": "scripts/verify-build-targets.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/api.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/disk-index.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/filter.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/hosted-auth.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/index.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/prefs.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/seed.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/hooks.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/install.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/installed.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/locks.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/remove.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/sanitize.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/search.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/skill-doc.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/source.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/types.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/update.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/services/updates-check.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/skills-client.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/spawn-queue.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/theme.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/core/version.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/main.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/Views.tsx",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/app.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/art.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/audio.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/model.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/renderer-ready.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/spike.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/tui/three-scene.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/web/client/core.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/web/client/installed.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/web/client/search-and-boot.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/web/page.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/web/styles.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/api.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/dash-sweep.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/e2e/audit-remediation.e2e.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/e2e/helpers/audit-fixture.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/e2e/hosted.e2e.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/filter-parity.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/fixtures/audit-web-server.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/fixtures/contract/add-hostile.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": "tests/fixtures/contract/add.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": "tests/fixtures/contract/hostile-skill/SKILL.md",
+      "language": "markdown",
+      "fileCategory": "docs"
+    },
+    {
+      "path": "tests/fixtures/contract/ls-empty.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": "tests/fixtures/contract/ls-global.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": "tests/fixtures/contract/ls-hostile.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": "tests/fixtures/contract/ls-project.json",
+      "language": "json",
+      "fileCategory": "config"
+    },
+    {
+      "path": "tests/fixtures/skills-shim.mjs",
+      "language": "javascript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/fixtures/slow-skills-shim.mjs",
+      "language": "javascript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/helpers/audit-state.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/helpers/installer-fixture.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/hooks-health.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/hosted-auth.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/image.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/installer.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/locks.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/markdown-render.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/page-hardening.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/page-smoke.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/perf/filter-dom.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/perf/helpers.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/perf/playwright-probes.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/perf/search-stub.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/perf/spawn-count.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/sanitize.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/selftest.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/serve-hardening.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/services.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/terminology.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/tui-disk-index.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/tui.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/version.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/web-055.test.ts",
+      "language": "typescript",
+      "fileCategory": "code"
+    },
+    {
+      "path": "tsconfig.json",
+      "language": "json",
+      "fileCategory": "config"
+    }
+  ]
+}

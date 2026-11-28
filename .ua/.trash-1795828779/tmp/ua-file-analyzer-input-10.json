@@ -1,0 +1,49 @@
+{
+  "projectRoot": "/Users/s-a-c/Projects/s-a-c/skills-ui/main",
+  "batchFiles": [
+    {
+      "path": "tests/fixtures/contract/add-hostile.json",
+      "language": "json",
+      "sizeLines": 15,
+      "fileCategory": "config"
+    },
+    {
+      "path": "tests/fixtures/contract/add.json",
+      "language": "json",
+      "sizeLines": 19,
+      "fileCategory": "config"
+    },
+    {
+      "path": "tests/fixtures/contract/ls-empty.json",
+      "language": "json",
+      "sizeLines": 1,
+      "fileCategory": "config"
+    },
+    {
+      "path": "tests/fixtures/contract/ls-global.json",
+      "language": "json",
+      "sizeLines": 1,
+      "fileCategory": "config"
+    },
+    {
+      "path": "tests/fixtures/contract/ls-hostile.json",
+      "language": "json",
+      "sizeLines": 27,
+      "fileCategory": "config"
+    },
+    {
+      "path": "tests/fixtures/contract/ls-project.json",
+      "language": "json",
+      "sizeLines": 20,
+      "fileCategory": "config"
+    }
+  ],
+  "batchImportData": {
+    "tests/fixtures/contract/add-hostile.json": [],
+    "tests/fixtures/contract/add.json": [],
+    "tests/fixtures/contract/ls-empty.json": [],
+    "tests/fixtures/contract/ls-global.json": [],
+    "tests/fixtures/contract/ls-hostile.json": [],
+    "tests/fixtures/contract/ls-project.json": []
+  }
+}

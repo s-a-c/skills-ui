@@ -1,0 +1,755 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 9,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 9,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 9,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "src/web/client/installed.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 673,
+      "nonEmptyLines": 660,
+      "functions": [
+        {
+          "name": "buildClientInstalledJs",
+          "startLine": 1,
+          "endLine": 673,
+          "params": [
+            "skillMatchesSrc"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "buildClientInstalledJs",
+          "line": 1,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/web/client/search-and-boot.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 904,
+      "nonEmptyLines": 886,
+      "exports": [
+        {
+          "name": "CLIENT_SEARCH_AND_BOOT_JS",
+          "line": 1,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/web/page.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 314,
+      "nonEmptyLines": 297,
+      "functions": [
+        {
+          "name": "cssVarsFor",
+          "startLine": 28,
+          "endLine": 37,
+          "params": [
+            "tokens",
+            "palette"
+          ]
+        },
+        {
+          "name": "safeJsonEmbed",
+          "startLine": 47,
+          "endLine": 49,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "bootstrapScript",
+          "startLine": 53,
+          "endLine": 59,
+          "params": [
+            "prefs",
+            "serverPort",
+            "seed"
+          ]
+        },
+        {
+          "name": "pageCspFor",
+          "startLine": 68,
+          "endLine": 87,
+          "params": [
+            "prefs",
+            "serverPort",
+            "seed",
+            "hosted"
+          ]
+        },
+        {
+          "name": "renderPage",
+          "startLine": 89,
+          "endLine": 312,
+          "params": [
+            "version",
+            "prefs",
+            "serverPort",
+            "seed",
+            "opts"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "skillMatches",
+          "line": 26,
+          "isDefault": false
+        },
+        {
+          "name": "APP_JS",
+          "line": 44,
+          "isDefault": false
+        },
+        {
+          "name": "pageCspFor",
+          "line": 68,
+          "isDefault": false
+        },
+        {
+          "name": "renderPage",
+          "line": 89,
+          "isDefault": false
+        },
+        {
+          "name": "webPageRenderer",
+          "line": 314,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "cssVarsFor",
+          "callee": "Object.entries(tokens).map",
+          "lineNumber": 32
+        },
+        {
+          "caller": "cssVarsFor",
+          "callee": "Object.entries",
+          "lineNumber": 32
+        },
+        {
+          "caller": "cssVarsFor",
+          "callee": "Object.entries(palette as unknown as Record<string, string>).map",
+          "lineNumber": 33
+        },
+        {
+          "caller": "cssVarsFor",
+          "callee": "Object.entries",
+          "lineNumber": 33
+        },
+        {
+          "caller": "cssVarsFor",
+          "callee": "[...entries, ...accents].join",
+          "lineNumber": 36
+        },
+        {
+          "caller": "safeJsonEmbed",
+          "callee": "JSON.stringify(value).replace",
+          "lineNumber": 48
+        },
+        {
+          "caller": "safeJsonEmbed",
+          "callee": "JSON.stringify",
+          "lineNumber": 48
+        },
+        {
+          "caller": "bootstrapScript",
+          "callee": "safeJsonEmbed",
+          "lineNumber": 58
+        },
+        {
+          "caller": "bootstrapScript",
+          "callee": "safeJsonEmbed",
+          "lineNumber": 58
+        },
+        {
+          "caller": "pageCspFor",
+          "callee": "[\n    createHash(\"sha256\").update(bootstrapScript(prefs, serverPort, seed)).digest(\"base64\"),\n    createHash(\"sha256\").update(`\\n${APP_JS}\\n`).digest(\"base64\"),\n  ].map",
+          "lineNumber": 74
+        },
+        {
+          "caller": "pageCspFor",
+          "callee": "createHash(\"sha256\").update(bootstrapScript(prefs, serverPort, seed)).digest",
+          "lineNumber": 75
+        },
+        {
+          "caller": "pageCspFor",
+          "callee": "createHash(\"sha256\").update",
+          "lineNumber": 75
+        },
+        {
+          "caller": "pageCspFor",
+          "callee": "createHash",
+          "lineNumber": 75
+        },
+        {
+          "caller": "pageCspFor",
+          "callee": "bootstrapScript",
+          "lineNumber": 75
+        },
+        {
+          "caller": "pageCspFor",
+          "callee": "createHash(\"sha256\").update(`\\n${APP_JS}\\n`).digest",
+          "lineNumber": 76
+        },
+        {
+          "caller": "pageCspFor",
+          "callee": "createHash(\"sha256\").update",
+          "lineNumber": 76
+        },
+        {
+          "caller": "pageCspFor",
+          "callee": "createHash",
+          "lineNumber": 76
+        },
+        {
+          "caller": "pageCspFor",
+          "callee": "[\n    \"default-src 'none'\",\n    \"style-src 'unsafe-inline'\",\n    `script-src ${hashes.join(\" \")}`,\n    \"img-src data:\",\n    hosted ? \"connect-src http://127.0.0.1:* http://localhost:*\" : \"connect-src 'self'\",\n    \"base-uri 'none'\",\n    \"form-action 'none'\",\n  ].join",
+          "lineNumber": 78
+        },
+        {
+          "caller": "pageCspFor",
+          "callee": "hashes.join",
+          "lineNumber": 81
+        },
+        {
+          "caller": "renderPage",
+          "callee": "pageCspFor",
+          "lineNumber": 97
+        },
+        {
+          "caller": "renderPage",
+          "callee": "bootstrapScript",
+          "lineNumber": 98
+        },
+        {
+          "caller": "renderPage",
+          "callee": "String",
+          "lineNumber": 100
+        },
+        {
+          "caller": "renderPage",
+          "callee": "cssVarsFor",
+          "lineNumber": 114
+        },
+        {
+          "caller": "renderPage",
+          "callee": "cssVarsFor",
+          "lineNumber": 118
+        }
+      ],
+      "metrics": {
+        "importCount": 8,
+        "exportCount": 5,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/web/styles.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 444,
+      "nonEmptyLines": 429,
+      "exports": [
+        {
+          "name": "APP_CSS",
+          "line": 1,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/dash-sweep.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 192,
+      "nonEmptyLines": 180,
+      "functions": [
+        {
+          "name": "opensRegex",
+          "startLine": 31,
+          "endLine": 34,
+          "params": [
+            "prevSig"
+          ]
+        },
+        {
+          "name": "lex",
+          "startLine": 43,
+          "endLine": 135,
+          "params": [
+            "src"
+          ]
+        },
+        {
+          "name": "jsxTextRuns",
+          "startLine": 138,
+          "endLine": 142,
+          "params": [
+            "blanked"
+          ]
+        },
+        {
+          "name": "read",
+          "startLine": 144,
+          "endLine": 144,
+          "params": [
+            "rel"
+          ]
+        },
+        {
+          "name": "dashHits",
+          "startLine": 149,
+          "endLine": 155,
+          "params": [
+            "file",
+            "candidates"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "opensRegex",
+          "callee": "/[\\w$)\\]\"'`]/.test",
+          "lineNumber": 33
+        },
+        {
+          "caller": "lex",
+          "callee": "src.split",
+          "lineNumber": 45
+        },
+        {
+          "caller": "prevSig",
+          "callee": "/\\s/.test",
+          "lineNumber": 51
+        },
+        {
+          "caller": "lex",
+          "callee": "blank",
+          "lineNumber": 62
+        },
+        {
+          "caller": "lex",
+          "callee": "Math.min",
+          "lineNumber": 67
+        },
+        {
+          "caller": "lex",
+          "callee": "blank",
+          "lineNumber": 68
+        },
+        {
+          "caller": "lex",
+          "callee": "src.slice",
+          "lineNumber": 76
+        },
+        {
+          "caller": "lex",
+          "callee": "Math.min",
+          "lineNumber": 83
+        },
+        {
+          "caller": "lex",
+          "callee": "blank",
+          "lineNumber": 84
+        },
+        {
+          "caller": "lex",
+          "callee": "literals.push",
+          "lineNumber": 85
+        },
+        {
+          "caller": "lex",
+          "callee": "src.slice",
+          "lineNumber": 92
+        },
+        {
+          "caller": "lex",
+          "callee": "lex",
+          "lineNumber": 105
+        },
+        {
+          "caller": "lex",
+          "callee": "src.slice",
+          "lineNumber": 105
+        },
+        {
+          "caller": "lex",
+          "callee": "literals.push",
+          "lineNumber": 106
+        },
+        {
+          "caller": "lex",
+          "callee": "blank",
+          "lineNumber": 107
+        },
+        {
+          "caller": "lex",
+          "callee": "Math.min",
+          "lineNumber": 114
+        },
+        {
+          "caller": "lex",
+          "callee": "blank",
+          "lineNumber": 115
+        },
+        {
+          "caller": "lex",
+          "callee": "literals.push",
+          "lineNumber": 116
+        },
+        {
+          "caller": "lex",
+          "callee": "opensRegex",
+          "lineNumber": 117
+        },
+        {
+          "caller": "lex",
+          "callee": "prevSig",
+          "lineNumber": 117
+        },
+        {
+          "caller": "lex",
+          "callee": "Math.min",
+          "lineNumber": 127
+        },
+        {
+          "caller": "lex",
+          "callee": "/[a-z]/i.test",
+          "lineNumber": 128
+        },
+        {
+          "caller": "lex",
+          "callee": "blank",
+          "lineNumber": 129
+        },
+        {
+          "caller": "lex",
+          "callee": "buf.join",
+          "lineNumber": 134
+        },
+        {
+          "caller": "jsxTextRuns",
+          "callee": "blanked.matchAll",
+          "lineNumber": 140
+        },
+        {
+          "caller": "jsxTextRuns",
+          "callee": "runs.push",
+          "lineNumber": 140
+        },
+        {
+          "caller": "read",
+          "callee": "readFileSync",
+          "lineNumber": 144
+        },
+        {
+          "caller": "read",
+          "callee": "join",
+          "lineNumber": 144
+        },
+        {
+          "caller": "dashHits",
+          "callee": "DASH.test",
+          "lineNumber": 152
+        },
+        {
+          "caller": "dashHits",
+          "callee": "DASH_EVASION.test",
+          "lineNumber": 152
+        },
+        {
+          "caller": "dashHits",
+          "callee": "hits.push",
+          "lineNumber": 152
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/fixtures/audit-web-server.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 5,
+      "nonEmptyLines": 5,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/markdown-render.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 226,
+      "nonEmptyLines": 203,
+      "functions": [
+        {
+          "name": "emittedAppJs",
+          "startLine": 16,
+          "endLine": 20,
+          "params": []
+        },
+        {
+          "name": "loadRenderer",
+          "startLine": 26,
+          "endLine": 41,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "emittedAppJs",
+          "callee": "renderPage",
+          "lineNumber": 17
+        },
+        {
+          "caller": "emittedAppJs",
+          "callee": "[...html.matchAll(SCRIPT_BLOCK_RE)].map",
+          "lineNumber": 18
+        },
+        {
+          "caller": "emittedAppJs",
+          "callee": "html.matchAll",
+          "lineNumber": 18
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "emittedAppJs",
+          "lineNumber": 27
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "js.indexOf",
+          "lineNumber": 28
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "js.indexOf",
+          "lineNumber": 29
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "js.indexOf",
+          "lineNumber": 30
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "js.indexOf",
+          "lineNumber": 31
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "expect(escStart).toBeGreaterThan",
+          "lineNumber": 32
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "expect",
+          "lineNumber": 32
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "expect(escEnd).toBeGreaterThan",
+          "lineNumber": 33
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "expect",
+          "lineNumber": 33
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "expect(mdStart).toBeGreaterThan",
+          "lineNumber": 34
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "expect",
+          "lineNumber": 34
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "expect(mdEnd).toBeGreaterThan",
+          "lineNumber": 35
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "expect",
+          "lineNumber": 35
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "js.slice",
+          "lineNumber": 37
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "js.slice",
+          "lineNumber": 37
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "new Function(src)",
+          "lineNumber": 38
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "expect(typeof fn).toBe",
+          "lineNumber": 39
+        },
+        {
+          "caller": "loadRenderer",
+          "callee": "expect",
+          "lineNumber": 39
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/page-hardening.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 137,
+      "nonEmptyLines": 121,
+      "functions": [
+        {
+          "name": "scriptBlocks",
+          "startLine": 16,
+          "endLine": 18,
+          "params": [
+            "html"
+          ]
+        },
+        {
+          "name": "sha256b64",
+          "startLine": 20,
+          "endLine": 22,
+          "params": [
+            "content"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "scriptBlocks",
+          "callee": "[...html.matchAll(SCRIPT_BLOCK_RE)].map",
+          "lineNumber": 17
+        },
+        {
+          "caller": "scriptBlocks",
+          "callee": "html.matchAll",
+          "lineNumber": 17
+        },
+        {
+          "caller": "sha256b64",
+          "callee": "createHash(\"sha256\").update(content).digest",
+          "lineNumber": 21
+        },
+        {
+          "caller": "sha256b64",
+          "callee": "createHash(\"sha256\").update",
+          "lineNumber": 21
+        },
+        {
+          "caller": "sha256b64",
+          "callee": "createHash",
+          "lineNumber": 21
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/terminology.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 70,
+      "nonEmptyLines": 60,
+      "functions": [
+        {
+          "name": "read",
+          "startLine": 16,
+          "endLine": 16,
+          "params": [
+            "rel"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "read",
+          "callee": "readFileSync",
+          "lineNumber": 16
+        },
+        {
+          "caller": "read",
+          "callee": "join",
+          "lineNumber": 16
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "projectRoot": "/Users/s-a-c/Projects/s-a-c/skills-ui/main",
+  "batchFiles": [
+    {
+      "path": "tests/e2e/audit-remediation.e2e.ts",
+      "language": "typescript",
+      "sizeLines": 658,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/e2e/helpers/audit-fixture.ts",
+      "language": "typescript",
+      "sizeLines": 60,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/helpers/audit-state.ts",
+      "language": "typescript",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/helpers/installer-fixture.ts",
+      "language": "typescript",
+      "sizeLines": 25,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/installer.test.ts",
+      "language": "typescript",
+      "sizeLines": 71,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "tests/e2e/audit-remediation.e2e.ts": [
+      "tests/e2e/helpers/audit-fixture.ts",
+      "tests/helpers/audit-state.ts"
+    ],
+    "tests/e2e/helpers/audit-fixture.ts": [
+      "tests/helpers/audit-state.ts"
+    ],
+    "tests/helpers/audit-state.ts": [],
+    "tests/helpers/installer-fixture.ts": [
+      "tests/helpers/audit-state.ts"
+    ],
+    "tests/installer.test.ts": [
+      "tests/helpers/installer-fixture.ts"
+    ]
+  }
+}

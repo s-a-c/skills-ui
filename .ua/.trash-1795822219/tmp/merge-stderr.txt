@@ -1,0 +1,39 @@
+Found 17 batch files (12 logical batches, 3 multi-part):
+  batch-1-part-1.json: 29 nodes, 114 edges
+  batch-1-part-2.json: 47 nodes, 113 edges
+  batch-2-part-1.json: 30 nodes, 70 edges
+  batch-2-part-2.json: 33 nodes, 118 edges
+  batch-2-part-3.json: 33 nodes, 109 edges
+  batch-2-part-4.json: 3 nodes, 22 edges
+  batch-3-part-1.json: 22 nodes, 85 edges
+  batch-3-part-2.json: 22 nodes, 73 edges
+  batch-4.json: 15 nodes, 45 edges
+  batch-5.json: 13 nodes, 40 edges
+  batch-6.json: 2 nodes, 3 edges
+  batch-7.json: 7 nodes, 47 edges
+  batch-8.json: 6 nodes, 39 edges
+  batch-9.json: 4 nodes, 19 edges
+  batch-10.json: 6 nodes, 17 edges
+  batch-11.json: 35 nodes, 88 edges
+  batch-12.json: 3 nodes, 14 edges
+
+Input: 310 nodes, 1016 edges
+
+Fixed (13 corrections):
+    13 × tested_by edges dropped (orphan endpoint or test↔test / prod↔prod pair)
+
+Tested-by linker:
+     0 × tested_by edges produced (path-convention supplement, production → test)
+    31 × production nodes tagged "tested"
+
+Could not fix (2 issues — needs agent review):
+  - Edge function:scripts/perf/budget.ts:benchFilterMatching → function:src/core/services/search.ts:sanitizeMetadata (calls): dropped, missing target 'function:src/core/services/search.ts:sanitizeMetadata'
+  - Edge function:src/main.ts:selftest → function:src/tui/app.ts:buildSpikeScreen (calls): dropped, missing target 'function:src/tui/app.ts:buildSpikeScreen'
+
+Output: 310 nodes, 996 edges
+
+Imports edge recovery:
+  Recovered 0 `imports` edges from importMap (116 entries scanned)
+  Skipped 2 importMap target paths with no `file:` node in graph
+
+Written to /Users/s-a-c/Projects/s-a-c/skills-ui/main/.ua/intermediate/assembled-graph.json (375 KB)

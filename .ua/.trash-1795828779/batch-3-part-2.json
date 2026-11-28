@@ -1,0 +1,796 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/api.test.ts",
+      "type": "file",
+      "name": "api.test.ts",
+      "filePath": "tests/api.test.ts",
+      "lineRange": [1, 730],
+      "summary": "Integration test suite for the loopback HTTP API covering version, skill listing, detail-by-path exact matching, search failure discrimination, install/remove/update validation, description cache invalidation across generations, prefs, CSP headers, and 413 body limits.",
+      "tags": ["api-tests", "integration-test", "cache-invalidation", "http-validation"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/page-smoke.test.ts",
+      "type": "file",
+      "name": "page-smoke.test.ts",
+      "filePath": "tests/page-smoke.test.ts",
+      "lineRange": [1, 448],
+      "summary": "Playwright smoke test suite verifying live WebUI behaviors including checkbox clearing, conditional Update button visibility, icon-only header toggles, tri-state Select all, split-pane resizing and persistence, and unified Search/Install flows.",
+      "tags": ["playwright-test", "webui-smoke", "split-pane", "ui-regression"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/perf/filter-dom.test.ts",
+      "type": "file",
+      "name": "filter-dom.test.ts",
+      "filePath": "tests/perf/filter-dom.test.ts",
+      "lineRange": [1, 237],
+      "summary": "Playwright behavioral performance tests pinning filter DOM row-identity preservation on same-result keystrokes, zero animation replay during filtering, and single-run entrance stagger on initial page load.",
+      "tags": ["perf-test", "playwright-test", "dom-identity", "css-animation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/perf/filter-dom.test.ts:openWithRiseSampler",
+      "type": "function",
+      "name": "openWithRiseSampler",
+      "filePath": "tests/perf/filter-dom.test.ts",
+      "lineRange": [126, 150],
+      "summary": "Opens a fresh Playwright page with an init script polling live list-scoped rise CSS animations every 50 ms to record peak cascade concurrency during first paint.",
+      "tags": ["animation-sampler", "playwright-helper", "first-paint"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/perf/helpers.ts",
+      "type": "file",
+      "name": "helpers.ts",
+      "filePath": "tests/perf/helpers.ts",
+      "lineRange": [1, 251],
+      "summary": "Shared performance harness utilities used by both perf tests and scripts/perf/budget.ts for generating synthetic SKILL.md corpora, parsing shim spawn logs, running a fixed-RTT search registry stub, and computing latency stats.",
+      "tags": ["perf-helpers", "synthetic-corpus", "search-stub", "spawn-log"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/perf/helpers.ts:buildSyntheticCorpus",
+      "type": "function",
+      "name": "buildSyntheticCorpus",
+      "filePath": "tests/perf/helpers.ts",
+      "lineRange": [60, 117],
+      "summary": "Materializes project and global skill directories with real SKILL.md files and writes JSON listing fixtures for the skills CLI shim.",
+      "tags": ["synthetic-corpus", "test-fixture", "skill-md"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/perf/helpers.ts:readShimCallLog",
+      "type": "function",
+      "name": "readShimCallLog",
+      "filePath": "tests/perf/helpers.ts",
+      "lineRange": [127, 133],
+      "summary": "Reads and parses a JSONL SKILLS_SHIM_CALLLOG file into structured ShimCall records, returning an empty array when the log does not exist.",
+      "tags": ["shim-calllog", "jsonl-parser", "spawn-tracking"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/perf/helpers.ts:countShimCalls",
+      "type": "function",
+      "name": "countShimCalls",
+      "filePath": "tests/perf/helpers.ts",
+      "lineRange": [136, 138],
+      "summary": "Counts logged shim invocations, optionally filtering to calls matching an exact leading argv prefix.",
+      "tags": ["spawn-counting", "argv-filter", "test-helper"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/perf/helpers.ts:startSearchStub",
+      "type": "function",
+      "name": "startSearchStub",
+      "filePath": "tests/perf/helpers.ts",
+      "lineRange": [185, 236],
+      "summary": "Starts a local loopback HTTP stub for the skills.sh search registry with configurable fixed or per-query RTTs, per-query payloads, request timing logs, and sweep-line concurrency calculation.",
+      "tags": ["search-stub", "mock-server", "concurrency-tracking"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/perf/helpers.ts:median",
+      "type": "function",
+      "name": "median",
+      "filePath": "tests/perf/helpers.ts",
+      "lineRange": [240, 247],
+      "summary": "Computes the arithmetic median of a numeric sample array without mutating the input, returning NaN when empty.",
+      "tags": ["statistics", "median", "perf-metrics"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/perf/helpers.ts:fmtMs",
+      "type": "function",
+      "name": "fmtMs",
+      "filePath": "tests/perf/helpers.ts",
+      "lineRange": [249, 251],
+      "summary": "Formats a millisecond duration to one decimal place with an ms suffix.",
+      "tags": ["formatting", "milliseconds", "perf-metrics"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/perf/playwright-probes.ts",
+      "type": "file",
+      "name": "playwright-probes.ts",
+      "filePath": "tests/perf/playwright-probes.ts",
+      "lineRange": [1, 407],
+      "summary": "Reusable Playwright browser instrumentation probes that observe filter render work, DOM identity preservation, animation replays, scope-switch first paint, and stale search overwrite behavior on the shipped WebUI.",
+      "tags": ["playwright-probes", "perf-instrumentation", "dom-observer", "webui-testing"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/perf/playwright-probes.ts:newPerfContext",
+      "type": "function",
+      "name": "newPerfContext",
+      "filePath": "tests/perf/playwright-probes.ts",
+      "lineRange": [25, 27],
+      "summary": "Creates a Playwright browser context with reducedMotion pinned to no-preference so CSS animations run consistently during replay probes.",
+      "tags": ["playwright-context", "reduced-motion", "animation-testing"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/perf/playwright-probes.ts:closeBrowser",
+      "type": "function",
+      "name": "closeBrowser",
+      "filePath": "tests/perf/playwright-probes.ts",
+      "lineRange": [35, 47],
+      "summary": "Closes a Playwright Chromium browser with a 2-second timeout before sending SIGKILL to its child process to avoid slow Bun runtime shutdown stalls.",
+      "tags": ["browser-teardown", "bun-workaround", "process-cleanup"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/perf/playwright-probes.ts:stubUpdates",
+      "type": "function",
+      "name": "stubUpdates",
+      "filePath": "tests/perf/playwright-probes.ts",
+      "lineRange": [54, 62],
+      "summary": "Intercepts /api/updates requests on a Playwright page with an empty JSON response so probes remain deterministic and network-free.",
+      "tags": ["network-stub", "updates-api", "deterministic-test"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/perf/playwright-probes.ts:openServedPage",
+      "type": "function",
+      "name": "openServedPage",
+      "filePath": "tests/perf/playwright-probes.ts",
+      "lineRange": [65, 81],
+      "summary": "Navigates a Playwright page to the served WebUI root and waits until the expected number of skill rows render and the busy indicator hides.",
+      "tags": ["page-navigation", "readiness-wait", "playwright-helper"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/perf/playwright-probes.ts:probeFilterRender",
+      "type": "function",
+      "name": "probeFilterRender",
+      "filePath": "tests/perf/playwright-probes.ts",
+      "lineRange": [130, 275],
+      "summary": "Dispatches an input event on #filter and uses a MutationObserver, double-rAF settle, and User Timing measures to report perceived latency, render work, preserved li nodes, fresh list animations, and no-mutation status.",
+      "tags": ["filter-probe", "mutation-observer", "user-timing", "dom-identity"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/perf/playwright-probes.ts:probeScopeFirstPaint",
+      "type": "function",
+      "name": "probeScopeFirstPaint",
+      "filePath": "tests/perf/playwright-probes.ts",
+      "lineRange": [295, 334],
+      "summary": "Clicks a scope toggle button and measures elapsed time until a MutationObserver detects either the scope's marker skill name or target row count in #skillList.",
+      "tags": ["first-paint", "scope-switch", "mutation-observer"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/perf/playwright-probes.ts:probeStaleOverwrite",
+      "type": "function",
+      "name": "probeStaleOverwrite",
+      "filePath": "tests/perf/playwright-probes.ts",
+      "lineRange": [372, 407],
+      "summary": "Drives a slow search query followed by a faster query while the first is in flight, then verifies after the slow RTT elapses whether the stale response overwrote the newer results.",
+      "tags": ["stale-overwrite", "search-race", "playwright-probe"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/perf/search-stub.test.ts",
+      "type": "file",
+      "name": "search-stub.test.ts",
+      "filePath": "tests/perf/search-stub.test.ts",
+      "lineRange": [1, 133],
+      "summary": "Behavioral performance tests verifying /api/search forwarding to SKILLS_UI_API_URL, single-call handling of sequential distinct queries, and in-flight deduplication of three concurrent identical searches.",
+      "tags": ["perf-test", "search-dedup", "registry-stub", "api-tests"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/perf/spawn-count.test.ts",
+      "type": "file",
+      "name": "spawn-count.test.ts",
+      "filePath": "tests/perf/spawn-count.test.ts",
+      "lineRange": [1, 346],
+      "summary": "Count-based performance tests using SKILLS_SHIM_CALLLOG to verify per-server list caching, scope-keyed request coalescing, zero-spawn detail-by-path lookups, bounded remove spawns, and mutation cache invalidation.",
+      "tags": ["perf-test", "spawn-counting", "request-coalescing", "list-cache"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/version.test.ts",
+      "type": "file",
+      "name": "version.test.ts",
+      "filePath": "tests/version.test.ts",
+      "lineRange": [1, 19],
+      "summary": "Unit tests verifying that APP_VERSION falls back to package.json when __APP_VERSION__ is undefined and matches a 3- or 4-segment semver format.",
+      "tags": ["unit-test", "app-version", "semver"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/web-055.test.ts",
+      "type": "file",
+      "name": "web-055.test.ts",
+      "filePath": "tests/web-055.test.ts",
+      "lineRange": [1, 219],
+      "summary": "Playwright UI tests verifying 0.5.5 WebUI features: provenance badges and #provRow filtering, non-locked remove confirmation warnings, post-mutation hook failure toasts, and the capability-gated health popover.",
+      "tags": ["playwright-test", "provenance-ui", "health-popover", "hook-toast"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "file:tests/helpers/audit-state.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "file:tests/fixtures/skills-shim.mjs",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "function:tests/helpers/audit-state.ts:createWorkspaceFixture",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "function:tests/perf/helpers.ts:readShimCallLog",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "function:tests/perf/helpers.ts:countShimCalls",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "function:tests/perf/helpers.ts:buildSyntheticCorpus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "function:src/core/skills-client.ts:resetSkillsBinCache",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/api.test.ts",
+      "target": "function:src/web/page.ts:renderPage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/api.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/version.ts",
+      "target": "file:tests/api.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/api.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "file:tests/api.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/page-smoke.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/page-smoke.test.ts",
+      "target": "function:tests/perf/helpers.ts:buildSyntheticCorpus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/page-smoke.test.ts",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/page-smoke.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/page-smoke.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "file:tests/perf/playwright-probes.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "function:tests/perf/filter-dom.test.ts:openWithRiseSampler",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "function:tests/perf/helpers.ts:buildSyntheticCorpus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "function:tests/perf/playwright-probes.ts:newPerfContext",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "function:tests/perf/playwright-probes.ts:stubUpdates",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "function:tests/perf/playwright-probes.ts:openServedPage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "function:tests/perf/playwright-probes.ts:closeBrowser",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "function:tests/perf/playwright-probes.ts:probeFilterRender",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/filter-dom.test.ts",
+      "target": "function:tests/perf/filter-dom.test.ts:openWithRiseSampler",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:tests/perf/filter-dom.test.ts:openWithRiseSampler",
+      "target": "function:tests/perf/playwright-probes.ts:stubUpdates",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/perf/filter-dom.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/perf/filter-dom.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/perf/helpers.ts",
+      "target": "file:tests/fixtures/skills-shim.mjs",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:tests/perf/helpers.ts",
+      "target": "function:tests/perf/helpers.ts:buildSyntheticCorpus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/perf/helpers.ts",
+      "target": "function:tests/perf/helpers.ts:readShimCallLog",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/perf/helpers.ts",
+      "target": "function:tests/perf/helpers.ts:countShimCalls",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/perf/helpers.ts",
+      "target": "function:tests/perf/helpers.ts:startSearchStub",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/perf/helpers.ts",
+      "target": "function:tests/perf/helpers.ts:median",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/perf/helpers.ts",
+      "target": "function:tests/perf/helpers.ts:fmtMs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/perf/helpers.ts",
+      "target": "function:tests/perf/helpers.ts:buildSyntheticCorpus",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/helpers.ts",
+      "target": "function:tests/perf/helpers.ts:readShimCallLog",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/helpers.ts",
+      "target": "function:tests/perf/helpers.ts:countShimCalls",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/helpers.ts",
+      "target": "function:tests/perf/helpers.ts:startSearchStub",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/helpers.ts",
+      "target": "function:tests/perf/helpers.ts:median",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/helpers.ts",
+      "target": "function:tests/perf/helpers.ts:fmtMs",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/playwright-probes.ts",
+      "target": "function:tests/perf/playwright-probes.ts:newPerfContext",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/perf/playwright-probes.ts",
+      "target": "function:tests/perf/playwright-probes.ts:closeBrowser",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/perf/playwright-probes.ts",
+      "target": "function:tests/perf/playwright-probes.ts:stubUpdates",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/perf/playwright-probes.ts",
+      "target": "function:tests/perf/playwright-probes.ts:openServedPage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/perf/playwright-probes.ts",
+      "target": "function:tests/perf/playwright-probes.ts:probeFilterRender",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/perf/playwright-probes.ts",
+      "target": "function:tests/perf/playwright-probes.ts:probeScopeFirstPaint",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/perf/playwright-probes.ts",
+      "target": "function:tests/perf/playwright-probes.ts:probeStaleOverwrite",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/perf/playwright-probes.ts",
+      "target": "function:tests/perf/playwright-probes.ts:newPerfContext",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/playwright-probes.ts",
+      "target": "function:tests/perf/playwright-probes.ts:closeBrowser",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/playwright-probes.ts",
+      "target": "function:tests/perf/playwright-probes.ts:stubUpdates",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/playwright-probes.ts",
+      "target": "function:tests/perf/playwright-probes.ts:openServedPage",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/playwright-probes.ts",
+      "target": "function:tests/perf/playwright-probes.ts:probeFilterRender",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/playwright-probes.ts",
+      "target": "function:tests/perf/playwright-probes.ts:probeScopeFirstPaint",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/playwright-probes.ts",
+      "target": "function:tests/perf/playwright-probes.ts:probeStaleOverwrite",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/search-stub.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/perf/search-stub.test.ts",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/search-stub.test.ts",
+      "target": "function:tests/perf/helpers.ts:startSearchStub",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/perf/search-stub.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "file:tests/perf/search-stub.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/perf/spawn-count.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/perf/spawn-count.test.ts",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/spawn-count.test.ts",
+      "target": "function:tests/perf/helpers.ts:readShimCallLog",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/perf/spawn-count.test.ts",
+      "target": "function:tests/perf/helpers.ts:countShimCalls",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/perf/spawn-count.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/version.test.ts",
+      "target": "config:package.json",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/version.test.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/version.ts",
+      "target": "file:tests/version.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/web-055.test.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/web-055.test.ts",
+      "target": "function:tests/perf/helpers.ts:buildSyntheticCorpus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/web-055.test.ts",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/web/page.ts",
+      "target": "file:tests/web-055.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/web-055.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

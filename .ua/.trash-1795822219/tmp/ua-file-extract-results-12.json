@@ -1,0 +1,103 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 1,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 1,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "tests/services.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 494,
+      "nonEmptyLines": 455,
+      "callGraph": [
+        {
+          "caller": "search",
+          "callee": "calls.push",
+          "lineNumber": 126
+        },
+        {
+          "caller": "search",
+          "callee": "calls.push",
+          "lineNumber": 153
+        },
+        {
+          "caller": "withStub",
+          "callee": "Bun.serve",
+          "lineNumber": 228
+        },
+        {
+          "caller": "withStub",
+          "callee": "handler",
+          "lineNumber": 231
+        },
+        {
+          "caller": "withStub",
+          "callee": "new URL(req.url).searchParams.get",
+          "lineNumber": 231
+        },
+        {
+          "caller": "withStub",
+          "callee": "run",
+          "lineNumber": 237
+        },
+        {
+          "caller": "withStub",
+          "callee": "server.stop",
+          "lineNumber": 239
+        },
+        {
+          "caller": "withQueryStub",
+          "callee": "Bun.serve",
+          "lineNumber": 328
+        },
+        {
+          "caller": "withQueryStub",
+          "callee": "new URL(req.url).searchParams.get",
+          "lineNumber": 332
+        },
+        {
+          "caller": "withQueryStub",
+          "callee": "requests.push",
+          "lineNumber": 333
+        },
+        {
+          "caller": "withQueryStub",
+          "callee": "Bun.sleep",
+          "lineNumber": 334
+        },
+        {
+          "caller": "withQueryStub",
+          "callee": "Response.json",
+          "lineNumber": 335
+        },
+        {
+          "caller": "withQueryStub",
+          "callee": "run",
+          "lineNumber": 342
+        },
+        {
+          "caller": "withQueryStub",
+          "callee": "server.stop",
+          "lineNumber": 344
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    }
+  ]
+}

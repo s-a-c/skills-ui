@@ -1,0 +1,14 @@
+{
+  "fixedSectionOk": true,
+  "nodesRecovered": 0,
+  "edgesRestored": 2,
+  "crossBatchEdgesAdded": 0,
+  "typesRemapped": 0,
+  "complexityRemapped": 0,
+  "notes": [
+    "Fixed section sanity check passed: 13 tested_by drops (12 unique edges) involved Playwright E2E files (tests/e2e/hosted.e2e.ts, tests/e2e/audit-remediation.e2e.ts) and smoke test (scripts/pty-smoke/smoke.py) not matched by the merge script test-node classifier; left as merged per review rules.",
+    "Restored 2 dropped calls edges caused by re-export path mismatches: function:scripts/perf/budget.ts:benchFilterMatching -> function:src/core/services/sanitize.ts:sanitizeMetadata (re-exported via search.ts/index.ts) and function:src/main.ts:selftest -> function:src/tui/spike.ts:buildSpikeScreen (re-exported via tui/app.ts).",
+    "Verified the 2 skipped importMap targets (src/core/version.ts -> package.json and tests/version.test.ts -> package.json) already have imports edges targeting config:package.json; all 116 importMap entries are represented with 0 missing cross-batch imports edges.",
+    "Verified integrity: all 116 scan files have root nodes (80 file, 22 document, 12 config, 2 pipeline), 310 unique nodes (0 duplicates), 998 unique edges (0 duplicates, 0 dangling), and all node types and complexities are valid."
+  ]
+}

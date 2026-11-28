@@ -1,0 +1,1421 @@
+{
+  "scriptCompleted": true,
+  "entryPointCandidates": [
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "score": 5,
+      "name": "README.md",
+      "filePath": "README.md",
+      "summary": "Primary user and developer guide for skills-ui describing its three runtime modes, hosted zero-install WebUI, 0.5.3 performance benchmarks, checksum-verified curl installer, CLI usage, development workflow, and subprocess wrapping of upstream skills."
+    },
+    {
+      "id": "file:src/tui/app.ts",
+      "type": "file",
+      "score": 4,
+      "name": "app.ts",
+      "filePath": "src/tui/app.ts",
+      "summary": "Orchestrates the interactive OpenTUI application lifecycle, wiring the pure Elm-style TuiModel store, React view mounting, keyboard dispatch, stale-while-revalidate disk-index hydration, async search/update/mutation workflows, crash-guard signal cleanup, and injectable production dependencies. Re-exports spike screen helpers for selftest verification."
+    },
+    {
+      "id": "file:src/main.ts",
+      "type": "file",
+      "score": 4,
+      "name": "main.ts",
+      "filePath": "src/main.ts",
+      "summary": "Primary CLI entrypoint for skills-ui that parses shared --port arguments and dispatches between --version, --selftest, headless serve, --web browser mode, and the default OpenTUI terminal application."
+    },
+    {
+      "id": "file:src/core/index.ts",
+      "type": "file",
+      "score": 3,
+      "name": "index.ts",
+      "filePath": "src/core/index.ts",
+      "summary": "Barrel entrypoint that re-exports core skill types, filter matching, CLI runner utilities, installed/search/mutation services, lock-file helpers, update checks, and post-mutation hook and health check APIs. Provides a single import surface for the TUI, HTTP API, and test suites."
+    },
+    {
+      "id": "document:AGENTS.md",
+      "type": "document",
+      "score": 2,
+      "name": "AGENTS.md",
+      "filePath": "AGENTS.md",
+      "summary": "Repository-level agent contract defining the skills-ui tech stack, directory layout, SKILLS_UI_* environment variables, development commands, git worktree conventions, Linear wayfinder process, and documentation authority hierarchy."
+    }
+  ],
+  "fanInRanking": [
+    {
+      "id": "file:src/web/page.ts",
+      "fanIn": 16,
+      "name": "page.ts"
+    },
+    {
+      "id": "file:src/core/api.ts",
+      "fanIn": 14,
+      "name": "api.ts"
+    },
+    {
+      "id": "file:src/core/skills-client.ts",
+      "fanIn": 14,
+      "name": "skills-client.ts"
+    },
+    {
+      "id": "file:tests/services.test.ts",
+      "fanIn": 14,
+      "name": "services.test.ts"
+    },
+    {
+      "id": "file:src/core/services/types.ts",
+      "fanIn": 13,
+      "name": "types.ts"
+    },
+    {
+      "id": "file:src/core/prefs.ts",
+      "fanIn": 12,
+      "name": "prefs.ts"
+    },
+    {
+      "id": "file:src/tui/app.ts",
+      "fanIn": 11,
+      "name": "app.ts"
+    },
+    {
+      "id": "file:scripts/build.ts",
+      "fanIn": 9,
+      "name": "build.ts"
+    },
+    {
+      "id": "file:src/core/index.ts",
+      "fanIn": 9,
+      "name": "index.ts"
+    },
+    {
+      "id": "file:src/core/services/sanitize.ts",
+      "fanIn": 9,
+      "name": "sanitize.ts"
+    },
+    {
+      "id": "config:package.json",
+      "fanIn": 8,
+      "name": "package.json"
+    },
+    {
+      "id": "file:src/core/version.ts",
+      "fanIn": 8,
+      "name": "version.ts"
+    },
+    {
+      "id": "file:src/main.ts",
+      "fanIn": 8,
+      "name": "main.ts"
+    },
+    {
+      "id": "file:scripts/perf/budget.ts",
+      "fanIn": 7,
+      "name": "budget.ts"
+    },
+    {
+      "id": "file:src/tui/model.ts",
+      "fanIn": 7,
+      "name": "model.ts"
+    },
+    {
+      "id": "file:tests/fixtures/skills-shim.mjs",
+      "fanIn": 7,
+      "name": "skills-shim.mjs"
+    },
+    {
+      "id": "file:tests/helpers/audit-state.ts",
+      "fanIn": 7,
+      "name": "audit-state.ts"
+    },
+    {
+      "id": "file:tests/perf/helpers.ts",
+      "fanIn": 7,
+      "name": "helpers.ts"
+    },
+    {
+      "id": "file:src/core/services/locks.ts",
+      "fanIn": 6,
+      "name": "locks.ts"
+    },
+    {
+      "id": "file:tests/sanitize.test.ts",
+      "fanIn": 6,
+      "name": "sanitize.test.ts"
+    }
+  ],
+  "fanOutRanking": [
+    {
+      "id": "file:src/core/api.ts",
+      "fanOut": 22,
+      "name": "api.ts"
+    },
+    {
+      "id": "file:src/web/page.ts",
+      "fanOut": 17,
+      "name": "page.ts"
+    },
+    {
+      "id": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "fanOut": 14,
+      "name": "archify-findings-review-and-report-2026-11-26.md"
+    },
+    {
+      "id": "document:AGENTS.md",
+      "fanOut": 13,
+      "name": "AGENTS.md"
+    },
+    {
+      "id": "file:src/tui/app.ts",
+      "fanOut": 12,
+      "name": "app.ts"
+    },
+    {
+      "id": "file:src/tui/Views.tsx",
+      "fanOut": 11,
+      "name": "Views.tsx"
+    },
+    {
+      "id": "document:README.md",
+      "fanOut": 9,
+      "name": "README.md"
+    },
+    {
+      "id": "file:tests/tui-disk-index.test.ts",
+      "fanOut": 8,
+      "name": "tui-disk-index.test.ts"
+    },
+    {
+      "id": "config:tsconfig.json",
+      "fanOut": 7,
+      "name": "tsconfig.json"
+    },
+    {
+      "id": "document:docs/index.md",
+      "fanOut": 7,
+      "name": "index.md"
+    },
+    {
+      "id": "document:ROADMAP.md",
+      "fanOut": 7,
+      "name": "ROADMAP.md"
+    },
+    {
+      "id": "file:src/tui/model.ts",
+      "fanOut": 7,
+      "name": "model.ts"
+    },
+    {
+      "id": "file:tests/tui.test.ts",
+      "fanOut": 7,
+      "name": "tui.test.ts"
+    },
+    {
+      "id": "document:docs/agents/workspace.md",
+      "fanOut": 6,
+      "name": "workspace.md"
+    },
+    {
+      "id": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "fanOut": 6,
+      "name": "v0.5.5-hub-integration-provenance-and-health-strip.md"
+    },
+    {
+      "id": "document:docs/upstream-ls-memoization.md",
+      "fanOut": 6,
+      "name": "upstream-ls-memoization.md"
+    },
+    {
+      "id": "file:scripts/perf/budget.ts",
+      "fanOut": 6,
+      "name": "budget.ts"
+    },
+    {
+      "id": "file:src/core/services/installed.ts",
+      "fanOut": 6,
+      "name": "installed.ts"
+    },
+    {
+      "id": "config:package.json",
+      "fanOut": 5,
+      "name": "package.json"
+    },
+    {
+      "id": "document:docs/agents/domain.md",
+      "fanOut": 5,
+      "name": "domain.md"
+    }
+  ],
+  "bfsTraversal": {
+    "startNode": "file:src/main.ts",
+    "reachedCount": 14,
+    "order": [
+      "file:src/main.ts",
+      "file:src/tui/app.ts",
+      "file:src/core/version.ts",
+      "file:src/core/prefs.ts",
+      "file:src/core/index.ts",
+      "file:src/tui/model.ts",
+      "file:src/core/seed.ts",
+      "file:src/tui/Views.tsx",
+      "file:src/core/disk-index.ts",
+      "file:src/tui/audio.ts",
+      "config:package.json",
+      "file:src/core/theme.ts",
+      "file:src/tui/art.ts",
+      "file:src/core/services/types.ts"
+    ],
+    "depthMap": {
+      "file:src/main.ts": 0,
+      "file:src/tui/app.ts": 1,
+      "file:src/core/version.ts": 1,
+      "file:src/core/prefs.ts": 2,
+      "file:src/core/index.ts": 2,
+      "file:src/tui/model.ts": 2,
+      "file:src/core/seed.ts": 2,
+      "file:src/tui/Views.tsx": 2,
+      "file:src/core/disk-index.ts": 2,
+      "file:src/tui/audio.ts": 2,
+      "config:package.json": 2,
+      "file:src/core/theme.ts": 3,
+      "file:src/tui/art.ts": 3,
+      "file:src/core/services/types.ts": 3
+    },
+    "byDepth": {
+      "0": [
+        "file:src/main.ts"
+      ],
+      "1": [
+        "file:src/tui/app.ts",
+        "file:src/core/version.ts"
+      ],
+      "2": [
+        "file:src/core/prefs.ts",
+        "file:src/core/index.ts",
+        "file:src/tui/model.ts",
+        "file:src/core/seed.ts",
+        "file:src/tui/Views.tsx",
+        "file:src/core/disk-index.ts",
+        "file:src/tui/audio.ts",
+        "config:package.json"
+      ],
+      "3": [
+        "file:src/core/theme.ts",
+        "file:src/tui/art.ts",
+        "file:src/core/services/types.ts"
+      ]
+    }
+  },
+  "nonCodeFiles": {
+    "documentation": [
+      {
+        "id": "document:AGENTS.md",
+        "name": "AGENTS.md",
+        "type": "document",
+        "filePath": "AGENTS.md",
+        "summary": "Repository-level agent contract defining the skills-ui tech stack, directory layout, SKILLS_UI_* environment variables, development commands, git worktree conventions, Linear wayfinder process, and documentation authority hierarchy."
+      },
+      {
+        "id": "document:CONTEXT.md",
+        "name": "CONTEXT.md",
+        "type": "document",
+        "filePath": "CONTEXT.md",
+        "summary": "Domain ubiquitous-language glossary standardizing canonical UI layout names (Frame, Filter List Panel, Detail Panel), card anatomy terms, Skill Provenance states, Post-Mutation Hook semantics, and the Health Pill across WebUI and TUI."
+      },
+      {
+        "id": "document:README.md",
+        "name": "README.md",
+        "type": "document",
+        "filePath": "README.md",
+        "summary": "Primary user and developer guide for skills-ui describing its three runtime modes, hosted zero-install WebUI, 0.5.3 performance benchmarks, checksum-verified curl installer, CLI usage, development workflow, and subprocess wrapping of upstream skills."
+      },
+      {
+        "id": "document:ROADMAP.md",
+        "name": "ROADMAP.md",
+        "type": "document",
+        "filePath": "ROADMAP.md",
+        "summary": "Milestone roadmap and delivery ledger spanning 0.0.x through 0.5.5, documenting HTTP API and OpenTUI parity, rich rendering, packaging matrix, Hosted UI architecture guardrails, hardening series, UI ergonomics, hub provenance/health features, and future targets."
+      },
+      {
+        "id": "document:docs/archify-findings-review-and-report-2026-11-26.md",
+        "name": "archify-findings-review-and-report-2026-11-26.md",
+        "type": "document",
+        "filePath": "docs/archify-findings-review-and-report-2026-11-26.md",
+        "summary": "Session transcript and architecture report auditing all 18 Archify code-analysis findings on skills-ui and documenting the completed 3-wave Option A remediation: decoupling src/core from src/web via PageRenderer injection and src/core/filter.ts, decomposing 6 high-complexity functions (app.ts:onKey, api.ts:route, model.ts:update, Views.tsx:SearchBody/InstalledBody, budget.ts:main), modularizing src/web/page.ts byte-identically, and achieving a none-found Archify gate."
+      },
+      {
+        "id": "document:docs/index.md",
+        "name": "index.md",
+        "type": "document",
+        "filePath": "docs/index.md",
+        "summary": "GitHub Pages landing page (layout: home) for skills-ui presenting pinned and rolling curl-to-sh installation via scripts/install.sh, CLI invocation modes (OpenTUI, --web, serve, --selftest), hosted zero-install web UI highlights, and links to ROADMAP.md and repo/agent conventions."
+      },
+      {
+        "id": "document:docs/release.md",
+        "name": "release.md",
+        "type": "document",
+        "filePath": "docs/release.md",
+        "summary": "Release runbook for v0.5.1+ detailing cross-platform matrix dependency installation, pre-release verification gates (bun test, pty-smoke, build --all, --selftest), SHA-256 checksum manifest commitment, signed git tagging, GitHub Release publishing, hosted docs/app.html export, and clean-directory installer verification."
+      },
+      {
+        "id": "document:docs/upstream-issue-draft.md",
+        "name": "upstream-issue-draft.md",
+        "type": "document",
+        "filePath": "docs/upstream-issue-draft.md",
+        "summary": "Ready-to-file GitHub bug report draft for vercel-labs/skills (cross-referencing #1389) diagnosing the O(canonical x corpus) SKILL.md re-parse storm in skills ls (v1.7.4 listInstalledSkills) with bisection timings, duplicate warning counts, sample(1) I/O-wait profile, and proposed memoization and per-agent index fixes."
+      },
+      {
+        "id": "document:docs/upstream-ls-memoization.md",
+        "name": "upstream-ls-memoization.md",
+        "type": "document",
+        "filePath": "docs/upstream-ls-memoization.md",
+        "summary": "Technical investigation memo (S-153, filed upstream as vercel-labs/skills#2644) analyzing the minute-long skills ls SKILL.md re-parse storm via corpus bisection and CPU/IO profiling, proposing upstream parseSkillMd memoization and per-agent indexing, and recording skills-ui's downstream caching, request coalescing, and remove-path optimizations."
+      },
+      {
+        "id": "document:docs/agents/domain.md",
+        "name": "domain.md",
+        "type": "document",
+        "filePath": "docs/agents/domain.md",
+        "summary": "Agent-skill convention guide explaining how to consume skills-ui's single-context domain documentation (CONTEXT.md and docs/adr/), enforce canonical glossary vocabulary across code and issues, and explicitly surface any ADR conflicts."
+      },
+      {
+        "id": "document:docs/agents/issue-tracker.md",
+        "name": "issue-tracker.md",
+        "type": "document",
+        "filePath": "docs/agents/issue-tracker.md",
+        "summary": "Agent-skill routing contract specifying Linear (project skills-ui / P-S-4, team S-a-c, workspace s-a-c) as the issue tracker via Linear MCP tools rather than gh, including milestone alignment with ROADMAP.md, Wayfinder map/ticket workflow, and triage label references."
+      },
+      {
+        "id": "document:docs/agents/triage-labels.md",
+        "name": "triage-labels.md",
+        "type": "document",
+        "filePath": "docs/agents/triage-labels.md",
+        "summary": "Mapping table translating the five canonical triage roles (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix) to matching Linear workspace labels in the s-a-c workspace for skills-ui issues."
+      },
+      {
+        "id": "document:docs/agents/workspace.md",
+        "name": "workspace.md",
+        "type": "document",
+        "filePath": "docs/agents/workspace.md",
+        "summary": "Canonical multi-worktree workspace-level agent contract (symlinked from the workspace root AGENTS.md) defining DOX instruction priority, bare-repo plus worktree topology (.bare/, main/, retained audit/remediation worktrees), phase worktree lifecycle commands, Linear planning routing, and SKILLS_UI_ environment variable rules."
+      },
+      {
+        "id": "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+        "name": "v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+        "type": "document",
+        "filePath": "docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+        "summary": "Design specification for skills-ui v0.5.4.1 covering unbreakable name-checkbox units on list cards, proportional 10%-50% list-panel widths with v0.5.4 pixel migration, merging right-justified card action groups, and TUI split-pane search and 3-mode sort parity with the WebUI."
+      },
+      {
+        "id": "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+        "name": "v0.5.5-hub-integration-provenance-and-health-strip.md",
+        "type": "document",
+        "filePath": "docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+        "summary": "Ratified design specification for skills-ui v0.5.5 defining global .skill-lock.json resolution, locked/linked/local skill provenance badges and removal guardrails, host-environment post-mutation hooks, and a read-only health-check endpoint and header Health Pill."
+      },
+      {
+        "id": "document:scripts/perf/report-2026-11-01-real.md",
+        "name": "report-2026-11-01-real.md",
+        "type": "document",
+        "filePath": "scripts/perf/report-2026-11-01-real.md",
+        "summary": "Performance budget benchmark report generated against the real local skills CLI corpus (1 project and 300 global skills) measuring serve API latency, search deduplication, filter matching and DOM rendering, and cold global first-paint timing."
+      },
+      {
+        "id": "document:scripts/perf/report-2026-11-01.md",
+        "name": "report-2026-11-01.md",
+        "type": "document",
+        "filePath": "scripts/perf/report-2026-11-01.md",
+        "summary": "Baseline performance budget report generated against the synthetic skills-shim fixture corpus (390 project and 40 global skills) documenting baseline verdicts for serve API latency, concurrent search deduplication, DOM filter rebuilds, and stale-response guards."
+      },
+      {
+        "id": "document:scripts/pty-smoke/README.md",
+        "name": "README.md",
+        "type": "document",
+        "filePath": "scripts/pty-smoke/README.md",
+        "summary": "Documentation for the PTY-based real-terminal TUI smoke harness describing how to run smoke.py via uv/pyte, the role of each harness file, and critical PTY gotchas including os.execvpe env passing, key pacing, and TIOCSWINSZ sizing."
+      },
+      {
+        "id": "document:scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+        "name": "SKILL.md",
+        "type": "document",
+        "filePath": "scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+        "summary": "Multi-paragraph markdown SKILL.md fixture for skill-001 referenced by ls-global-long.json to supply realistic scrollable markdown detail height during PTY smoke testing."
+      },
+      {
+        "id": "document:scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+        "name": "SKILL.md",
+        "type": "document",
+        "filePath": "scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+        "summary": "Multi-paragraph markdown SKILL.md fixture for skill-002 referenced by ls-global-long.json to provide scrollable detail-pane content in PTY smoke runs."
+      },
+      {
+        "id": "document:scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+        "name": "SKILL.md",
+        "type": "document",
+        "filePath": "scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+        "summary": "Multi-paragraph markdown SKILL.md fixture for skill-003 referenced by ls-global-long.json to provide scrollable detail-pane content in PTY smoke runs."
+      },
+      {
+        "id": "document:tests/fixtures/contract/hostile-skill/SKILL.md",
+        "name": "SKILL.md",
+        "type": "document",
+        "filePath": "tests/fixtures/contract/hostile-skill/SKILL.md",
+        "summary": "Adversarial SKILL.md fixture embedding ANSI SGR, OSC, DCS, and C1 control sequences alongside normal tabs and text to verify terminal and web sanitization strips dangerous escapes while preserving readable structure."
+      }
+    ],
+    "infrastructure": [
+      {
+        "id": "pipeline:.github/workflows/claude-code-review.yml",
+        "name": "claude-code-review.yml",
+        "type": "pipeline",
+        "filePath": ".github/workflows/claude-code-review.yml",
+        "summary": "GitHub Actions workflow that runs automated Claude Code reviews on pull request open, synchronize, ready-for-review, and reopen events using anthropics/claude-code-action@v1 with the code-review plugin and inline comment tool."
+      },
+      {
+        "id": "pipeline:.github/workflows/claude.yml",
+        "name": "claude.yml",
+        "type": "pipeline",
+        "filePath": ".github/workflows/claude.yml",
+        "summary": "GitHub Actions workflow triggered by @claude mentions in issue bodies, issue comments, PR review comments, and PR reviews, invoking anthropics/claude-code-action@v1 with read access to repository contents, PRs, issues, and CI actions."
+      }
+    ],
+    "data": [],
+    "config": [
+      {
+        "id": "config:mise.toml",
+        "name": "mise.toml",
+        "type": "config",
+        "filePath": "mise.toml",
+        "summary": "Toolchain configuration pinning Bun 1.4.4 via mise for consistent local development, test execution, and compiled binary builds."
+      },
+      {
+        "id": "config:package.json",
+        "name": "package.json",
+        "type": "config",
+        "filePath": "package.json",
+        "summary": "ESM package manifest for skills-ui v0.5.5 declaring the Bun >=1.4 engine requirement, dev/selftest/test/build/export:page/pty-smoke/perf:budget scripts, OpenTUI and React 19 dependencies, and Playwright/Bun type devDependencies."
+      },
+      {
+        "id": "config:tsconfig.json",
+        "name": "tsconfig.json",
+        "type": "config",
+        "filePath": "tsconfig.json",
+        "summary": "TypeScript compiler configuration targeting ESNext with bundler module resolution, Bun global types, strict checking, noUncheckedIndexedAccess, verbatimModuleSyntax, and noEmit across src, tests, and scripts."
+      },
+      {
+        "id": "config:docs/_config.yml",
+        "name": "_config.yml",
+        "type": "config",
+        "filePath": "docs/_config.yml",
+        "summary": "Jekyll and GitHub Pages site configuration for skills-ui using the just-the-docs remote theme, setting the site URL (https://s-a-c.github.io) and /skills-ui baseurl, auxiliary GitHub and Releases links, and the default page layout."
+      },
+      {
+        "id": "config:tests/fixtures/contract/add-hostile.json",
+        "name": "add-hostile.json",
+        "type": "config",
+        "filePath": "tests/fixtures/contract/add-hostile.json",
+        "summary": "Hostile contract test fixture for skills add --json output containing ANSI CSI color codes, OSC terminal title injection sequences, BEL characters, and NUL bytes across installed and failed entries. Used by the sanitization test suite to verify escape stripping on add-command ingress."
+      },
+      {
+        "id": "config:tests/fixtures/contract/add.json",
+        "name": "add.json",
+        "type": "config",
+        "filePath": "tests/fixtures/contract/add.json",
+        "summary": "Baseline contract test fixture modeling skills add --json output with one installed skill (alpha) and one failed skill (beta) to exercise partial-failure detection. Loaded by default by skills-shim.mjs when emulating add and install subcommands."
+      },
+      {
+        "id": "config:tests/fixtures/contract/ls-empty.json",
+        "name": "ls-empty.json",
+        "type": "config",
+        "filePath": "tests/fixtures/contract/ls-empty.json",
+        "summary": "Empty JSON array contract fixture representing a skills ls --json response with zero installed skills. Injected via SKILLS_SHIM_LS_PROJECT in hosted end-to-end tests to verify empty-state behavior."
+      },
+      {
+        "id": "config:tests/fixtures/contract/ls-global.json",
+        "name": "ls-global.json",
+        "type": "config",
+        "filePath": "tests/fixtures/contract/ls-global.json",
+        "summary": "Default global-scope contract test fixture containing an empty JSON array for skills ls --json -g output. Loaded by skills-shim.mjs as the initial global skill list and exercised by service tests verifying global-scope filtering."
+      },
+      {
+        "id": "config:tests/fixtures/contract/ls-hostile.json",
+        "name": "ls-hostile.json",
+        "type": "config",
+        "filePath": "tests/fixtures/contract/ls-hostile.json",
+        "summary": "Hostile contract test fixture for skills ls --json output pairing a valid skill referencing tests/fixtures/contract/hostile-skill with entries carrying ANSI CSI/OSC/C1 escape sequences, BEL and NUL bytes, and malformed non-string field types. Consumed by the sanitization test suite to validate untrusted CLI ingress hardening."
+      },
+      {
+        "id": "config:tests/fixtures/contract/ls-project.json",
+        "name": "ls-project.json",
+        "type": "config",
+        "filePath": "tests/fixtures/contract/ls-project.json",
+        "summary": "Baseline project-scope contract test fixture modeling skills ls --json output with two installed skills (tdd with null source metadata across four agents and code-review sourced from anthropics/skills on GitHub). Loaded by default by skills-shim.mjs, slow-skills-shim.mjs, and spawn-count performance tests."
+      },
+      {
+        "id": "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+        "name": "ls-global-long.json",
+        "type": "config",
+        "filePath": "scripts/pty-smoke/fixtures/ls-global-long.json",
+        "summary": "120-skill global scope JSON fixture served by skills-smoke-bin.ts to stress-test TUI scrolling, paging, mouse selection, filtering, and viewport follow in PTY smoke tests."
+      },
+      {
+        "id": "config:scripts/pty-smoke/fixtures/ls-project.json",
+        "name": "ls-project.json",
+        "type": "config",
+        "filePath": "scripts/pty-smoke/fixtures/ls-project.json",
+        "summary": "Two-skill project scope JSON fixture (tdd and code-review) returned by skills-smoke-bin.ts for initial project-scope startup checks in PTY smoke tests."
+      }
+    ]
+  },
+  "clusters": [
+    {
+      "nodes": [
+        "file:src/core/prefs.ts",
+        "file:src/tui/app.ts",
+        "file:src/tui/model.ts",
+        "file:tests/tui-disk-index.test.ts",
+        "file:tests/tui.test.ts"
+      ],
+      "edgeCount": 13
+    },
+    {
+      "nodes": [
+        "file:src/core/api.ts",
+        "file:src/core/services/locks.ts",
+        "file:src/core/services/updates-check.ts",
+        "file:tests/hooks-health.test.ts",
+        "file:tests/locks.test.ts"
+      ],
+      "edgeCount": 11
+    },
+    {
+      "nodes": [
+        "file:src/core/api.ts",
+        "file:src/core/index.ts",
+        "file:src/core/services/locks.ts",
+        "file:src/core/skills-client.ts",
+        "file:tests/hooks-health.test.ts"
+      ],
+      "edgeCount": 11
+    },
+    {
+      "nodes": [
+        "file:src/core/api.ts",
+        "file:src/core/skills-client.ts",
+        "file:src/core/version.ts",
+        "file:tests/api.test.ts",
+        "file:tests/hooks-health.test.ts"
+      ],
+      "edgeCount": 11
+    },
+    {
+      "nodes": [
+        "file:src/core/prefs.ts",
+        "file:src/tui/model.ts",
+        "file:src/web/page.ts",
+        "file:tests/filter-parity.test.ts",
+        "file:tests/tui-disk-index.test.ts"
+      ],
+      "edgeCount": 10
+    },
+    {
+      "nodes": [
+        "config:package.json",
+        "file:scripts/build.ts",
+        "file:src/core/version.ts",
+        "file:src/main.ts",
+        "file:tests/version.test.ts"
+      ],
+      "edgeCount": 10
+    },
+    {
+      "nodes": [
+        "document:docs/archify-findings-review-and-report-2026-11-26.md",
+        "file:src/core/index.ts",
+        "file:src/tui/Views.tsx",
+        "file:src/web/page.ts",
+        "file:tests/dash-sweep.test.ts"
+      ],
+      "edgeCount": 9
+    },
+    {
+      "nodes": [
+        "document:docs/archify-findings-review-and-report-2026-11-26.md",
+        "file:src/web/client/installed.ts",
+        "file:src/web/page.ts",
+        "file:tests/dash-sweep.test.ts",
+        "file:tests/markdown-render.test.ts"
+      ],
+      "edgeCount": 9
+    },
+    {
+      "nodes": [
+        "file:src/core/api.ts",
+        "file:src/core/services/install.ts",
+        "file:src/core/services/installed.ts",
+        "file:src/core/services/sanitize.ts",
+        "file:tests/sanitize.test.ts"
+      ],
+      "edgeCount": 8
+    },
+    {
+      "nodes": [
+        "file:src/core/api.ts",
+        "file:src/core/hosted-auth.ts",
+        "file:tests/hosted-auth.test.ts",
+        "file:tests/serve-hardening.test.ts"
+      ],
+      "edgeCount": 7
+    }
+  ],
+  "layers": {
+    "count": 9,
+    "list": [
+      {
+        "id": "layer:entry-api",
+        "name": "CLI Entry & HTTP API",
+        "description": "Dispatches CLI runtime modes and serves the authenticated loopback HTTP API with CORS, Host allowlisting, rate limiting, and hosted Bearer-token defense."
+      },
+      {
+        "id": "layer:core-services",
+        "name": "Core Services & Runtime",
+        "description": "Wraps the upstream skills CLI behind a bounded spawn queue and implements domain services, lockfile validation, ingress sanitization, SWR disk caching, theme tokens, preferences, and shared filter logic."
+      },
+      {
+        "id": "layer:tui",
+        "name": "Terminal UI (OpenTUI)",
+        "description": "Implements the interactive OpenTUI terminal application with an Elm-style state model, React view tree, procedural NativeImage art, PCM audio feedback, optional Three.js 3D skill graph, and selftest spike."
+      },
+      {
+        "id": "layer:web",
+        "name": "Web UI",
+        "description": "Assembles the single-file CSP-hardened HTML, CSS, and client-side JavaScript web interface for both local --web serving and static GitHub Pages hosted deployment over the loopback API."
+      },
+      {
+        "id": "layer:build-ci",
+        "name": "Build, Release & CI",
+        "description": "Compiles cross-platform Bun executables with SHA-256 checksum verification, exports the hosted GitHub Pages WebUI, provides the POSIX shell installer, and runs GitHub Actions PR and issue automation."
+      },
+      {
+        "id": "layer:harnesses",
+        "name": "Performance & Smoke Harnesses",
+        "description": "Runs end-to-end performance budget benchmarks and Python/pyte real-terminal PTY smoke suites along with their dedicated CLI stubs, fixtures, and baseline reports."
+      },
+      {
+        "id": "layer:test",
+        "name": "Testing & Fixtures",
+        "description": "Verifies core services, HTTP security hardening, TUI/WebUI parity, installer atomicity, performance budgets, and Playwright E2E flows using stateful skills-CLI shims and hostile contract fixtures."
+      },
+      {
+        "id": "layer:documentation",
+        "name": "Documentation",
+        "description": "Captures user guides, milestone roadmap, ubiquitous-language glossary, agent workflow contracts, design specifications, release runbooks, and upstream performance investigations."
+      },
+      {
+        "id": "layer:config",
+        "name": "Configuration",
+        "description": "Configures the Bun package manifest, TypeScript compiler options, mise toolchain pin, Playwright E2E runner settings, and Jekyll GitHub Pages site metadata."
+      }
+    ]
+  },
+  "nodeSummaryIndex": {
+    "file:src/core/api.ts": {
+      "name": "api.ts",
+      "type": "file",
+      "filePath": "src/core/api.ts",
+      "summary": "Implements the authenticated loopback HTTP API server (127.0.0.1 only) exposing skill listing, detail/body lookup, registry search, install/remove/update mutations, lockfile update checks, health checks, preferences persistence, and optional WebUI HTML serving. Enforces Host allowlisting, cross-site fetch-metadata rejection, CORS and timing-safe Bearer auth for hosted cross-origin clients, token-bucket rate limiting, and a 1 MiB transport/body cap."
+    },
+    "file:src/core/hosted-auth.ts": {
+      "name": "hosted-auth.ts",
+      "type": "file",
+      "filePath": "src/core/hosted-auth.ts",
+      "summary": "Provides the hosted WebUI authentication and browser-boundary defense primitives for the loopback API server. Implements persisted Bearer token management, constant-time SHA-256 token verification, DNS-rebinding Host allowlisting, Sec-Fetch-Site cross-site rejection, origin allowlisting, and CORS preflight responses."
+    },
+    "file:src/core/services/hooks.ts": {
+      "name": "hooks.ts",
+      "type": "file",
+      "filePath": "src/core/services/hooks.ts",
+      "summary": "Manages operator-configured post-mutation hooks (SKILLS_UI_POST_MUTATION_HOOK) and external health-check executables (SKILLS_UI_HEALTH_CMD). Spawns executables directly without a shell using a sanitized environment, enforces timeouts, scrubs output, and caches health check results with TTL and in-flight coalescing."
+    },
+    "file:src/core/services/install.ts": {
+      "name": "install.ts",
+      "type": "file",
+      "filePath": "src/core/services/install.ts",
+      "summary": "Wraps `skills add --yes --json` to install one, several, or all (`*`) skills from a source into project or global scope. Parses the upstream JSON result array, sanitizes all text fields at ingress, and surfaces unparseable output as a failed entry."
+    },
+    "file:src/core/services/installed.ts": {
+      "name": "installed.ts",
+      "type": "file",
+      "filePath": "src/core/services/installed.ts",
+      "summary": "Lists and queries installed skills by invoking `skills ls --json [-g]`, enriching each record with lockfile- and symlink-based provenance while sanitizing display metadata at ingress and keeping filesystem paths raw."
+    },
+    "file:src/core/services/locks.ts": {
+      "name": "locks.ts",
+      "type": "file",
+      "filePath": "src/core/services/locks.ts",
+      "summary": "Provides read-only access and per-entry schema validation for project (`skills-lock.json`) and global XDG state (`.skill-lock.json` / legacy `skills-lock.json`) lockfiles. Isolates malformed entries into per-entry diagnostics while raising InvalidLockFileError on container-level corruption."
+    },
+    "file:src/core/services/remove.ts": {
+      "name": "remove.ts",
+      "type": "file",
+      "filePath": "src/core/services/remove.ts",
+      "summary": "Removes installed skills via `skills rm -y [-g]` and verifies actual removal by diffing before and after installed skill lists. Accepts optional cached listing callbacks so the HTTP server avoids redundant `skills ls` spawns."
+    },
+    "file:src/core/services/sanitize.ts": {
+      "name": "sanitize.ts",
+      "type": "file",
+      "filePath": "src/core/services/sanitize.ts",
+      "summary": "Implements CWE-150 ingress sanitization that strips ANSI CSI/C1-CSI/OSC/DCS/two-byte terminal escape sequences and unsafe control characters from untrusted CLI, lockfile, SKILL.md, and registry strings."
+    },
+    "file:src/core/services/search.ts": {
+      "name": "search.ts",
+      "type": "file",
+      "filePath": "src/core/services/search.ts",
+      "summary": "Queries the skills.sh HTTP search registry with in-flight promise deduplication, ingress metadata sanitization, and progressive fallback strategies (prefix continuation fan-out and query shortening) that short-circuit cleanly on upstream HTTP failures."
+    },
+    "file:src/core/services/skill-doc.ts": {
+      "name": "skill-doc.ts",
+      "type": "file",
+      "filePath": "src/core/services/skill-doc.ts",
+      "summary": "Reads SKILL.md files from either a direct file path or a skill directory, strips leading YAML frontmatter blocks, and sanitizes Markdown bodies at ingress for safe TUI and WebUI display."
+    },
+    "file:src/core/services/source.ts": {
+      "name": "source.ts",
+      "type": "file",
+      "filePath": "src/core/services/source.ts",
+      "summary": "Discovers installable skills advertised by a remote or local source by running `skills install <source> --list --yes` with FORCE_COLOR=1 and extracting sanitized skill names from SGR cyan ANSI spans."
+    },
+    "file:src/core/services/types.ts": {
+      "name": "types.ts",
+      "type": "file",
+      "filePath": "src/core/services/types.ts",
+      "summary": "Defines shared TypeScript domain types and data contracts across core services, the HTTP API, and the TUI, including Scope, SkillProvenance, MutationEvent, InstalledSkill, SearchSkill, AddResultEntry, UpdatesResult, PostMutationHookResult, and HealthCheckResult."
+    },
+    "file:src/core/services/update.ts": {
+      "name": "update.ts",
+      "type": "file",
+      "filePath": "src/core/services/update.ts",
+      "summary": "Wraps `skills update -p|-g -y [names]` to update installed skills in project or global scope and sanitizes the combined CLI output for UI toast display."
+    },
+    "file:src/core/services/updates-check.ts": {
+      "name": "updates-check.ts",
+      "type": "file",
+      "filePath": "src/core/services/updates-check.ts",
+      "summary": "Checks locked GitHub skills for upstream updates by querying the GitHub Git Trees API per unique repo/ref and comparing folder SHAs against lockfile hashes. Treats truncated trees, malformed payloads, or missing folders in complete trees as inconclusive rather than falsely current, and isolates entry names in a null-prototype map."
+    },
+    "file:src/core/skills-client.ts": {
+      "name": "skills-client.ts",
+      "type": "file",
+      "filePath": "src/core/skills-client.ts",
+      "summary": "Central subprocess boundary for executing the upstream `skills` CLI executable via Bun.spawn. Applies an allowlist/denylist environment sanitizer, caches executable resolution, serializes invocations behind a bounded spawn queue, enforces timeouts, and parses `skills --version`."
+    },
+    "file:src/core/spawn-queue.ts": {
+      "name": "spawn-queue.ts",
+      "type": "file",
+      "filePath": "src/core/spawn-queue.ts",
+      "summary": "Implements a bounded FIFO concurrency semaphore for `skills` CLI subprocesses so request bursts cannot fan out long-running child processes. Rejects excess waiters immediately with SkillsBusyError when the queue reaches SKILLS_UI_SPAWN_QUEUE_CAP."
+    },
+    "file:tests/hosted-auth.test.ts": {
+      "name": "hosted-auth.test.ts",
+      "type": "file",
+      "filePath": "tests/hosted-auth.test.ts",
+      "summary": "Unit and API integration test suite verifying hosted-auth token persistence, environment overrides, Host and Origin allowlists, same-origin checks, CORS preflight behavior, token-free /api/version probes, and 401/403 enforcement on createSkillsUiServer."
+    },
+    "file:tests/locks.test.ts": {
+      "name": "locks.test.ts",
+      "type": "file",
+      "filePath": "tests/locks.test.ts",
+      "summary": "Regression test suite covering CORE-03 per-entry lockfile validation, controlled InvalidLockFileError 400 responses on GET /api/updates, __proto__ key safety, and CORE-04 inconclusive handling for truncated or incomplete GitHub tree responses."
+    },
+    "file:tests/sanitize.test.ts": {
+      "name": "sanitize.test.ts",
+      "type": "file",
+      "filePath": "tests/sanitize.test.ts",
+      "summary": "Security test suite verifying ANSI/C1 escape stripping and control-character scrubbing in sanitize.ts as well as end-to-end ingress sanitization across listInstalled, listSourceSkills, install, and HTTP API skill descriptions and SKILL.md bodies."
+    },
+    "file:tests/serve-hardening.test.ts": {
+      "name": "serve-hardening.test.ts",
+      "type": "file",
+      "filePath": "tests/serve-hardening.test.ts",
+      "summary": "Hostile-input hardening test suite covering timing-safe bearerMatches, spawn-queue backpressure, fetchRepoTree URL encoding and completeness checks, cross-site Sec-Fetch-Site rejection, API argv/shape validation, transport body caps, rate limiting, and slow-handler idle timeouts."
+    },
+    "file:src/core/disk-index.ts": {
+      "name": "disk-index.ts",
+      "type": "file",
+      "filePath": "src/core/disk-index.ts",
+      "summary": "Persists a per-scope stale-while-revalidate cache of enriched installed skills under the user cache directory so TUI sessions paint immediately before subprocess refreshes settle. Partitions project-scope caches by canonical realpath hash and envelope projectRoot, rejects corrupt or oversized files safely, and writes atomically with stale temp/project sweeps."
+    },
+    "file:src/core/index.ts": {
+      "name": "index.ts",
+      "type": "file",
+      "filePath": "src/core/index.ts",
+      "summary": "Barrel entrypoint that re-exports core skill types, filter matching, CLI runner utilities, installed/search/mutation services, lock-file helpers, update checks, and post-mutation hook and health check APIs. Provides a single import surface for the TUI, HTTP API, and test suites."
+    },
+    "file:src/core/prefs.ts": {
+      "name": "prefs.ts",
+      "type": "file",
+      "filePath": "src/core/prefs.ts",
+      "summary": "Manages persisted UI preferences (Catppuccin theme, sound effects, reduced motion, fixed web port, and list-pane width percentage) under the skills-ui config directory. Normalizes partial or legacy preference files safely and supports one-time migration from the upstream skills CLI preference file."
+    },
+    "file:src/core/seed.ts": {
+      "name": "seed.ts",
+      "type": "file",
+      "filePath": "src/core/seed.ts",
+      "summary": "Parses CLI command-line arguments into structured UiSeed intents for launching the TUI or Web UI pre-seeded with add, update, or remove actions. Performs flag-aware positional extraction so value-taking options do not pollute skill or source arguments."
+    },
+    "file:src/core/theme.ts": {
+      "name": "theme.ts",
+      "type": "file",
+      "filePath": "src/core/theme.ts",
+      "summary": "Defines Catppuccin Mocha and Latte color palettes, WCAG 2.x luminance and contrast utilities, contrast-enforced semantic theme tokens, truecolor/256-color ANSI terminal painters, and OpenTUI tree-sitter syntax highlighting scopes. Serves as the single color token source for both TUI and web surfaces."
+    },
+    "file:src/tui/Views.tsx": {
+      "name": "Views.tsx",
+      "type": "file",
+      "filePath": "src/tui/Views.tsx",
+      "summary": "Implements the OpenTUI React view tree mounted on a single root and subscribed to the Elm-style TuiModel store via useSyncExternalStore. Renders the startup splash, optional 3D skill graph, installed and registry-search split panes with match highlighting, settings panel, constant footer legend, and animated modal overlays."
+    },
+    "file:src/tui/app.ts": {
+      "name": "app.ts",
+      "type": "file",
+      "filePath": "src/tui/app.ts",
+      "summary": "Orchestrates the interactive OpenTUI application lifecycle, wiring the pure Elm-style TuiModel store, React view mounting, keyboard dispatch, stale-while-revalidate disk-index hydration, async search/update/mutation workflows, crash-guard signal cleanup, and injectable production dependencies. Re-exports spike screen helpers for selftest verification."
+    },
+    "file:src/tui/art.ts": {
+      "name": "art.ts",
+      "type": "file",
+      "filePath": "src/tui/art.ts",
+      "summary": "Generates procedural RGBA pixel art via OpenTUI NativeImage for the startup splash gradient banner and deterministic per-source search identicon badges. Caches generated images per theme and source key so the standalone binary ships zero external image assets."
+    },
+    "file:src/tui/audio.ts": {
+      "name": "audio.ts",
+      "type": "file",
+      "filePath": "src/tui/audio.ts",
+      "summary": "Synthesizes short mono f32le PCM sine-wave UI feedback tones (select, confirm, success, error) streamed through OpenTUI's Audio engine. Gates playback on user sound preferences, disposes resources cleanly on exit, and degrades silently when audio hardware is unavailable."
+    },
+    "file:src/tui/model.ts": {
+      "name": "model.ts",
+      "type": "file",
+      "filePath": "src/tui/model.ts",
+      "summary": "Implements the renderer-agnostic Elm-style state model and pure action reducer for the TUI, covering installed and search tabs, scope-keyed update/error tracking, text/agent/provenance filtering, sort modes, batch checks, install queue, and modal overlays. Memoizes one filter-and-sort pass per dispatch onto model.visible and model.visibleResults."
+    },
+    "file:src/tui/renderer-ready.ts": {
+      "name": "renderer-ready.ts",
+      "type": "file",
+      "filePath": "src/tui/renderer-ready.ts",
+      "summary": "Provides a bounded frame-polling helper (waitForFrame) that flushes and captures character frames from an in-memory OpenTUI test renderer until a predicate holds or a timeout expires. Eliminates flaky fixed sleeps when awaiting asynchronous React commits and tree-sitter highlighting."
+    },
+    "file:src/tui/three-scene.ts": {
+      "name": "three-scene.ts",
+      "type": "file",
+      "filePath": "src/tui/three-scene.ts",
+      "summary": "Builds and caches an interactive 3D Three.js skill graph on an OpenTUI ThreeRenderable using Fibonacci-sphere point layout colored by source/agent accents and line edges connecting shared-agent skills. Dynamically loaded by Views.tsx so environments without WebGPU avoid paying startup or compatibility costs."
+    },
+    "file:src/web/client/core.ts": {
+      "name": "core.ts",
+      "type": "file",
+      "filePath": "src/web/client/core.ts",
+      "summary": "Exports the CLIENT_CORE_JS browser script foundation embedded into the web UI page, holding global client state, sessionStorage migration, authenticated fetch wrapper, Web Audio feedback synth, theme/list-width preference sync, hosted backend probing, health popover, and toast notifications."
+    },
+    "file:tests/filter-parity.test.ts": {
+      "name": "filter-parity.test.ts",
+      "type": "file",
+      "filePath": "tests/filter-parity.test.ts",
+      "summary": "Verifies cross-surface filter parity between the TUI visibleSkills pipeline and the web UI skillMatches predicate across text, agent-only, source, description, and empty queries. Also asserts that renderPage embeds the shared skillMatches function rather than a divergent copy."
+    },
+    "file:tests/hooks-health.test.ts": {
+      "name": "hooks-health.test.ts",
+      "type": "file",
+      "filePath": "tests/hooks-health.test.ts",
+      "summary": "Tests global lock-file resolution and malformed lock error propagation, symlink/locked/local skill provenance classification, disk-index provenance round-tripping, subprocess environment sanitization, post-mutation hook execution, TTL health-check caching, and API security enforcement on /api/version and /api/health-check."
+    },
+    "file:tests/selftest.test.ts": {
+      "name": "selftest.test.ts",
+      "type": "file",
+      "filePath": "tests/selftest.test.ts",
+      "summary": "Exercises the OpenTUI tree-sitter markdown spike screen both in-memory via buildSpikeScreen and waitForFrame and end-to-end by spawning `src/main.ts --selftest`. Confirms asynchronous syntax-worker markers render reliably within bounded deadlines."
+    },
+    "file:tests/tui-disk-index.test.ts": {
+      "name": "tui-disk-index.test.ts",
+      "type": "file",
+      "filePath": "tests/tui-disk-index.test.ts",
+      "summary": "Covers unit and in-memory renderer behavior for stale-while-revalidate disk indexing, including atomic writes, hostile/oversized payload rejection, canonical project-root partitioning across symlinks and processes, stale cache sweeping, instant stale paints before subprocess completion, and swap reconciliation."
+    },
+    "file:tests/tui.test.ts": {
+      "name": "tui.test.ts",
+      "type": "file",
+      "filePath": "tests/tui.test.ts",
+      "summary": "Comprehensive in-memory OpenTUI and pure-model test suite covering installed and search workflows, keyboard contracts, scope-threaded installs and updates, double-press quit safety, FIFO toasts, stale search and update-check race rejection, 3D graph and splash views, list-width resizing, provenance badges, and health overlays."
+    },
+    "file:scripts/export-page.ts": {
+      "name": "export-page.ts",
+      "type": "file",
+      "filePath": "scripts/export-page.ts",
+      "summary": "Build helper script that renders the hosted single-file WebUI HTML via renderPage with APP_VERSION and writes it to docs/app.html or a CLI-provided destination for GitHub Pages deployment."
+    },
+    "file:scripts/perf/budget.ts": {
+      "name": "budget.ts",
+      "type": "file",
+      "filePath": "scripts/perf/budget.ts",
+      "summary": "End-to-end performance budget harness that benchmarks filter matching, cold and warm API listings, stubbed registry search concurrency, and Playwright DOM/paint probes against synthetic or real skill corpora. Emits Markdown budget reports and supports strict gating via CLI flags."
+    },
+    "file:src/core/version.ts": {
+      "name": "version.ts",
+      "type": "file",
+      "filePath": "src/core/version.ts",
+      "summary": "Exports APP_VERSION as the single source of truth for the wrapper version across the TUI, WebUI, GET /api/version, and --version. Uses the build-time __APP_VERSION__ define when compiled and falls back to package.json during development and tests."
+    },
+    "file:src/main.ts": {
+      "name": "main.ts",
+      "type": "file",
+      "filePath": "src/main.ts",
+      "summary": "Primary CLI entrypoint for skills-ui that parses shared --port arguments and dispatches between --version, --selftest, headless serve, --web browser mode, and the default OpenTUI terminal application."
+    },
+    "file:tests/api.test.ts": {
+      "name": "api.test.ts",
+      "type": "file",
+      "filePath": "tests/api.test.ts",
+      "summary": "Comprehensive HTTP API integration test suite covering /api/version, /api/skills listing and caching, /api/skill detail-by-name and detail-by-path validation, install/remove/update mutations, preferences persistence, and security/host-header hardening against the skills shim."
+    },
+    "file:tests/page-smoke.test.ts": {
+      "name": "page-smoke.test.ts",
+      "type": "file",
+      "filePath": "tests/page-smoke.test.ts",
+      "summary": "Playwright browser smoke and regression test suite against the live served WebUI page. Pins row checkbox clear behavior, conditional detail-pane update button rendering, layout geometry, and DOM reconciliation invariants."
+    },
+    "file:tests/perf/filter-dom.test.ts": {
+      "name": "filter-dom.test.ts",
+      "type": "file",
+      "filePath": "tests/perf/filter-dom.test.ts",
+      "summary": "Playwright behavioral performance tests for the served WebUI filter input on a 60-row synthetic corpus. Asserts exact match row counts, zero-mutation DOM node identity preservation on same-result keystrokes, and zero entrance animation replays."
+    },
+    "file:tests/perf/helpers.ts": {
+      "name": "helpers.ts",
+      "type": "file",
+      "filePath": "tests/perf/helpers.ts",
+      "summary": "Shared performance harness utility module used by both perf tests and scripts/perf/budget.ts. Provides synthetic SKILL.md corpus generation, shim call-log parsing and spawn counting, a fixed-RTT stub skills.sh registry server, and median/millisecond formatting helpers."
+    },
+    "file:tests/perf/playwright-probes.ts": {
+      "name": "playwright-probes.ts",
+      "type": "file",
+      "filePath": "tests/perf/playwright-probes.ts",
+      "summary": "Reusable Playwright browser instrumentation probes for measuring filter render work, DOM identity preservation, animation replays, scope-switch first paint, and stale search overwrite resistance on the shipped WebUI page."
+    },
+    "file:tests/perf/search-stub.test.ts": {
+      "name": "search-stub.test.ts",
+      "type": "file",
+      "filePath": "tests/perf/search-stub.test.ts",
+      "summary": "Count-based performance tests exercising /api/search against the fixed-RTT stub registry server to verify payload mapping, single-call sequential routing, and in-flight deduplication of concurrent identical searches."
+    },
+    "file:tests/perf/spawn-count.test.ts": {
+      "name": "spawn-count.test.ts",
+      "type": "file",
+      "filePath": "tests/perf/spawn-count.test.ts",
+      "summary": "Spawn-count performance test suite asserting per-server list caching, scope-keyed request coalescing, zero-spawn detail-by-name and detail-by-path reads, and cache invalidation across mutations via the shim call log."
+    },
+    "file:tests/version.test.ts": {
+      "name": "version.test.ts",
+      "type": "file",
+      "filePath": "tests/version.test.ts",
+      "summary": "Unit tests verifying that APP_VERSION falls back to package.json when the build-time __APP_VERSION__ define is absent and matches a 3- or 4-segment semver string."
+    },
+    "file:tests/web-055.test.ts": {
+      "name": "web-055.test.ts",
+      "type": "file",
+      "filePath": "tests/web-055.test.ts",
+      "summary": "Playwright browser test suite for WebUI v0.5.5 features, verifying skill provenance badges (locked, linked, local) and conditional health-check capability and status UI against stubbed API routes."
+    },
+    "file:src/web/client/installed.ts": {
+      "name": "installed.ts",
+      "type": "file",
+      "filePath": "src/web/client/installed.ts",
+      "summary": "Generates the client-side JavaScript bundle section that manages the installed skills list, DOM-reusing filter and sort rendering, escape-first Markdown SKILL.md detail viewer, removal confirmation, seed-install flows, and update checks. Interpolates the shared skillMatches predicate source so web filtering matches the TUI."
+    },
+    "file:src/web/client/search-and-boot.ts": {
+      "name": "search-and-boot.ts",
+      "type": "file",
+      "filePath": "src/web/client/search-and-boot.ts",
+      "summary": "Exports the CLIENT_SEARCH_AND_BOOT_JS script fragment powering skills.sh registry search, install-list queueing and batch installation, tab and scope switching, agent filter popover, settings drawer, resizable list-pane splitter, keyboard shortcuts, and application boot."
+    },
+    "file:src/web/page.ts": {
+      "name": "page.ts",
+      "type": "file",
+      "filePath": "src/web/page.ts",
+      "summary": "Assembles and renders the complete single-file HTML web UI over the skills-ui /api contract, combining Catppuccin Mocha and Latte CSS variables, APP_CSS, concatenated APP_JS client scripts, </script>-safe JSON bootstrap state, and SHA-256 hash-pinned Content-Security-Policy headers. Re-exports skillMatches and exposes webPageRenderer for local serve and static hosted exports."
+    },
+    "file:src/web/styles.ts": {
+      "name": "styles.ts",
+      "type": "file",
+      "filePath": "src/web/styles.ts",
+      "summary": "Exports the APP_CSS stylesheet string for the skills-ui web interface, defining responsive layout rules, 4px-scale spacing, Catppuccin token consumption, reduced-motion overrides, Markdown detail typography, settings drawer transitions, modal scrims, and toast styling."
+    },
+    "file:tests/dash-sweep.test.ts": {
+      "name": "dash-sweep.test.ts",
+      "type": "file",
+      "filePath": "tests/dash-sweep.test.ts",
+      "summary": "Enforces the S-184 runtime copy gate by lexing emitted web APP_JS and TUI source files (Views.tsx, app.ts, model.ts) to ensure no en-dash, em-dash, or escaped/entity dash variants appear in user-facing strings or JSX text runs."
+    },
+    "file:tests/fixtures/audit-web-server.ts": {
+      "name": "audit-web-server.ts",
+      "type": "file",
+      "filePath": "tests/fixtures/audit-web-server.ts",
+      "summary": "Minimal test fixture script that launches an unthrottled local skills-ui HTTP server with webPageRenderer enabled, prints the bound loopback AUDIT_ORIGIN JSON payload, and cleanly stops on SIGTERM."
+    },
+    "file:tests/markdown-render.test.ts": {
+      "name": "markdown-render.test.ts",
+      "type": "file",
+      "filePath": "tests/markdown-render.test.ts",
+      "summary": "Tests the shipped web renderMarkdown implementation sliced directly from renderPage's emitted APP_JS, verifying CommonMark/GFM subset rendering, non-navigable links, sink-side XSS neutralization against hostile payloads, zero raw backticks, and byte-identical output determinism."
+    },
+    "file:tests/page-hardening.test.ts": {
+      "name": "page-hardening.test.ts",
+      "type": "file",
+      "filePath": "tests/page-hardening.test.ts",
+      "summary": "Verifies web page security hardening including SHA-256 hash-pinned CSP headers and meta tags, </script>-safe JSON bootstrap embedding, sessionStorage token persistence with legacy localStorage migration, APP_JS Node syntax validity, and serve-side nosniff/no-referrer headers."
+    },
+    "file:tests/terminology.test.ts": {
+      "name": "terminology.test.ts",
+      "type": "file",
+      "filePath": "tests/terminology.test.ts",
+      "summary": "Guards ratified skills-ui vocabulary across both TUI source files (Views.tsx, app.ts) and emitted renderPage HTML, asserting consistent use of 'install list', 'remove' instead of 'delete', and matching confirmation key prompts."
+    },
+    "file:tests/e2e/audit-remediation.e2e.ts": {
+      "name": "audit-remediation.e2e.ts",
+      "type": "file",
+      "filePath": "tests/e2e/audit-remediation.e2e.ts",
+      "summary": "Playwright end-to-end test suite verifying web UI audit-remediation invariants across 20 browser scenarios. Covers install-queue scope capture and partial failures, wildcard seed installation, stale list/detail/update-check race guards, busy-state and semantic disabled-button arbitration, keyboard checkbox accessibility, and responsive search-card layout."
+    },
+    "file:tests/e2e/helpers/audit-fixture.ts": {
+      "name": "audit-fixture.ts",
+      "type": "file",
+      "filePath": "tests/e2e/helpers/audit-fixture.ts",
+      "summary": "Playwright E2E fixture helpers that manage the audit web backend subprocess, construct synthetic skill rows, stub default `/api/**` browser routes, track page errors, and wait for post-response DOM paint frames."
+    },
+    "file:tests/helpers/audit-state.ts": {
+      "name": "audit-state.ts",
+      "type": "file",
+      "filePath": "tests/helpers/audit-state.ts",
+      "summary": "Shared test-isolation utility providing a `deferred` promise helper and a temporary workspace fixture that redirects `SKILLS_UI_*`, shim, and XDG environment variables into `.agents/tmp`."
+    },
+    "file:tests/helpers/installer-fixture.ts": {
+      "name": "installer-fixture.ts",
+      "type": "file",
+      "filePath": "tests/helpers/installer-fixture.ts",
+      "summary": "Test fixture builder for `scripts/install.sh` that constructs a hermetic sandbox with a pre-installed binary, payload, SHA-256 checksum manifest, and stubbed `uname`, `curl`, and `chmod` commands."
+    },
+    "file:tests/installer.test.ts": {
+      "name": "installer.test.ts",
+      "type": "file",
+      "filePath": "tests/installer.test.ts",
+      "summary": "Bun test suite exercising `scripts/install.sh` against hermetic installer fixtures to verify atomic installation, executable publishing, temp-file cleanup, and preservation of the prior binary on `chmod`, checksum, and download failures."
+    },
+    "pipeline:.github/workflows/claude-code-review.yml": {
+      "name": "claude-code-review.yml",
+      "type": "pipeline",
+      "filePath": ".github/workflows/claude-code-review.yml",
+      "summary": "GitHub Actions workflow that runs automated Claude Code reviews on pull request open, synchronize, ready-for-review, and reopen events using anthropics/claude-code-action@v1 with the code-review plugin and inline comment tool."
+    },
+    "pipeline:.github/workflows/claude.yml": {
+      "name": "claude.yml",
+      "type": "pipeline",
+      "filePath": ".github/workflows/claude.yml",
+      "summary": "GitHub Actions workflow triggered by @claude mentions in issue bodies, issue comments, PR review comments, and PR reviews, invoking anthropics/claude-code-action@v1 with read access to repository contents, PRs, issues, and CI actions."
+    },
+    "document:AGENTS.md": {
+      "name": "AGENTS.md",
+      "type": "document",
+      "filePath": "AGENTS.md",
+      "summary": "Repository-level agent contract defining the skills-ui tech stack, directory layout, SKILLS_UI_* environment variables, development commands, git worktree conventions, Linear wayfinder process, and documentation authority hierarchy."
+    },
+    "document:CONTEXT.md": {
+      "name": "CONTEXT.md",
+      "type": "document",
+      "filePath": "CONTEXT.md",
+      "summary": "Domain ubiquitous-language glossary standardizing canonical UI layout names (Frame, Filter List Panel, Detail Panel), card anatomy terms, Skill Provenance states, Post-Mutation Hook semantics, and the Health Pill across WebUI and TUI."
+    },
+    "document:README.md": {
+      "name": "README.md",
+      "type": "document",
+      "filePath": "README.md",
+      "summary": "Primary user and developer guide for skills-ui describing its three runtime modes, hosted zero-install WebUI, 0.5.3 performance benchmarks, checksum-verified curl installer, CLI usage, development workflow, and subprocess wrapping of upstream skills."
+    },
+    "document:ROADMAP.md": {
+      "name": "ROADMAP.md",
+      "type": "document",
+      "filePath": "ROADMAP.md",
+      "summary": "Milestone roadmap and delivery ledger spanning 0.0.x through 0.5.5, documenting HTTP API and OpenTUI parity, rich rendering, packaging matrix, Hosted UI architecture guardrails, hardening series, UI ergonomics, hub provenance/health features, and future targets."
+    },
+    "config:mise.toml": {
+      "name": "mise.toml",
+      "type": "config",
+      "filePath": "mise.toml",
+      "summary": "Toolchain configuration pinning Bun 1.4.4 via mise for consistent local development, test execution, and compiled binary builds."
+    },
+    "config:package.json": {
+      "name": "package.json",
+      "type": "config",
+      "filePath": "package.json",
+      "summary": "ESM package manifest for skills-ui v0.5.5 declaring the Bun >=1.4 engine requirement, dev/selftest/test/build/export:page/pty-smoke/perf:budget scripts, OpenTUI and React 19 dependencies, and Playwright/Bun type devDependencies."
+    },
+    "config:tsconfig.json": {
+      "name": "tsconfig.json",
+      "type": "config",
+      "filePath": "tsconfig.json",
+      "summary": "TypeScript compiler configuration targeting ESNext with bundler module resolution, Bun global types, strict checking, noUncheckedIndexedAccess, verbatimModuleSyntax, and noEmit across src, tests, and scripts."
+    },
+    "config:docs/_config.yml": {
+      "name": "_config.yml",
+      "type": "config",
+      "filePath": "docs/_config.yml",
+      "summary": "Jekyll and GitHub Pages site configuration for skills-ui using the just-the-docs remote theme, setting the site URL (https://s-a-c.github.io) and /skills-ui baseurl, auxiliary GitHub and Releases links, and the default page layout."
+    },
+    "document:docs/archify-findings-review-and-report-2026-11-26.md": {
+      "name": "archify-findings-review-and-report-2026-11-26.md",
+      "type": "document",
+      "filePath": "docs/archify-findings-review-and-report-2026-11-26.md",
+      "summary": "Session transcript and architecture report auditing all 18 Archify code-analysis findings on skills-ui and documenting the completed 3-wave Option A remediation: decoupling src/core from src/web via PageRenderer injection and src/core/filter.ts, decomposing 6 high-complexity functions (app.ts:onKey, api.ts:route, model.ts:update, Views.tsx:SearchBody/InstalledBody, budget.ts:main), modularizing src/web/page.ts byte-identically, and achieving a none-found Archify gate."
+    },
+    "document:docs/index.md": {
+      "name": "index.md",
+      "type": "document",
+      "filePath": "docs/index.md",
+      "summary": "GitHub Pages landing page (layout: home) for skills-ui presenting pinned and rolling curl-to-sh installation via scripts/install.sh, CLI invocation modes (OpenTUI, --web, serve, --selftest), hosted zero-install web UI highlights, and links to ROADMAP.md and repo/agent conventions."
+    },
+    "document:docs/release.md": {
+      "name": "release.md",
+      "type": "document",
+      "filePath": "docs/release.md",
+      "summary": "Release runbook for v0.5.1+ detailing cross-platform matrix dependency installation, pre-release verification gates (bun test, pty-smoke, build --all, --selftest), SHA-256 checksum manifest commitment, signed git tagging, GitHub Release publishing, hosted docs/app.html export, and clean-directory installer verification."
+    },
+    "document:docs/upstream-issue-draft.md": {
+      "name": "upstream-issue-draft.md",
+      "type": "document",
+      "filePath": "docs/upstream-issue-draft.md",
+      "summary": "Ready-to-file GitHub bug report draft for vercel-labs/skills (cross-referencing #1389) diagnosing the O(canonical x corpus) SKILL.md re-parse storm in skills ls (v1.7.4 listInstalledSkills) with bisection timings, duplicate warning counts, sample(1) I/O-wait profile, and proposed memoization and per-agent index fixes."
+    },
+    "document:docs/upstream-ls-memoization.md": {
+      "name": "upstream-ls-memoization.md",
+      "type": "document",
+      "filePath": "docs/upstream-ls-memoization.md",
+      "summary": "Technical investigation memo (S-153, filed upstream as vercel-labs/skills#2644) analyzing the minute-long skills ls SKILL.md re-parse storm via corpus bisection and CPU/IO profiling, proposing upstream parseSkillMd memoization and per-agent indexing, and recording skills-ui's downstream caching, request coalescing, and remove-path optimizations."
+    },
+    "document:docs/agents/domain.md": {
+      "name": "domain.md",
+      "type": "document",
+      "filePath": "docs/agents/domain.md",
+      "summary": "Agent-skill convention guide explaining how to consume skills-ui's single-context domain documentation (CONTEXT.md and docs/adr/), enforce canonical glossary vocabulary across code and issues, and explicitly surface any ADR conflicts."
+    },
+    "document:docs/agents/issue-tracker.md": {
+      "name": "issue-tracker.md",
+      "type": "document",
+      "filePath": "docs/agents/issue-tracker.md",
+      "summary": "Agent-skill routing contract specifying Linear (project skills-ui / P-S-4, team S-a-c, workspace s-a-c) as the issue tracker via Linear MCP tools rather than gh, including milestone alignment with ROADMAP.md, Wayfinder map/ticket workflow, and triage label references."
+    },
+    "document:docs/agents/triage-labels.md": {
+      "name": "triage-labels.md",
+      "type": "document",
+      "filePath": "docs/agents/triage-labels.md",
+      "summary": "Mapping table translating the five canonical triage roles (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix) to matching Linear workspace labels in the s-a-c workspace for skills-ui issues."
+    },
+    "document:docs/agents/workspace.md": {
+      "name": "workspace.md",
+      "type": "document",
+      "filePath": "docs/agents/workspace.md",
+      "summary": "Canonical multi-worktree workspace-level agent contract (symlinked from the workspace root AGENTS.md) defining DOX instruction priority, bare-repo plus worktree topology (.bare/, main/, retained audit/remediation worktrees), phase worktree lifecycle commands, Linear planning routing, and SKILLS_UI_ environment variable rules."
+    },
+    "config:tests/fixtures/contract/add-hostile.json": {
+      "name": "add-hostile.json",
+      "type": "config",
+      "filePath": "tests/fixtures/contract/add-hostile.json",
+      "summary": "Hostile contract test fixture for skills add --json output containing ANSI CSI color codes, OSC terminal title injection sequences, BEL characters, and NUL bytes across installed and failed entries. Used by the sanitization test suite to verify escape stripping on add-command ingress."
+    },
+    "config:tests/fixtures/contract/add.json": {
+      "name": "add.json",
+      "type": "config",
+      "filePath": "tests/fixtures/contract/add.json",
+      "summary": "Baseline contract test fixture modeling skills add --json output with one installed skill (alpha) and one failed skill (beta) to exercise partial-failure detection. Loaded by default by skills-shim.mjs when emulating add and install subcommands."
+    },
+    "config:tests/fixtures/contract/ls-empty.json": {
+      "name": "ls-empty.json",
+      "type": "config",
+      "filePath": "tests/fixtures/contract/ls-empty.json",
+      "summary": "Empty JSON array contract fixture representing a skills ls --json response with zero installed skills. Injected via SKILLS_SHIM_LS_PROJECT in hosted end-to-end tests to verify empty-state behavior."
+    },
+    "config:tests/fixtures/contract/ls-global.json": {
+      "name": "ls-global.json",
+      "type": "config",
+      "filePath": "tests/fixtures/contract/ls-global.json",
+      "summary": "Default global-scope contract test fixture containing an empty JSON array for skills ls --json -g output. Loaded by skills-shim.mjs as the initial global skill list and exercised by service tests verifying global-scope filtering."
+    },
+    "config:tests/fixtures/contract/ls-hostile.json": {
+      "name": "ls-hostile.json",
+      "type": "config",
+      "filePath": "tests/fixtures/contract/ls-hostile.json",
+      "summary": "Hostile contract test fixture for skills ls --json output pairing a valid skill referencing tests/fixtures/contract/hostile-skill with entries carrying ANSI CSI/OSC/C1 escape sequences, BEL and NUL bytes, and malformed non-string field types. Consumed by the sanitization test suite to validate untrusted CLI ingress hardening."
+    },
+    "config:tests/fixtures/contract/ls-project.json": {
+      "name": "ls-project.json",
+      "type": "config",
+      "filePath": "tests/fixtures/contract/ls-project.json",
+      "summary": "Baseline project-scope contract test fixture modeling skills ls --json output with two installed skills (tdd with null source metadata across four agents and code-review sourced from anthropics/skills on GitHub). Loaded by default by skills-shim.mjs, slow-skills-shim.mjs, and spawn-count performance tests."
+    },
+    "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md": {
+      "name": "v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "type": "document",
+      "filePath": "docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "summary": "Design specification for skills-ui v0.5.4.1 covering unbreakable name-checkbox units on list cards, proportional 10%-50% list-panel widths with v0.5.4 pixel migration, merging right-justified card action groups, and TUI split-pane search and 3-mode sort parity with the WebUI."
+    },
+    "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md": {
+      "name": "v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "type": "document",
+      "filePath": "docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "summary": "Ratified design specification for skills-ui v0.5.5 defining global .skill-lock.json resolution, locked/linked/local skill provenance badges and removal guardrails, host-environment post-mutation hooks, and a read-only health-check endpoint and header Health Pill."
+    },
+    "file:playwright.config.ts": {
+      "name": "playwright.config.ts",
+      "type": "file",
+      "filePath": "playwright.config.ts",
+      "summary": "Playwright test runner configuration targeting tests/e2e/**/*.e2e.ts with a 30-second timeout, single-worker serial execution, and list reporter so Bun's test runner ignores E2E specs."
+    },
+    "file:scripts/build.ts": {
+      "name": "build.ts",
+      "type": "file",
+      "filePath": "scripts/build.ts",
+      "summary": "Cross-platform Bun compile build script that produces self-contained skills-ui executables for darwin-arm64, darwin-x64, linux-x64, and linux-arm64 with embedded __APP_VERSION__, macOS JIT entitlements codesigning, stale dist artifact pruning, and SHA-256 checksum manifest generation."
+    },
+    "file:scripts/install.sh": {
+      "name": "install.sh",
+      "type": "file",
+      "filePath": "scripts/install.sh",
+      "summary": "POSIX shell installer that detects OS and CPU architecture, resolves the requested or latest GitHub release binary, verifies its SHA-256 hash against the tag-committed checksum manifest (falling back to the release asset), and atomically installs skills-ui into SKILLS_UI_INSTALL_DIR."
+    },
+    "document:scripts/perf/report-2026-11-01-real.md": {
+      "name": "report-2026-11-01-real.md",
+      "type": "document",
+      "filePath": "scripts/perf/report-2026-11-01-real.md",
+      "summary": "Performance budget benchmark report generated against the real local skills CLI corpus (1 project and 300 global skills) measuring serve API latency, search deduplication, filter matching and DOM rendering, and cold global first-paint timing."
+    },
+    "document:scripts/perf/report-2026-11-01.md": {
+      "name": "report-2026-11-01.md",
+      "type": "document",
+      "filePath": "scripts/perf/report-2026-11-01.md",
+      "summary": "Baseline performance budget report generated against the synthetic skills-shim fixture corpus (390 project and 40 global skills) documenting baseline verdicts for serve API latency, concurrent search deduplication, DOM filter rebuilds, and stale-response guards."
+    },
+    "document:scripts/pty-smoke/README.md": {
+      "name": "README.md",
+      "type": "document",
+      "filePath": "scripts/pty-smoke/README.md",
+      "summary": "Documentation for the PTY-based real-terminal TUI smoke harness describing how to run smoke.py via uv/pyte, the role of each harness file, and critical PTY gotchas including os.execvpe env passing, key pacing, and TIOCSWINSZ sizing."
+    },
+    "file:scripts/pty-smoke/bin/skills": {
+      "name": "skills",
+      "type": "file",
+      "filePath": "scripts/pty-smoke/bin/skills",
+      "summary": "Relocatable POSIX shell PATH shim placed ahead of system binaries during PTY smoke tests that resolves its sibling directory and execs bun run on scripts/pty-smoke/skills-smoke-bin.ts."
+    },
+    "document:scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md": {
+      "name": "SKILL.md",
+      "type": "document",
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "summary": "Multi-paragraph markdown SKILL.md fixture for skill-001 referenced by ls-global-long.json to supply realistic scrollable markdown detail height during PTY smoke testing."
+    },
+    "document:scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md": {
+      "name": "SKILL.md",
+      "type": "document",
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "summary": "Multi-paragraph markdown SKILL.md fixture for skill-002 referenced by ls-global-long.json to provide scrollable detail-pane content in PTY smoke runs."
+    },
+    "document:scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md": {
+      "name": "SKILL.md",
+      "type": "document",
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "summary": "Multi-paragraph markdown SKILL.md fixture for skill-003 referenced by ls-global-long.json to provide scrollable detail-pane content in PTY smoke runs."
+    },
+    "config:scripts/pty-smoke/fixtures/ls-global-long.json": {
+      "name": "ls-global-long.json",
+      "type": "config",
+      "filePath": "scripts/pty-smoke/fixtures/ls-global-long.json",
+      "summary": "120-skill global scope JSON fixture served by skills-smoke-bin.ts to stress-test TUI scrolling, paging, mouse selection, filtering, and viewport follow in PTY smoke tests."
+    },
+    "config:scripts/pty-smoke/fixtures/ls-project.json": {
+      "name": "ls-project.json",
+      "type": "config",
+      "filePath": "scripts/pty-smoke/fixtures/ls-project.json",
+      "summary": "Two-skill project scope JSON fixture (tdd and code-review) returned by skills-smoke-bin.ts for initial project-scope startup checks in PTY smoke tests."
+    },
+    "file:scripts/pty-smoke/runner.py": {
+      "name": "runner.py",
+      "type": "file",
+      "filePath": "scripts/pty-smoke/runner.py",
+      "summary": "Python PTY test harness that forks skills-ui inside a real pseudo-terminal with isolated prefs/cache paths and the smoke skills shim on PATH, feeding output into a pyte virtual screen for row-accurate assertions."
+    },
+    "file:scripts/pty-smoke/skills-smoke-bin.ts": {
+      "name": "skills-smoke-bin.ts",
+      "type": "file",
+      "filePath": "scripts/pty-smoke/skills-smoke-bin.ts",
+      "summary": "Minimal Bun-executed skills CLI stand-in invoked via the PATH shim that answers --version with 1.7.4 and serves ls-global-long.json or ls-project.json for ls/list commands without relying on environment variables."
+    },
+    "file:scripts/pty-smoke/smoke.py": {
+      "name": "smoke.py",
+      "type": "file",
+      "filePath": "scripts/pty-smoke/smoke.py",
+      "summary": "End-to-end real-terminal smoke test suite that starts an ephemeral fixture search HTTP server and drives skills-ui through PtyApp to verify startup layout, global scope jumps, Home/End/PgDn scrolling, SGR mouse clicks, live filtering, space checks, 3D graph toggling, and search queue navigation."
+    },
+    "file:scripts/verify-build-targets.ts": {
+      "name": "verify-build-targets.ts",
+      "type": "file",
+      "filePath": "scripts/verify-build-targets.ts",
+      "summary": "Post-build verification script that inspects all four compiled binaries in dist/ with the file command to confirm Mach-O/ELF target architectures and asserts every binary's SHA-256 digest matches checksums-<version>.txt."
+    },
+    "file:src/core/filter.ts": {
+      "name": "filter.ts",
+      "type": "file",
+      "filePath": "src/core/filter.ts",
+      "summary": "Shared single source of truth for installed-skill substring filtering across both WebUI (embedded via toString() into APP_JS) and TUI, deliberately avoiding template and regex literals for verbatim script interpolation."
+    },
+    "file:src/tui/spike.ts": {
+      "name": "spike.ts",
+      "type": "file",
+      "filePath": "src/tui/spike.ts",
+      "summary": "Phase-0 OpenTUI markdown rendering spike used by selftest and standalone spike verification to prove tree-sitter worker embedding, Catppuccin Mocha syntax styling, and BoxRenderable/MarkdownRenderable composition."
+    },
+    "file:tests/e2e/hosted.e2e.ts": {
+      "name": "hosted.e2e.ts",
+      "type": "file",
+      "filePath": "tests/e2e/hosted.e2e.ts",
+      "summary": "Playwright end-to-end test suite exercising the live GitHub Pages hosted UI against local serve subprocesses (LNA permission, bearer auth, empty state) plus local web-mode honesty, error toasts, search in-flight race guards, sort/filter/scope semantics, and hostile SKILL.md XSS safety."
+    },
+    "document:tests/fixtures/contract/hostile-skill/SKILL.md": {
+      "name": "SKILL.md",
+      "type": "document",
+      "filePath": "tests/fixtures/contract/hostile-skill/SKILL.md",
+      "summary": "Adversarial SKILL.md fixture embedding ANSI SGR, OSC, DCS, and C1 control sequences alongside normal tabs and text to verify terminal and web sanitization strips dangerous escapes while preserving readable structure."
+    },
+    "file:tests/fixtures/skills-shim.mjs": {
+      "name": "skills-shim.mjs",
+      "type": "file",
+      "filePath": "tests/fixtures/skills-shim.mjs",
+      "summary": "Stateful fixture stand-in for the skills CLI implementing --version, ls --json, install --list, add --json, rm (with optional SKILLS_SHIM_RM_KEEP partial failures), update, environment snapshots, and JSONL call logging for unit, API, E2E, and performance tests."
+    },
+    "file:tests/fixtures/slow-skills-shim.mjs": {
+      "name": "slow-skills-shim.mjs",
+      "type": "file",
+      "filePath": "tests/fixtures/slow-skills-shim.mjs",
+      "summary": "Delayed skills CLI test shim that sleeps SKILLS_SHIM_DELAY_MS milliseconds before answering ls requests from ls-project.json so serve-hardening tests can exercise subprocess spawn-queue saturation and concurrency limits."
+    },
+    "file:tests/image.test.ts": {
+      "name": "image.test.ts",
+      "type": "file",
+      "filePath": "tests/image.test.ts",
+      "summary": "Bun unit tests verifying OpenTUI ImageRenderable blocks-protocol rendering in an in-memory test renderer and pinning that the vendored Jimp-free @opentui/three fork throws unsupported-operation errors on file-image utilities."
+    },
+    "file:tests/services.test.ts": {
+      "name": "services.test.ts",
+      "type": "file",
+      "filePath": "tests/services.test.ts",
+      "summary": "Comprehensive Bun unit and integration test suite covering skills-client env sanitization and versioning, core skill services (installed, install, remove, source, update, skill-doc), registry search fallback, failure signaling, in-flight deduplication, byte-pinned search semantics, CLI seed parsing, preference persistence and width normalization, and Catppuccin theme WCAG AA contrast compliance."
+    }
+  },
+  "totalNodes": 116,
+  "totalEdges": 385
+}

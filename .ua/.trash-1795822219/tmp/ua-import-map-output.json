@@ -1,0 +1,315 @@
+{
+  "scriptCompleted": true,
+  "stats": {
+    "filesScanned": 116,
+    "filesWithImports": 52,
+    "totalEdges": 137
+  },
+  "importMap": {
+    ".github/workflows/claude-code-review.yml": [],
+    ".github/workflows/claude.yml": [],
+    "AGENTS.md": [],
+    "CONTEXT.md": [],
+    "README.md": [],
+    "ROADMAP.md": [],
+    "docs/_config.yml": [],
+    "docs/agents/domain.md": [],
+    "docs/agents/issue-tracker.md": [],
+    "docs/agents/triage-labels.md": [],
+    "docs/agents/workspace.md": [],
+    "docs/archify-findings-review-and-report-2026-11-26.md": [],
+    "docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md": [],
+    "docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md": [],
+    "docs/index.md": [],
+    "docs/release.md": [],
+    "docs/upstream-issue-draft.md": [],
+    "docs/upstream-ls-memoization.md": [],
+    "mise.toml": [],
+    "package.json": [],
+    "playwright.config.ts": [],
+    "scripts/build.ts": [],
+    "scripts/export-page.ts": [
+      "src/core/version.ts",
+      "src/web/page.ts"
+    ],
+    "scripts/install.sh": [],
+    "scripts/perf/budget.ts": [
+      "src/core/api.ts",
+      "src/core/index.ts",
+      "src/core/version.ts",
+      "src/web/page.ts",
+      "tests/perf/helpers.ts",
+      "tests/perf/playwright-probes.ts"
+    ],
+    "scripts/perf/report-2026-11-01-real.md": [],
+    "scripts/perf/report-2026-11-01.md": [],
+    "scripts/pty-smoke/README.md": [],
+    "scripts/pty-smoke/bin/skills": [],
+    "scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md": [],
+    "scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md": [],
+    "scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md": [],
+    "scripts/pty-smoke/fixtures/ls-global-long.json": [],
+    "scripts/pty-smoke/fixtures/ls-project.json": [],
+    "scripts/pty-smoke/runner.py": [],
+    "scripts/pty-smoke/skills-smoke-bin.ts": [],
+    "scripts/pty-smoke/smoke.py": [
+      "scripts/pty-smoke/runner.py"
+    ],
+    "scripts/verify-build-targets.ts": [],
+    "src/core/api.ts": [
+      "src/core/hosted-auth.ts",
+      "src/core/index.ts",
+      "src/core/prefs.ts",
+      "src/core/seed.ts",
+      "src/core/services/locks.ts",
+      "src/core/services/sanitize.ts",
+      "src/core/services/skill-doc.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts",
+      "src/core/version.ts"
+    ],
+    "src/core/disk-index.ts": [
+      "src/core/services/types.ts"
+    ],
+    "src/core/filter.ts": [],
+    "src/core/hosted-auth.ts": [],
+    "src/core/index.ts": [],
+    "src/core/prefs.ts": [],
+    "src/core/seed.ts": [],
+    "src/core/services/hooks.ts": [
+      "src/core/services/sanitize.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts"
+    ],
+    "src/core/services/install.ts": [
+      "src/core/services/sanitize.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts"
+    ],
+    "src/core/services/installed.ts": [
+      "src/core/services/locks.ts",
+      "src/core/services/sanitize.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts"
+    ],
+    "src/core/services/locks.ts": [
+      "src/core/services/types.ts"
+    ],
+    "src/core/services/remove.ts": [
+      "src/core/services/installed.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts"
+    ],
+    "src/core/services/sanitize.ts": [],
+    "src/core/services/search.ts": [
+      "src/core/services/sanitize.ts",
+      "src/core/services/types.ts"
+    ],
+    "src/core/services/skill-doc.ts": [
+      "src/core/services/sanitize.ts"
+    ],
+    "src/core/services/source.ts": [
+      "src/core/services/sanitize.ts",
+      "src/core/skills-client.ts"
+    ],
+    "src/core/services/types.ts": [],
+    "src/core/services/update.ts": [
+      "src/core/services/sanitize.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts"
+    ],
+    "src/core/services/updates-check.ts": [
+      "src/core/services/locks.ts",
+      "src/core/services/types.ts"
+    ],
+    "src/core/skills-client.ts": [
+      "src/core/spawn-queue.ts"
+    ],
+    "src/core/spawn-queue.ts": [],
+    "src/core/theme.ts": [
+      "src/core/prefs.ts"
+    ],
+    "src/core/version.ts": [
+      "package.json"
+    ],
+    "src/main.ts": [
+      "src/core/version.ts",
+      "src/tui/app.ts"
+    ],
+    "src/tui/Views.tsx": [
+      "src/core/index.ts",
+      "src/core/prefs.ts",
+      "src/core/seed.ts",
+      "src/core/theme.ts",
+      "src/core/version.ts",
+      "src/tui/art.ts",
+      "src/tui/audio.ts",
+      "src/tui/model.ts"
+    ],
+    "src/tui/app.ts": [
+      "src/core/disk-index.ts",
+      "src/core/index.ts",
+      "src/core/prefs.ts",
+      "src/core/seed.ts",
+      "src/tui/Views.tsx",
+      "src/tui/audio.ts",
+      "src/tui/model.ts"
+    ],
+    "src/tui/art.ts": [
+      "src/core/theme.ts"
+    ],
+    "src/tui/audio.ts": [
+      "src/core/prefs.ts"
+    ],
+    "src/tui/model.ts": [
+      "src/core/index.ts",
+      "src/core/prefs.ts",
+      "src/core/seed.ts"
+    ],
+    "src/tui/renderer-ready.ts": [],
+    "src/tui/spike.ts": [],
+    "src/tui/three-scene.ts": [
+      "src/core/index.ts",
+      "src/core/theme.ts"
+    ],
+    "src/web/client/core.ts": [
+      "src/core/prefs.ts"
+    ],
+    "src/web/client/installed.ts": [],
+    "src/web/client/search-and-boot.ts": [],
+    "src/web/page.ts": [
+      "src/core/index.ts",
+      "src/core/prefs.ts",
+      "src/core/seed.ts",
+      "src/core/theme.ts",
+      "src/web/client/core.ts",
+      "src/web/client/installed.ts",
+      "src/web/client/search-and-boot.ts",
+      "src/web/styles.ts"
+    ],
+    "src/web/styles.ts": [],
+    "tests/api.test.ts": [
+      "src/core/skills-client.ts",
+      "src/core/version.ts",
+      "tests/helpers/audit-state.ts",
+      "tests/perf/helpers.ts"
+    ],
+    "tests/dash-sweep.test.ts": [
+      "src/web/page.ts"
+    ],
+    "tests/e2e/audit-remediation.e2e.ts": [
+      "tests/e2e/helpers/audit-fixture.ts",
+      "tests/helpers/audit-state.ts"
+    ],
+    "tests/e2e/helpers/audit-fixture.ts": [
+      "tests/helpers/audit-state.ts"
+    ],
+    "tests/e2e/hosted.e2e.ts": [],
+    "tests/filter-parity.test.ts": [
+      "src/core/prefs.ts",
+      "src/core/services/types.ts",
+      "src/tui/model.ts",
+      "src/web/page.ts"
+    ],
+    "tests/fixtures/audit-web-server.ts": [
+      "src/core/api.ts",
+      "src/web/page.ts"
+    ],
+    "tests/fixtures/contract/add-hostile.json": [],
+    "tests/fixtures/contract/add.json": [],
+    "tests/fixtures/contract/hostile-skill/SKILL.md": [],
+    "tests/fixtures/contract/ls-empty.json": [],
+    "tests/fixtures/contract/ls-global.json": [],
+    "tests/fixtures/contract/ls-hostile.json": [],
+    "tests/fixtures/contract/ls-project.json": [],
+    "tests/fixtures/skills-shim.mjs": [],
+    "tests/fixtures/slow-skills-shim.mjs": [],
+    "tests/helpers/audit-state.ts": [],
+    "tests/helpers/installer-fixture.ts": [
+      "tests/helpers/audit-state.ts"
+    ],
+    "tests/hooks-health.test.ts": [
+      "src/core/api.ts",
+      "src/core/disk-index.ts",
+      "src/core/index.ts",
+      "src/core/services/locks.ts",
+      "src/core/skills-client.ts"
+    ],
+    "tests/hosted-auth.test.ts": [
+      "src/core/hosted-auth.ts"
+    ],
+    "tests/image.test.ts": [],
+    "tests/installer.test.ts": [
+      "tests/helpers/installer-fixture.ts"
+    ],
+    "tests/locks.test.ts": [
+      "src/core/services/locks.ts",
+      "src/core/services/updates-check.ts",
+      "tests/helpers/audit-state.ts"
+    ],
+    "tests/markdown-render.test.ts": [
+      "src/web/page.ts"
+    ],
+    "tests/page-hardening.test.ts": [
+      "src/web/page.ts"
+    ],
+    "tests/page-smoke.test.ts": [
+      "tests/perf/helpers.ts"
+    ],
+    "tests/perf/filter-dom.test.ts": [
+      "tests/perf/helpers.ts",
+      "tests/perf/playwright-probes.ts"
+    ],
+    "tests/perf/helpers.ts": [],
+    "tests/perf/playwright-probes.ts": [],
+    "tests/perf/search-stub.test.ts": [
+      "tests/perf/helpers.ts"
+    ],
+    "tests/perf/spawn-count.test.ts": [
+      "tests/perf/helpers.ts"
+    ],
+    "tests/sanitize.test.ts": [
+      "src/core/services/sanitize.ts"
+    ],
+    "tests/selftest.test.ts": [
+      "src/tui/app.ts",
+      "src/tui/renderer-ready.ts"
+    ],
+    "tests/serve-hardening.test.ts": [
+      "src/core/hosted-auth.ts",
+      "src/core/services/updates-check.ts",
+      "src/core/spawn-queue.ts"
+    ],
+    "tests/services.test.ts": [],
+    "tests/terminology.test.ts": [
+      "src/web/page.ts"
+    ],
+    "tests/tui-disk-index.test.ts": [
+      "src/core/disk-index.ts",
+      "src/core/prefs.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts",
+      "src/tui/app.ts",
+      "src/tui/model.ts",
+      "src/tui/renderer-ready.ts",
+      "tests/helpers/audit-state.ts"
+    ],
+    "tests/tui.test.ts": [
+      "src/core/prefs.ts",
+      "src/core/services/types.ts",
+      "src/core/skills-client.ts",
+      "src/tui/app.ts",
+      "src/tui/model.ts",
+      "src/tui/renderer-ready.ts",
+      "tests/helpers/audit-state.ts"
+    ],
+    "tests/version.test.ts": [
+      "package.json",
+      "src/core/version.ts"
+    ],
+    "tests/web-055.test.ts": [
+      "tests/perf/helpers.ts"
+    ],
+    "tsconfig.json": []
+  }
+}

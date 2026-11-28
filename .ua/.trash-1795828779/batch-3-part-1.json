@@ -1,0 +1,842 @@
+{
+  "nodes": [
+    {
+      "id": "file:scripts/export-page.ts",
+      "type": "file",
+      "name": "export-page.ts",
+      "filePath": "scripts/export-page.ts",
+      "lineRange": [1, 15],
+      "summary": "CLI build script that renders the hosted WebUI HTML via renderPage with hosted mode enabled and writes it to a target path (defaulting to docs/app.html).",
+      "tags": ["build-script", "static-export", "hosted-webui", "html-generator"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:scripts/perf/budget.ts",
+      "type": "file",
+      "name": "budget.ts",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [1, 644],
+      "summary": "Performance budget harness that benchmarks API list/detail latency, search overhead and deduplication, filter matching, and Playwright browser probes against synthetic or real skill corpora, emitting a Markdown verdict report.",
+      "tags": ["perf-harness", "benchmark", "playwright-probes", "budget-report"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:msRow",
+      "type": "function",
+      "name": "msRow",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [124, 133],
+      "summary": "Formats a millisecond benchmark measurement, evaluates its MET or BUDGET-MISS verdict against a budget threshold, and appends the resulting Row to the report table.",
+      "tags": ["perf-report", "verdict", "millisecond-formatting"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:setupSynthetic",
+      "type": "function",
+      "name": "setupSynthetic",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [201, 223],
+      "summary": "Materializes a synthetic 390-project and 40-global skill corpus in a temporary workspace, configures shim environment variables, and returns a Scenario descriptor for benchmarking.",
+      "tags": ["synthetic-corpus", "scenario-setup", "shim-env"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:setupReal",
+      "type": "function",
+      "name": "setupReal",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [227, 288],
+      "summary": "Refuses CI execution, verifies the real skills CLI on PATH, enumerates live project and global skill installations, and constructs a real-corpus benchmark Scenario with alternating match and non-match filter probes.",
+      "tags": ["real-corpus", "ci-guard", "scenario-setup", "skills-cli"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:benchFilterMatching",
+      "type": "function",
+      "name": "benchFilterMatching",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [292, 324],
+      "summary": "Enriches project skill entries with sanitized frontmatter descriptions and benchmarks in-process full-corpus skillMatches passes across all scenario needles to record median latency.",
+      "tags": ["filter-benchmark", "in-process", "skill-matching"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:benchColdList",
+      "type": "function",
+      "name": "benchColdList",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [326, 344],
+      "summary": "Spins up a fresh API-only server for each repetition, times the first GET /api/skills request for the given scope, validates status and row count, and returns the median latency.",
+      "tags": ["cold-start", "api-benchmark", "skills-list"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:benchApiLists",
+      "type": "function",
+      "name": "benchApiLists",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [346, 390],
+      "summary": "Measures cold and warm project list endpoints, exact-path skill detail reads, and contextual cold/warm global list timings, returning the live warm server for downstream search benchmarks.",
+      "tags": ["api-benchmark", "warm-cache", "detail-read", "skills-list"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:benchSearch",
+      "type": "function",
+      "name": "benchSearch",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [392, 438],
+      "summary": "Starts a fixed-RTT stub registry server, measures /api/search wrapper overhead against direct stub calls, and verifies concurrent identical-query deduplication across three parallel requests.",
+      "tags": ["search-benchmark", "registry-stub", "in-flight-dedup"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:benchColdGlobalPaint",
+      "type": "function",
+      "name": "benchColdGlobalPaint",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [440, 466],
+      "summary": "Opens the served WebUI against a fresh server on each repetition and measures perceived first paint latency when switching to the global scope.",
+      "tags": ["playwright-benchmark", "first-paint", "scope-switch"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:benchFilterRenderAndRebuild",
+      "type": "function",
+      "name": "benchFilterRenderAndRebuild",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [468, 516],
+      "summary": "Probes debounced filter render work across all scenario needles and checks repeated same-result keystrokes for zero full DOM rebuilds and zero animation replays.",
+      "tags": ["filter-render", "dom-identity", "animation-replay", "playwright-benchmark"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:benchStaleOverwrite",
+      "type": "function",
+      "name": "benchStaleOverwrite",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [518, 538],
+      "summary": "Runs the slow-then-fast search ordering probe in Playwright and records whether a late stale registry response overwrote the fresher search render.",
+      "tags": ["stale-response", "search-ordering", "playwright-benchmark"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:benchPageProbes",
+      "type": "function",
+      "name": "benchPageProbes",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [540, 556],
+      "summary": "Launches headless Chromium with animations enabled and updates stubbed, then orchestrates the cold-global paint, filter render/rebuild, and stale-overwrite page probes.",
+      "tags": ["chromium", "playwright-orchestrator", "page-probes"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:recordShimSpawns",
+      "type": "function",
+      "name": "recordShimSpawns",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [558, 567],
+      "summary": "Reads the synthetic shim call log and records an observation summarizing project list, global list, and other CLI subprocess spawn counts.",
+      "tags": ["spawn-counting", "shim-calllog", "observability"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:emitReport",
+      "type": "function",
+      "name": "emitReport",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [569, 584],
+      "summary": "Prints the Markdown budget report to stdout, optionally persists a dated report file with overwrite protection, and sets exit code 1 under --strict when any row misses budget.",
+      "tags": ["report-output", "strict-gate", "markdown-report"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [588, 612],
+      "summary": "Top-level orchestrator that snapshots environment state, runs synthetic or real setup followed by all API and browser benchmark stages, emits the report, and cleans up servers, browser, temp directories, and env vars.",
+      "tags": ["entrypoint", "benchmark-orchestrator", "resource-cleanup"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:scripts/perf/budget.ts:renderReport",
+      "type": "function",
+      "name": "renderReport",
+      "filePath": "scripts/perf/budget.ts",
+      "lineRange": [614, 639],
+      "summary": "Builds the Markdown performance budget report containing scenario metadata, repetition counts, app version, verdict table rows, and diagnostic observations.",
+      "tags": ["markdown-formatter", "perf-report", "summary-table"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/core/version.ts",
+      "type": "file",
+      "name": "version.ts",
+      "filePath": "src/core/version.ts",
+      "lineRange": [1, 15],
+      "summary": "Exports the single source of truth APP_VERSION constant, preferring the bundle-time __APP_VERSION__ define in compiled binaries and falling back to package.json during development and tests.",
+      "tags": ["app-version", "build-define", "metadata", "core"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/main.ts",
+      "type": "file",
+      "name": "main.ts",
+      "filePath": "src/main.ts",
+      "lineRange": [1, 104],
+      "summary": "Primary CLI entrypoint for skills-ui that parses --port and dispatches between --version, --selftest, headless serve, interactive --web, and the default OpenTUI terminal application.",
+      "tags": ["cli-entrypoint", "mode-dispatch", "tui", "web-server"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main.ts:parsePortArg",
+      "type": "function",
+      "name": "parsePortArg",
+      "filePath": "src/main.ts",
+      "lineRange": [16, 30],
+      "summary": "Extracts and validates an optional --port <n> flag (integer 1-65535) from CLI arguments while returning the remaining positional and option arguments.",
+      "tags": ["cli-parsing", "port-validation", "arguments"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/main.ts:selftest",
+      "type": "function",
+      "name": "selftest",
+      "filePath": "src/main.ts",
+      "lineRange": [32, 53],
+      "summary": "Runs a headless in-memory OpenTUI smoke test by mounting the spike screen in a test renderer and polling waitForFrame until all expected frame markers render.",
+      "tags": ["selftest", "opentui", "headless-smoke", "frame-check"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/main.ts:runWeb",
+      "type": "function",
+      "name": "runWeb",
+      "filePath": "src/main.ts",
+      "lineRange": [55, 88],
+      "summary": "Lazily loads the HTTP API server, UI seed parser, and optional WebUI page renderer, starts the loopback server, opens a browser in interactive TTY mode, and waits for SIGINT or SIGTERM for clean shutdown.",
+      "tags": ["web-server", "loopback-api", "browser-launch", "signal-handling"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:scripts/export-page.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/export-page.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/export-page.ts",
+      "target": "function:src/web/page.ts:renderPage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:src/core/api.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:src/web/page.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:tests/perf/helpers.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "file:tests/perf/playwright-probes.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:msRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:setupSynthetic",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:setupReal",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:benchFilterMatching",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:benchColdList",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:benchApiLists",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:benchSearch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:benchColdGlobalPaint",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:benchFilterRenderAndRebuild",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:benchStaleOverwrite",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:benchPageProbes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:recordShimSpawns",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:emitReport",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:renderReport",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:scripts/perf/budget.ts:main",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:scripts/perf/budget.ts",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:msRow",
+      "target": "function:tests/perf/helpers.ts:fmtMs",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:setupSynthetic",
+      "target": "function:tests/perf/helpers.ts:buildSyntheticCorpus",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:setupReal",
+      "target": "function:src/core/skills-client.ts:runSkills",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:setupReal",
+      "target": "function:src/core/services/installed.ts:listInstalled",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchFilterMatching",
+      "target": "function:src/core/services/skill-doc.ts:readSkillDoc",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchFilterMatching",
+      "target": "function:src/core/services/sanitize.ts:sanitizeMetadata",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchFilterMatching",
+      "target": "function:src/core/filter.ts:skillMatches",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchFilterMatching",
+      "target": "function:tests/perf/helpers.ts:median",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchFilterMatching",
+      "target": "function:tests/perf/helpers.ts:fmtMs",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchFilterMatching",
+      "target": "function:scripts/perf/budget.ts:msRow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchColdList",
+      "target": "function:tests/perf/helpers.ts:fmtMs",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchColdList",
+      "target": "function:tests/perf/helpers.ts:median",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchApiLists",
+      "target": "function:scripts/perf/budget.ts:msRow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchApiLists",
+      "target": "function:scripts/perf/budget.ts:benchColdList",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchApiLists",
+      "target": "function:tests/perf/helpers.ts:median",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchApiLists",
+      "target": "function:tests/perf/helpers.ts:fmtMs",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchSearch",
+      "target": "function:tests/perf/helpers.ts:startSearchStub",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchSearch",
+      "target": "function:tests/perf/helpers.ts:median",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchSearch",
+      "target": "function:tests/perf/helpers.ts:fmtMs",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchColdGlobalPaint",
+      "target": "function:tests/perf/playwright-probes.ts:openServedPage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchColdGlobalPaint",
+      "target": "function:tests/perf/playwright-probes.ts:probeScopeFirstPaint",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchColdGlobalPaint",
+      "target": "function:tests/perf/helpers.ts:fmtMs",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchColdGlobalPaint",
+      "target": "function:scripts/perf/budget.ts:msRow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchColdGlobalPaint",
+      "target": "function:tests/perf/helpers.ts:median",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchFilterRenderAndRebuild",
+      "target": "function:tests/perf/playwright-probes.ts:probeFilterRender",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchFilterRenderAndRebuild",
+      "target": "function:tests/perf/helpers.ts:fmtMs",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchFilterRenderAndRebuild",
+      "target": "function:tests/perf/helpers.ts:median",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchFilterRenderAndRebuild",
+      "target": "function:scripts/perf/budget.ts:msRow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchStaleOverwrite",
+      "target": "function:tests/perf/playwright-probes.ts:probeStaleOverwrite",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchPageProbes",
+      "target": "function:tests/perf/playwright-probes.ts:newPerfContext",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchPageProbes",
+      "target": "function:tests/perf/playwright-probes.ts:stubUpdates",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchPageProbes",
+      "target": "function:scripts/perf/budget.ts:benchColdGlobalPaint",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchPageProbes",
+      "target": "function:tests/perf/playwright-probes.ts:openServedPage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchPageProbes",
+      "target": "function:scripts/perf/budget.ts:benchFilterRenderAndRebuild",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:benchPageProbes",
+      "target": "function:scripts/perf/budget.ts:benchStaleOverwrite",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:recordShimSpawns",
+      "target": "function:tests/perf/helpers.ts:readShimCallLog",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:recordShimSpawns",
+      "target": "function:tests/perf/helpers.ts:countShimCalls",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:emitReport",
+      "target": "function:scripts/perf/budget.ts:renderReport",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:main",
+      "target": "function:scripts/perf/budget.ts:setupReal",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:main",
+      "target": "function:scripts/perf/budget.ts:setupSynthetic",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:main",
+      "target": "function:scripts/perf/budget.ts:benchFilterMatching",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:main",
+      "target": "function:scripts/perf/budget.ts:benchApiLists",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:main",
+      "target": "function:scripts/perf/budget.ts:benchSearch",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:main",
+      "target": "function:scripts/perf/budget.ts:benchPageProbes",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:main",
+      "target": "function:scripts/perf/budget.ts:recordShimSpawns",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:main",
+      "target": "function:scripts/perf/budget.ts:emitReport",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:scripts/perf/budget.ts:main",
+      "target": "function:tests/perf/playwright-probes.ts:closeBrowser",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/version.ts",
+      "target": "config:package.json",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "file:src/tui/app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "function:src/main.ts:parsePortArg",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "function:src/main.ts:selftest",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "function:src/main.ts:runWeb",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "function:src/main.ts:parsePortArg",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "function:src/main.ts:selftest",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "function:src/main.ts:runWeb",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "function:src/core/seed.ts:parseUiSeed",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main.ts",
+      "target": "function:src/tui/app.ts:runTui",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main.ts:selftest",
+      "target": "function:src/tui/spike.ts:buildSpikeScreen",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main.ts:selftest",
+      "target": "function:src/tui/renderer-ready.ts:waitForFrame",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main.ts:runWeb",
+      "target": "function:src/core/seed.ts:parseUiSeed",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/main.ts:runWeb",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

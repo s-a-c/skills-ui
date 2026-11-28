@@ -1,0 +1,181 @@
+[
+  {
+    "id": "layer:terminal-ui",
+    "name": "Terminal UI (OpenTUI)",
+    "description": "OpenTUI React terminal application implementing the Elm-style state model, interactive views, keyboard runtime, procedural pixel art, PCM audio synthesis, 3D skills graph, and tree-sitter selftest screen.",
+    "nodeIds": [
+      "file:src/tui/app.ts",
+      "file:src/tui/Views.tsx",
+      "file:src/tui/model.ts",
+      "file:src/tui/art.ts",
+      "file:src/tui/audio.ts",
+      "file:src/tui/three-scene.ts",
+      "file:src/tui/renderer-ready.ts",
+      "file:src/tui/spike.ts"
+    ]
+  },
+  {
+    "id": "layer:web-ui",
+    "name": "Web Dashboard UI",
+    "description": "Single-file local and hosted browser dashboard assembling Catppuccin styles, SHA-256 CSP-pinned HTML rendering, and client-side JavaScript modules for installed skills, markdown detail, and registry search.",
+    "nodeIds": [
+      "file:src/web/page.ts",
+      "file:src/web/styles.ts",
+      "file:src/web/client/core.ts",
+      "file:src/web/client/installed.ts",
+      "file:src/web/client/search-and-boot.ts"
+    ]
+  },
+  {
+    "id": "layer:cli-and-api",
+    "name": "CLI Entrypoint & Loopback API",
+    "description": "Primary CLI mode dispatcher, startup argument seed parser, and authenticated Bun.serve loopback HTTP API enforcing host and origin allowlists, bearer verification, CORS, caching, and rate limits.",
+    "nodeIds": [
+      "file:src/main.ts",
+      "file:src/core/api.ts",
+      "file:src/core/hosted-auth.ts",
+      "file:src/core/seed.ts"
+    ]
+  },
+  {
+    "id": "layer:core-services",
+    "name": "Skill Domain Services",
+    "description": "Domain services wrapping the external skills CLI, lockfile provenance readers, skills.sh registry search, GitHub Trees update checks, SKILL.md reading, post-mutation hooks, health checks, and CWE-150 ingress sanitization.",
+    "nodeIds": [
+      "file:src/core/services/types.ts",
+      "file:src/core/services/sanitize.ts",
+      "file:src/core/services/locks.ts",
+      "file:src/core/services/installed.ts",
+      "file:src/core/services/install.ts",
+      "file:src/core/services/remove.ts",
+      "file:src/core/services/update.ts",
+      "file:src/core/services/updates-check.ts",
+      "file:src/core/services/search.ts",
+      "file:src/core/services/source.ts",
+      "file:src/core/services/skill-doc.ts",
+      "file:src/core/services/hooks.ts"
+    ]
+  },
+  {
+    "id": "layer:core-platform",
+    "name": "Core Runtime & Shared Primitives",
+    "description": "Foundational runtime modules shared across TUI, WebUI, and API layers, including sanitized skills CLI subprocess execution, bounded spawn-queue concurrency, SWR disk caching, user preferences, filter parity, Catppuccin theming, and version metadata.",
+    "nodeIds": [
+      "file:src/core/index.ts",
+      "file:src/core/skills-client.ts",
+      "file:src/core/spawn-queue.ts",
+      "file:src/core/disk-index.ts",
+      "file:src/core/prefs.ts",
+      "file:src/core/filter.ts",
+      "file:src/core/theme.ts",
+      "file:src/core/version.ts"
+    ]
+  },
+  {
+    "id": "layer:test-suites",
+    "name": "Automated Test Suites",
+    "description": "Bun unit, integration, security hardening, performance regression, and Playwright end-to-end test suites validating core services, HTTP API boundaries, TUI state/rendering, WebUI behavior, and installer safety.",
+    "nodeIds": [
+      "file:tests/api.test.ts",
+      "file:tests/dash-sweep.test.ts",
+      "file:tests/filter-parity.test.ts",
+      "file:tests/hooks-health.test.ts",
+      "file:tests/hosted-auth.test.ts",
+      "file:tests/image.test.ts",
+      "file:tests/installer.test.ts",
+      "file:tests/locks.test.ts",
+      "file:tests/markdown-render.test.ts",
+      "file:tests/page-hardening.test.ts",
+      "file:tests/page-smoke.test.ts",
+      "file:tests/sanitize.test.ts",
+      "file:tests/selftest.test.ts",
+      "file:tests/serve-hardening.test.ts",
+      "file:tests/services.test.ts",
+      "file:tests/terminology.test.ts",
+      "file:tests/tui-disk-index.test.ts",
+      "file:tests/tui.test.ts",
+      "file:tests/version.test.ts",
+      "file:tests/web-055.test.ts",
+      "file:tests/e2e/audit-remediation.e2e.ts",
+      "file:tests/e2e/hosted.e2e.ts",
+      "file:tests/perf/filter-dom.test.ts",
+      "file:tests/perf/search-stub.test.ts",
+      "file:tests/perf/spawn-count.test.ts"
+    ]
+  },
+  {
+    "id": "layer:test-harnesses-and-fixtures",
+    "name": "Verification Harnesses, Shims & Fixtures",
+    "description": "Shared test fixtures, sandboxed workspace helpers, executable skills CLI shims, Playwright performance probes, benchmark budget runner, and the Python real-terminal PTY smoke harness with its fixture payloads.",
+    "nodeIds": [
+      "file:tests/helpers/audit-state.ts",
+      "file:tests/helpers/installer-fixture.ts",
+      "file:tests/e2e/helpers/audit-fixture.ts",
+      "file:tests/perf/helpers.ts",
+      "file:tests/perf/playwright-probes.ts",
+      "file:tests/fixtures/audit-web-server.ts",
+      "file:tests/fixtures/skills-shim.mjs",
+      "file:tests/fixtures/slow-skills-shim.mjs",
+      "config:tests/fixtures/contract/add-hostile.json",
+      "config:tests/fixtures/contract/add.json",
+      "config:tests/fixtures/contract/ls-empty.json",
+      "config:tests/fixtures/contract/ls-global.json",
+      "config:tests/fixtures/contract/ls-hostile.json",
+      "config:tests/fixtures/contract/ls-project.json",
+      "document:tests/fixtures/contract/hostile-skill/SKILL.md",
+      "file:scripts/perf/budget.ts",
+      "document:scripts/perf/report-2026-11-01.md",
+      "document:scripts/perf/report-2026-11-01-real.md",
+      "document:scripts/pty-smoke/README.md",
+      "file:scripts/pty-smoke/runner.py",
+      "file:scripts/pty-smoke/smoke.py",
+      "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "file:scripts/pty-smoke/bin/skills",
+      "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "config:scripts/pty-smoke/fixtures/ls-project.json",
+      "document:scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "document:scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "document:scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md"
+    ]
+  },
+  {
+    "id": "layer:build-config-and-ci",
+    "name": "Build, Release, CI & Project Config",
+    "description": "Cross-platform Bun executable compiler, target checksum verifier, hosted page exporter, POSIX shell installer, GitHub Actions workflows, and repository toolchain, TypeScript, Playwright, and Jekyll configurations.",
+    "nodeIds": [
+      "file:scripts/build.ts",
+      "file:scripts/verify-build-targets.ts",
+      "file:scripts/export-page.ts",
+      "file:scripts/install.sh",
+      "pipeline:.github/workflows/claude-code-review.yml",
+      "pipeline:.github/workflows/claude.yml",
+      "config:package.json",
+      "config:tsconfig.json",
+      "config:mise.toml",
+      "file:playwright.config.ts",
+      "config:docs/_config.yml"
+    ]
+  },
+  {
+    "id": "layer:documentation",
+    "name": "Documentation, Designs & Agent Specs",
+    "description": "Project README, roadmap, domain glossary, release runbook, architecture audit and upstream performance memos, feature design specifications, and repository/workspace agent contracts.",
+    "nodeIds": [
+      "document:README.md",
+      "document:ROADMAP.md",
+      "document:AGENTS.md",
+      "document:CONTEXT.md",
+      "document:docs/index.md",
+      "document:docs/release.md",
+      "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "document:docs/upstream-issue-draft.md",
+      "document:docs/upstream-ls-memoization.md",
+      "document:docs/agents/domain.md",
+      "document:docs/agents/issue-tracker.md",
+      "document:docs/agents/triage-labels.md",
+      "document:docs/agents/workspace.md",
+      "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md"
+    ]
+  }
+]

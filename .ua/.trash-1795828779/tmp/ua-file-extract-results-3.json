@@ -1,0 +1,2765 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 13,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 13,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 13,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "scripts/export-page.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 15,
+      "nonEmptyLines": 14,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "scripts/perf/budget.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 644,
+      "nonEmptyLines": 607,
+      "functions": [
+        {
+          "name": "verdictFor",
+          "startLine": 121,
+          "endLine": 123,
+          "params": [
+            "measured",
+            "budget"
+          ]
+        },
+        {
+          "name": "msRow",
+          "startLine": 124,
+          "endLine": 133,
+          "params": [
+            "hotPath",
+            "budgetLabel",
+            "budgetMs",
+            "measuredMs"
+          ]
+        },
+        {
+          "name": "progress",
+          "startLine": 134,
+          "endLine": 136,
+          "params": [
+            "message"
+          ]
+        },
+        {
+          "name": "die",
+          "startLine": 138,
+          "endLine": 140,
+          "params": [
+            "message"
+          ]
+        },
+        {
+          "name": "snapshotEnv",
+          "startLine": 154,
+          "endLine": 158,
+          "params": []
+        },
+        {
+          "name": "restoreEnv",
+          "startLine": 159,
+          "endLine": 164,
+          "params": [
+            "snap"
+          ]
+        },
+        {
+          "name": "freshServer",
+          "startLine": 171,
+          "endLine": 174,
+          "params": [
+            "withPage"
+          ]
+        },
+        {
+          "name": "timedGetJson",
+          "startLine": 176,
+          "endLine": 181,
+          "params": [
+            "url"
+          ]
+        },
+        {
+          "name": "setupSynthetic",
+          "startLine": 201,
+          "endLine": 223,
+          "params": [
+            "workDir"
+          ]
+        },
+        {
+          "name": "setupReal",
+          "startLine": 227,
+          "endLine": 288,
+          "params": []
+        },
+        {
+          "name": "benchFilterMatching",
+          "startLine": 292,
+          "endLine": 324,
+          "params": [
+            "scenario"
+          ]
+        },
+        {
+          "name": "benchColdList",
+          "startLine": 326,
+          "endLine": 344,
+          "params": [
+            "scope",
+            "expectedProjectRows"
+          ]
+        },
+        {
+          "name": "benchApiLists",
+          "startLine": 346,
+          "endLine": 390,
+          "params": [
+            "scenario",
+            "servers"
+          ]
+        },
+        {
+          "name": "benchSearch",
+          "startLine": 392,
+          "endLine": 438,
+          "params": [
+            "warm"
+          ]
+        },
+        {
+          "name": "benchColdGlobalPaint",
+          "startLine": 440,
+          "endLine": 466,
+          "params": [
+            "page",
+            "scenario",
+            "pageTimeout"
+          ]
+        },
+        {
+          "name": "benchFilterRenderAndRebuild",
+          "startLine": 468,
+          "endLine": 516,
+          "params": [
+            "page",
+            "scenario"
+          ]
+        },
+        {
+          "name": "benchStaleOverwrite",
+          "startLine": 518,
+          "endLine": 538,
+          "params": [
+            "page"
+          ]
+        },
+        {
+          "name": "benchPageProbes",
+          "startLine": 540,
+          "endLine": 556,
+          "params": [
+            "scenario",
+            "servers"
+          ]
+        },
+        {
+          "name": "recordShimSpawns",
+          "startLine": 558,
+          "endLine": 567,
+          "params": []
+        },
+        {
+          "name": "emitReport",
+          "startLine": 569,
+          "endLine": 584,
+          "params": [
+            "scenario"
+          ]
+        },
+        {
+          "name": "main",
+          "startLine": 588,
+          "endLine": 612,
+          "params": []
+        },
+        {
+          "name": "renderReport",
+          "startLine": 614,
+          "endLine": 639,
+          "params": [
+            "scenario",
+            "date"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "msRow",
+          "callee": "fmtMs",
+          "lineNumber": 128
+        },
+        {
+          "caller": "msRow",
+          "callee": "verdictFor",
+          "lineNumber": 129
+        },
+        {
+          "caller": "msRow",
+          "callee": "rows.push",
+          "lineNumber": 131
+        },
+        {
+          "caller": "progress",
+          "callee": "console.error",
+          "lineNumber": 135
+        },
+        {
+          "caller": "freshServer",
+          "callee": "createSkillsUiServer",
+          "lineNumber": 172
+        },
+        {
+          "caller": "timedGetJson",
+          "callee": "performance.now",
+          "lineNumber": 177
+        },
+        {
+          "caller": "timedGetJson",
+          "callee": "fetch",
+          "lineNumber": 178
+        },
+        {
+          "caller": "timedGetJson",
+          "callee": "res.json",
+          "lineNumber": 179
+        },
+        {
+          "caller": "timedGetJson",
+          "callee": "performance.now",
+          "lineNumber": 180
+        },
+        {
+          "caller": "setupSynthetic",
+          "callee": "buildSyntheticCorpus",
+          "lineNumber": 202
+        },
+        {
+          "caller": "setupSynthetic",
+          "callee": "join",
+          "lineNumber": 204
+        },
+        {
+          "caller": "setupSynthetic",
+          "callee": "join",
+          "lineNumber": 205
+        },
+        {
+          "caller": "setupSynthetic",
+          "callee": "join",
+          "lineNumber": 208
+        },
+        {
+          "caller": "setupReal",
+          "callee": "die",
+          "lineNumber": 235
+        },
+        {
+          "caller": "setupReal",
+          "callee": "mkdtempSync",
+          "lineNumber": 239
+        },
+        {
+          "caller": "setupReal",
+          "callee": "join",
+          "lineNumber": 239
+        },
+        {
+          "caller": "setupReal",
+          "callee": "tmpdir",
+          "lineNumber": 239
+        },
+        {
+          "caller": "setupReal",
+          "callee": "runSkills",
+          "lineNumber": 243
+        },
+        {
+          "caller": "setupReal",
+          "callee": "progress",
+          "lineNumber": 244
+        },
+        {
+          "caller": "setupReal",
+          "callee": "version.stdout.trim",
+          "lineNumber": 244
+        },
+        {
+          "caller": "setupReal",
+          "callee": "die",
+          "lineNumber": 246
+        },
+        {
+          "caller": "setupReal",
+          "callee": "progress",
+          "lineNumber": 248
+        },
+        {
+          "caller": "setupReal",
+          "callee": "listInstalled",
+          "lineNumber": 249
+        },
+        {
+          "caller": "setupReal",
+          "callee": "listInstalled",
+          "lineNumber": 250
+        },
+        {
+          "caller": "setupReal",
+          "callee": "die",
+          "lineNumber": 251
+        },
+        {
+          "caller": "setupReal",
+          "callee": "existsSync",
+          "lineNumber": 255
+        },
+        {
+          "caller": "setupReal",
+          "callee": "statSync(entry.path).isFile",
+          "lineNumber": 255
+        },
+        {
+          "caller": "setupReal",
+          "callee": "statSync",
+          "lineNumber": 255
+        },
+        {
+          "caller": "setupReal",
+          "callee": "existsSync",
+          "lineNumber": 256
+        },
+        {
+          "caller": "setupReal",
+          "callee": "join",
+          "lineNumber": 256
+        },
+        {
+          "caller": "setupReal",
+          "callee": "agentDirs.add",
+          "lineNumber": 257
+        },
+        {
+          "caller": "setupReal",
+          "callee": "dirname",
+          "lineNumber": 257
+        },
+        {
+          "caller": "setupReal",
+          "callee": "dirname",
+          "lineNumber": 257
+        },
+        {
+          "caller": "setupReal",
+          "callee": "global.map((g) => g.name).filter",
+          "lineNumber": 259
+        },
+        {
+          "caller": "setupReal",
+          "callee": "global.map",
+          "lineNumber": 259
+        },
+        {
+          "caller": "setupReal",
+          "callee": "project.some",
+          "lineNumber": 259
+        },
+        {
+          "caller": "setupReal",
+          "callee": "project[0]!.name.slice",
+          "lineNumber": 277
+        },
+        {
+          "caller": "setupReal",
+          "callee": "project[0]!.name.slice",
+          "lineNumber": 279
+        },
+        {
+          "caller": "setupReal",
+          "callee": "project[0]!.name.slice",
+          "lineNumber": 281
+        },
+        {
+          "caller": "benchFilterMatching",
+          "callee": "scenario.projectEntries.map",
+          "lineNumber": 293
+        },
+        {
+          "caller": "benchFilterMatching",
+          "callee": "readSkillDoc",
+          "lineNumber": 294
+        },
+        {
+          "caller": "benchFilterMatching",
+          "callee": "sanitizeMetadata",
+          "lineNumber": 295
+        },
+        {
+          "caller": "benchFilterMatching",
+          "callee": "doc?.match",
+          "lineNumber": 295
+        },
+        {
+          "caller": "benchFilterMatching",
+          "callee": "skillMatches",
+          "lineNumber": 299
+        },
+        {
+          "caller": "benchFilterMatching",
+          "callee": "performance.now",
+          "lineNumber": 304
+        },
+        {
+          "caller": "benchFilterMatching",
+          "callee": "skillMatches",
+          "lineNumber": 306
+        },
+        {
+          "caller": "benchFilterMatching",
+          "callee": "matchingSamples.push",
+          "lineNumber": 308
+        },
+        {
+          "caller": "benchFilterMatching",
+          "callee": "performance.now",
+          "lineNumber": 308
+        },
+        {
+          "caller": "benchFilterMatching",
+          "callee": "median",
+          "lineNumber": 311
+        },
+        {
+          "caller": "benchFilterMatching",
+          "callee": "progress",
+          "lineNumber": 312
+        },
+        {
+          "caller": "benchFilterMatching",
+          "callee": "fmtMs",
+          "lineNumber": 313
+        },
+        {
+          "caller": "benchFilterMatching",
+          "callee": "msRow",
+          "lineNumber": 315
+        },
+        {
+          "caller": "benchFilterMatching",
+          "callee": "observations.push",
+          "lineNumber": 321
+        },
+        {
+          "caller": "benchColdList",
+          "callee": "freshServer",
+          "lineNumber": 329
+        },
+        {
+          "caller": "benchColdList",
+          "callee": "timedGetJson",
+          "lineNumber": 332
+        },
+        {
+          "caller": "benchColdList",
+          "callee": "server.stop().catch",
+          "lineNumber": 334
+        },
+        {
+          "caller": "benchColdList",
+          "callee": "server.stop",
+          "lineNumber": 334
+        },
+        {
+          "caller": "benchColdList",
+          "callee": "die",
+          "lineNumber": 336
+        },
+        {
+          "caller": "benchColdList",
+          "callee": "die",
+          "lineNumber": 338
+        },
+        {
+          "caller": "benchColdList",
+          "callee": "samples.push",
+          "lineNumber": 340
+        },
+        {
+          "caller": "benchColdList",
+          "callee": "progress",
+          "lineNumber": 341
+        },
+        {
+          "caller": "benchColdList",
+          "callee": "fmtMs",
+          "lineNumber": 341
+        },
+        {
+          "caller": "benchColdList",
+          "callee": "median",
+          "lineNumber": 343
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "msRow",
+          "lineNumber": 347
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "benchColdList",
+          "lineNumber": 351
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "freshServer",
+          "lineNumber": 354
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "servers.push",
+          "lineNumber": 355
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "timedGetJson",
+          "lineNumber": 356
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "timedGetJson",
+          "lineNumber": 359
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "die",
+          "lineNumber": 360
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "warmProject.push",
+          "lineNumber": 361
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "msRow",
+          "lineNumber": 363
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "median",
+          "lineNumber": 363
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "encodeURIComponent",
+          "lineNumber": 366
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "encodeURIComponent",
+          "lineNumber": 366
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "timedGetJson",
+          "lineNumber": 368
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "die",
+          "lineNumber": 369
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "detail.push",
+          "lineNumber": 370
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "msRow",
+          "lineNumber": 372
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "median",
+          "lineNumber": 376
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "benchColdList",
+          "lineNumber": 379
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "observations.push",
+          "lineNumber": 380
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "fmtMs",
+          "lineNumber": 381
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "timedGetJson",
+          "lineNumber": 384
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "warmGlobal.push",
+          "lineNumber": 386
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "timedGetJson",
+          "lineNumber": 386
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "observations.push",
+          "lineNumber": 388
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "fmtMs",
+          "lineNumber": 388
+        },
+        {
+          "caller": "benchApiLists",
+          "callee": "median",
+          "lineNumber": 388
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "startSearchStub",
+          "lineNumber": 393
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "directRtt.push",
+          "lineNumber": 409
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "timedGetJson",
+          "lineNumber": 409
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "timedGetJson",
+          "lineNumber": 410
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "die",
+          "lineNumber": 411
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "wrapped.push",
+          "lineNumber": 412
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "median",
+          "lineNumber": 414
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "median",
+          "lineNumber": 414
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "observations.push",
+          "lineNumber": 415
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "fmtMs",
+          "lineNumber": 416
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "median",
+          "lineNumber": 416
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "fmtMs",
+          "lineNumber": 416
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "median",
+          "lineNumber": 416
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "rows.push",
+          "lineNumber": 418
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "fmtMs",
+          "lineNumber": 421
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "verdictFor",
+          "lineNumber": 422
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "Promise.all",
+          "lineNumber": 425
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "Array.from",
+          "lineNumber": 425
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "timedGetJson",
+          "lineNumber": 425
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "stub.maxIdenticalInFlight",
+          "lineNumber": 426
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "stub.requests.filter",
+          "lineNumber": 427
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "observations.push",
+          "lineNumber": 428
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "rows.push",
+          "lineNumber": 431
+        },
+        {
+          "caller": "benchSearch",
+          "callee": "verdictFor",
+          "lineNumber": 435
+        },
+        {
+          "caller": "benchColdGlobalPaint",
+          "callee": "freshServer",
+          "lineNumber": 443
+        },
+        {
+          "caller": "benchColdGlobalPaint",
+          "callee": "progress",
+          "lineNumber": 445
+        },
+        {
+          "caller": "benchColdGlobalPaint",
+          "callee": "openServedPage",
+          "lineNumber": 446
+        },
+        {
+          "caller": "benchColdGlobalPaint",
+          "callee": "paintSamples.push",
+          "lineNumber": 447
+        },
+        {
+          "caller": "benchColdGlobalPaint",
+          "callee": "probeScopeFirstPaint",
+          "lineNumber": 448
+        },
+        {
+          "caller": "benchColdGlobalPaint",
+          "callee": "progress",
+          "lineNumber": 455
+        },
+        {
+          "caller": "benchColdGlobalPaint",
+          "callee": "fmtMs",
+          "lineNumber": 455
+        },
+        {
+          "caller": "benchColdGlobalPaint",
+          "callee": "paintServer.stop().catch",
+          "lineNumber": 457
+        },
+        {
+          "caller": "benchColdGlobalPaint",
+          "callee": "paintServer.stop",
+          "lineNumber": 457
+        },
+        {
+          "caller": "benchColdGlobalPaint",
+          "callee": "msRow",
+          "lineNumber": 460
+        },
+        {
+          "caller": "benchColdGlobalPaint",
+          "callee": "median",
+          "lineNumber": 464
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "probeFilterRender",
+          "lineNumber": 474
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "die",
+          "lineNumber": 475
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "die",
+          "lineNumber": 477
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "Math.max",
+          "lineNumber": 479
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "probeSamples.push",
+          "lineNumber": 481
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "fmtMs",
+          "lineNumber": 481
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "fmtMs",
+          "lineNumber": 481
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "keystrokes.push",
+          "lineNumber": 482
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "perceived.push",
+          "lineNumber": 483
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "observations.push",
+          "lineNumber": 485
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "probeSamples.join",
+          "lineNumber": 485
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "observations.push",
+          "lineNumber": 486
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "fmtMs",
+          "lineNumber": 487
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "median",
+          "lineNumber": 487
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "msRow",
+          "lineNumber": 489
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "median",
+          "lineNumber": 493
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "probeFilterRender",
+          "lineNumber": 496
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "probeFilterRender",
+          "lineNumber": 497
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "die",
+          "lineNumber": 498
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "rows.push",
+          "lineNumber": 500
+        },
+        {
+          "caller": "benchFilterRenderAndRebuild",
+          "callee": "rows.push",
+          "lineNumber": 510
+        },
+        {
+          "caller": "benchStaleOverwrite",
+          "callee": "probeStaleOverwrite",
+          "lineNumber": 519
+        },
+        {
+          "caller": "benchStaleOverwrite",
+          "callee": "die",
+          "lineNumber": 528
+        },
+        {
+          "caller": "benchStaleOverwrite",
+          "callee": "rows.push",
+          "lineNumber": 530
+        },
+        {
+          "caller": "benchPageProbes",
+          "callee": "chromium.launch",
+          "lineNumber": 541
+        },
+        {
+          "caller": "benchPageProbes",
+          "callee": "newPerfContext",
+          "lineNumber": 542
+        },
+        {
+          "caller": "benchPageProbes",
+          "callee": "context.newPage",
+          "lineNumber": 543
+        },
+        {
+          "caller": "benchPageProbes",
+          "callee": "stubUpdates",
+          "lineNumber": 544
+        },
+        {
+          "caller": "benchPageProbes",
+          "callee": "benchColdGlobalPaint",
+          "lineNumber": 547
+        },
+        {
+          "caller": "benchPageProbes",
+          "callee": "freshServer",
+          "lineNumber": 549
+        },
+        {
+          "caller": "benchPageProbes",
+          "callee": "servers.push",
+          "lineNumber": 550
+        },
+        {
+          "caller": "benchPageProbes",
+          "callee": "progress",
+          "lineNumber": 551
+        },
+        {
+          "caller": "benchPageProbes",
+          "callee": "openServedPage",
+          "lineNumber": 552
+        },
+        {
+          "caller": "benchPageProbes",
+          "callee": "benchFilterRenderAndRebuild",
+          "lineNumber": 553
+        },
+        {
+          "caller": "benchPageProbes",
+          "callee": "benchStaleOverwrite",
+          "lineNumber": 554
+        },
+        {
+          "caller": "recordShimSpawns",
+          "callee": "readShimCallLog",
+          "lineNumber": 560
+        },
+        {
+          "caller": "recordShimSpawns",
+          "callee": "countShimCalls",
+          "lineNumber": 561
+        },
+        {
+          "caller": "recordShimSpawns",
+          "callee": "countShimCalls",
+          "lineNumber": 562
+        },
+        {
+          "caller": "recordShimSpawns",
+          "callee": "countShimCalls",
+          "lineNumber": 563
+        },
+        {
+          "caller": "recordShimSpawns",
+          "callee": "observations.push",
+          "lineNumber": 564
+        },
+        {
+          "caller": "recordShimSpawns",
+          "callee": "countShimCalls",
+          "lineNumber": 565
+        },
+        {
+          "caller": "emitReport",
+          "callee": "renderReport",
+          "lineNumber": 571
+        },
+        {
+          "caller": "emitReport",
+          "callee": "console.log",
+          "lineNumber": 572
+        },
+        {
+          "caller": "emitReport",
+          "callee": "date.toISOString().slice",
+          "lineNumber": 574
+        },
+        {
+          "caller": "emitReport",
+          "callee": "date.toISOString",
+          "lineNumber": 574
+        },
+        {
+          "caller": "emitReport",
+          "callee": "existsSync",
+          "lineNumber": 575
+        },
+        {
+          "caller": "emitReport",
+          "callee": "die",
+          "lineNumber": 576
+        },
+        {
+          "caller": "emitReport",
+          "callee": "writeFileSync",
+          "lineNumber": 578
+        },
+        {
+          "caller": "emitReport",
+          "callee": "progress",
+          "lineNumber": 579
+        },
+        {
+          "caller": "emitReport",
+          "callee": "rows.some",
+          "lineNumber": 581
+        },
+        {
+          "caller": "main",
+          "callee": "snapshotEnv",
+          "lineNumber": 589
+        },
+        {
+          "caller": "main",
+          "callee": "mkdtempSync",
+          "lineNumber": 590
+        },
+        {
+          "caller": "main",
+          "callee": "join",
+          "lineNumber": 590
+        },
+        {
+          "caller": "main",
+          "callee": "tmpdir",
+          "lineNumber": 590
+        },
+        {
+          "caller": "main",
+          "callee": "setupReal",
+          "lineNumber": 595
+        },
+        {
+          "caller": "main",
+          "callee": "setupSynthetic",
+          "lineNumber": 595
+        },
+        {
+          "caller": "main",
+          "callee": "progress",
+          "lineNumber": 596
+        },
+        {
+          "caller": "main",
+          "callee": "benchFilterMatching",
+          "lineNumber": 598
+        },
+        {
+          "caller": "main",
+          "callee": "benchApiLists",
+          "lineNumber": 599
+        },
+        {
+          "caller": "main",
+          "callee": "benchSearch",
+          "lineNumber": 600
+        },
+        {
+          "caller": "main",
+          "callee": "benchPageProbes",
+          "lineNumber": 601
+        },
+        {
+          "caller": "main",
+          "callee": "recordShimSpawns",
+          "lineNumber": 602
+        },
+        {
+          "caller": "main",
+          "callee": "emitReport",
+          "lineNumber": 603
+        },
+        {
+          "caller": "main",
+          "callee": "closeBrowser",
+          "lineNumber": 605
+        },
+        {
+          "caller": "main",
+          "callee": "stub?.stop",
+          "lineNumber": 606
+        },
+        {
+          "caller": "main",
+          "callee": "server.stop().catch",
+          "lineNumber": 607
+        },
+        {
+          "caller": "main",
+          "callee": "server.stop",
+          "lineNumber": 607
+        },
+        {
+          "caller": "main",
+          "callee": "rmSync",
+          "lineNumber": 608
+        },
+        {
+          "caller": "main",
+          "callee": "rmSync",
+          "lineNumber": 609
+        },
+        {
+          "caller": "main",
+          "callee": "restoreEnv",
+          "lineNumber": 610
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 616
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 617
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 618
+        },
+        {
+          "caller": "renderReport",
+          "callee": "date.toISOString",
+          "lineNumber": 618
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 619
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 620
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 621
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 624
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 625
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 628
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 629
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 630
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 632
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 634
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 635
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 636
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.push",
+          "lineNumber": 637
+        },
+        {
+          "caller": "renderReport",
+          "callee": "lines.join",
+          "lineNumber": 638
+        }
+      ],
+      "metrics": {
+        "importCount": 6,
+        "exportCount": 0,
+        "functionCount": 22,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/core/version.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 15,
+      "nonEmptyLines": 13,
+      "exports": [
+        {
+          "name": "APP_VERSION",
+          "line": 14,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "src/main.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 104,
+      "nonEmptyLines": 98,
+      "functions": [
+        {
+          "name": "parsePortArg",
+          "startLine": 16,
+          "endLine": 30,
+          "params": [
+            "args"
+          ]
+        },
+        {
+          "name": "selftest",
+          "startLine": 32,
+          "endLine": 53,
+          "params": []
+        },
+        {
+          "name": "runWeb",
+          "startLine": 55,
+          "endLine": 88,
+          "params": [
+            "headless",
+            "portArg",
+            "seedArgs"
+          ]
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "parsePortArg",
+          "callee": "Number",
+          "lineNumber": 22
+        },
+        {
+          "caller": "parsePortArg",
+          "callee": "Number.isInteger",
+          "lineNumber": 23
+        },
+        {
+          "caller": "parsePortArg",
+          "callee": "rest.push",
+          "lineNumber": 27
+        },
+        {
+          "caller": "selftest",
+          "callee": "import",
+          "lineNumber": 33
+        },
+        {
+          "caller": "selftest",
+          "callee": "import",
+          "lineNumber": 34
+        },
+        {
+          "caller": "selftest",
+          "callee": "createTestRenderer",
+          "lineNumber": 35
+        },
+        {
+          "caller": "selftest",
+          "callee": "setup.renderer.root.add",
+          "lineNumber": 37
+        },
+        {
+          "caller": "selftest",
+          "callee": "buildSpikeScreen",
+          "lineNumber": 37
+        },
+        {
+          "caller": "selftest",
+          "callee": "waitForFrame",
+          "lineNumber": 43
+        },
+        {
+          "caller": "selftest",
+          "callee": "markers.every",
+          "lineNumber": 43
+        },
+        {
+          "caller": "selftest",
+          "callee": "frame.includes",
+          "lineNumber": 43
+        },
+        {
+          "caller": "selftest",
+          "callee": "console.error",
+          "lineNumber": 45
+        },
+        {
+          "caller": "selftest",
+          "callee": "String",
+          "lineNumber": 45
+        },
+        {
+          "caller": "selftest",
+          "callee": "console.log",
+          "lineNumber": 49
+        },
+        {
+          "caller": "selftest",
+          "callee": "setup.renderer.destroy",
+          "lineNumber": 51
+        },
+        {
+          "caller": "runWeb",
+          "callee": "import",
+          "lineNumber": 56
+        },
+        {
+          "caller": "runWeb",
+          "callee": "import",
+          "lineNumber": 57
+        },
+        {
+          "caller": "runWeb",
+          "callee": "import",
+          "lineNumber": 58
+        },
+        {
+          "caller": "runWeb",
+          "callee": "parseUiSeed",
+          "lineNumber": 59
+        },
+        {
+          "caller": "runWeb",
+          "callee": "createSkillsUiServer",
+          "lineNumber": 61
+        },
+        {
+          "caller": "runWeb",
+          "callee": "console.log",
+          "lineNumber": 70
+        },
+        {
+          "caller": "runWeb",
+          "callee": "console.log",
+          "lineNumber": 71
+        },
+        {
+          "caller": "runWeb",
+          "callee": "console.log",
+          "lineNumber": 72
+        },
+        {
+          "caller": "runWeb",
+          "callee": "console.log",
+          "lineNumber": 73
+        },
+        {
+          "caller": "runWeb",
+          "callee": "Bun.spawn([opener, url], { stdin: \"ignore\", stdout: \"ignore\", stderr: \"ignore\" }).unref",
+          "lineNumber": 80
+        },
+        {
+          "caller": "runWeb",
+          "callee": "Bun.spawn",
+          "lineNumber": 80
+        },
+        {
+          "caller": "done",
+          "callee": "resolve",
+          "lineNumber": 83
+        },
+        {
+          "caller": "runWeb",
+          "callee": "process.on",
+          "lineNumber": 84
+        },
+        {
+          "caller": "runWeb",
+          "callee": "process.on",
+          "lineNumber": 85
+        },
+        {
+          "caller": "runWeb",
+          "callee": "server.stop",
+          "lineNumber": 87
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 3,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/api.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 730,
+      "nonEmptyLines": 674,
+      "functions": [
+        {
+          "name": "start",
+          "startLine": 34,
+          "endLine": 39,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "start",
+          "callee": "import",
+          "lineNumber": 35
+        },
+        {
+          "caller": "start",
+          "callee": "import",
+          "lineNumber": 36
+        },
+        {
+          "caller": "start",
+          "callee": "createSkillsUiServer",
+          "lineNumber": 37
+        },
+        {
+          "caller": "send",
+          "callee": "fetch",
+          "lineNumber": 376
+        },
+        {
+          "caller": "send",
+          "callee": "JSON.stringify",
+          "lineNumber": 378
+        },
+        {
+          "caller": "send",
+          "callee": "fetch",
+          "lineNumber": 393
+        },
+        {
+          "caller": "send",
+          "callee": "JSON.stringify",
+          "lineNumber": 396
+        },
+        {
+          "caller": "send",
+          "callee": "fetch",
+          "lineNumber": 416
+        },
+        {
+          "caller": "send",
+          "callee": "JSON.stringify",
+          "lineNumber": 419
+        },
+        {
+          "caller": "OLD_DOC",
+          "callee": "docFor",
+          "lineNumber": 500
+        },
+        {
+          "caller": "listDescription",
+          "callee": "(await fetch(`${base}/api/skills`)).json",
+          "lineNumber": 504
+        },
+        {
+          "caller": "listDescription",
+          "callee": "fetch",
+          "lineNumber": 504
+        },
+        {
+          "caller": "listDescription",
+          "callee": "body.skills.find",
+          "lineNumber": 505
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/page-smoke.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 448,
+      "nonEmptyLines": 421,
+      "callGraph": [
+        {
+          "caller": "anyBoxChecked",
+          "callee": "page!.evaluate",
+          "lineNumber": 210
+        },
+        {
+          "caller": "anyBoxChecked",
+          "callee": "Array.from(document.querySelectorAll(\"#skillList li input.skill-check\")).some",
+          "lineNumber": 211
+        },
+        {
+          "caller": "anyBoxChecked",
+          "callee": "Array.from",
+          "lineNumber": 211
+        },
+        {
+          "caller": "anyBoxChecked",
+          "callee": "document.querySelectorAll",
+          "lineNumber": 211
+        },
+        {
+          "caller": "rowHeight",
+          "callee": "head.evaluate",
+          "lineNumber": 277
+        },
+        {
+          "caller": "rowHeight",
+          "callee": "el.getBoundingClientRect",
+          "lineNumber": 277
+        },
+        {
+          "caller": "rectOf",
+          "callee": "page!.evaluate",
+          "lineNumber": 279
+        },
+        {
+          "caller": "rectOf",
+          "callee": "document.querySelector(q)!.getBoundingClientRect",
+          "lineNumber": 279
+        },
+        {
+          "caller": "rectOf",
+          "callee": "document.querySelector",
+          "lineNumber": 279
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/perf/filter-dom.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 237,
+      "nonEmptyLines": 224,
+      "callGraph": [
+        {
+          "caller": "openWithRiseSampler",
+          "callee": "context!.newPage",
+          "lineNumber": 127
+        },
+        {
+          "caller": "openWithRiseSampler",
+          "callee": "p.addInitScript",
+          "lineNumber": 128
+        },
+        {
+          "caller": "openWithRiseSampler",
+          "callee": "setInterval",
+          "lineNumber": 131
+        },
+        {
+          "caller": "openWithRiseSampler",
+          "callee": "document\n          .getAnimations()\n          .filter((a) => a instanceof CSSAnimation && a.animationName === \"rise\")\n          .filter",
+          "lineNumber": 132
+        },
+        {
+          "caller": "openWithRiseSampler",
+          "callee": "document\n          .getAnimations()\n          .filter",
+          "lineNumber": 132
+        },
+        {
+          "caller": "openWithRiseSampler",
+          "callee": "document\n          .getAnimations",
+          "lineNumber": 132
+        },
+        {
+          "caller": "openWithRiseSampler",
+          "callee": "t.closest",
+          "lineNumber": 137
+        },
+        {
+          "caller": "openWithRiseSampler",
+          "callee": "stubUpdates",
+          "lineNumber": 142
+        },
+        {
+          "caller": "openWithRiseSampler",
+          "callee": "p.goto",
+          "lineNumber": 143
+        },
+        {
+          "caller": "openWithRiseSampler",
+          "callee": "p.waitForFunction",
+          "lineNumber": 144
+        },
+        {
+          "caller": "openWithRiseSampler",
+          "callee": "document.querySelectorAll",
+          "lineNumber": 145
+        },
+        {
+          "caller": "risePeak",
+          "callee": "p.evaluate",
+          "lineNumber": 152
+        },
+        {
+          "caller": "riseNow",
+          "callee": "p.evaluate",
+          "lineNumber": 154
+        },
+        {
+          "caller": "riseNow",
+          "callee": "document\n        .getAnimations()\n        .filter((a) => a instanceof CSSAnimation && a.animationName === \"rise\")\n        .filter",
+          "lineNumber": 155
+        },
+        {
+          "caller": "riseNow",
+          "callee": "document\n        .getAnimations()\n        .filter",
+          "lineNumber": 155
+        },
+        {
+          "caller": "riseNow",
+          "callee": "document\n        .getAnimations",
+          "lineNumber": 155
+        },
+        {
+          "caller": "riseNow",
+          "callee": "t.closest",
+          "lineNumber": 160
+        },
+        {
+          "caller": "waitRise",
+          "callee": "p.waitForFunction",
+          "lineNumber": 167
+        },
+        {
+          "caller": "waitRise",
+          "callee": "document\n          .getAnimations()\n          .filter((a) => a instanceof CSSAnimation && a.animationName === \"rise\")\n          .filter",
+          "lineNumber": 169
+        },
+        {
+          "caller": "waitRise",
+          "callee": "document\n          .getAnimations()\n          .filter",
+          "lineNumber": 169
+        },
+        {
+          "caller": "waitRise",
+          "callee": "document\n          .getAnimations",
+          "lineNumber": 169
+        },
+        {
+          "caller": "waitRise",
+          "callee": "t.closest",
+          "lineNumber": 174
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/perf/helpers.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 251,
+      "nonEmptyLines": 231,
+      "functions": [
+        {
+          "name": "buildSyntheticCorpus",
+          "startLine": 60,
+          "endLine": 117,
+          "params": [
+            "root",
+            "projectCount",
+            "globalCount"
+          ]
+        },
+        {
+          "name": "readShimCallLog",
+          "startLine": 127,
+          "endLine": 133,
+          "params": [
+            "path"
+          ]
+        },
+        {
+          "name": "countShimCalls",
+          "startLine": 136,
+          "endLine": 138,
+          "params": [
+            "calls",
+            "argv"
+          ]
+        },
+        {
+          "name": "startSearchStub",
+          "startLine": 185,
+          "endLine": 236,
+          "params": [
+            "options"
+          ]
+        },
+        {
+          "name": "median",
+          "startLine": 240,
+          "endLine": 247,
+          "params": [
+            "samples"
+          ]
+        },
+        {
+          "name": "fmtMs",
+          "startLine": 249,
+          "endLine": 251,
+          "params": [
+            "ms"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "SHIM",
+          "line": 21,
+          "isDefault": false
+        },
+        {
+          "name": "buildSyntheticCorpus",
+          "line": 60,
+          "isDefault": false
+        },
+        {
+          "name": "readShimCallLog",
+          "line": 127,
+          "isDefault": false
+        },
+        {
+          "name": "countShimCalls",
+          "line": 136,
+          "isDefault": false
+        },
+        {
+          "name": "startSearchStub",
+          "line": 185,
+          "isDefault": false
+        },
+        {
+          "name": "median",
+          "line": 240,
+          "isDefault": false
+        },
+        {
+          "name": "fmtMs",
+          "line": 249,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "buildSyntheticCorpus",
+          "callee": "join",
+          "lineNumber": 65
+        },
+        {
+          "caller": "buildSyntheticCorpus",
+          "callee": "mkdirSync",
+          "lineNumber": 66
+        },
+        {
+          "caller": "pad",
+          "callee": "String(n).padStart",
+          "lineNumber": 67
+        },
+        {
+          "caller": "pad",
+          "callee": "String",
+          "lineNumber": 67
+        },
+        {
+          "caller": "make",
+          "callee": "pad",
+          "lineNumber": 70
+        },
+        {
+          "caller": "make",
+          "callee": "join",
+          "lineNumber": 71
+        },
+        {
+          "caller": "make",
+          "callee": "mkdirSync",
+          "lineNumber": 72
+        },
+        {
+          "caller": "make",
+          "callee": "writeFileSync",
+          "lineNumber": 75
+        },
+        {
+          "caller": "make",
+          "callee": "join",
+          "lineNumber": 76
+        },
+        {
+          "caller": "make",
+          "callee": "[\n        \"---\",\n        `name: ${name}`,\n        `description: Synthetic perf skill ${pad(i, 3)} for the ${scope} budget corpus`,\n        \"---\",\n        \"\",\n        `# ${name}`,\n        \"\",\n        \"Body line for the detail-read path. \" + \"filler \".repeat(12),\n        \"\",\n        \"- list item one\",\n        \"- list item two\",\n        \"\",\n      ].join",
+          "lineNumber": 77
+        },
+        {
+          "caller": "make",
+          "callee": "pad",
+          "lineNumber": 80
+        },
+        {
+          "caller": "make",
+          "callee": "\"filler \".repeat",
+          "lineNumber": 85
+        },
+        {
+          "caller": "buildSyntheticCorpus",
+          "callee": "Array.from",
+          "lineNumber": 103
+        },
+        {
+          "caller": "buildSyntheticCorpus",
+          "callee": "make",
+          "lineNumber": 103
+        },
+        {
+          "caller": "buildSyntheticCorpus",
+          "callee": "Array.from",
+          "lineNumber": 104
+        },
+        {
+          "caller": "buildSyntheticCorpus",
+          "callee": "make",
+          "lineNumber": 104
+        },
+        {
+          "caller": "buildSyntheticCorpus",
+          "callee": "join",
+          "lineNumber": 105
+        },
+        {
+          "caller": "buildSyntheticCorpus",
+          "callee": "join",
+          "lineNumber": 106
+        },
+        {
+          "caller": "buildSyntheticCorpus",
+          "callee": "writeFileSync",
+          "lineNumber": 107
+        },
+        {
+          "caller": "buildSyntheticCorpus",
+          "callee": "JSON.stringify",
+          "lineNumber": 107
+        },
+        {
+          "caller": "buildSyntheticCorpus",
+          "callee": "writeFileSync",
+          "lineNumber": 108
+        },
+        {
+          "caller": "buildSyntheticCorpus",
+          "callee": "JSON.stringify",
+          "lineNumber": 108
+        },
+        {
+          "caller": "readShimCallLog",
+          "callee": "existsSync",
+          "lineNumber": 128
+        },
+        {
+          "caller": "readShimCallLog",
+          "callee": "readFileSync(path, \"utf-8\")\n    .split(\"\\n\")\n    .filter((line) => line.trim().length > 0)\n    .map",
+          "lineNumber": 129
+        },
+        {
+          "caller": "readShimCallLog",
+          "callee": "readFileSync(path, \"utf-8\")\n    .split(\"\\n\")\n    .filter",
+          "lineNumber": 129
+        },
+        {
+          "caller": "readShimCallLog",
+          "callee": "readFileSync(path, \"utf-8\")\n    .split",
+          "lineNumber": 129
+        },
+        {
+          "caller": "readShimCallLog",
+          "callee": "readFileSync",
+          "lineNumber": 129
+        },
+        {
+          "caller": "readShimCallLog",
+          "callee": "line.trim",
+          "lineNumber": 131
+        },
+        {
+          "caller": "readShimCallLog",
+          "callee": "JSON.parse",
+          "lineNumber": 132
+        },
+        {
+          "caller": "countShimCalls",
+          "callee": "calls.filter",
+          "lineNumber": 137
+        },
+        {
+          "caller": "countShimCalls",
+          "callee": "argv.every",
+          "lineNumber": 137
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "performance.now",
+          "lineNumber": 193
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "Bun.serve",
+          "lineNumber": 194
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "new URL(req.url).searchParams.get",
+          "lineNumber": 198
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "performance.now",
+          "lineNumber": 199
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "Bun.sleep",
+          "lineNumber": 200
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "performance.now",
+          "lineNumber": 201
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "requests.push",
+          "lineNumber": 202
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "Response.json",
+          "lineNumber": 203
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "byQ.get",
+          "lineNumber": 215
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "list.push",
+          "lineNumber": 216
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "byQ.set",
+          "lineNumber": 217
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "byQ.values",
+          "lineNumber": 219
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "list\n          .flatMap((r) => [\n            { t: r.start, delta: 1 },\n            { t: r.end, delta: -1 },\n          ])\n          .sort",
+          "lineNumber": 220
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "list\n          .flatMap",
+          "lineNumber": 220
+        },
+        {
+          "caller": "startSearchStub",
+          "callee": "server.stop",
+          "lineNumber": 234
+        },
+        {
+          "caller": "median",
+          "callee": "[...samples].sort",
+          "lineNumber": 242
+        },
+        {
+          "caller": "median",
+          "callee": "Math.floor",
+          "lineNumber": 243
+        },
+        {
+          "caller": "fmtMs",
+          "callee": "ms.toFixed",
+          "lineNumber": 250
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 7,
+        "functionCount": 6,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/perf/playwright-probes.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 407,
+      "nonEmptyLines": 396,
+      "functions": [
+        {
+          "name": "newPerfContext",
+          "startLine": 25,
+          "endLine": 27,
+          "params": [
+            "browser"
+          ]
+        },
+        {
+          "name": "closeBrowser",
+          "startLine": 35,
+          "endLine": 47,
+          "params": [
+            "browser"
+          ]
+        },
+        {
+          "name": "stubUpdates",
+          "startLine": 54,
+          "endLine": 62,
+          "params": [
+            "page"
+          ]
+        },
+        {
+          "name": "openServedPage",
+          "startLine": 65,
+          "endLine": 81,
+          "params": [
+            "page",
+            "base",
+            "expectedRows",
+            "timeoutMs"
+          ]
+        },
+        {
+          "name": "probeFilterRender",
+          "startLine": 130,
+          "endLine": 275,
+          "params": [
+            "page",
+            "value",
+            "timeoutMs"
+          ]
+        },
+        {
+          "name": "probeScopeFirstPaint",
+          "startLine": 295,
+          "endLine": 334,
+          "params": [
+            "page",
+            "options"
+          ]
+        },
+        {
+          "name": "probeStaleOverwrite",
+          "startLine": 372,
+          "endLine": 407,
+          "params": [
+            "page",
+            "options"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "newPerfContext",
+          "line": 25,
+          "isDefault": false
+        },
+        {
+          "name": "closeBrowser",
+          "line": 35,
+          "isDefault": false
+        },
+        {
+          "name": "stubUpdates",
+          "line": 54,
+          "isDefault": false
+        },
+        {
+          "name": "openServedPage",
+          "line": 65,
+          "isDefault": false
+        },
+        {
+          "name": "probeFilterRender",
+          "line": 130,
+          "isDefault": false
+        },
+        {
+          "name": "probeScopeFirstPaint",
+          "line": 295,
+          "isDefault": false
+        },
+        {
+          "name": "probeStaleOverwrite",
+          "line": 372,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "newPerfContext",
+          "callee": "browser.newContext",
+          "lineNumber": 26
+        },
+        {
+          "caller": "closeBrowser",
+          "callee": "(browser as unknown as { process?: () => { kill: (signal?: string) => void; killed: boolean } | null })\n      .process",
+          "lineNumber": 39
+        },
+        {
+          "caller": "closeBrowser",
+          "callee": "browser.close().catch",
+          "lineNumber": 42
+        },
+        {
+          "caller": "closeBrowser",
+          "callee": "browser.close",
+          "lineNumber": 42
+        },
+        {
+          "caller": "closeBrowser",
+          "callee": "Promise.race",
+          "lineNumber": 45
+        },
+        {
+          "caller": "closeBrowser",
+          "callee": "browser.close().catch",
+          "lineNumber": 45
+        },
+        {
+          "caller": "closeBrowser",
+          "callee": "browser.close",
+          "lineNumber": 45
+        },
+        {
+          "caller": "closeBrowser",
+          "callee": "Bun.sleep",
+          "lineNumber": 45
+        },
+        {
+          "caller": "closeBrowser",
+          "callee": "child.kill",
+          "lineNumber": 46
+        },
+        {
+          "caller": "stubUpdates",
+          "callee": "page.route",
+          "lineNumber": 55
+        },
+        {
+          "caller": "stubUpdates",
+          "callee": "route.fulfill",
+          "lineNumber": 56
+        },
+        {
+          "caller": "stubUpdates",
+          "callee": "JSON.stringify",
+          "lineNumber": 59
+        },
+        {
+          "caller": "openServedPage",
+          "callee": "page.goto",
+          "lineNumber": 71
+        },
+        {
+          "caller": "openServedPage",
+          "callee": "page.waitForFunction",
+          "lineNumber": 72
+        },
+        {
+          "caller": "openServedPage",
+          "callee": "document.querySelectorAll",
+          "lineNumber": 73
+        },
+        {
+          "caller": "openServedPage",
+          "callee": "page.waitForFunction",
+          "lineNumber": 77
+        },
+        {
+          "caller": "openServedPage",
+          "callee": "document.querySelector",
+          "lineNumber": 78
+        },
+        {
+          "caller": "probeFilterRender",
+          "callee": "page.evaluate",
+          "lineNumber": 135
+        },
+        {
+          "caller": "probeFilterRender",
+          "callee": "document.querySelector",
+          "lineNumber": 146
+        },
+        {
+          "caller": "probeFilterRender",
+          "callee": "document.querySelector",
+          "lineNumber": 147
+        },
+        {
+          "caller": "listScoped",
+          "callee": "target.closest",
+          "lineNumber": 150
+        },
+        {
+          "caller": "probeFilterRender",
+          "callee": "Array.from",
+          "lineNumber": 152
+        },
+        {
+          "caller": "probeFilterRender",
+          "callee": "list.querySelectorAll",
+          "lineNumber": 152
+        },
+        {
+          "caller": "probeFilterRender",
+          "callee": "document.getAnimations().filter",
+          "lineNumber": 153
+        },
+        {
+          "caller": "probeFilterRender",
+          "callee": "document.getAnimations",
+          "lineNumber": 153
+        },
+        {
+          "caller": "measuredRenderWork",
+          "callee": "performance.getEntriesByName",
+          "lineNumber": 168
+        },
+        {
+          "caller": "measuredRenderWork",
+          "callee": "Math.max",
+          "lineNumber": 172
+        },
+        {
+          "caller": "finish",
+          "callee": "clearTimeout",
+          "lineNumber": 175
+        },
+        {
+          "caller": "finish",
+          "callee": "obs.disconnect",
+          "lineNumber": 176
+        },
+        {
+          "caller": "finish",
+          "callee": "requestAnimationFrame",
+          "lineNumber": 181
+        },
+        {
+          "caller": "finish",
+          "callee": "requestAnimationFrame",
+          "lineNumber": 182
+        },
+        {
+          "caller": "finish",
+          "callee": "Array.from",
+          "lineNumber": 185
+        },
+        {
+          "caller": "finish",
+          "callee": "list.querySelectorAll",
+          "lineNumber": 185
+        },
+        {
+          "caller": "finish",
+          "callee": "liBefore.has",
+          "lineNumber": 187
+        },
+        {
+          "caller": "finish",
+          "callee": "document\n                .getAnimations()\n                .filter(listScoped)\n                .filter",
+          "lineNumber": 188
+        },
+        {
+          "caller": "finish",
+          "callee": "document\n                .getAnimations()\n                .filter",
+          "lineNumber": 188
+        },
+        {
+          "caller": "finish",
+          "callee": "document\n                .getAnimations",
+          "lineNumber": 188
+        },
+        {
+          "caller": "finish",
+          "callee": "animsBefore.has",
+          "lineNumber": 191
+        },
+        {
+          "caller": "finish",
+          "callee": "resolve",
+          "lineNumber": 204
+        },
+        {
+          "caller": "finish",
+          "callee": "performance.now",
+          "lineNumber": 205
+        },
+        {
+          "caller": "finish",
+          "callee": "measuredRenderWork",
+          "lineNumber": 209
+        },
+        {
+          "caller": "finish",
+          "callee": "resolve",
+          "lineNumber": 215
+        },
+        {
+          "caller": "finish",
+          "callee": "resolve",
+          "lineNumber": 226
+        },
+        {
+          "caller": "finish",
+          "callee": "measuredRenderWork",
+          "lineNumber": 231
+        },
+        {
+          "caller": "scheduleSettle",
+          "callee": "requestAnimationFrame",
+          "lineNumber": 245
+        },
+        {
+          "caller": "scheduleSettle",
+          "callee": "requestAnimationFrame",
+          "lineNumber": 246
+        },
+        {
+          "caller": "scheduleSettle",
+          "callee": "scheduleSettle",
+          "lineNumber": 248
+        },
+        {
+          "caller": "scheduleSettle",
+          "callee": "finish",
+          "lineNumber": 251
+        },
+        {
+          "caller": "probeFilterRender",
+          "callee": "performance.now",
+          "lineNumber": 256
+        },
+        {
+          "caller": "probeFilterRender",
+          "callee": "scheduleSettle",
+          "lineNumber": 264
+        },
+        {
+          "caller": "probeFilterRender",
+          "callee": "setTimeout",
+          "lineNumber": 266
+        },
+        {
+          "caller": "probeFilterRender",
+          "callee": "finish",
+          "lineNumber": 266
+        },
+        {
+          "caller": "probeFilterRender",
+          "callee": "performance.now",
+          "lineNumber": 267
+        },
+        {
+          "caller": "probeFilterRender",
+          "callee": "obs.observe",
+          "lineNumber": 268
+        },
+        {
+          "caller": "probeFilterRender",
+          "callee": "filter.dispatchEvent",
+          "lineNumber": 270
+        },
+        {
+          "caller": "probeScopeFirstPaint",
+          "callee": "page.evaluate",
+          "lineNumber": 300
+        },
+        {
+          "caller": "probeScopeFirstPaint",
+          "callee": "document.querySelector",
+          "lineNumber": 303
+        },
+        {
+          "caller": "probeScopeFirstPaint",
+          "callee": "reject",
+          "lineNumber": 305
+        },
+        {
+          "caller": "probeScopeFirstPaint",
+          "callee": "document.querySelector",
+          "lineNumber": 308
+        },
+        {
+          "caller": "painted",
+          "callee": "text.includes",
+          "lineNumber": 311
+        },
+        {
+          "caller": "painted",
+          "callee": "list.querySelectorAll",
+          "lineNumber": 314
+        },
+        {
+          "caller": "probeScopeFirstPaint",
+          "callee": "painted",
+          "lineNumber": 318
+        },
+        {
+          "caller": "probeScopeFirstPaint",
+          "callee": "obs.disconnect",
+          "lineNumber": 319
+        },
+        {
+          "caller": "probeScopeFirstPaint",
+          "callee": "resolve",
+          "lineNumber": 320
+        },
+        {
+          "caller": "probeScopeFirstPaint",
+          "callee": "performance.now",
+          "lineNumber": 320
+        },
+        {
+          "caller": "probeScopeFirstPaint",
+          "callee": "setTimeout",
+          "lineNumber": 323
+        },
+        {
+          "caller": "probeScopeFirstPaint",
+          "callee": "obs.disconnect",
+          "lineNumber": 324
+        },
+        {
+          "caller": "probeScopeFirstPaint",
+          "callee": "reject",
+          "lineNumber": 325
+        },
+        {
+          "caller": "probeScopeFirstPaint",
+          "callee": "performance.now",
+          "lineNumber": 327
+        },
+        {
+          "caller": "probeScopeFirstPaint",
+          "callee": "obs.observe",
+          "lineNumber": 328
+        },
+        {
+          "caller": "probeScopeFirstPaint",
+          "callee": "button.click",
+          "lineNumber": 329
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "page.locator('[data-tab=\"search\"]').click",
+          "lineNumber": 378
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "page.locator",
+          "lineNumber": 378
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "page.locator(\"#searchInput\").fill",
+          "lineNumber": 379
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "page.locator",
+          "lineNumber": 379
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "page.waitForTimeout",
+          "lineNumber": 380
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "page.locator(\"#searchInput\").fill",
+          "lineNumber": 381
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "page.locator",
+          "lineNumber": 381
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "page.waitForFunction",
+          "lineNumber": 384
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "document.querySelector",
+          "lineNumber": 386
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "results.textContent.includes",
+          "lineNumber": 387
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "page.waitForTimeout",
+          "lineNumber": 397
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "page.evaluate",
+          "lineNumber": 398
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "document.querySelector",
+          "lineNumber": 399
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "finalText.includes",
+          "lineNumber": 404
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "finalText.includes",
+          "lineNumber": 404
+        },
+        {
+          "caller": "probeStaleOverwrite",
+          "callee": "finalText.slice",
+          "lineNumber": 405
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 7,
+        "functionCount": 7,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/perf/search-stub.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 133,
+      "nonEmptyLines": 125,
+      "functions": [
+        {
+          "name": "start",
+          "startLine": 39,
+          "endLine": 44,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "start",
+          "callee": "import",
+          "lineNumber": 40
+        },
+        {
+          "caller": "start",
+          "callee": "createSkillsUiServer",
+          "lineNumber": 41
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/perf/spawn-count.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 346,
+      "nonEmptyLines": 328,
+      "functions": [
+        {
+          "name": "start",
+          "startLine": 60,
+          "endLine": 65,
+          "params": []
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "start",
+          "callee": "import",
+          "lineNumber": 61
+        },
+        {
+          "caller": "start",
+          "callee": "createSkillsUiServer",
+          "lineNumber": 62
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 1,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/version.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 19,
+      "nonEmptyLines": 17,
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/web-055.test.ts",
+      "language": "typescript",
+      "fileCategory": "code",
+      "totalLines": 219,
+      "nonEmptyLines": 200,
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,1173 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/tui/Views.tsx",
+      "type": "file",
+      "name": "Views.tsx",
+      "filePath": "src/tui/Views.tsx",
+      "language": "typescript",
+      "summary": "OpenTUI React view layer that subscribes to the Elm-style TuiModel store via useSyncExternalStore and renders the splash screen, header, installed/search/settings tabs, 3D graph host, footer, and animated overlays.",
+      "tags": [
+        "tui",
+        "react-views",
+        "opentui",
+        "ui-components"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:useApp",
+      "type": "function",
+      "name": "useApp",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        33,
+        33
+      ],
+      "language": "typescript",
+      "summary": "React hook returning the AppBridge context connecting view components to the TUI store, dispatch, audio, and detail loaders.",
+      "tags": [
+        "react-hook",
+        "context",
+        "tui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:mountApp",
+      "type": "function",
+      "name": "mountApp",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        41,
+        49
+      ],
+      "language": "typescript",
+      "summary": "Creates an OpenTUI React root on a CliRenderer, mounts App inside AppProvider, and returns an unmount callback.",
+      "tags": [
+        "opentui",
+        "react-mount",
+        "tui-lifecycle"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:usePopInOverlay",
+      "type": "function",
+      "name": "usePopInOverlay",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        63,
+        87
+      ],
+      "language": "typescript",
+      "summary": "Custom hook that animates absolute-positioned modal overlays sliding into place over 180ms via OpenTUI timelines when reduceMotion is explicitly disabled.",
+      "tags": [
+        "animation",
+        "overlay",
+        "react-hook",
+        "reduce-motion"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:App",
+      "type": "function",
+      "name": "App",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        89,
+        114
+      ],
+      "language": "typescript",
+      "summary": "Root React component subscribing to TuiModel changes and switching between the startup splash, main tab/graph layout, footer, and active modal overlays.",
+      "tags": [
+        "react-component",
+        "tui-root",
+        "layout"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:Splash",
+      "type": "function",
+      "name": "Splash",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        118,
+        127
+      ],
+      "language": "typescript",
+      "summary": "Renders the full-screen startup splash view with a procedural Catppuccin gradient banner and live loading status text.",
+      "tags": [
+        "splash-screen",
+        "react-component",
+        "tui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:GraphView",
+      "type": "function",
+      "name": "GraphView",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        133,
+        195
+      ],
+      "language": "typescript",
+      "summary": "Dynamically loads three-scene.ts to host a per-renderer 3D skill graph ThreeRenderable with optional timeline rotation, degrading cleanly when WebGPU is unavailable.",
+      "tags": [
+        "3d-graph",
+        "dynamic-import",
+        "opentui-three",
+        "react-component"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:Header",
+      "type": "function",
+      "name": "Header",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        197,
+        221
+      ],
+      "language": "typescript",
+      "summary": "Renders the top navigation bar displaying tab indicators, search install-queue badge, optional hub health status pill, active scope, and busy spinner text.",
+      "tags": [
+        "header",
+        "navigation",
+        "react-component",
+        "tui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:checkedTitle",
+      "type": "function",
+      "name": "checkedTitle",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        226,
+        229
+      ],
+      "language": "typescript",
+      "summary": "Formats the checked-count border title so it stays within the 19-character 80-column pane budget by dropping the total when needed.",
+      "tags": [
+        "title-formatting",
+        "layout-budget",
+        "tui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:installedListTitle",
+      "type": "function",
+      "name": "installedListTitle",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        231,
+        238
+      ],
+      "language": "typescript",
+      "summary": "Computes the live border title for the installed-skills pane reflecting active agent filters, text filter cursor, checked count, sort mode, and provenance filter.",
+      "tags": [
+        "title-formatting",
+        "installed-tab",
+        "tui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:searchListTitle",
+      "type": "function",
+      "name": "searchListTitle",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        240,
+        248
+      ],
+      "language": "typescript",
+      "summary": "Computes a width-bounded border title for the search pane showing the active query, editing cursor, result count, and fuzzy-adjusted query hint.",
+      "tags": [
+        "title-formatting",
+        "search-tab",
+        "tui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:useSelectionScrollFollow",
+      "type": "function",
+      "name": "useSelectionScrollFollow",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        250,
+        274
+      ],
+      "language": "typescript",
+      "summary": "Synchronizes a ScrollBoxRenderable's scrollTop with the currently selected row's screen coordinates or fallback index so the active item remains in view.",
+      "tags": [
+        "scroll-management",
+        "react-hook",
+        "opentui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:skillRowStyle",
+      "type": "function",
+      "name": "skillRowStyle",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        282,
+        306
+      ],
+      "language": "typescript",
+      "summary": "Resolves foreground, background, provenance badge, and bold styling attributes for an installed skill row based on selection and checked state.",
+      "tags": [
+        "styling",
+        "list-row",
+        "theming"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:InstalledSkillRow",
+      "type": "function",
+      "name": "InstalledSkillRow",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        308,
+        350
+      ],
+      "language": "typescript",
+      "summary": "Renders a single installed skill row with check/cursor prefixes, name, provenance badge, source label, update arrow, and mouse click selection.",
+      "tags": [
+        "installed-tab",
+        "list-row",
+        "react-component"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:InstalledDetailPane",
+      "type": "function",
+      "name": "InstalledDetailPane",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        352,
+        396
+      ],
+      "language": "typescript",
+      "summary": "Renders the right-hand markdown documentation scrollbox, agent/scope/provenance metadata line, and update-check error diagnostics for the focused installed skill.",
+      "tags": [
+        "installed-tab",
+        "detail-pane",
+        "markdown",
+        "react-component"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:InstalledBody",
+      "type": "function",
+      "name": "InstalledBody",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        398,
+        452
+      ],
+      "language": "typescript",
+      "summary": "Composes the resizable split installed-skills list and markdown detail pane with memoized Catppuccin syntax highlighting and scroll-follow synchronization.",
+      "tags": [
+        "installed-tab",
+        "split-pane",
+        "react-component"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:highlightSegments",
+      "type": "function",
+      "name": "highlightSegments",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        458,
+        480
+      ],
+      "language": "typescript",
+      "summary": "Splits a string into matched and unmatched text runs for case-insensitive occurrences of the first matching search needle (raw or fuzzy-adjusted query).",
+      "tags": [
+        "search-highlighting",
+        "text-matching",
+        "pure-function"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:HighlightedRuns",
+      "type": "function",
+      "name": "HighlightedRuns",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        482,
+        510
+      ],
+      "language": "typescript",
+      "summary": "Renders segmented text runs from highlightSegments with bold accent styling on matched substrings.",
+      "tags": [
+        "search-highlighting",
+        "react-component",
+        "tui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:SearchResultRow",
+      "type": "function",
+      "name": "SearchResultRow",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        512,
+        555
+      ],
+      "language": "typescript",
+      "summary": "Renders a registry search result row with queue/selection markers, procedural source identicon badge, highlighted name/source runs, and install count.",
+      "tags": [
+        "search-tab",
+        "list-row",
+        "react-component"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:SearchQueueSection",
+      "type": "function",
+      "name": "SearchQueueSection",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        557,
+        591
+      ],
+      "language": "typescript",
+      "summary": "Renders the staged install-queue section beneath search results with pane-focus highlighting and per-item cursor selection.",
+      "tags": [
+        "search-tab",
+        "install-queue",
+        "react-component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:SearchRepoSkillsList",
+      "type": "function",
+      "name": "SearchRepoSkillsList",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        593,
+        615
+      ],
+      "language": "typescript",
+      "summary": "Displays sibling skills discovered within the currently selected search result's source repository.",
+      "tags": [
+        "search-tab",
+        "source-skills",
+        "react-component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:SearchDetailPane",
+      "type": "function",
+      "name": "SearchDetailPane",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        617,
+        664
+      ],
+      "language": "typescript",
+      "summary": "Renders the right-hand search inspection pane showing source metadata, install status in the active scope, queue status, failure messaging, and sibling repository skills.",
+      "tags": [
+        "search-tab",
+        "detail-pane",
+        "react-component"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:SearchBody",
+      "type": "function",
+      "name": "SearchBody",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        666,
+        725
+      ],
+      "language": "typescript",
+      "summary": "Composes the split search-results/queue list pane, detail inspector pane, and command hint strip capped at SEARCH_RENDER_CAP rows.",
+      "tags": [
+        "search-tab",
+        "split-pane",
+        "react-component"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:SettingsBody",
+      "type": "function",
+      "name": "SettingsBody",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        727,
+        753
+      ],
+      "language": "typescript",
+      "summary": "Renders the Settings tab displaying app and skills CLI versions along with interactive theme, sound, motion, and list-width preference controls.",
+      "tags": [
+        "settings-tab",
+        "preferences",
+        "react-component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:Footer",
+      "type": "function",
+      "name": "Footer",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        755,
+        776
+      ],
+      "language": "typescript",
+      "summary": "Renders the constant-width keybinding legend and transient toast or confirmation status text along the bottom edge of the TUI.",
+      "tags": [
+        "footer",
+        "toasts",
+        "react-component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:HelpOverlay",
+      "type": "function",
+      "name": "HelpOverlay",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        778,
+        812
+      ],
+      "language": "typescript",
+      "summary": "Renders the centered modal keybinding reference sheet with optional pop-in motion when help mode is open.",
+      "tags": [
+        "overlay",
+        "help-dialog",
+        "react-component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:AgentSelectOverlay",
+      "type": "function",
+      "name": "AgentSelectOverlay",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        814,
+        834
+      ],
+      "language": "typescript",
+      "summary": "Renders the multi-select agent filter modal displaying staged checkboxes, cursor state, and apply/cancel shortcuts.",
+      "tags": [
+        "overlay",
+        "agent-filter",
+        "react-component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:HealthOverlay",
+      "type": "function",
+      "name": "HealthOverlay",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        836,
+        857
+      ],
+      "language": "typescript",
+      "summary": "Renders the hub health diagnostics modal showing OK/FAIL summary and detailed check lines when a health command is configured.",
+      "tags": [
+        "overlay",
+        "health-check",
+        "react-component"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/tui/Views.tsx:ConfirmOverlay",
+      "type": "function",
+      "name": "ConfirmOverlay",
+      "filePath": "src/tui/Views.tsx",
+      "lineRange": [
+        859,
+        875
+      ],
+      "language": "typescript",
+      "summary": "Renders the destructive remove/update confirmation modal, highlighting warnings when selected skills have non-locked (linked or local) provenance.",
+      "tags": [
+        "overlay",
+        "confirmation-dialog",
+        "provenance"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:useApp",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:useApp",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:mountApp",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:mountApp",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:usePopInOverlay",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:App",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:App",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:Splash",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:GraphView",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:Header",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:checkedTitle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:checkedTitle",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:installedListTitle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:installedListTitle",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:searchListTitle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:searchListTitle",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:useSelectionScrollFollow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:skillRowStyle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:InstalledSkillRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:InstalledDetailPane",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:InstalledBody",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:highlightSegments",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:highlightSegments",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:HighlightedRuns",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:SearchResultRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:SearchQueueSection",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:SearchRepoSkillsList",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:SearchDetailPane",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:SearchBody",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:SettingsBody",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:Footer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:HelpOverlay",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:AgentSelectOverlay",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:HealthOverlay",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "function:src/tui/Views.tsx:ConfirmOverlay",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/theme.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/tui/art.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/tui/audio.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/tui/Views.tsx",
+      "target": "file:src/tui/model.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "function:src/tui/Views.tsx:mountApp",
+      "target": "function:src/tui/Views.tsx:App",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:App",
+      "target": "function:src/tui/Views.tsx:useApp",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:App",
+      "target": "function:src/tui/Views.tsx:Splash",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:App",
+      "target": "function:src/tui/Views.tsx:Header",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:App",
+      "target": "function:src/tui/Views.tsx:GraphView",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:App",
+      "target": "function:src/tui/Views.tsx:InstalledBody",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:App",
+      "target": "function:src/tui/Views.tsx:SearchBody",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:App",
+      "target": "function:src/tui/Views.tsx:SettingsBody",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:App",
+      "target": "function:src/tui/Views.tsx:Footer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:App",
+      "target": "function:src/tui/Views.tsx:ConfirmOverlay",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:App",
+      "target": "function:src/tui/Views.tsx:HealthOverlay",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:App",
+      "target": "function:src/tui/Views.tsx:HelpOverlay",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:App",
+      "target": "function:src/tui/Views.tsx:AgentSelectOverlay",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:Splash",
+      "target": "function:src/core/theme.ts:tokensFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:Splash",
+      "target": "function:src/tui/art.ts:splashImage",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:GraphView",
+      "target": "function:src/core/theme.ts:tokensFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:GraphView",
+      "target": "function:src/tui/three-scene.ts:getGraphView",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:Header",
+      "target": "function:src/core/theme.ts:tokensFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:installedListTitle",
+      "target": "function:src/tui/Views.tsx:checkedTitle",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:InstalledSkillRow",
+      "target": "function:src/tui/Views.tsx:skillRowStyle",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:InstalledDetailPane",
+      "target": "function:src/tui/Views.tsx:useApp",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:InstalledBody",
+      "target": "function:src/core/theme.ts:tokensFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:InstalledBody",
+      "target": "function:src/tui/Views.tsx:useApp",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:InstalledBody",
+      "target": "function:src/core/theme.ts:syntaxTokensFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:InstalledBody",
+      "target": "function:src/tui/Views.tsx:installedListTitle",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:InstalledBody",
+      "target": "function:src/tui/Views.tsx:useSelectionScrollFollow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:InstalledBody",
+      "target": "function:src/tui/Views.tsx:InstalledSkillRow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:InstalledBody",
+      "target": "function:src/tui/Views.tsx:InstalledDetailPane",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:HighlightedRuns",
+      "target": "function:src/tui/Views.tsx:highlightSegments",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:SearchResultRow",
+      "target": "function:src/tui/art.ts:sourceBadge",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:SearchResultRow",
+      "target": "function:src/tui/Views.tsx:HighlightedRuns",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:SearchDetailPane",
+      "target": "function:src/tui/Views.tsx:SearchRepoSkillsList",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:SearchBody",
+      "target": "function:src/core/theme.ts:tokensFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:SearchBody",
+      "target": "function:src/tui/Views.tsx:useApp",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:SearchBody",
+      "target": "function:src/tui/Views.tsx:useSelectionScrollFollow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:SearchBody",
+      "target": "function:src/tui/Views.tsx:searchListTitle",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:SearchBody",
+      "target": "function:src/tui/Views.tsx:SearchResultRow",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:SearchBody",
+      "target": "function:src/tui/Views.tsx:SearchQueueSection",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:SearchBody",
+      "target": "function:src/tui/Views.tsx:SearchDetailPane",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:SettingsBody",
+      "target": "function:src/core/theme.ts:tokensFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:Footer",
+      "target": "function:src/core/theme.ts:tokensFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:HelpOverlay",
+      "target": "function:src/core/theme.ts:tokensFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:HelpOverlay",
+      "target": "function:src/tui/Views.tsx:usePopInOverlay",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:AgentSelectOverlay",
+      "target": "function:src/core/theme.ts:tokensFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:AgentSelectOverlay",
+      "target": "function:src/tui/Views.tsx:usePopInOverlay",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:HealthOverlay",
+      "target": "function:src/core/theme.ts:tokensFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:HealthOverlay",
+      "target": "function:src/tui/Views.tsx:usePopInOverlay",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:ConfirmOverlay",
+      "target": "function:src/core/theme.ts:tokensFor",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/tui/Views.tsx:ConfirmOverlay",
+      "target": "function:src/tui/Views.tsx:usePopInOverlay",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

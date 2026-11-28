@@ -1,0 +1,45 @@
+{
+  "nodes": [
+    {
+      "id": "pipeline:.github/workflows/claude-code-review.yml",
+      "type": "pipeline",
+      "name": "claude-code-review.yml",
+      "filePath": ".github/workflows/claude-code-review.yml",
+      "language": "yaml",
+      "summary": "GitHub Actions workflow ('Claude Code Review') triggered on pull request opened, synchronize, ready_for_review, and reopened events. Checks out the repository and runs anthropics/claude-code-action@v1 with the code-review plugin and inline-comment MCP tool authenticated via CLAUDE_CODE_OAUTH_TOKEN.",
+      "tags": [
+        "github-actions",
+        "ci-workflow",
+        "code-review",
+        "claude-code",
+        "pull-request"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "pipeline:.github/workflows/claude.yml",
+      "type": "pipeline",
+      "name": "claude.yml",
+      "filePath": ".github/workflows/claude.yml",
+      "language": "yaml",
+      "summary": "GitHub Actions workflow ('Claude Code') triggered when @claude is mentioned in issue comments, PR review comments, PR reviews, or issue titles and bodies. Checks out the repository and runs anthropics/claude-code-action@v1 with read access to contents, pull requests, issues, and CI actions.",
+      "tags": [
+        "github-actions",
+        "ci-workflow",
+        "claude-code",
+        "issue-automation",
+        "mention-trigger"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "pipeline:.github/workflows/claude-code-review.yml",
+      "target": "pipeline:.github/workflows/claude.yml",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

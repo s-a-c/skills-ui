@@ -1,0 +1,6032 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "2d70a9811c7645707d0b7161ef0fcdc1d473cfb0",
+  "generatedAt": "2026-11-28T01:19:39.854Z",
+  "files": {
+    ".github/workflows/claude-code-review.yml": {
+      "filePath": ".github/workflows/claude-code-review.yml",
+      "contentHash": "450c42700116c47383d5622a6c201eea1324cadbe6e3a719be2f4047942f8c29",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 46,
+      "hasStructuralAnalysis": true
+    },
+    ".github/workflows/claude.yml": {
+      "filePath": ".github/workflows/claude.yml",
+      "contentHash": "11b83242c6ea5288748ed0fc1fbe6dc7501103ee185df84486324034d930cad6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 51,
+      "hasStructuralAnalysis": true
+    },
+    "AGENTS.md": {
+      "filePath": "AGENTS.md",
+      "contentHash": "a345c043bb489c66eeb1dfe742ff77581839597e91fc90faea32fbc47fc3a683",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 109,
+      "hasStructuralAnalysis": true
+    },
+    "CONTEXT.md": {
+      "filePath": "CONTEXT.md",
+      "contentHash": "8675e8d4fe59ea138853fb8951149828f5e5208b38c2e2848821f274b53ce2f5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": true
+    },
+    "README.md": {
+      "filePath": "README.md",
+      "contentHash": "e95bfcc88da999d42b5f02c586c4e2e9c2540c2d8c501ca31a21a039fbe4b70e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 76,
+      "hasStructuralAnalysis": true
+    },
+    "ROADMAP.md": {
+      "filePath": "ROADMAP.md",
+      "contentHash": "ffaca347b75c5324316378536d63477366ef2607e9467622f2f996ed9b53af2c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 75,
+      "hasStructuralAnalysis": true
+    },
+    "docs/_config.yml": {
+      "filePath": "docs/_config.yml",
+      "contentHash": "f9021b7c7b0f736dfbf912b80297220e0fa002c6a3dd7e98e0167fe02406bfb8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 22,
+      "hasStructuralAnalysis": true
+    },
+    "docs/agents/domain.md": {
+      "filePath": "docs/agents/domain.md",
+      "contentHash": "024c3b53f639268bdd308c33e7156a331eb37fc16de51f3ef484fca18f6ead3c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 55,
+      "hasStructuralAnalysis": true
+    },
+    "docs/agents/issue-tracker.md": {
+      "filePath": "docs/agents/issue-tracker.md",
+      "contentHash": "fc0d713dbba606e5400d824a42d6ee3b356f2b6315b34f7a34dc78cef01eecf3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": true
+    },
+    "docs/agents/triage-labels.md": {
+      "filePath": "docs/agents/triage-labels.md",
+      "contentHash": "220df125b201cb7c3fbc0e2377222690ef8af04c0ea1e0ae02dd21748392284a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 19,
+      "hasStructuralAnalysis": true
+    },
+    "docs/agents/workspace.md": {
+      "filePath": "docs/agents/workspace.md",
+      "contentHash": "37962c7063e6f521ba9e361a47b9b8ab95cb6e19b750c4e8c1a3a4eb6900f38c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 94,
+      "hasStructuralAnalysis": true
+    },
+    "docs/archify-findings-review-and-report-2026-11-26.md": {
+      "filePath": "docs/archify-findings-review-and-report-2026-11-26.md",
+      "contentHash": "1881534de7eb622d0c70bfcb9eb16b2249f14ec0ff392bdb5910f82a01639fe5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 880,
+      "hasStructuralAnalysis": true
+    },
+    "docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md": {
+      "filePath": "docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "contentHash": "6a8d21ace195bc0b7dee2f7df89fa403f446384aaf4c26f5ca59d6ec9edfee3a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 311,
+      "hasStructuralAnalysis": true
+    },
+    "docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md": {
+      "filePath": "docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md",
+      "contentHash": "c5f5da02abea90ef245f193200ce430f89d1a06cc21c3912d8cda582e3b524db",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 208,
+      "hasStructuralAnalysis": true
+    },
+    "docs/index.md": {
+      "filePath": "docs/index.md",
+      "contentHash": "1de7b34bb08b42269aba6a2e47a5f8ecb4fa41d84e1e6410261b821b091e3d28",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 41,
+      "hasStructuralAnalysis": true
+    },
+    "docs/release.md": {
+      "filePath": "docs/release.md",
+      "contentHash": "07af31af20b6934c82736cb121865b1a1884169a7a51a5ef2db7eb0065eb27fc",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 40,
+      "hasStructuralAnalysis": true
+    },
+    "docs/upstream-issue-draft.md": {
+      "filePath": "docs/upstream-issue-draft.md",
+      "contentHash": "d461248ca08ee23f11a169507a479eae1980b46b244c6efee724608d847af007",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 63,
+      "hasStructuralAnalysis": true
+    },
+    "docs/upstream-ls-memoization.md": {
+      "filePath": "docs/upstream-ls-memoization.md",
+      "contentHash": "fb68e99a7dc67a467d3285da281152fd0f2a00a53bb19de0a271582606053f85",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 86,
+      "hasStructuralAnalysis": true
+    },
+    "mise.toml": {
+      "filePath": "mise.toml",
+      "contentHash": "001c32405e32e262f5a259d577dee0f857f8c41c46746f7f87b7a547304f32d1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 3,
+      "hasStructuralAnalysis": true
+    },
+    "package.json": {
+      "filePath": "package.json",
+      "contentHash": "785947c07c0099fe62e5a46db7274c3253617f654e0a6c0c5f129b177023c617",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 31,
+      "hasStructuralAnalysis": true
+    },
+    "playwright.config.ts": {
+      "filePath": "playwright.config.ts",
+      "contentHash": "e8851f3464d17cc8d3324677c13a72b3dd084c92bd3c3f2a74e4348887231735",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@playwright/test",
+          "specifiers": [
+            "defineConfig"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/build.ts": {
+      "filePath": "scripts/build.ts",
+      "contentHash": "30f4a7473c4dca550597ce1abce30acfb1da45f4214561beddb79b401bab9090",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun",
+          "specifiers": [
+            "$"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "readdirSync",
+            "rmSync"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 114,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/export-page.ts": {
+      "filePath": "scripts/export-page.ts",
+      "contentHash": "933a9cf0f60324c95967830f65e33fe0e974d5a9f7439364512ca38f401f1bb6",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdirSync",
+            "writeFileSync"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "dirname",
+            "resolve"
+          ]
+        },
+        {
+          "source": "../src/web/page.ts",
+          "specifiers": [
+            "renderPage"
+          ]
+        },
+        {
+          "source": "../src/core/version.ts",
+          "specifiers": [
+            "APP_VERSION"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/install.sh": {
+      "filePath": "scripts/install.sh",
+      "contentHash": "c3d1b7e25cd7385a8aadd9693c6a82daea061ccc8c968c84bdda301afee401b5",
+      "functions": [
+        {
+          "name": "say",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "die",
+          "params": [],
+          "exported": false,
+          "lineCount": 1
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 101,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/perf/budget.ts": {
+      "filePath": "scripts/perf/budget.ts",
+      "contentHash": "528de21cf2eca84e0adf75c802c7a986e11c7e0e5f278ce589e03a1057a15365",
+      "functions": [
+        {
+          "name": "verdictFor",
+          "params": [
+            "measured",
+            "budget"
+          ],
+          "returnType": "Verdict",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "msRow",
+          "params": [
+            "hotPath",
+            "budgetLabel",
+            "budgetMs",
+            "measuredMs"
+          ],
+          "returnType": "Row",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "progress",
+          "params": [
+            "message"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "die",
+          "params": [
+            "message"
+          ],
+          "returnType": "never",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "snapshotEnv",
+          "params": [],
+          "returnType": "Record<EnvKey, string | undefined>",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "restoreEnv",
+          "params": [
+            "snap"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "freshServer",
+          "params": [
+            "withPage"
+          ],
+          "returnType": "Promise<Server>",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "timedGetJson",
+          "params": [
+            "url"
+          ],
+          "returnType": "Promise<{ ms: number; status: number; body: any }>",
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "setupSynthetic",
+          "params": [
+            "workDir"
+          ],
+          "returnType": "Promise<Scenario>",
+          "exported": false,
+          "lineCount": 23
+        },
+        {
+          "name": "setupReal",
+          "params": [],
+          "returnType": "Promise<Scenario>",
+          "exported": false,
+          "lineCount": 62
+        },
+        {
+          "name": "benchFilterMatching",
+          "params": [
+            "scenario"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 33
+        },
+        {
+          "name": "benchColdList",
+          "params": [
+            "scope",
+            "expectedProjectRows"
+          ],
+          "returnType": "Promise<number>",
+          "exported": false,
+          "lineCount": 19
+        },
+        {
+          "name": "benchApiLists",
+          "params": [
+            "scenario",
+            "servers"
+          ],
+          "returnType": "Promise<Server>",
+          "exported": false,
+          "lineCount": 45
+        },
+        {
+          "name": "benchSearch",
+          "params": [
+            "warm"
+          ],
+          "returnType": "Promise<SearchStub>",
+          "exported": false,
+          "lineCount": 47
+        },
+        {
+          "name": "benchColdGlobalPaint",
+          "params": [
+            "page",
+            "scenario",
+            "pageTimeout"
+          ],
+          "returnType": "Promise<void>",
+          "exported": false,
+          "lineCount": 27
+        },
+        {
+          "name": "benchFilterRenderAndRebuild",
+          "params": [
+            "page",
+            "scenario"
+          ],
+          "returnType": "Promise<void>",
+          "exported": false,
+          "lineCount": 49
+        },
+        {
+          "name": "benchStaleOverwrite",
+          "params": [
+            "page"
+          ],
+          "returnType": "Promise<void>",
+          "exported": false,
+          "lineCount": 21
+        },
+        {
+          "name": "benchPageProbes",
+          "params": [
+            "scenario",
+            "servers"
+          ],
+          "returnType": "Promise<Browser>",
+          "exported": false,
+          "lineCount": 17
+        },
+        {
+          "name": "recordShimSpawns",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "emitReport",
+          "params": [
+            "scenario"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "main",
+          "params": [],
+          "returnType": "Promise<void>",
+          "exported": false,
+          "lineCount": 25
+        },
+        {
+          "name": "renderReport",
+          "params": [
+            "scenario",
+            "date"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 26
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "existsSync",
+            "mkdtempSync",
+            "rmSync",
+            "statSync",
+            "writeFileSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "tmpdir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "dirname",
+            "join"
+          ]
+        },
+        {
+          "source": "@playwright/test",
+          "specifiers": [
+            "chromium",
+            "Browser",
+            "BrowserContext",
+            "Page"
+          ]
+        },
+        {
+          "source": "../../tests/perf/helpers.ts",
+          "specifiers": [
+            "SHIM",
+            "buildSyntheticCorpus",
+            "countShimCalls",
+            "fmtMs",
+            "median",
+            "readShimCallLog",
+            "startSearchStub",
+            "SearchStub",
+            "ShimEntry",
+            "SyntheticCorpus"
+          ]
+        },
+        {
+          "source": "../../tests/perf/playwright-probes.ts",
+          "specifiers": [
+            "closeBrowser",
+            "newPerfContext",
+            "openServedPage",
+            "probeFilterRender",
+            "probeScopeFirstPaint",
+            "probeStaleOverwrite",
+            "stubUpdates"
+          ]
+        },
+        {
+          "source": "../../src/core/api.ts",
+          "specifiers": [
+            "createSkillsUiServer"
+          ]
+        },
+        {
+          "source": "../../src/core/index.ts",
+          "specifiers": [
+            "listInstalled",
+            "readSkillDoc",
+            "runSkills",
+            "sanitizeMetadata",
+            "skillMatches"
+          ]
+        },
+        {
+          "source": "../../src/core/version.ts",
+          "specifiers": [
+            "APP_VERSION"
+          ]
+        },
+        {
+          "source": "../../src/web/page.ts",
+          "specifiers": [
+            "webPageRenderer"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 645,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/perf/report-2026-11-01-real.md": {
+      "filePath": "scripts/perf/report-2026-11-01-real.md",
+      "contentHash": "03751b1151049f0e2bd61aeb656c363b79fd77938bf5db72a45394da3b546651",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 34,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/perf/report-2026-11-01.md": {
+      "filePath": "scripts/perf/report-2026-11-01.md",
+      "contentHash": "0cb179a09e73901a1012a41bab243e0b42018e282be6cc148048bf05a3ef6593",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/pty-smoke/README.md": {
+      "filePath": "scripts/pty-smoke/README.md",
+      "contentHash": "d123455c2302d83a9a2053c466499fb625ff3674e483b5c8a680935e5e5eb345",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 45,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/pty-smoke/bin/skills": {
+      "filePath": "scripts/pty-smoke/bin/skills",
+      "contentHash": "fc4541fa90d2ce5da705c5ae1506e6f973086f71c64e6a58c33cbe485ebc47f1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 5,
+      "hasStructuralAnalysis": false
+    },
+    "scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md": {
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "contentHash": "46a398738e9260af267ab769354495a6fe12de11799c6f08aab0c1fe3b44ac84",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 67,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md": {
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "contentHash": "90731bc176ec3403f76f6a2f61d5d6fc8bd44bee1ac018fd61c992d46ad873ef",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 67,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md": {
+      "filePath": "scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md",
+      "contentHash": "10581a0fe373dd18917849a203e8fd82d5624da7d98f241a46e5390f9fce6ef0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 67,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/pty-smoke/fixtures/ls-global-long.json": {
+      "filePath": "scripts/pty-smoke/fixtures/ls-global-long.json",
+      "contentHash": "c77d9e29f79ae79a55cfbdfbee2ba010ff8cc9545431fdacccf88987d5c8cd6e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1502,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/pty-smoke/fixtures/ls-project.json": {
+      "filePath": "scripts/pty-smoke/fixtures/ls-project.json",
+      "contentHash": "6f2c0800bbee57272200bca4a3f01be30c178316bd9b673aced88fcf80f0e4e8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 21,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/pty-smoke/runner.py": {
+      "filePath": "scripts/pty-smoke/runner.py",
+      "contentHash": "4ddbfbd1b1bfcc14499932ad6ec1ef0a8f5a380d132759f6b0faa958061fad98",
+      "functions": [],
+      "classes": [
+        {
+          "name": "PtyApp",
+          "methods": [
+            "__init__",
+            "read",
+            "send",
+            "lines",
+            "find",
+            "stop"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 61
+        }
+      ],
+      "imports": [
+        {
+          "source": "fcntl",
+          "specifiers": [
+            "fcntl"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "pty",
+          "specifiers": [
+            "pty"
+          ]
+        },
+        {
+          "source": "select",
+          "specifiers": [
+            "select"
+          ]
+        },
+        {
+          "source": "signal",
+          "specifiers": [
+            "signal"
+          ]
+        },
+        {
+          "source": "struct",
+          "specifiers": [
+            "struct"
+          ]
+        },
+        {
+          "source": "termios",
+          "specifiers": [
+            "termios"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        }
+      ],
+      "exports": [
+        "PtyApp"
+      ],
+      "totalLines": 98,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/pty-smoke/skills-smoke-bin.ts": {
+      "filePath": "scripts/pty-smoke/skills-smoke-bin.ts",
+      "contentHash": "e7b9f22af432417b5a65de260b81b987178f7d04db243e21fdf7940c05d59e60",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "readFileSync"
+          ]
+        },
+        {
+          "source": "node:url",
+          "specifiers": [
+            "fileURLToPath"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "dirname",
+            "join"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 34,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/pty-smoke/smoke.py": {
+      "filePath": "scripts/pty-smoke/smoke.py",
+      "contentHash": "89250b7446312ad8459cb495368293f982dd248ccbdfdf366285e34872ec96da",
+      "functions": [
+        {
+          "name": "check",
+          "params": [
+            "name",
+            "ok",
+            "detail"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "main",
+          "params": [],
+          "exported": true,
+          "lineCount": 115
+        }
+      ],
+      "classes": [
+        {
+          "name": "_SearchFixtureHandler",
+          "methods": [
+            "do_GET",
+            "log_message"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 19
+        }
+      ],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "threading",
+          "specifiers": [
+            "threading"
+          ]
+        },
+        {
+          "source": "http.server",
+          "specifiers": [
+            "BaseHTTPRequestHandler",
+            "HTTPServer"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "runner",
+          "specifiers": [
+            "PtyApp"
+          ]
+        }
+      ],
+      "exports": [
+        "_SearchFixtureHandler",
+        "check",
+        "main"
+      ],
+      "totalLines": 170,
+      "hasStructuralAnalysis": true
+    },
+    "scripts/verify-build-targets.ts": {
+      "filePath": "scripts/verify-build-targets.ts",
+      "contentHash": "3ea006a62e7b18dcaee4ba45be0815d2bd81a59ebf0a116798532a7bd0de06f4",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:assert/strict",
+          "specifiers": [
+            "assert"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "readFileSync"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join",
+            "resolve"
+          ]
+        },
+        {
+          "source": "node:crypto",
+          "specifiers": [
+            "createHash"
+          ]
+        },
+        {
+          "source": "node:child_process",
+          "specifiers": [
+            "spawnSync"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 22,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/api.ts": {
+      "filePath": "src/core/api.ts",
+      "contentHash": "72da9a9a44388eeee1124f4f82f73ce8f2fd0915caef6f5f26f731343c6b306f",
+      "functions": [
+        {
+          "name": "json",
+          "params": [
+            "body",
+            "status"
+          ],
+          "returnType": "Response",
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "readJsonBody",
+          "params": [
+            "req"
+          ],
+          "returnType": "Promise<Record<string, unknown>>",
+          "exported": false,
+          "lineCount": 15
+        },
+        {
+          "name": "validText",
+          "params": [
+            "value",
+            "max"
+          ],
+          "returnType": "string | null",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "validSkillName",
+          "params": [
+            "value"
+          ],
+          "returnType": "string | null",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "validSource",
+          "params": [
+            "value"
+          ],
+          "returnType": "string | null",
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "validQuery",
+          "params": [
+            "value"
+          ],
+          "returnType": "string | null",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "createLimiter",
+          "params": [
+            "capacity",
+            "refillPerSec"
+          ],
+          "returnType": "() => boolean",
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "scopeParam",
+          "params": [
+            "url"
+          ],
+          "returnType": "\"project\" | \"global\"",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "createSkillsUiServer",
+          "params": [
+            "options"
+          ],
+          "returnType": "Promise<{\n  port: number;\n  fellBack: boolean;\n  stop: () => Promise<void>;\n}>",
+          "exported": true,
+          "lineCount": 475
+        }
+      ],
+      "classes": [
+        {
+          "name": "BodyTooLarge",
+          "methods": [],
+          "properties": [],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "BadJson",
+          "methods": [],
+          "properties": [],
+          "exported": false,
+          "lineCount": 1
+        }
+      ],
+      "imports": [
+        {
+          "source": "./index.ts",
+          "specifiers": [
+            "checkForUpdates",
+            "createHealthChecker",
+            "install",
+            "isHealthCmdConfigured",
+            "isPostMutationHookConfigured",
+            "listInstalled",
+            "listSourceSkills",
+            "remove",
+            "runPostMutationHook",
+            "searchWithFallback",
+            "skillBody",
+            "update"
+          ]
+        },
+        {
+          "source": "./services/locks.ts",
+          "specifiers": [
+            "InvalidLockFileError"
+          ]
+        },
+        {
+          "source": "./hosted-auth.ts",
+          "specifiers": [
+            "bearerMatches",
+            "corsHeaders",
+            "getOrCreateHostedToken",
+            "isAllowedHost",
+            "isAllowedOrigin",
+            "isCrossSiteFetch",
+            "isSameOrigin",
+            "preflightResponse"
+          ]
+        },
+        {
+          "source": "./prefs.ts",
+          "specifiers": [
+            "DEFAULT_UI_PREFERENCES",
+            "loadUiPreferences",
+            "normalizePreferences",
+            "saveUiPreferences",
+            "uiPrefsPath",
+            "UiPreferences"
+          ]
+        },
+        {
+          "source": "./seed.ts",
+          "specifiers": [
+            "UiSeed"
+          ]
+        },
+        {
+          "source": "./services/skill-doc.ts",
+          "specifiers": [
+            "readSkillDoc"
+          ]
+        },
+        {
+          "source": "./services/sanitize.ts",
+          "specifiers": [
+            "sanitizeMetadata"
+          ]
+        },
+        {
+          "source": "./services/types.ts",
+          "specifiers": [
+            "InstalledSkill",
+            "Scope"
+          ]
+        },
+        {
+          "source": "./skills-client.ts",
+          "specifiers": [
+            "SkillsBusyError",
+            "skillsVersion"
+          ]
+        },
+        {
+          "source": "./version.ts",
+          "specifiers": [
+            "APP_VERSION"
+          ]
+        }
+      ],
+      "exports": [
+        "createSkillsUiServer",
+        "DEFAULT_UI_PREFERENCES",
+        "uiPrefsPath"
+      ],
+      "totalLines": 655,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/disk-index.ts": {
+      "filePath": "src/core/disk-index.ts",
+      "contentHash": "8003336cadebf049e2d53eae4df50c6f64f2a1f11f62e67a00c896afd3ba5fe3",
+      "functions": [
+        {
+          "name": "sweepStaleTmp",
+          "params": [
+            "dir",
+            "prefix"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "sweepStaleProjectIndexes",
+          "params": [
+            "dir",
+            "keep"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "diskIndexDir",
+          "params": [
+            "dirOverride"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "projectIdentity",
+          "params": [],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "diskIndexPath",
+          "params": [
+            "scope",
+            "dirOverride"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "isScope",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "isStrOrNull",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "normalizeEntry",
+          "params": [
+            "input",
+            "scope"
+          ],
+          "returnType": "InstalledSkill | null",
+          "exported": false,
+          "lineCount": 24
+        },
+        {
+          "name": "normalizeDiskIndex",
+          "params": [
+            "content",
+            "scope"
+          ],
+          "returnType": "PersistedIndex | null",
+          "exported": true,
+          "lineCount": 37
+        },
+        {
+          "name": "loadDiskIndex",
+          "params": [
+            "scope",
+            "dirOverride"
+          ],
+          "returnType": "InstalledSkill[] | null",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "saveDiskIndex",
+          "params": [
+            "scope",
+            "skills",
+            "dirOverride"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 30
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:crypto",
+          "specifiers": [
+            "createHash"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "existsSync",
+            "mkdirSync",
+            "readdirSync",
+            "readFileSync",
+            "realpathSync",
+            "renameSync",
+            "statSync",
+            "unlinkSync",
+            "writeFileSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "homedir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "basename",
+            "dirname",
+            "join"
+          ]
+        },
+        {
+          "source": "./services/types.ts",
+          "specifiers": [
+            "InstalledSkill",
+            "Scope"
+          ]
+        }
+      ],
+      "exports": [
+        "DISK_INDEX_VERSION",
+        "TMP_SWEEP_MIN_AGE_MS",
+        "diskIndexDir",
+        "projectIdentity",
+        "diskIndexPath",
+        "normalizeDiskIndex",
+        "loadDiskIndex",
+        "saveDiskIndex"
+      ],
+      "totalLines": 247,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/filter.ts": {
+      "filePath": "src/core/filter.ts",
+      "contentHash": "5ac627a949e1b4afe131ffd6a6438cc093dcf8e2418062950f2fc6e11e5ab141",
+      "functions": [
+        {
+          "name": "skillMatches",
+          "params": [
+            "skill",
+            "needle"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 13
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "skillMatches"
+      ],
+      "totalLines": 27,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/hosted-auth.ts": {
+      "filePath": "src/core/hosted-auth.ts",
+      "contentHash": "1d91852a04a8e390227fa8aab2f167c59d969341ad70c2476d6f4740f19064ed",
+      "functions": [
+        {
+          "name": "hostedTokenPath",
+          "params": [],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "getOrCreateHostedToken",
+          "params": [
+            "path"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "bearerMatches",
+          "params": [
+            "authHeader",
+            "token"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "isCrossSiteFetch",
+          "params": [
+            "req"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "isAllowedHost",
+          "params": [
+            "host"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "extraOrigins",
+          "params": [],
+          "returnType": "string[]",
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "isAllowedOrigin",
+          "params": [
+            "origin"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "isSameOrigin",
+          "params": [
+            "origin",
+            "host"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "corsHeaders",
+          "params": [
+            "origin"
+          ],
+          "returnType": "Record<string, string>",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "preflightResponse",
+          "params": [
+            "origin"
+          ],
+          "returnType": "Response",
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "existsSync",
+            "mkdirSync",
+            "readFileSync",
+            "writeFileSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "homedir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "dirname",
+            "join"
+          ]
+        },
+        {
+          "source": "node:crypto",
+          "specifiers": [
+            "createHash",
+            "randomBytes",
+            "timingSafeEqual"
+          ]
+        }
+      ],
+      "exports": [
+        "hostedTokenPath",
+        "getOrCreateHostedToken",
+        "bearerMatches",
+        "isCrossSiteFetch",
+        "isAllowedHost",
+        "isAllowedOrigin",
+        "isSameOrigin",
+        "corsHeaders",
+        "preflightResponse"
+      ],
+      "totalLines": 126,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/index.ts": {
+      "filePath": "src/core/index.ts",
+      "contentHash": "74a540f84add6b4269ab997e1b4a48e7d98865e1f7f55c75a5d562a956d5f8c3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "skillMatches",
+        "runSkills",
+        "skillsVersion",
+        "sanitizeEnv",
+        "resolveSkillsBin",
+        "SkillsCliError",
+        "listInstalled",
+        "findInstalled",
+        "classifyProvenance",
+        "skillBody",
+        "readSkillDoc",
+        "stripFrontmatter",
+        "searchWithFallback",
+        "makeSearchWithFallback",
+        "searchRegistryFuzzy",
+        "sanitizeMetadata",
+        "install",
+        "remove",
+        "update",
+        "listSourceSkills",
+        "SourceSkill",
+        "checkForUpdates",
+        "readLock",
+        "projectLockPath",
+        "globalLockPath",
+        "isPostMutationHookConfigured",
+        "isHealthCmdConfigured",
+        "runPostMutationHook",
+        "createHealthChecker",
+        "checkHealth",
+        "invalidateHealthCache"
+      ],
+      "totalLines": 21,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/prefs.ts": {
+      "filePath": "src/core/prefs.ts",
+      "contentHash": "6b1a1c221007e39b14fd7c643a30c1b827e1510c8ea9304b1168b7cf5561e5f7",
+      "functions": [
+        {
+          "name": "uiPrefsPath",
+          "params": [
+            "dirOverride"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "isThemeName",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "isReduceMotion",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "isPort",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "normalizePreferences",
+          "params": [
+            "input"
+          ],
+          "returnType": "UiPreferences",
+          "exported": true,
+          "lineCount": 33
+        },
+        {
+          "name": "loadUiPreferences",
+          "params": [
+            "path"
+          ],
+          "returnType": "UiPreferences",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "saveUiPreferences",
+          "params": [
+            "prefs",
+            "path"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "importSkillsPrefsOnce",
+          "params": [
+            "path",
+            "source"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 10
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "existsSync",
+            "mkdirSync",
+            "readFileSync",
+            "writeFileSync",
+            "copyFileSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "homedir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "dirname",
+            "join"
+          ]
+        }
+      ],
+      "exports": [
+        "LIST_WIDTH_MIN",
+        "LIST_WIDTH_MAX",
+        "DEFAULT_UI_PREFERENCES",
+        "uiPrefsPath",
+        "normalizePreferences",
+        "loadUiPreferences",
+        "saveUiPreferences",
+        "importSkillsPrefsOnce"
+      ],
+      "totalLines": 123,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/seed.ts": {
+      "filePath": "src/core/seed.ts",
+      "contentHash": "6dddedfd637267a442032aefb6e16f4ddf943c99c3ac3bdf064af3fc7f841df8",
+      "functions": [
+        {
+          "name": "positionals",
+          "params": [
+            "args"
+          ],
+          "returnType": "string[]",
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "flagValues",
+          "params": [
+            "args",
+            "flag"
+          ],
+          "returnType": "string[]",
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "parseUiSeed",
+          "params": [
+            "argv"
+          ],
+          "returnType": "UiSeed",
+          "exported": true,
+          "lineCount": 29
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "parseUiSeed"
+      ],
+      "totalLines": 84,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/services/hooks.ts": {
+      "filePath": "src/core/services/hooks.ts",
+      "contentHash": "77f6e7b4b33967615643bd5ab15205848d5acbd675a75f2ff460637b5f94dd2e",
+      "functions": [
+        {
+          "name": "envCmd",
+          "params": [
+            "name"
+          ],
+          "returnType": "string | null",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "isPostMutationHookConfigured",
+          "params": [],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "isHealthCmdConfigured",
+          "params": [],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "clipSanitized",
+          "params": [
+            "raw",
+            "max"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "spawnExecutable",
+          "params": [
+            "exe",
+            "opts"
+          ],
+          "returnType": "Promise<{ stdout: string; stderr: string; exitCode: number; timedOut: boolean; spawnError?: string }>",
+          "exported": false,
+          "lineCount": 47
+        },
+        {
+          "name": "runPostMutationHook",
+          "params": [
+            "opts"
+          ],
+          "returnType": "Promise<PostMutationHookResult>",
+          "exported": true,
+          "lineCount": 54
+        },
+        {
+          "name": "createHealthChecker",
+          "params": [
+            "opts"
+          ],
+          "returnType": "HealthChecker",
+          "exported": true,
+          "lineCount": 96
+        },
+        {
+          "name": "checkHealth",
+          "params": [
+            "options"
+          ],
+          "returnType": "Promise<HealthCheckResult>",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "invalidateHealthCache",
+          "params": [],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../skills-client.ts",
+          "specifiers": [
+            "sanitizeEnv"
+          ]
+        },
+        {
+          "source": "./sanitize.ts",
+          "specifiers": [
+            "sanitizeMetadata"
+          ]
+        },
+        {
+          "source": "./types.ts",
+          "specifiers": [
+            "HealthCheckResult",
+            "MutationEvent",
+            "PostMutationHookResult",
+            "Scope"
+          ]
+        }
+      ],
+      "exports": [
+        "POST_MUTATION_HOOK_ENV",
+        "HEALTH_CMD_ENV",
+        "isPostMutationHookConfigured",
+        "isHealthCmdConfigured",
+        "runPostMutationHook",
+        "createHealthChecker",
+        "checkHealth",
+        "invalidateHealthCache"
+      ],
+      "totalLines": 245,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/services/install.ts": {
+      "filePath": "src/core/services/install.ts",
+      "contentHash": "52ec840c59c66ec7c3fd5735d73c8a3f6eda02faba5f0ee1fc20a439e0a29978",
+      "functions": [
+        {
+          "name": "install",
+          "params": [
+            "opts"
+          ],
+          "returnType": "Promise<InstallResult>",
+          "exported": true,
+          "lineCount": 35
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../skills-client.ts",
+          "specifiers": [
+            "runSkills"
+          ]
+        },
+        {
+          "source": "./sanitize.ts",
+          "specifiers": [
+            "sanitizeMetadata"
+          ]
+        },
+        {
+          "source": "./types.ts",
+          "specifiers": [
+            "AddResultEntry"
+          ]
+        }
+      ],
+      "exports": [
+        "install"
+      ],
+      "totalLines": 58,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/services/installed.ts": {
+      "filePath": "src/core/services/installed.ts",
+      "contentHash": "ae66d886a98d01f92145e4ffb92f92d6e363fa65930ed45d9ef2ddb23aeeb7c0",
+      "functions": [
+        {
+          "name": "classifyProvenance",
+          "params": [
+            "skillPath",
+            "name",
+            "lockedNames"
+          ],
+          "returnType": "SkillProvenance",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "listInstalled",
+          "params": [
+            "scope"
+          ],
+          "returnType": "Promise<InstalledSkill[]>",
+          "exported": true,
+          "lineCount": 42
+        },
+        {
+          "name": "findInstalled",
+          "params": [
+            "name",
+            "scope"
+          ],
+          "returnType": "Promise<InstalledSkill | null>",
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "lstatSync"
+          ]
+        },
+        {
+          "source": "../skills-client.ts",
+          "specifiers": [
+            "runSkills"
+          ]
+        },
+        {
+          "source": "./locks.ts",
+          "specifiers": [
+            "readLock"
+          ]
+        },
+        {
+          "source": "./sanitize.ts",
+          "specifiers": [
+            "sanitizeMetadata"
+          ]
+        },
+        {
+          "source": "./types.ts",
+          "specifiers": [
+            "InstalledSkill",
+            "Scope",
+            "SkillProvenance"
+          ]
+        }
+      ],
+      "exports": [
+        "classifyProvenance",
+        "listInstalled",
+        "findInstalled"
+      ],
+      "totalLines": 79,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/services/locks.ts": {
+      "filePath": "src/core/services/locks.ts",
+      "contentHash": "2c51495a80bb59f1bc52c1034a6a7f383514d7e9b77d1e7e7c7bfa0679f89c93",
+      "functions": [
+        {
+          "name": "record",
+          "params": [
+            "v"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "validEntry",
+          "params": [
+            "v"
+          ],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "normalizeLock",
+          "params": [
+            "value"
+          ],
+          "returnType": "LockFile",
+          "exported": false,
+          "lineCount": 15
+        },
+        {
+          "name": "projectLockPath",
+          "params": [
+            "cwd"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "globalLockPath",
+          "params": [],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "readLock",
+          "params": [
+            "scope",
+            "cwd"
+          ],
+          "returnType": "LockFile",
+          "exported": true,
+          "lineCount": 16
+        }
+      ],
+      "classes": [
+        {
+          "name": "InvalidLockFileError",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 1
+        }
+      ],
+      "imports": [
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "existsSync",
+            "readFileSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "homedir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "./types.ts",
+          "specifiers": [
+            "Scope"
+          ]
+        }
+      ],
+      "exports": [
+        "InvalidLockFileError",
+        "projectLockPath",
+        "globalLockPath",
+        "readLock"
+      ],
+      "totalLines": 105,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/services/remove.ts": {
+      "filePath": "src/core/services/remove.ts",
+      "contentHash": "d2ef60bf0e33f05af8828b4572aa10c945812952890f231c79d3e239e87e25c0",
+      "functions": [
+        {
+          "name": "remove",
+          "params": [
+            "names",
+            "scope",
+            "options"
+          ],
+          "returnType": "Promise<RemoveResult>",
+          "exported": true,
+          "lineCount": 23
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../skills-client.ts",
+          "specifiers": [
+            "runSkills"
+          ]
+        },
+        {
+          "source": "./installed.ts",
+          "specifiers": [
+            "listInstalled"
+          ]
+        },
+        {
+          "source": "./types.ts",
+          "specifiers": [
+            "InstalledSkill",
+            "Scope"
+          ]
+        }
+      ],
+      "exports": [
+        "remove"
+      ],
+      "totalLines": 61,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/services/sanitize.ts": {
+      "filePath": "src/core/services/sanitize.ts",
+      "contentHash": "44cd66215ff029fba8aa0c5752519a9bf5ca98d4109f42f185f2123a2faba871",
+      "functions": [
+        {
+          "name": "stripEscapes",
+          "params": [
+            "str"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "sanitizeMetadata",
+          "params": [
+            "str"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "sanitizeBody",
+          "params": [
+            "str"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "stripEscapes",
+        "sanitizeMetadata",
+        "sanitizeBody"
+      ],
+      "totalLines": 42,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/services/search.ts": {
+      "filePath": "src/core/services/search.ts",
+      "contentHash": "fae47a08b7e1c833d6e77ca1a01f98335987551d9645822249773d9876528a9b",
+      "functions": [
+        {
+          "name": "apiBase",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "searchRegistryFuzzyOnce",
+          "params": [
+            "query",
+            "owner"
+          ],
+          "returnType": "Promise<RegistrySearchOutcome>",
+          "exported": false,
+          "lineCount": 29
+        },
+        {
+          "name": "searchRegistryFuzzy",
+          "params": [
+            "query",
+            "owner"
+          ],
+          "returnType": "Promise<RegistrySearchOutcome>",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "mapConcurrent",
+          "params": [
+            "items",
+            "fn",
+            "limit"
+          ],
+          "returnType": "Promise<R[]>",
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "makeSearchWithFallback",
+          "params": [
+            "search"
+          ],
+          "returnType": "(query: string, owner?: string) => Promise<FallbackSearchResult>",
+          "exported": true,
+          "lineCount": 51
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./types.ts",
+          "specifiers": [
+            "SearchSkill"
+          ]
+        },
+        {
+          "source": "./sanitize.ts",
+          "specifiers": [
+            "sanitizeMetadata"
+          ]
+        }
+      ],
+      "exports": [
+        "sanitizeMetadata",
+        "searchRegistryFuzzy",
+        "makeSearchWithFallback",
+        "searchWithFallback"
+      ],
+      "totalLines": 169,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/services/skill-doc.ts": {
+      "filePath": "src/core/services/skill-doc.ts",
+      "contentHash": "2eef0f24732c36b33431fe6c43adf52243bc7db3f974fb0608f5f2e0ec160db2",
+      "functions": [
+        {
+          "name": "readSkillDoc",
+          "params": [
+            "path"
+          ],
+          "returnType": "string | null",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "stripFrontmatter",
+          "params": [
+            "doc"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "skillBody",
+          "params": [
+            "path"
+          ],
+          "returnType": "string | null",
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "statSync",
+            "readFileSync"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "./sanitize.ts",
+          "specifiers": [
+            "sanitizeBody"
+          ]
+        }
+      ],
+      "exports": [
+        "readSkillDoc",
+        "stripFrontmatter",
+        "skillBody"
+      ],
+      "totalLines": 37,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/services/source.ts": {
+      "filePath": "src/core/services/source.ts",
+      "contentHash": "47ae77e85c24582df9a8970dc1f82c249364150976e7c1d4ae384bf791db4231",
+      "functions": [
+        {
+          "name": "listSourceSkills",
+          "params": [
+            "source"
+          ],
+          "returnType": "Promise<SourceSkill[]>",
+          "exported": true,
+          "lineCount": 14
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../skills-client.ts",
+          "specifiers": [
+            "runSkills"
+          ]
+        },
+        {
+          "source": "./sanitize.ts",
+          "specifiers": [
+            "sanitizeMetadata"
+          ]
+        }
+      ],
+      "exports": [
+        "listSourceSkills"
+      ],
+      "totalLines": 32,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/services/types.ts": {
+      "filePath": "src/core/services/types.ts",
+      "contentHash": "5daaf277a05cd9851eab12dd213c27c0695b817e11e055d181a2a7dfc5c8828c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 69,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/services/update.ts": {
+      "filePath": "src/core/services/update.ts",
+      "contentHash": "8dff016a607c66f4d7a44f8b54cde7532540a28733fbb05ecc2300c9bcfb0876",
+      "functions": [
+        {
+          "name": "update",
+          "params": [
+            "names",
+            "scope"
+          ],
+          "returnType": "Promise<{ ok: boolean; output: string }>",
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../skills-client.ts",
+          "specifiers": [
+            "runSkills"
+          ]
+        },
+        {
+          "source": "./sanitize.ts",
+          "specifiers": [
+            "sanitizeMetadata"
+          ]
+        },
+        {
+          "source": "./types.ts",
+          "specifiers": [
+            "Scope"
+          ]
+        }
+      ],
+      "exports": [
+        "update"
+      ],
+      "totalLines": 17,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/services/updates-check.ts": {
+      "filePath": "src/core/services/updates-check.ts",
+      "contentHash": "b247edb0c8481d7ab4613c02630c522ce313387f4c4c4f20de25d3078078dadc",
+      "functions": [
+        {
+          "name": "record",
+          "params": [
+            "v"
+          ],
+          "exported": false,
+          "lineCount": 2
+        },
+        {
+          "name": "isTreeEntry",
+          "params": [
+            "v"
+          ],
+          "exported": false,
+          "lineCount": 2
+        },
+        {
+          "name": "fetchRepoTree",
+          "params": [
+            "source",
+            "ref"
+          ],
+          "returnType": "Promise<TreeEntry[] | null>",
+          "exported": true,
+          "lineCount": 39
+        },
+        {
+          "name": "treeHashFor",
+          "params": [
+            "tree",
+            "skillPath"
+          ],
+          "returnType": "string | null",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "checkForUpdates",
+          "params": [
+            "scope"
+          ],
+          "returnType": "Promise<UpdatesResult>",
+          "exported": true,
+          "lineCount": 70
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./locks.ts",
+          "specifiers": [
+            "readLock"
+          ]
+        },
+        {
+          "source": "./types.ts",
+          "specifiers": [
+            "Scope",
+            "UpdatesResult"
+          ]
+        }
+      ],
+      "exports": [
+        "fetchRepoTree",
+        "checkForUpdates"
+      ],
+      "totalLines": 159,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/skills-client.ts": {
+      "filePath": "src/core/skills-client.ts",
+      "contentHash": "f3e4825ccda6de7df06208405c59239654ab987668241712b7b5f9a586297103",
+      "functions": [
+        {
+          "name": "sanitizeEnv",
+          "params": [
+            "base"
+          ],
+          "returnType": "Record<string, string>",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "resolveSkillsBin",
+          "params": [],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "resetSkillsBinCache",
+          "params": [],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "runSkills",
+          "params": [
+            "args",
+            "options"
+          ],
+          "returnType": "Promise<RunResult>",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "runSkillsUnqueued",
+          "params": [
+            "args",
+            "options"
+          ],
+          "returnType": "Promise<RunResult>",
+          "exported": false,
+          "lineCount": 38
+        },
+        {
+          "name": "skillsVersion",
+          "params": [],
+          "returnType": "Promise<string>",
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "classes": [
+        {
+          "name": "SkillsCliError",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 1
+        }
+      ],
+      "imports": [
+        {
+          "source": "./spawn-queue.ts",
+          "specifiers": [
+            "createSpawnQueue"
+          ]
+        }
+      ],
+      "exports": [
+        "SkillsBusyError",
+        "sanitizeEnv",
+        "SkillsCliError",
+        "resolveSkillsBin",
+        "resetSkillsBinCache",
+        "runSkills",
+        "skillsVersion"
+      ],
+      "totalLines": 156,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/spawn-queue.ts": {
+      "filePath": "src/core/spawn-queue.ts",
+      "contentHash": "798a6b06c28704bc597777570d88a3d08c7bf3415af98f7ef3709c6847d2e1b2",
+      "functions": [
+        {
+          "name": "queueCap",
+          "params": [],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "createSpawnQueue",
+          "params": [
+            "maxConcurrent"
+          ],
+          "exported": true,
+          "lineCount": 28
+        }
+      ],
+      "classes": [
+        {
+          "name": "SkillsBusyError",
+          "methods": [
+            "constructor"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "SkillsBusyError",
+        "queueCap",
+        "createSpawnQueue"
+      ],
+      "totalLines": 57,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/theme.ts": {
+      "filePath": "src/core/theme.ts",
+      "contentHash": "9e616739628566de83608969bff287ae22129cfabb093248e30f273d97977c2f",
+      "functions": [
+        {
+          "name": "hexToRgb",
+          "params": [
+            "hex"
+          ],
+          "returnType": "[number, number, number]",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "srgbChannelToLinear",
+          "params": [
+            "channel"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "relativeLuminance",
+          "params": [
+            "hex"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "contrastRatio",
+          "params": [
+            "fg",
+            "bg"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "darkenToContrast",
+          "params": [
+            "hex",
+            "bg",
+            "min"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "rgbToHex",
+          "params": [
+            "[r, g, b]"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "buildThemeTokens",
+          "params": [
+            "palette",
+            "name"
+          ],
+          "returnType": "ThemeTokens",
+          "exported": true,
+          "lineCount": 37
+        },
+        {
+          "name": "tokensFor",
+          "params": [
+            "theme"
+          ],
+          "returnType": "ThemeTokens",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "supportsTruecolor",
+          "params": [],
+          "returnType": "boolean",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "to256",
+          "params": [
+            "hex"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "createAnsiPainter",
+          "params": [
+            "colorDepth"
+          ],
+          "returnType": "AnsiPainter",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "syntaxTokensFor",
+          "params": [
+            "palette"
+          ],
+          "returnType": "ScopeTokenStyle[]",
+          "exported": true,
+          "lineCount": 22
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./prefs.ts",
+          "specifiers": [
+            "ThemeName"
+          ]
+        }
+      ],
+      "exports": [
+        "ThemeName",
+        "CATPPUCCIN_MOCHA",
+        "CATPPUCCIN_LATTE",
+        "hexToRgb",
+        "relativeLuminance",
+        "contrastRatio",
+        "darkenToContrast",
+        "AA_TEXT_RATIO",
+        "AA_UI_RATIO",
+        "buildThemeTokens",
+        "THEME_TOKENS",
+        "tokensFor",
+        "createAnsiPainter",
+        "syntaxTokensFor"
+      ],
+      "totalLines": 362,
+      "hasStructuralAnalysis": true
+    },
+    "src/core/version.ts": {
+      "filePath": "src/core/version.ts",
+      "contentHash": "574a5115104e88aaa42b3b5cef1045c6e22758961d351c0b7aa349d07654cc2f",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../../package.json",
+          "specifiers": [
+            "pkg"
+          ]
+        }
+      ],
+      "exports": [
+        "APP_VERSION"
+      ],
+      "totalLines": 16,
+      "hasStructuralAnalysis": true
+    },
+    "src/main.ts": {
+      "filePath": "src/main.ts",
+      "contentHash": "65c3cbc5988f1d9b8ec282504c6e05ca876197484f181839df22aed3eff226b0",
+      "functions": [
+        {
+          "name": "parsePortArg",
+          "params": [
+            "args"
+          ],
+          "returnType": "{ port: number | null; rest: string[] }",
+          "exported": false,
+          "lineCount": 15
+        },
+        {
+          "name": "selftest",
+          "params": [],
+          "returnType": "Promise<void>",
+          "exported": false,
+          "lineCount": 22
+        },
+        {
+          "name": "runWeb",
+          "params": [
+            "headless",
+            "portArg",
+            "seedArgs"
+          ],
+          "returnType": "Promise<void>",
+          "exported": false,
+          "lineCount": 34
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./tui/app.ts",
+          "specifiers": [
+            "buildSpikeScreen",
+            "runTui"
+          ]
+        },
+        {
+          "source": "./core/version.ts",
+          "specifiers": [
+            "APP_VERSION"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 105,
+      "hasStructuralAnalysis": true
+    },
+    "src/tui/Views.tsx": {
+      "filePath": "src/tui/Views.tsx",
+      "contentHash": "6f266fa9fc88dfbe6f6a55280f7ba1c7affbae8873f044ef835c5b52ba2f0945",
+      "functions": [
+        {
+          "name": "useApp",
+          "params": [],
+          "returnType": "AppBridge",
+          "exported": true,
+          "lineCount": 1
+        },
+        {
+          "name": "mountApp",
+          "params": [
+            "renderer",
+            "bridge"
+          ],
+          "returnType": "() => void",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "usePopInOverlay",
+          "params": [
+            "prefs",
+            "targetTop"
+          ],
+          "returnType": "{\n  ref: ReturnType<typeof useRef<BoxRenderable | null>>;\n  top: number;\n}",
+          "exported": false,
+          "lineCount": 25
+        },
+        {
+          "name": "App",
+          "params": [],
+          "returnType": "ReactNode",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "Splash",
+          "params": [
+            "{ model }"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "GraphView",
+          "params": [
+            "{ model }"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 63
+        },
+        {
+          "name": "Header",
+          "params": [
+            "{ model }"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 25
+        },
+        {
+          "name": "checkedTitle",
+          "params": [
+            "checked",
+            "total"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "installedListTitle",
+          "params": [
+            "model",
+            "visibleCount",
+            "listWidthPct"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "searchListTitle",
+          "params": [
+            "model"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "useSelectionScrollFollow",
+          "params": [
+            "scrollRef",
+            "rowRef",
+            "deps",
+            "fallbackIndex"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 25
+        },
+        {
+          "name": "skillRowStyle",
+          "params": [
+            "sel",
+            "checked",
+            "provenance",
+            "t"
+          ],
+          "exported": false,
+          "lineCount": 25
+        },
+        {
+          "name": "InstalledSkillRow",
+          "params": [
+            "{\n  skill,\n  sel,\n  checked,\n  hasUpdate,\n  selectedRowRef,\n  onSelect,\n  t,\n}"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 43
+        },
+        {
+          "name": "InstalledDetailPane",
+          "params": [
+            "{\n  model,\n  selected,\n  syntaxStyle,\n  detailScrollRef,\n  t,\n}"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 45
+        },
+        {
+          "name": "InstalledBody",
+          "params": [
+            "{ model }"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 55
+        },
+        {
+          "name": "highlightSegments",
+          "params": [
+            "text",
+            "needles"
+          ],
+          "returnType": "Array<{ text: string; match: boolean }>",
+          "exported": true,
+          "lineCount": 23
+        },
+        {
+          "name": "HighlightedRuns",
+          "params": [
+            "{\n  text,\n  needles,\n  sel,\n  baseFg,\n  boldWhenSelected,\n  t,\n}"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 29
+        },
+        {
+          "name": "SearchResultRow",
+          "params": [
+            "{\n  result,\n  sel,\n  queued,\n  theme,\n  needles,\n  rowRef,\n  onSelect,\n  t,\n}"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 44
+        },
+        {
+          "name": "SearchQueueSection",
+          "params": [
+            "{\n  model,\n  resultsActive,\n  queueRowRef,\n  t,\n}"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 35
+        },
+        {
+          "name": "SearchRepoSkillsList",
+          "params": [
+            "{\n  source,\n  selectedName,\n  repoSkills,\n  t,\n}"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 23
+        },
+        {
+          "name": "SearchDetailPane",
+          "params": [
+            "{\n  model,\n  selectedResult,\n  t,\n}"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 48
+        },
+        {
+          "name": "SearchBody",
+          "params": [
+            "{ model }"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 60
+        },
+        {
+          "name": "SettingsBody",
+          "params": [
+            "{ model }"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 27
+        },
+        {
+          "name": "Footer",
+          "params": [
+            "{ model }"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 22
+        },
+        {
+          "name": "HelpOverlay",
+          "params": [
+            "{ model }"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 35
+        },
+        {
+          "name": "AgentSelectOverlay",
+          "params": [
+            "{ model }"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 21
+        },
+        {
+          "name": "HealthOverlay",
+          "params": [
+            "{ model }"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 22
+        },
+        {
+          "name": "ConfirmOverlay",
+          "params": [
+            "{ model }"
+          ],
+          "returnType": "ReactNode",
+          "exported": false,
+          "lineCount": 17
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@opentui/core",
+          "specifiers": [
+            "BoxRenderable",
+            "createTimeline",
+            "getTimelineEngine",
+            "CliRenderer",
+            "ScrollBoxRenderable",
+            "SyntaxStyle",
+            "TextAttributes"
+          ]
+        },
+        {
+          "source": "@opentui/react",
+          "specifiers": [
+            "createRoot",
+            "useRenderer"
+          ]
+        },
+        {
+          "source": "react",
+          "specifiers": [
+            "createContext",
+            "useContext",
+            "useEffect",
+            "useMemo",
+            "useRef",
+            "useState",
+            "ReactNode"
+          ]
+        },
+        {
+          "source": "react",
+          "specifiers": [
+            "useSyncExternalStore"
+          ]
+        },
+        {
+          "source": "../core/theme.ts",
+          "specifiers": [
+            "CATPPUCCIN_LATTE",
+            "CATPPUCCIN_MOCHA",
+            "syntaxTokensFor",
+            "tokensFor"
+          ]
+        },
+        {
+          "source": "./art.ts",
+          "specifiers": [
+            "sourceBadge",
+            "splashImage"
+          ]
+        },
+        {
+          "source": "./model.ts",
+          "specifiers": [
+            "SEARCH_RENDER_CAP",
+            "Action",
+            "TuiModel"
+          ]
+        },
+        {
+          "source": "./audio.ts",
+          "specifiers": [
+            "SoundKind"
+          ]
+        },
+        {
+          "source": "../core/version.ts",
+          "specifiers": [
+            "APP_VERSION"
+          ]
+        },
+        {
+          "source": "../core/index.ts",
+          "specifiers": [
+            "InstalledSkill",
+            "SearchSkill",
+            "SourceSkill",
+            "UpdatesResult"
+          ]
+        },
+        {
+          "source": "../core/prefs.ts",
+          "specifiers": [
+            "UiPreferences"
+          ]
+        },
+        {
+          "source": "../core/seed.ts",
+          "specifiers": [
+            "UiSeed"
+          ]
+        }
+      ],
+      "exports": [
+        "AppProvider",
+        "useApp",
+        "mountApp",
+        "App",
+        "checkedTitle",
+        "installedListTitle",
+        "searchListTitle",
+        "highlightSegments"
+      ],
+      "totalLines": 876,
+      "hasStructuralAnalysis": true
+    },
+    "src/tui/app.ts": {
+      "filePath": "src/tui/app.ts",
+      "contentHash": "99e0c0f61625c310500aa58e5ea9b3d906362907cf7e1ae67311b0933e74aa66",
+      "functions": [
+        {
+          "name": "installCrashGuard",
+          "params": [
+            "opts"
+          ],
+          "returnType": "CrashGuard",
+          "exported": true,
+          "lineCount": 48
+        },
+        {
+          "name": "descriptionOf",
+          "params": [
+            "path"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "runTui",
+          "params": [
+            "seed",
+            "deps"
+          ],
+          "returnType": "Promise<void>",
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "runTuiOn",
+          "params": [
+            "renderer",
+            "seed",
+            "deps"
+          ],
+          "returnType": "Promise<() => void>",
+          "exported": true,
+          "lineCount": 789
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@opentui/core",
+          "specifiers": [
+            "createCliRenderer",
+            "CliRenderer",
+            "ScrollBoxRenderable"
+          ]
+        },
+        {
+          "source": "../core/index.ts",
+          "specifiers": [
+            "svcCheckForUpdates",
+            "svcCheckHealth",
+            "svcInstall",
+            "isHealthCmdConfigured",
+            "svcListInstalled",
+            "svcListSourceSkills",
+            "readSkillDoc",
+            "svcRemove",
+            "svcRunPostMutationHook",
+            "svcSearch",
+            "svcSkillBody",
+            "skillsVersion",
+            "svcUpdate",
+            "HealthCheckResult",
+            "InstalledSkill",
+            "MutationEvent",
+            "PostMutationHookResult",
+            "SearchSkill",
+            "SkillProvenance",
+            "SourceSkill",
+            "UpdatesResult"
+          ]
+        },
+        {
+          "source": "../core/disk-index.ts",
+          "specifiers": [
+            "loadDiskIndex",
+            "saveDiskIndex"
+          ]
+        },
+        {
+          "source": "../core/prefs.ts",
+          "specifiers": [
+            "LIST_WIDTH_MAX",
+            "LIST_WIDTH_MIN",
+            "loadUiPreferences",
+            "saveUiPreferences",
+            "UiPreferences"
+          ]
+        },
+        {
+          "source": "../core/seed.ts",
+          "specifiers": [
+            "UiSeed"
+          ]
+        },
+        {
+          "source": "./audio.ts",
+          "specifiers": [
+            "disposeAudio",
+            "playSound",
+            "SoundKind"
+          ]
+        },
+        {
+          "source": "./model.ts",
+          "specifiers": [
+            "applySeed",
+            "createTuiModel",
+            "tabFor",
+            "update",
+            "Action",
+            "TuiModel"
+          ]
+        },
+        {
+          "source": "./Views.tsx",
+          "specifiers": [
+            "mountApp",
+            "AppBridge",
+            "RefsHolder"
+          ]
+        }
+      ],
+      "exports": [
+        "buildSpikeScreen",
+        "SPIKE_MARKDOWN",
+        "spikeSyntaxTokens",
+        "installCrashGuard",
+        "realDeps",
+        "runTui",
+        "runTuiOn"
+      ],
+      "totalLines": 1003,
+      "hasStructuralAnalysis": true
+    },
+    "src/tui/art.ts": {
+      "filePath": "src/tui/art.ts",
+      "contentHash": "fc174d27dfc9132c2cb8788a48df6d5370eb5ef3ac06e1e493669e1a24bd21ea",
+      "functions": [
+        {
+          "name": "paletteFor",
+          "params": [
+            "theme"
+          ],
+          "returnType": "CatppuccinPalette",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "mix",
+          "params": [
+            "a",
+            "b",
+            "t"
+          ],
+          "returnType": "[number, number, number]",
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "splashImage",
+          "params": [
+            "theme"
+          ],
+          "returnType": "NativeImage",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "hash32",
+          "params": [
+            "text"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "sourceBadge",
+          "params": [
+            "source",
+            "theme"
+          ],
+          "returnType": "NativeImage",
+          "exported": true,
+          "lineCount": 23
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@opentui/core",
+          "specifiers": [
+            "NativeImage"
+          ]
+        },
+        {
+          "source": "../core/theme.ts",
+          "specifiers": [
+            "CATPPUCCIN_LATTE",
+            "CATPPUCCIN_MOCHA",
+            "hexToRgb",
+            "CatppuccinPalette",
+            "ThemeName"
+          ]
+        }
+      ],
+      "exports": [
+        "splashImage",
+        "sourceBadge"
+      ],
+      "totalLines": 98,
+      "hasStructuralAnalysis": true
+    },
+    "src/tui/audio.ts": {
+      "filePath": "src/tui/audio.ts",
+      "contentHash": "84b9ac1ab9d72201232cb4d0336507239a2c4b8ffd9218a67917598668b4182d",
+      "functions": [
+        {
+          "name": "ensure",
+          "params": [],
+          "returnType": "Promise<AudioLike | null>",
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "playSound",
+          "params": [
+            "kind",
+            "prefs"
+          ],
+          "returnType": "Promise<void>",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "disposeAudio",
+          "params": [],
+          "returnType": "Promise<void>",
+          "exported": true,
+          "lineCount": 10
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../core/prefs.ts",
+          "specifiers": [
+            "UiPreferences"
+          ]
+        }
+      ],
+      "exports": [
+        "playSound",
+        "disposeAudio"
+      ],
+      "totalLines": 108,
+      "hasStructuralAnalysis": true
+    },
+    "src/tui/model.ts": {
+      "filePath": "src/tui/model.ts",
+      "contentHash": "c0e3efbe4109cffe3645b8a9b06bded30a6debe9377a390320680c6b36bb7fe1",
+      "functions": [
+        {
+          "name": "createTuiModel",
+          "params": [
+            "prefs"
+          ],
+          "returnType": "TuiModel",
+          "exported": true,
+          "lineCount": 44
+        },
+        {
+          "name": "applySeed",
+          "params": [
+            "model",
+            "seed"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "visibleSkills",
+          "params": [
+            "model"
+          ],
+          "returnType": "InstalledSkill[]",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "visibleSearchResults",
+          "params": [
+            "model"
+          ],
+          "returnType": "SearchSkill[]",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "clamp",
+          "params": [
+            "model",
+            "visibleOf"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "clampSelectedCursor",
+          "params": [
+            "model"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "applySkillsLoaded",
+          "params": [
+            "ctx",
+            "skills"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 15
+        },
+        {
+          "name": "applyMove",
+          "params": [
+            "ctx",
+            "delta"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "applyHomeEnd",
+          "params": [
+            "ctx",
+            "edge"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "applyCheckAction",
+          "params": [
+            "ctx",
+            "kind"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 28
+        },
+        {
+          "name": "applyAgentSelectAction",
+          "params": [
+            "ctx",
+            "action"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 36
+        },
+        {
+          "name": "applySortToggle",
+          "params": [
+            "ctx"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "applyProvenanceCycle",
+          "params": [
+            "ctx"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "update",
+          "params": [
+            "model",
+            "action"
+          ],
+          "returnType": "TuiModel",
+          "exported": true,
+          "lineCount": 45
+        },
+        {
+          "name": "tabFor",
+          "params": [
+            "key"
+          ],
+          "returnType": "Tab | null",
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../core/index.ts",
+          "specifiers": [
+            "skillMatches",
+            "HealthCheckResult",
+            "InstalledSkill",
+            "SearchSkill",
+            "SkillProvenance",
+            "SourceSkill"
+          ]
+        },
+        {
+          "source": "../core/prefs.ts",
+          "specifiers": [
+            "UiPreferences"
+          ]
+        },
+        {
+          "source": "../core/seed.ts",
+          "specifiers": [
+            "UiSeed"
+          ]
+        }
+      ],
+      "exports": [
+        "SEARCH_RENDER_CAP",
+        "createTuiModel",
+        "applySeed",
+        "visibleSkills",
+        "visibleSearchResults",
+        "update",
+        "tabFor"
+      ],
+      "totalLines": 578,
+      "hasStructuralAnalysis": true
+    },
+    "src/tui/renderer-ready.ts": {
+      "filePath": "src/tui/renderer-ready.ts",
+      "contentHash": "5628b5ebe6e55c6ecab80a7b3a5df2260212072b750528ef663e1d756bc9cf4e",
+      "functions": [
+        {
+          "name": "waitForFrame",
+          "params": [
+            "driver",
+            "predicate",
+            "timeoutMs"
+          ],
+          "returnType": "Promise<string>",
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "waitForFrame"
+      ],
+      "totalLines": 37,
+      "hasStructuralAnalysis": true
+    },
+    "src/tui/spike.ts": {
+      "filePath": "src/tui/spike.ts",
+      "contentHash": "08d2110e2d1c9d1ad16514197edb698d138428abaeba54f062fc0cecd26b32e0",
+      "functions": [
+        {
+          "name": "spikeSyntaxTokens",
+          "params": [],
+          "returnType": "ThemeTokenStyle[]",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "buildSpikeScreen",
+          "params": [
+            "renderer"
+          ],
+          "returnType": "BoxRenderable",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "runSpikeTui",
+          "params": [],
+          "returnType": "Promise<void>",
+          "exported": true,
+          "lineCount": 15
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@opentui/core",
+          "specifiers": [
+            "BoxRenderable",
+            "MarkdownRenderable",
+            "SyntaxStyle",
+            "TextAttributes",
+            "TextRenderable",
+            "CliRenderer",
+            "RenderContext",
+            "ThemeTokenStyle"
+          ]
+        }
+      ],
+      "exports": [
+        "SPIKE_MARKDOWN",
+        "spikeSyntaxTokens",
+        "buildSpikeScreen",
+        "runSpikeTui"
+      ],
+      "totalLines": 96,
+      "hasStructuralAnalysis": true
+    },
+    "src/tui/three-scene.ts": {
+      "filePath": "src/tui/three-scene.ts",
+      "contentHash": "4d6ba5d13d1a9369219825962cd8c70ea86284f47ddab5f61cfb42b60b78c3b6",
+      "functions": [
+        {
+          "name": "hash32",
+          "params": [
+            "text"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "getGraphView",
+          "params": [
+            "renderer",
+            "skills",
+            "theme"
+          ],
+          "returnType": "GraphViewHandle",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "buildSkillGraph",
+          "params": [
+            "skills",
+            "theme"
+          ],
+          "returnType": "SkillGraph",
+          "exported": true,
+          "lineCount": 86
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@opentui/three",
+          "specifiers": [
+            "THREE",
+            "ThreeRenderable"
+          ]
+        },
+        {
+          "source": "@opentui/core",
+          "specifiers": [
+            "CliRenderer"
+          ]
+        },
+        {
+          "source": "../core/theme.ts",
+          "specifiers": [
+            "hexToRgb",
+            "CATPPUCCIN_MOCHA",
+            "CATPPUCCIN_LATTE",
+            "ThemeName"
+          ]
+        },
+        {
+          "source": "../core/index.ts",
+          "specifiers": [
+            "InstalledSkill"
+          ]
+        }
+      ],
+      "exports": [
+        "THREE",
+        "GRAPH_ROTATION_MS",
+        "getGraphView",
+        "buildSkillGraph"
+      ],
+      "totalLines": 177,
+      "hasStructuralAnalysis": true
+    },
+    "src/web/client/core.ts": {
+      "filePath": "src/web/client/core.ts",
+      "contentHash": "5fefd860b884cd386b8582b47304a89c6373851312db587d2db1eb8296d88c59",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../../core/prefs.ts",
+          "specifiers": [
+            "LIST_WIDTH_MAX",
+            "LIST_WIDTH_MIN"
+          ]
+        }
+      ],
+      "exports": [
+        "CLIENT_CORE_JS"
+      ],
+      "totalLines": 367,
+      "hasStructuralAnalysis": true
+    },
+    "src/web/client/installed.ts": {
+      "filePath": "src/web/client/installed.ts",
+      "contentHash": "e51ddb56e9bcc288744e5f29dad4b85a85aa9db13de72f4a11f299fe77db24d0",
+      "functions": [
+        {
+          "name": "buildClientInstalledJs",
+          "params": [
+            "skillMatchesSrc"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 673
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "buildClientInstalledJs"
+      ],
+      "totalLines": 674,
+      "hasStructuralAnalysis": true
+    },
+    "src/web/client/search-and-boot.ts": {
+      "filePath": "src/web/client/search-and-boot.ts",
+      "contentHash": "e605d3a70d0d1c002b3ccdabcd0bc699271d7a27725ae2cd352e260bef31b3f8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "CLIENT_SEARCH_AND_BOOT_JS"
+      ],
+      "totalLines": 905,
+      "hasStructuralAnalysis": true
+    },
+    "src/web/page.ts": {
+      "filePath": "src/web/page.ts",
+      "contentHash": "4b23f2f24a893374f16b7f93cd8744691ab56dde054e971ca89ac4dcd254d7d7",
+      "functions": [
+        {
+          "name": "cssVarsFor",
+          "params": [
+            "tokens",
+            "palette"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "safeJsonEmbed",
+          "params": [
+            "value"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "bootstrapScript",
+          "params": [
+            "prefs",
+            "serverPort",
+            "seed"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "pageCspFor",
+          "params": [
+            "prefs",
+            "serverPort",
+            "seed",
+            "hosted"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "renderPage",
+          "params": [
+            "version",
+            "prefs",
+            "serverPort",
+            "seed",
+            "opts"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 224
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:crypto",
+          "specifiers": [
+            "createHash"
+          ]
+        },
+        {
+          "source": "../core/theme.ts",
+          "specifiers": [
+            "THEME_TOKENS",
+            "CATPPUCCIN_MOCHA",
+            "CATPPUCCIN_LATTE",
+            "CatppuccinPalette",
+            "ThemeTokens"
+          ]
+        },
+        {
+          "source": "../core/prefs.ts",
+          "specifiers": [
+            "DEFAULT_UI_PREFERENCES",
+            "LIST_WIDTH_MIN",
+            "LIST_WIDTH_MAX",
+            "UiPreferences"
+          ]
+        },
+        {
+          "source": "../core/index.ts",
+          "specifiers": [
+            "skillMatches"
+          ]
+        },
+        {
+          "source": "../core/seed.ts",
+          "specifiers": [
+            "UiSeed"
+          ]
+        },
+        {
+          "source": "./styles.ts",
+          "specifiers": [
+            "APP_CSS"
+          ]
+        },
+        {
+          "source": "./client/core.ts",
+          "specifiers": [
+            "CLIENT_CORE_JS"
+          ]
+        },
+        {
+          "source": "./client/installed.ts",
+          "specifiers": [
+            "buildClientInstalledJs"
+          ]
+        },
+        {
+          "source": "./client/search-and-boot.ts",
+          "specifiers": [
+            "CLIENT_SEARCH_AND_BOOT_JS"
+          ]
+        }
+      ],
+      "exports": [
+        "skillMatches",
+        "APP_JS",
+        "pageCspFor",
+        "renderPage",
+        "webPageRenderer"
+      ],
+      "totalLines": 315,
+      "hasStructuralAnalysis": true
+    },
+    "src/web/styles.ts": {
+      "filePath": "src/web/styles.ts",
+      "contentHash": "df9c7ffb3a694d47fe912fc1787e8b765005bf3c8726232379e4ee7cc851bc50",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "APP_CSS"
+      ],
+      "totalLines": 445,
+      "hasStructuralAnalysis": true
+    },
+    "tests/api.test.ts": {
+      "filePath": "tests/api.test.ts",
+      "contentHash": "4f12080fc5aa0b3f5d26762a9dbdc1ded3e5c1e61e4837e8a4794cedd3878cf1",
+      "functions": [
+        {
+          "name": "start",
+          "params": [],
+          "returnType": "Promise<string>",
+          "exported": false,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterEach",
+            "beforeEach",
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdtempSync",
+            "rmSync",
+            "mkdirSync",
+            "writeFileSync",
+            "chmodSync",
+            "existsSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "tmpdir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "../src/core/version.ts",
+          "specifiers": [
+            "APP_VERSION"
+          ]
+        },
+        {
+          "source": "../src/core/skills-client.ts",
+          "specifiers": [
+            "resetSkillsBinCache"
+          ]
+        },
+        {
+          "source": "./perf/helpers.ts",
+          "specifiers": [
+            "buildSyntheticCorpus",
+            "countShimCalls",
+            "readShimCallLog"
+          ]
+        },
+        {
+          "source": "./helpers/audit-state.ts",
+          "specifiers": [
+            "createWorkspaceFixture"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 731,
+      "hasStructuralAnalysis": true
+    },
+    "tests/dash-sweep.test.ts": {
+      "filePath": "tests/dash-sweep.test.ts",
+      "contentHash": "5fce58dabde3295dbdec5530b9d3d1760c5d4309b835f781ebdb49a1049613bf",
+      "functions": [
+        {
+          "name": "opensRegex",
+          "params": [
+            "prevSig"
+          ],
+          "returnType": "boolean",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "lex",
+          "params": [
+            "src"
+          ],
+          "returnType": "{ literals: { kind: Hit[\"kind\"]; text: string }[]; blanked: string }",
+          "exported": false,
+          "lineCount": 93
+        },
+        {
+          "name": "jsxTextRuns",
+          "params": [
+            "blanked"
+          ],
+          "returnType": "string[]",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "read",
+          "params": [
+            "rel"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "dashHits",
+          "params": [
+            "file",
+            "candidates"
+          ],
+          "returnType": "Hit[]",
+          "exported": false,
+          "lineCount": 7
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "readFileSync"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "../src/web/page.ts",
+          "specifiers": [
+            "APP_JS"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 193,
+      "hasStructuralAnalysis": true
+    },
+    "tests/e2e/audit-remediation.e2e.ts": {
+      "filePath": "tests/e2e/audit-remediation.e2e.ts",
+      "contentHash": "a66483f9f66e99ec5a30e99d987df0f2f63e589ed7a071b11551f0d6ea2b68bb",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@playwright/test",
+          "specifiers": [
+            "test",
+            "expect"
+          ]
+        },
+        {
+          "source": "./helpers/audit-fixture.ts",
+          "specifiers": [
+            "startAuditBackend",
+            "openAuditPage",
+            "row",
+            "settleResponse",
+            "closeAuditPages"
+          ]
+        },
+        {
+          "source": "../helpers/audit-state.ts",
+          "specifiers": [
+            "deferred"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 659,
+      "hasStructuralAnalysis": true
+    },
+    "tests/e2e/helpers/audit-fixture.ts": {
+      "filePath": "tests/e2e/helpers/audit-fixture.ts",
+      "contentHash": "8c6004a1d1306395fe4355e2cac6d1ab4808152ae18ab1dc669219098696a4b6",
+      "functions": [
+        {
+          "name": "closeAuditPages",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "startAuditBackend",
+          "params": [],
+          "exported": true,
+          "lineCount": 23
+        },
+        {
+          "name": "row",
+          "params": [
+            "name",
+            "scope"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "openAuditPage",
+          "params": [
+            "browser",
+            "origin"
+          ],
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "settleResponse",
+          "params": [
+            "page",
+            "response"
+          ],
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:child_process",
+          "specifiers": [
+            "spawn"
+          ]
+        },
+        {
+          "source": "node:events",
+          "specifiers": [
+            "once"
+          ]
+        },
+        {
+          "source": "@playwright/test",
+          "specifiers": [
+            "expect",
+            "Browser",
+            "Page",
+            "BrowserResponse"
+          ]
+        },
+        {
+          "source": "../../helpers/audit-state.ts",
+          "specifiers": [
+            "createWorkspaceFixture"
+          ]
+        }
+      ],
+      "exports": [
+        "closeAuditPages",
+        "startAuditBackend",
+        "row",
+        "openAuditPage",
+        "settleResponse"
+      ],
+      "totalLines": 61,
+      "hasStructuralAnalysis": true
+    },
+    "tests/e2e/hosted.e2e.ts": {
+      "filePath": "tests/e2e/hosted.e2e.ts",
+      "contentHash": "7dab56035fc3db3b01d9820fd280b034a633b548419b15eef768812f6af68f61",
+      "functions": [
+        {
+          "name": "startServe",
+          "params": [
+            "port",
+            "extraEnv",
+            "prefsDirOverride",
+            "cmd"
+          ],
+          "returnType": "Promise<ChildProcessWithoutNullStreams>",
+          "exported": false,
+          "lineCount": 38
+        },
+        {
+          "name": "connect",
+          "params": [
+            "page",
+            "tok"
+          ],
+          "returnType": "Promise<void>",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "localOrigin",
+          "params": [
+            "port"
+          ],
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "quietUpdateCheck",
+          "params": [
+            "page"
+          ],
+          "returnType": "Promise<void>",
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "stubSkillApi",
+          "params": [
+            "page",
+            "body"
+          ],
+          "returnType": "Promise<void>",
+          "exported": false,
+          "lineCount": 36
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@playwright/test",
+          "specifiers": [
+            "test",
+            "expect",
+            "Browser"
+          ]
+        },
+        {
+          "source": "node:child_process",
+          "specifiers": [
+            "spawn",
+            "ChildProcessWithoutNullStreams"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdtempSync",
+            "rmSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "homedir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join",
+            "resolve"
+          ]
+        },
+        {
+          "source": "node:url",
+          "specifiers": [
+            "fileURLToPath"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 845,
+      "hasStructuralAnalysis": true
+    },
+    "tests/filter-parity.test.ts": {
+      "filePath": "tests/filter-parity.test.ts",
+      "contentHash": "c5a0a77d10fb0dc0585399e87878afa5964bd34deec3d5ca9218952d8a55ac6d",
+      "functions": [
+        {
+          "name": "tuiResult",
+          "params": [
+            "query"
+          ],
+          "returnType": "string[]",
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "webResult",
+          "params": [
+            "query"
+          ],
+          "returnType": "string[]",
+          "exported": false,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "../src/web/page.ts",
+          "specifiers": [
+            "renderPage",
+            "skillMatches"
+          ]
+        },
+        {
+          "source": "../src/tui/model.ts",
+          "specifiers": [
+            "createTuiModel",
+            "visibleSkills"
+          ]
+        },
+        {
+          "source": "../src/core/prefs.ts",
+          "specifiers": [
+            "DEFAULT_UI_PREFERENCES"
+          ]
+        },
+        {
+          "source": "../src/core/services/types.ts",
+          "specifiers": [
+            "InstalledSkill"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 104,
+      "hasStructuralAnalysis": true
+    },
+    "tests/fixtures/audit-web-server.ts": {
+      "filePath": "tests/fixtures/audit-web-server.ts",
+      "contentHash": "142c620a714f213d8777fa23ce062121634e602e80659701db70913681124a93",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "../../src/core/api.ts",
+          "specifiers": [
+            "createSkillsUiServer"
+          ]
+        },
+        {
+          "source": "../../src/web/page.ts",
+          "specifiers": [
+            "webPageRenderer"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": true
+    },
+    "tests/fixtures/contract/add-hostile.json": {
+      "filePath": "tests/fixtures/contract/add-hostile.json",
+      "contentHash": "5d5b09f0f2d4c7e836ff22af5500e4806e29c6ac529f4232ed3deb9dc6f5c350",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": true
+    },
+    "tests/fixtures/contract/add.json": {
+      "filePath": "tests/fixtures/contract/add.json",
+      "contentHash": "0febe2b4edc85766791dc6c7152f979a0176cc0e8c8a79e602b619e58d0aea48",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 20,
+      "hasStructuralAnalysis": true
+    },
+    "tests/fixtures/contract/hostile-skill/SKILL.md": {
+      "filePath": "tests/fixtures/contract/hostile-skill/SKILL.md",
+      "contentHash": "3979632cc0517f1824f22b364b4bd017c79e543a83fbadad068597b9b6422bb1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 11,
+      "hasStructuralAnalysis": true
+    },
+    "tests/fixtures/contract/ls-empty.json": {
+      "filePath": "tests/fixtures/contract/ls-empty.json",
+      "contentHash": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "tests/fixtures/contract/ls-global.json": {
+      "filePath": "tests/fixtures/contract/ls-global.json",
+      "contentHash": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "tests/fixtures/contract/ls-hostile.json": {
+      "filePath": "tests/fixtures/contract/ls-hostile.json",
+      "contentHash": "3c4bdc81acf640a069b0e032784ca968d4571810cec3b227193747fc4a70ce7d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 28,
+      "hasStructuralAnalysis": true
+    },
+    "tests/fixtures/contract/ls-project.json": {
+      "filePath": "tests/fixtures/contract/ls-project.json",
+      "contentHash": "6f2c0800bbee57272200bca4a3f01be30c178316bd9b673aced88fcf80f0e4e8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 21,
+      "hasStructuralAnalysis": true
+    },
+    "tests/fixtures/skills-shim.mjs": {
+      "filePath": "tests/fixtures/skills-shim.mjs",
+      "contentHash": "9ed73e55ab1675d4e028a8de56a2c0a8b50ab49b6566cacc3b04856194ab34b9",
+      "functions": [
+        {
+          "name": "loadState",
+          "params": [],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "saveState",
+          "params": [
+            "list"
+          ],
+          "exported": false,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "appendFileSync",
+            "existsSync",
+            "mkdirSync",
+            "readFileSync",
+            "writeFileSync"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 129,
+      "hasStructuralAnalysis": true
+    },
+    "tests/fixtures/slow-skills-shim.mjs": {
+      "filePath": "tests/fixtures/slow-skills-shim.mjs",
+      "contentHash": "17180f03e975e95ed783eef6b15dcc5299d60cefa1e58eea1d4fdcfbc644ff1a",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "readFileSync"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 28,
+      "hasStructuralAnalysis": true
+    },
+    "tests/helpers/audit-state.ts": {
+      "filePath": "tests/helpers/audit-state.ts",
+      "contentHash": "29a844e8b34e0d3245e4624c620e73252d6a149308305fe17db75c05045f094f",
+      "functions": [
+        {
+          "name": "deferred",
+          "params": [],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "createWorkspaceFixture",
+          "params": [],
+          "exported": true,
+          "lineCount": 22
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdirSync",
+            "mkdtempSync",
+            "rmSync"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "resolve",
+            "join"
+          ]
+        }
+      ],
+      "exports": [
+        "deferred",
+        "createWorkspaceFixture"
+      ],
+      "totalLines": 30,
+      "hasStructuralAnalysis": true
+    },
+    "tests/helpers/installer-fixture.ts": {
+      "filePath": "tests/helpers/installer-fixture.ts",
+      "contentHash": "6631df14a108cd2c8b185e2a152abf023d435f57a169dca61f06e0da46080704",
+      "functions": [
+        {
+          "name": "createInstallerFixture",
+          "params": [
+            "{chmodFails=false,checksumFails=false,downloadFails=false}"
+          ],
+          "exported": true,
+          "lineCount": 18
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdirSync",
+            "writeFileSync",
+            "chmodSync"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "node:crypto",
+          "specifiers": [
+            "createHash"
+          ]
+        },
+        {
+          "source": "./audit-state.ts",
+          "specifiers": [
+            "createWorkspaceFixture"
+          ]
+        }
+      ],
+      "exports": [
+        "createInstallerFixture"
+      ],
+      "totalLines": 26,
+      "hasStructuralAnalysis": true
+    },
+    "tests/hooks-health.test.ts": {
+      "filePath": "tests/hooks-health.test.ts",
+      "contentHash": "25f935a8b0ce0dc9bd13df724825f6ac987dfebf67b4faf5535e0730985aca2d",
+      "functions": [
+        {
+          "name": "writeExe",
+          "params": [
+            "name",
+            "script"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterEach",
+            "beforeEach",
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "chmodSync",
+            "mkdirSync",
+            "mkdtempSync",
+            "readFileSync",
+            "rmSync",
+            "symlinkSync",
+            "writeFileSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "tmpdir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "../src/core/index.ts",
+          "specifiers": [
+            "classifyProvenance",
+            "createHealthChecker",
+            "globalLockPath",
+            "isHealthCmdConfigured",
+            "isPostMutationHookConfigured",
+            "readLock",
+            "runPostMutationHook"
+          ]
+        },
+        {
+          "source": "../src/core/services/locks.ts",
+          "specifiers": [
+            "InvalidLockFileError"
+          ]
+        },
+        {
+          "source": "../src/core/skills-client.ts",
+          "specifiers": [
+            "sanitizeEnv"
+          ]
+        },
+        {
+          "source": "../src/core/disk-index.ts",
+          "specifiers": [
+            "loadDiskIndex",
+            "saveDiskIndex"
+          ]
+        },
+        {
+          "source": "../src/core/api.ts",
+          "specifiers": [
+            "createSkillsUiServer"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 287,
+      "hasStructuralAnalysis": true
+    },
+    "tests/hosted-auth.test.ts": {
+      "filePath": "tests/hosted-auth.test.ts",
+      "contentHash": "f4c09bb6220d7cfb8a1278fd6e5360ac8d281ad2eea0ebaf35d6b77b249c8cfd",
+      "functions": [
+        {
+          "name": "start",
+          "params": [],
+          "returnType": "Promise<string>",
+          "exported": false,
+          "lineCount": 14
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterEach",
+            "beforeEach",
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "existsSync",
+            "mkdtempSync",
+            "readFileSync",
+            "rmSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "tmpdir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "../src/core/hosted-auth.ts",
+          "specifiers": [
+            "getOrCreateHostedToken",
+            "hostedTokenPath",
+            "isAllowedHost",
+            "isAllowedOrigin",
+            "isSameOrigin"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 191,
+      "hasStructuralAnalysis": true
+    },
+    "tests/image.test.ts": {
+      "filePath": "tests/image.test.ts",
+      "contentHash": "c972a921205bec6bc4cb45247d795fc33294a7edc0288c3b9134698eb84b3531",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "@opentui/core",
+          "specifiers": [
+            "ImageRenderable"
+          ]
+        },
+        {
+          "source": "@opentui/core/testing",
+          "specifiers": [
+            "createTestRenderer"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": true
+    },
+    "tests/installer.test.ts": {
+      "filePath": "tests/installer.test.ts",
+      "contentHash": "e49c7c030aac1018b82094b17af689ff0ef46861c038fbcfd055163cbb5b7cb4",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "chmodSync",
+            "readdirSync",
+            "readFileSync",
+            "statSync"
+          ]
+        },
+        {
+          "source": "./helpers/installer-fixture.ts",
+          "specifiers": [
+            "createInstallerFixture"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 72,
+      "hasStructuralAnalysis": true
+    },
+    "tests/locks.test.ts": {
+      "filePath": "tests/locks.test.ts",
+      "contentHash": "971afebb06227d80f3f878c1a0685047b0fe1d78d8e88fddd278d5b80eb3c235",
+      "functions": [
+        {
+          "name": "startServer",
+          "params": [],
+          "returnType": "Promise<{ port: number; stop: () => Promise<void> }>",
+          "exported": false,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterEach",
+            "beforeEach",
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "writeFileSync"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "../src/core/services/locks.ts",
+          "specifiers": [
+            "InvalidLockFileError",
+            "readLock"
+          ]
+        },
+        {
+          "source": "../src/core/services/updates-check.ts",
+          "specifiers": [
+            "checkForUpdates"
+          ]
+        },
+        {
+          "source": "./helpers/audit-state.ts",
+          "specifiers": [
+            "createWorkspaceFixture"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 403,
+      "hasStructuralAnalysis": true
+    },
+    "tests/markdown-render.test.ts": {
+      "filePath": "tests/markdown-render.test.ts",
+      "contentHash": "7afdaa193919fd2586d6224bebd28afaec4605aefc5bdf07aa20ac8924a99ca3",
+      "functions": [
+        {
+          "name": "emittedAppJs",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "loadRenderer",
+          "params": [],
+          "returnType": "(md: string) => string",
+          "exported": false,
+          "lineCount": 16
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "../src/web/page.ts",
+          "specifiers": [
+            "renderPage"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 227,
+      "hasStructuralAnalysis": true
+    },
+    "tests/page-hardening.test.ts": {
+      "filePath": "tests/page-hardening.test.ts",
+      "contentHash": "c07093276fa59e9b62cc1d39a9445c4eae74080429277600c5ba28d3dbe25425",
+      "functions": [
+        {
+          "name": "scriptBlocks",
+          "params": [
+            "html"
+          ],
+          "returnType": "string[]",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "sha256b64",
+          "params": [
+            "content"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterEach",
+            "beforeEach",
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdtempSync",
+            "rmSync",
+            "writeFileSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "tmpdir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "node:crypto",
+          "specifiers": [
+            "createHash"
+          ]
+        },
+        {
+          "source": "../src/web/page.ts",
+          "specifiers": [
+            "pageCspFor",
+            "renderPage",
+            "webPageRenderer"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 138,
+      "hasStructuralAnalysis": true
+    },
+    "tests/page-smoke.test.ts": {
+      "filePath": "tests/page-smoke.test.ts",
+      "contentHash": "ea300d3095381f288ce7abbfd157ad861fb210b3f81f0d4ac734c5c29f5bde57",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterAll",
+            "beforeAll",
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "@playwright/test",
+          "specifiers": [
+            "chromium",
+            "pwExpect",
+            "Browser",
+            "BrowserContext",
+            "Page"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdtempSync",
+            "rmSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "tmpdir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "./perf/helpers.ts",
+          "specifiers": [
+            "SHIM",
+            "buildSyntheticCorpus",
+            "SyntheticCorpus"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 449,
+      "hasStructuralAnalysis": true
+    },
+    "tests/perf/filter-dom.test.ts": {
+      "filePath": "tests/perf/filter-dom.test.ts",
+      "contentHash": "233b47d1e2375f5e94e52af14837cc6d5c8d4c599e893f388f01d6b1d3ac0c38",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterAll",
+            "beforeAll",
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "@playwright/test",
+          "specifiers": [
+            "chromium",
+            "Browser",
+            "BrowserContext",
+            "Page"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdtempSync",
+            "rmSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "tmpdir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "./helpers.ts",
+          "specifiers": [
+            "SHIM",
+            "buildSyntheticCorpus",
+            "SyntheticCorpus"
+          ]
+        },
+        {
+          "source": "./playwright-probes.ts",
+          "specifiers": [
+            "closeBrowser",
+            "newPerfContext",
+            "openServedPage",
+            "probeFilterRender",
+            "stubUpdates"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 238,
+      "hasStructuralAnalysis": true
+    },
+    "tests/perf/helpers.ts": {
+      "filePath": "tests/perf/helpers.ts",
+      "contentHash": "d6ec551901a16df04ec038a08c32d483bd06cad21caf2e685df1455c1b72de77",
+      "functions": [
+        {
+          "name": "buildSyntheticCorpus",
+          "params": [
+            "root",
+            "projectCount",
+            "globalCount"
+          ],
+          "returnType": "SyntheticCorpus",
+          "exported": true,
+          "lineCount": 58
+        },
+        {
+          "name": "readShimCallLog",
+          "params": [
+            "path"
+          ],
+          "returnType": "ShimCall[]",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "countShimCalls",
+          "params": [
+            "calls",
+            "argv"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "startSearchStub",
+          "params": [
+            "options"
+          ],
+          "returnType": "Promise<SearchStub>",
+          "exported": true,
+          "lineCount": 52
+        },
+        {
+          "name": "median",
+          "params": [
+            "samples"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "fmtMs",
+          "params": [
+            "ms"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "existsSync",
+            "mkdirSync",
+            "readFileSync",
+            "writeFileSync"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        }
+      ],
+      "exports": [
+        "SHIM",
+        "buildSyntheticCorpus",
+        "readShimCallLog",
+        "countShimCalls",
+        "startSearchStub",
+        "median",
+        "fmtMs"
+      ],
+      "totalLines": 252,
+      "hasStructuralAnalysis": true
+    },
+    "tests/perf/playwright-probes.ts": {
+      "filePath": "tests/perf/playwright-probes.ts",
+      "contentHash": "62130dbd2b89d14da3457b930333af4ad4b00edb5d4fd631394da8e1e54e1ea7",
+      "functions": [
+        {
+          "name": "newPerfContext",
+          "params": [
+            "browser"
+          ],
+          "returnType": "Promise<BrowserContext>",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "closeBrowser",
+          "params": [
+            "browser"
+          ],
+          "returnType": "Promise<void>",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "stubUpdates",
+          "params": [
+            "page"
+          ],
+          "returnType": "Promise<void>",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "openServedPage",
+          "params": [
+            "page",
+            "base",
+            "expectedRows",
+            "timeoutMs"
+          ],
+          "returnType": "Promise<void>",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "probeFilterRender",
+          "params": [
+            "page",
+            "value",
+            "timeoutMs"
+          ],
+          "returnType": "Promise<FilterProbeResult>",
+          "exported": true,
+          "lineCount": 146
+        },
+        {
+          "name": "probeScopeFirstPaint",
+          "params": [
+            "page",
+            "options"
+          ],
+          "returnType": "Promise<number>",
+          "exported": true,
+          "lineCount": 40
+        },
+        {
+          "name": "probeStaleOverwrite",
+          "params": [
+            "page",
+            "options"
+          ],
+          "returnType": "Promise<StaleOverwriteResult>",
+          "exported": true,
+          "lineCount": 36
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@playwright/test",
+          "specifiers": [
+            "Browser",
+            "BrowserContext",
+            "Page"
+          ]
+        }
+      ],
+      "exports": [
+        "newPerfContext",
+        "closeBrowser",
+        "stubUpdates",
+        "openServedPage",
+        "probeFilterRender",
+        "probeScopeFirstPaint",
+        "probeStaleOverwrite"
+      ],
+      "totalLines": 408,
+      "hasStructuralAnalysis": true
+    },
+    "tests/perf/search-stub.test.ts": {
+      "filePath": "tests/perf/search-stub.test.ts",
+      "contentHash": "9d115eae6c8e8c7d85f6a50545710559177c55e902f476516fc51d7f8db6fbe4",
+      "functions": [
+        {
+          "name": "start",
+          "params": [],
+          "returnType": "Promise<string>",
+          "exported": false,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterEach",
+            "beforeEach",
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdtempSync",
+            "rmSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "tmpdir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "./helpers.ts",
+          "specifiers": [
+            "SHIM",
+            "startSearchStub",
+            "SearchStub"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 134,
+      "hasStructuralAnalysis": true
+    },
+    "tests/perf/spawn-count.test.ts": {
+      "filePath": "tests/perf/spawn-count.test.ts",
+      "contentHash": "cb4cc998a3f5a2745d4fc9423a45e42a5ce372667fbab1a3febe9df22c18e5dc",
+      "functions": [
+        {
+          "name": "start",
+          "params": [],
+          "returnType": "Promise<string>",
+          "exported": false,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterEach",
+            "beforeEach",
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdtempSync",
+            "readFileSync",
+            "rmSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "tmpdir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "./helpers.ts",
+          "specifiers": [
+            "SHIM",
+            "countShimCalls",
+            "readShimCallLog"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 347,
+      "hasStructuralAnalysis": true
+    },
+    "tests/sanitize.test.ts": {
+      "filePath": "tests/sanitize.test.ts",
+      "contentHash": "fac003cab47f99b8157f550b00548ca6c823eb3f9a1572d967e2fe5b03757f90",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterEach",
+            "beforeEach",
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdtempSync",
+            "rmSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "tmpdir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "../src/core/services/sanitize.ts",
+          "specifiers": [
+            "sanitizeBody",
+            "sanitizeMetadata",
+            "stripEscapes"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 153,
+      "hasStructuralAnalysis": true
+    },
+    "tests/selftest.test.ts": {
+      "filePath": "tests/selftest.test.ts",
+      "contentHash": "fcc49ef63537f90391e111e65f3973b523cc941869ea995ad20d3f7c9122a67d",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "../src/tui/app.ts",
+          "specifiers": [
+            "buildSpikeScreen"
+          ]
+        },
+        {
+          "source": "@opentui/core/testing",
+          "specifiers": [
+            "createTestRenderer"
+          ]
+        },
+        {
+          "source": "../src/tui/renderer-ready.ts",
+          "specifiers": [
+            "waitForFrame"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": true
+    },
+    "tests/serve-hardening.test.ts": {
+      "filePath": "tests/serve-hardening.test.ts",
+      "contentHash": "d660f3e174ed067a773d21505d6ea94656fbc0edc1a10233cc659f115fc20a06",
+      "functions": [
+        {
+          "name": "start",
+          "params": [
+            "rateLimit"
+          ],
+          "returnType": "Promise<string>",
+          "exported": false,
+          "lineCount": 12
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterEach",
+            "beforeEach",
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdtempSync",
+            "rmSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "tmpdir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "../src/core/hosted-auth.ts",
+          "specifiers": [
+            "bearerMatches"
+          ]
+        },
+        {
+          "source": "../src/core/spawn-queue.ts",
+          "specifiers": [
+            "SkillsBusyError",
+            "createSpawnQueue"
+          ]
+        },
+        {
+          "source": "../src/core/services/updates-check.ts",
+          "specifiers": [
+            "fetchRepoTree"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 396,
+      "hasStructuralAnalysis": true
+    },
+    "tests/services.test.ts": {
+      "filePath": "tests/services.test.ts",
+      "contentHash": "17cb897d1513e475c81b2673240a05131f894987d62e28402bd3ebd180721c15",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterEach",
+            "beforeEach",
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdtempSync",
+            "rmSync",
+            "readFileSync",
+            "existsSync",
+            "writeFileSync",
+            "mkdirSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "tmpdir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 495,
+      "hasStructuralAnalysis": true
+    },
+    "tests/terminology.test.ts": {
+      "filePath": "tests/terminology.test.ts",
+      "contentHash": "b4e7cd2f114fa891df6bcbba78bd8650559555701e9c6f730cdd19e4a57a25fc",
+      "functions": [
+        {
+          "name": "read",
+          "params": [
+            "rel"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 1
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "readFileSync"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "../src/web/page.ts",
+          "specifiers": [
+            "renderPage"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 71,
+      "hasStructuralAnalysis": true
+    },
+    "tests/tui-disk-index.test.ts": {
+      "filePath": "tests/tui-disk-index.test.ts",
+      "contentHash": "a18ce183ce6daafa01db07d0b5a6cc9c07c151e6441d350b21acb24cf1097ac6",
+      "functions": [
+        {
+          "name": "entry",
+          "params": [
+            "name",
+            "scope"
+          ],
+          "returnType": "InstalledSkill",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "writeIndexFile",
+          "params": [
+            "dir",
+            "scope",
+            "content"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "writeIndex",
+          "params": [
+            "dir",
+            "scope",
+            "skills"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "deferredListDeps",
+          "params": [],
+          "returnType": "{ deps: TuiDeps; resolveAll: (skills: InstalledSkill[]) => void }",
+          "exported": false,
+          "lineCount": 15
+        },
+        {
+          "name": "waitFor",
+          "params": [
+            "fn",
+            "timeoutMs"
+          ],
+          "returnType": "Promise<void>",
+          "exported": false,
+          "lineCount": 12
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterEach",
+            "beforeEach",
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:child_process",
+          "specifiers": [
+            "spawnSync"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "existsSync",
+            "mkdirSync",
+            "mkdtempSync",
+            "readdirSync",
+            "readFileSync",
+            "rmSync",
+            "symlinkSync",
+            "utimesSync",
+            "writeFileSync"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "basename",
+            "join"
+          ]
+        },
+        {
+          "source": "@opentui/core/testing",
+          "specifiers": [
+            "createTestRenderer"
+          ]
+        },
+        {
+          "source": "../src/tui/app.ts",
+          "specifiers": [
+            "realDeps",
+            "runTuiOn",
+            "TuiDeps"
+          ]
+        },
+        {
+          "source": "../src/tui/renderer-ready.ts",
+          "specifiers": [
+            "waitForFrame"
+          ]
+        },
+        {
+          "source": "./helpers/audit-state.ts",
+          "specifiers": [
+            "createWorkspaceFixture",
+            "deferred"
+          ]
+        },
+        {
+          "source": "../src/core/disk-index.ts",
+          "specifiers": [
+            "DISK_INDEX_VERSION",
+            "TMP_SWEEP_MIN_AGE_MS",
+            "diskIndexPath",
+            "loadDiskIndex",
+            "normalizeDiskIndex",
+            "projectIdentity",
+            "saveDiskIndex"
+          ]
+        },
+        {
+          "source": "../src/core/skills-client.ts",
+          "specifiers": [
+            "resetSkillsBinCache"
+          ]
+        },
+        {
+          "source": "../src/core/prefs.ts",
+          "specifiers": [
+            "DEFAULT_UI_PREFERENCES"
+          ]
+        },
+        {
+          "source": "../src/tui/model.ts",
+          "specifiers": [
+            "createTuiModel",
+            "update"
+          ]
+        },
+        {
+          "source": "../src/core/services/types.ts",
+          "specifiers": [
+            "InstalledSkill",
+            "Scope"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 728,
+      "hasStructuralAnalysis": true
+    },
+    "tests/tui.test.ts": {
+      "filePath": "tests/tui.test.ts",
+      "contentHash": "dafcd3d6bf4148042ac645b5076ce10e8791a904758b0f3b3bccd5c634aebca8",
+      "functions": [
+        {
+          "name": "fakeDeps",
+          "params": [],
+          "returnType": "TuiDeps",
+          "exported": false,
+          "lineCount": 21
+        },
+        {
+          "name": "waitFor",
+          "params": [
+            "fn",
+            "timeoutMs"
+          ],
+          "returnType": "Promise<void>",
+          "exported": false,
+          "lineCount": 15
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterEach",
+            "beforeEach",
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "node:events",
+          "specifiers": [
+            "EventEmitter"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdtempSync",
+            "readFileSync",
+            "rmSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "tmpdir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "@opentui/core/testing",
+          "specifiers": [
+            "createTestRenderer"
+          ]
+        },
+        {
+          "source": "../src/tui/app.ts",
+          "specifiers": [
+            "installCrashGuard",
+            "realDeps",
+            "runTuiOn",
+            "TuiDeps"
+          ]
+        },
+        {
+          "source": "../src/tui/renderer-ready.ts",
+          "specifiers": [
+            "waitForFrame"
+          ]
+        },
+        {
+          "source": "./helpers/audit-state.ts",
+          "specifiers": [
+            "deferred"
+          ]
+        },
+        {
+          "source": "../src/tui/model.ts",
+          "specifiers": [
+            "createTuiModel",
+            "update",
+            "visibleSkills",
+            "TuiModel"
+          ]
+        },
+        {
+          "source": "../src/core/skills-client.ts",
+          "specifiers": [
+            "resetSkillsBinCache"
+          ]
+        },
+        {
+          "source": "../src/core/prefs.ts",
+          "specifiers": [
+            "DEFAULT_UI_PREFERENCES"
+          ]
+        },
+        {
+          "source": "../src/core/services/types.ts",
+          "specifiers": [
+            "InstalledSkill",
+            "SearchSkill"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 1666,
+      "hasStructuralAnalysis": true
+    },
+    "tests/version.test.ts": {
+      "filePath": "tests/version.test.ts",
+      "contentHash": "297723d7ae626dc67addbd8cfd35472d9b616f49d2d4664448e0094f7d202df4",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "describe",
+            "expect",
+            "test"
+          ]
+        },
+        {
+          "source": "../package.json",
+          "specifiers": [
+            "pkg"
+          ]
+        },
+        {
+          "source": "../src/core/version.ts",
+          "specifiers": [
+            "APP_VERSION"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 20,
+      "hasStructuralAnalysis": true
+    },
+    "tests/web-055.test.ts": {
+      "filePath": "tests/web-055.test.ts",
+      "contentHash": "e37cc9b59cb3330798bb8d1468aa4fecc8172819e51accc55dd61bee722c4873",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "bun:test",
+          "specifiers": [
+            "afterAll",
+            "beforeAll",
+            "describe",
+            "test"
+          ]
+        },
+        {
+          "source": "@playwright/test",
+          "specifiers": [
+            "chromium",
+            "pwExpect",
+            "Browser",
+            "BrowserContext",
+            "Page"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "mkdtempSync",
+            "rmSync"
+          ]
+        },
+        {
+          "source": "node:os",
+          "specifiers": [
+            "tmpdir"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "./perf/helpers.ts",
+          "specifiers": [
+            "SHIM",
+            "buildSyntheticCorpus",
+            "SyntheticCorpus"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 220,
+      "hasStructuralAnalysis": true
+    },
+    "tsconfig.json": {
+      "filePath": "tsconfig.json",
+      "contentHash": "744785c3becb538b87fbe85ca07529969cf4bf8a1618345142a5beb8ca6815a0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": true
+    }
+  }
+}

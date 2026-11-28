@@ -1,0 +1,1315 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/core/api.ts",
+      "type": "file",
+      "name": "api.ts",
+      "filePath": "src/core/api.ts",
+      "language": "typescript",
+      "summary": "Loopback HTTP API server built on Bun.serve that exposes skill listing, search, installation, removal, update, preferences, and health-check routes. Enforces host/origin allowlists, bearer authentication, cross-site fetch rejection, token-bucket rate limiting, request body limits, and per-server list/description caching.",
+      "tags": [
+        "http-api",
+        "bun-serve",
+        "security-gate",
+        "caching",
+        "core"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/core/api.ts:readJsonBody",
+      "type": "function",
+      "name": "readJsonBody",
+      "filePath": "src/core/api.ts",
+      "lineRange": [
+        96,
+        110
+      ],
+      "summary": "Reads and parses a JSON object request body up to the 1 MiB limit, returning an empty object for empty bodies. Throws BodyTooLarge for oversized payloads and BadJson for malformed or non-object JSON.",
+      "tags": [
+        "http-api",
+        "json-parsing",
+        "validation",
+        "security"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/api.ts:validSource",
+      "type": "function",
+      "name": "validSource",
+      "filePath": "src/core/api.ts",
+      "lineRange": [
+        137,
+        149
+      ],
+      "summary": "Validates a skill source string up to 512 characters against control characters and leading-dash flag injection. Rejects HTTP(S) URLs that embed credentials or fail URL parsing.",
+      "tags": [
+        "validation",
+        "security",
+        "argv-safety",
+        "url-parsing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/api.ts:createLimiter",
+      "type": "function",
+      "name": "createLimiter",
+      "filePath": "src/core/api.ts",
+      "lineRange": [
+        159,
+        170
+      ],
+      "summary": "Creates a token-bucket rate limiter closure with configurable capacity and per-second refill rate. Consumes one token per allowed request and returns false when exhausted.",
+      "tags": [
+        "rate-limiting",
+        "token-bucket",
+        "security",
+        "hardening"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "function",
+      "name": "createSkillsUiServer",
+      "filePath": "src/core/api.ts",
+      "lineRange": [
+        178,
+        652
+      ],
+      "summary": "Starts a 127.0.0.1 Bun HTTP server wiring all /api/* endpoints, optional HTML page rendering with hash-pinned CSP, per-server coalescing list/description caches, and hosted-UI CORS/bearer security gates. Falls back to an ephemeral port if the preferred port is unavailable and returns port metadata plus a stop handle.",
+      "tags": [
+        "http-server",
+        "routing",
+        "caching",
+        "security-gate",
+        "core"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/core/hosted-auth.ts",
+      "type": "file",
+      "name": "hosted-auth.ts",
+      "filePath": "src/core/hosted-auth.ts",
+      "language": "typescript",
+      "summary": "Authentication and browser-boundary protection helpers for hosted WebUI access to the local API server. Provides stable bearer token persistence, constant-time bearer verification, DNS-rebinding Host checks, cross-site fetch detection, and CORS/preflight responses.",
+      "tags": [
+        "authentication",
+        "cors",
+        "security",
+        "hosted-ui",
+        "core"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/hosted-auth.ts:hostedTokenPath",
+      "type": "function",
+      "name": "hostedTokenPath",
+      "filePath": "src/core/hosted-auth.ts",
+      "lineRange": [
+        25,
+        30
+      ],
+      "summary": "Resolves the filesystem path for the persisted hosted-UI bearer token file, honoring SKILLS_UI_PREFS_DIR or defaulting to ~/.config/skills-ui/hosted-token.",
+      "tags": [
+        "authentication",
+        "config-path",
+        "hosted-ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/hosted-auth.ts:getOrCreateHostedToken",
+      "type": "function",
+      "name": "getOrCreateHostedToken",
+      "filePath": "src/core/hosted-auth.ts",
+      "lineRange": [
+        33,
+        49
+      ],
+      "summary": "Returns the hosted-UI bearer token from SKILLS_UI_HOSTED_TOKEN, reads an existing persisted token file, or generates a 32-byte base64url token and writes it with mode 0600.",
+      "tags": [
+        "authentication",
+        "token-generation",
+        "persistence",
+        "security"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/hosted-auth.ts:bearerMatches",
+      "type": "function",
+      "name": "bearerMatches",
+      "filePath": "src/core/hosted-auth.ts",
+      "lineRange": [
+        55,
+        59
+      ],
+      "summary": "Verifies an Authorization header against the expected Bearer token using SHA-256 digests and crypto.timingSafeEqual to prevent timing leaks.",
+      "tags": [
+        "authentication",
+        "timing-safe",
+        "crypto",
+        "security"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/hosted-auth.ts:isCrossSiteFetch",
+      "type": "function",
+      "name": "isCrossSiteFetch",
+      "filePath": "src/core/hosted-auth.ts",
+      "lineRange": [
+        68,
+        73
+      ],
+      "summary": "Detects hostile browser no-cors requests that omit the Origin header while carrying Sec-Fetch-Site: cross-site.",
+      "tags": [
+        "csrf-defense",
+        "fetch-metadata",
+        "security",
+        "http-headers"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/hosted-auth.ts:isAllowedHost",
+      "type": "function",
+      "name": "isAllowedHost",
+      "filePath": "src/core/hosted-auth.ts",
+      "lineRange": [
+        76,
+        89
+      ],
+      "summary": "Validates the HTTP Host header against loopback hostnames (127.0.0.1, localhost, [::1], ::1) across any port to mitigate DNS-rebinding attacks.",
+      "tags": [
+        "dns-rebinding",
+        "host-validation",
+        "security",
+        "loopback"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/hosted-auth.ts:isAllowedOrigin",
+      "type": "function",
+      "name": "isAllowedOrigin",
+      "filePath": "src/core/hosted-auth.ts",
+      "lineRange": [
+        99,
+        102
+      ],
+      "summary": "Checks whether an Origin header matches the built-in GitHub Pages origin, a local HTTP loopback origin, or an entry in SKILLS_UI_ALLOWED_ORIGINS.",
+      "tags": [
+        "cors",
+        "origin-allowlist",
+        "security",
+        "hosted-ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/hosted-auth.ts:isSameOrigin",
+      "type": "function",
+      "name": "isSameOrigin",
+      "filePath": "src/core/hosted-auth.ts",
+      "lineRange": [
+        105,
+        107
+      ],
+      "summary": "Determines whether an HTTP request Origin header matches http://<host> from the request's own Host header.",
+      "tags": [
+        "cors",
+        "origin-check",
+        "security"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/hosted-auth.ts:corsHeaders",
+      "type": "function",
+      "name": "corsHeaders",
+      "filePath": "src/core/hosted-auth.ts",
+      "lineRange": [
+        110,
+        112
+      ],
+      "summary": "Builds Access-Control-Allow-Origin and Vary: Origin response headers echoing an already-approved cross-origin caller.",
+      "tags": [
+        "cors",
+        "http-headers",
+        "hosted-ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/hosted-auth.ts:preflightResponse",
+      "type": "function",
+      "name": "preflightResponse",
+      "filePath": "src/core/hosted-auth.ts",
+      "lineRange": [
+        115,
+        125
+      ],
+      "summary": "Constructs a 204 No Content CORS preflight response permitting GET, POST, PUT, and OPTIONS with Authorization and Content-Type headers cached for 7200 seconds.",
+      "tags": [
+        "cors",
+        "preflight",
+        "http-response",
+        "hosted-ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/core/services/hooks.ts",
+      "type": "file",
+      "name": "hooks.ts",
+      "filePath": "src/core/services/hooks.ts",
+      "language": "typescript",
+      "summary": "Manages user-configured external post-mutation hooks and health-check commands specified via SKILLS_UI_POST_MUTATION_HOOK and SKILLS_UI_HEALTH_CMD. Spawns executables in sanitized environments with timeouts, sanitizes output, and caches health-check results with in-flight deduplication.",
+      "tags": [
+        "hooks",
+        "health-check",
+        "subprocess",
+        "caching",
+        "services"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/core/services/hooks.ts:isPostMutationHookConfigured",
+      "type": "function",
+      "name": "isPostMutationHookConfigured",
+      "filePath": "src/core/services/hooks.ts",
+      "lineRange": [
+        18,
+        20
+      ],
+      "summary": "Reports whether the SKILLS_UI_POST_MUTATION_HOOK environment variable is set to a non-empty command path.",
+      "tags": [
+        "hooks",
+        "config",
+        "feature-flag"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/hooks.ts:isHealthCmdConfigured",
+      "type": "function",
+      "name": "isHealthCmdConfigured",
+      "filePath": "src/core/services/hooks.ts",
+      "lineRange": [
+        22,
+        24
+      ],
+      "summary": "Reports whether the SKILLS_UI_HEALTH_CMD environment variable is set to a non-empty command path.",
+      "tags": [
+        "health-check",
+        "config",
+        "feature-flag"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/hooks.ts:spawnExecutable",
+      "type": "function",
+      "name": "spawnExecutable",
+      "filePath": "src/core/services/hooks.ts",
+      "lineRange": [
+        31,
+        77
+      ],
+      "summary": "Spawns an external executable via Bun.spawn with a sanitized environment, optional extra environment variables, stdout/stderr capture, and a kill timer. Returns structured exit code, output, timeout status, and spawn errors without throwing.",
+      "tags": [
+        "subprocess",
+        "bun-spawn",
+        "timeout",
+        "sanitization"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/services/hooks.ts:runPostMutationHook",
+      "type": "function",
+      "name": "runPostMutationHook",
+      "filePath": "src/core/services/hooks.ts",
+      "lineRange": [
+        79,
+        132
+      ],
+      "summary": "Runs the configured post-mutation hook executable with SKILLS_UI_EVENT, SKILLS_UI_SCOPE, SKILLS_UI_SKILLS, and SKILLS_UI_CWD environment variables. Returns a normalized PostMutationHookResult with sanitized output, exit code, and timeout or launch error reporting.",
+      "tags": [
+        "hooks",
+        "post-mutation",
+        "subprocess",
+        "services"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/services/hooks.ts:createHealthChecker",
+      "type": "function",
+      "name": "createHealthChecker",
+      "filePath": "src/core/services/hooks.ts",
+      "lineRange": [
+        139,
+        234
+      ],
+      "summary": "Creates a stateful HealthChecker with configurable TTL caching, in-flight request deduplication, and explicit cache invalidation. Executes SKILLS_UI_HEALTH_CMD, validates its JSON output shape, sanitizes summary/details fields, and gracefully handles spawn errors, timeouts, or invalid JSON.",
+      "tags": [
+        "health-check",
+        "caching",
+        "deduplication",
+        "subprocess",
+        "services"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/core/services/hooks.ts:checkHealth",
+      "type": "function",
+      "name": "checkHealth",
+      "filePath": "src/core/services/hooks.ts",
+      "lineRange": [
+        238,
+        240
+      ],
+      "summary": "Runs a health check through the module-level default HealthChecker instance, optionally forcing a cache refresh.",
+      "tags": [
+        "health-check",
+        "facade",
+        "services"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/hooks.ts:invalidateHealthCache",
+      "type": "function",
+      "name": "invalidateHealthCache",
+      "filePath": "src/core/services/hooks.ts",
+      "lineRange": [
+        242,
+        244
+      ],
+      "summary": "Clears the cached health-check result on the module-level default HealthChecker instance.",
+      "tags": [
+        "health-check",
+        "cache-invalidation",
+        "services"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/core/services/install.ts",
+      "type": "file",
+      "name": "install.ts",
+      "filePath": "src/core/services/install.ts",
+      "language": "typescript",
+      "summary": "Service wrapper around `skills add --yes --json` for installing one, several, or all (`*`) skills from a source into project or global scope. Parses CLI JSON output and sanitizes all returned metadata fields at ingress.",
+      "tags": [
+        "install",
+        "skills-cli",
+        "sanitization",
+        "services"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/services/install.ts:install",
+      "type": "function",
+      "name": "install",
+      "filePath": "src/core/services/install.ts",
+      "lineRange": [
+        23,
+        57
+      ],
+      "summary": "Invokes `skills add` with `--all` or repeated `--skill` flags and `--yes --json`, parses the resulting JSON entry array, and sanitizes every string field. Reports `ok: true` only when exit code is 0 and every entry has status `installed`.",
+      "tags": [
+        "install",
+        "skills-cli",
+        "sanitization",
+        "services"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/core/services/installed.ts",
+      "type": "file",
+      "name": "installed.ts",
+      "filePath": "src/core/services/installed.ts",
+      "language": "typescript",
+      "summary": "Lists and looks up installed skills for project or global scope via `skills ls --json`. Enriches each skill with provenance classification (`linked`, `locked`, or `local`) using symlink inspection and lockfile membership while sanitizing display metadata.",
+      "tags": [
+        "installed-skills",
+        "provenance",
+        "skills-cli",
+        "services"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/services/installed.ts:classifyProvenance",
+      "type": "function",
+      "name": "classifyProvenance",
+      "filePath": "src/core/services/installed.ts",
+      "lineRange": [
+        11,
+        25
+      ],
+      "summary": "Classifies an installed skill's provenance by checking whether its filesystem path is a symlink (`linked`), appears in the scope's lockfile (`locked`), or otherwise defaults to `local`.",
+      "tags": [
+        "provenance",
+        "symlink",
+        "lockfile",
+        "filesystem"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/installed.ts:listInstalled",
+      "type": "function",
+      "name": "listInstalled",
+      "filePath": "src/core/services/installed.ts",
+      "lineRange": [
+        32,
+        73
+      ],
+      "summary": "Executes `skills ls --json [-g]`, parses the returned array, cross-references lockfile entries for provenance, and sanitizes display fields while preserving raw filesystem paths.",
+      "tags": [
+        "installed-skills",
+        "skills-cli",
+        "sanitization",
+        "services"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/services/installed.ts:findInstalled",
+      "type": "function",
+      "name": "findInstalled",
+      "filePath": "src/core/services/installed.ts",
+      "lineRange": [
+        75,
+        78
+      ],
+      "summary": "Finds a single installed skill by exact name within the requested project or global scope by delegating to `listInstalled`.",
+      "tags": [
+        "installed-skills",
+        "lookup",
+        "services"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/hosted-auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/index.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/prefs.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/seed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/services/skill-doc.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:src/core/version.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "function:src/core/api.ts:readJsonBody",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "function:src/core/api.ts:validSource",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "function:src/core/api.ts:createLimiter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/api.ts:readJsonBody",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/api.ts:validSource",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/api.ts:createLimiter",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/hosted-auth.ts:getOrCreateHostedToken",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/hosted-auth.ts:corsHeaders",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/hosted-auth.ts:isAllowedHost",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/hosted-auth.ts:isCrossSiteFetch",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/hosted-auth.ts:isSameOrigin",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/hosted-auth.ts:isAllowedOrigin",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/hosted-auth.ts:preflightResponse",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/hosted-auth.ts:bearerMatches",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/prefs.ts:loadUiPreferences",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/prefs.ts:normalizePreferences",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/prefs.ts:saveUiPreferences",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/services/hooks.ts:createHealthChecker",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/services/hooks.ts:runPostMutationHook",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/services/hooks.ts:isHealthCmdConfigured",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/services/hooks.ts:isPostMutationHookConfigured",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/services/installed.ts:listInstalled",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/services/skill-doc.ts:readSkillDoc",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/services/skill-doc.ts:skillBody",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/services/sanitize.ts:sanitizeMetadata",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/skills-client.ts:skillsVersion",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/services/search.ts:searchWithFallback",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/services/install.ts:install",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/services/source.ts:listSourceSkills",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/services/remove.ts:remove",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/services/update.ts:update",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/api.ts:createSkillsUiServer",
+      "target": "function:src/core/services/updates-check.ts:checkForUpdates",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/hosted-auth.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/locks.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/sanitize.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/api.ts",
+      "target": "file:tests/serve-hardening.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:hostedTokenPath",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:getOrCreateHostedToken",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:bearerMatches",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:isCrossSiteFetch",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:isAllowedHost",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:isAllowedOrigin",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:isSameOrigin",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:corsHeaders",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:preflightResponse",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:hostedTokenPath",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:getOrCreateHostedToken",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:bearerMatches",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:isCrossSiteFetch",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:isAllowedHost",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:isAllowedOrigin",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:isSameOrigin",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:corsHeaders",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "function:src/core/hosted-auth.ts:preflightResponse",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/hosted-auth.ts:getOrCreateHostedToken",
+      "target": "function:src/core/hosted-auth.ts:hostedTokenPath",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/hosted-auth.ts:preflightResponse",
+      "target": "function:src/core/hosted-auth.ts:corsHeaders",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "file:tests/hosted-auth.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/hosted-auth.ts",
+      "target": "file:tests/serve-hardening.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "function:src/core/services/hooks.ts:isPostMutationHookConfigured",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "function:src/core/services/hooks.ts:isHealthCmdConfigured",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "function:src/core/services/hooks.ts:spawnExecutable",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "function:src/core/services/hooks.ts:runPostMutationHook",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "function:src/core/services/hooks.ts:createHealthChecker",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "function:src/core/services/hooks.ts:checkHealth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "function:src/core/services/hooks.ts:invalidateHealthCache",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "function:src/core/services/hooks.ts:isPostMutationHookConfigured",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "function:src/core/services/hooks.ts:isHealthCmdConfigured",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "function:src/core/services/hooks.ts:runPostMutationHook",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "function:src/core/services/hooks.ts:createHealthChecker",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "function:src/core/services/hooks.ts:checkHealth",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/hooks.ts",
+      "target": "function:src/core/services/hooks.ts:invalidateHealthCache",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/hooks.ts:spawnExecutable",
+      "target": "function:src/core/skills-client.ts:sanitizeEnv",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/hooks.ts:runPostMutationHook",
+      "target": "function:src/core/services/hooks.ts:spawnExecutable",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/hooks.ts:runPostMutationHook",
+      "target": "function:src/core/services/sanitize.ts:sanitizeMetadata",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/hooks.ts:createHealthChecker",
+      "target": "function:src/core/services/hooks.ts:spawnExecutable",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/hooks.ts:createHealthChecker",
+      "target": "function:src/core/services/sanitize.ts:sanitizeMetadata",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "function:src/core/services/install.ts:install",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "function:src/core/services/install.ts:install",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/install.ts:install",
+      "target": "function:src/core/skills-client.ts:runSkills",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/install.ts:install",
+      "target": "function:src/core/services/sanitize.ts:sanitizeMetadata",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "file:tests/sanitize.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "function:src/core/services/installed.ts:classifyProvenance",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "function:src/core/services/installed.ts:listInstalled",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "function:src/core/services/installed.ts:findInstalled",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "function:src/core/services/installed.ts:classifyProvenance",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "function:src/core/services/installed.ts:listInstalled",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "function:src/core/services/installed.ts:findInstalled",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/installed.ts:listInstalled",
+      "target": "function:src/core/skills-client.ts:runSkills",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/installed.ts:listInstalled",
+      "target": "function:src/core/services/locks.ts:readLock",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/installed.ts:listInstalled",
+      "target": "function:src/core/services/sanitize.ts:sanitizeMetadata",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/installed.ts:listInstalled",
+      "target": "function:src/core/services/installed.ts:classifyProvenance",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/installed.ts:findInstalled",
+      "target": "function:src/core/services/installed.ts:listInstalled",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:tests/sanitize.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

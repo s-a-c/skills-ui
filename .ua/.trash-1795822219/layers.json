@@ -1,0 +1,181 @@
+[
+  {
+    "id": "layer:entry-api",
+    "name": "CLI Entry & HTTP API",
+    "description": "Dispatches CLI runtime modes and serves the authenticated loopback HTTP API with CORS, Host allowlisting, rate limiting, and hosted Bearer-token defense.",
+    "nodeIds": [
+      "file:src/main.ts",
+      "file:src/core/api.ts",
+      "file:src/core/hosted-auth.ts"
+    ]
+  },
+  {
+    "id": "layer:core-services",
+    "name": "Core Services & Runtime",
+    "description": "Wraps the upstream skills CLI behind a bounded spawn queue and implements domain services, lockfile validation, ingress sanitization, SWR disk caching, theme tokens, preferences, and shared filter logic.",
+    "nodeIds": [
+      "file:src/core/index.ts",
+      "file:src/core/skills-client.ts",
+      "file:src/core/spawn-queue.ts",
+      "file:src/core/disk-index.ts",
+      "file:src/core/prefs.ts",
+      "file:src/core/theme.ts",
+      "file:src/core/filter.ts",
+      "file:src/core/seed.ts",
+      "file:src/core/version.ts",
+      "file:src/core/services/hooks.ts",
+      "file:src/core/services/install.ts",
+      "file:src/core/services/installed.ts",
+      "file:src/core/services/locks.ts",
+      "file:src/core/services/remove.ts",
+      "file:src/core/services/sanitize.ts",
+      "file:src/core/services/search.ts",
+      "file:src/core/services/skill-doc.ts",
+      "file:src/core/services/source.ts",
+      "file:src/core/services/types.ts",
+      "file:src/core/services/update.ts",
+      "file:src/core/services/updates-check.ts"
+    ]
+  },
+  {
+    "id": "layer:tui",
+    "name": "Terminal UI (OpenTUI)",
+    "description": "Implements the interactive OpenTUI terminal application with an Elm-style state model, React view tree, procedural NativeImage art, PCM audio feedback, optional Three.js 3D skill graph, and selftest spike.",
+    "nodeIds": [
+      "file:src/tui/app.ts",
+      "file:src/tui/Views.tsx",
+      "file:src/tui/model.ts",
+      "file:src/tui/art.ts",
+      "file:src/tui/audio.ts",
+      "file:src/tui/three-scene.ts",
+      "file:src/tui/renderer-ready.ts",
+      "file:src/tui/spike.ts"
+    ]
+  },
+  {
+    "id": "layer:web",
+    "name": "Web UI",
+    "description": "Assembles the single-file CSP-hardened HTML, CSS, and client-side JavaScript web interface for both local --web serving and static GitHub Pages hosted deployment over the loopback API.",
+    "nodeIds": [
+      "file:src/web/page.ts",
+      "file:src/web/styles.ts",
+      "file:src/web/client/core.ts",
+      "file:src/web/client/installed.ts",
+      "file:src/web/client/search-and-boot.ts"
+    ]
+  },
+  {
+    "id": "layer:build-ci",
+    "name": "Build, Release & CI",
+    "description": "Compiles cross-platform Bun executables with SHA-256 checksum verification, exports the hosted GitHub Pages WebUI, provides the POSIX shell installer, and runs GitHub Actions PR and issue automation.",
+    "nodeIds": [
+      "file:scripts/build.ts",
+      "file:scripts/export-page.ts",
+      "file:scripts/install.sh",
+      "file:scripts/verify-build-targets.ts",
+      "pipeline:.github/workflows/claude.yml",
+      "pipeline:.github/workflows/claude-code-review.yml"
+    ]
+  },
+  {
+    "id": "layer:harnesses",
+    "name": "Performance & Smoke Harnesses",
+    "description": "Runs end-to-end performance budget benchmarks and Python/pyte real-terminal PTY smoke suites along with their dedicated CLI stubs, fixtures, and baseline reports.",
+    "nodeIds": [
+      "file:scripts/perf/budget.ts",
+      "document:scripts/perf/report-2026-11-01.md",
+      "document:scripts/perf/report-2026-11-01-real.md",
+      "document:scripts/pty-smoke/README.md",
+      "file:scripts/pty-smoke/runner.py",
+      "file:scripts/pty-smoke/smoke.py",
+      "file:scripts/pty-smoke/skills-smoke-bin.ts",
+      "file:scripts/pty-smoke/bin/skills",
+      "config:scripts/pty-smoke/fixtures/ls-global-long.json",
+      "config:scripts/pty-smoke/fixtures/ls-project.json",
+      "document:scripts/pty-smoke/fixtures/docs/skill-001/SKILL.md",
+      "document:scripts/pty-smoke/fixtures/docs/skill-002/SKILL.md",
+      "document:scripts/pty-smoke/fixtures/docs/skill-003/SKILL.md"
+    ]
+  },
+  {
+    "id": "layer:test",
+    "name": "Testing & Fixtures",
+    "description": "Verifies core services, HTTP security hardening, TUI/WebUI parity, installer atomicity, performance budgets, and Playwright E2E flows using stateful skills-CLI shims and hostile contract fixtures.",
+    "nodeIds": [
+      "file:tests/api.test.ts",
+      "file:tests/dash-sweep.test.ts",
+      "file:tests/filter-parity.test.ts",
+      "file:tests/hooks-health.test.ts",
+      "file:tests/hosted-auth.test.ts",
+      "file:tests/image.test.ts",
+      "file:tests/installer.test.ts",
+      "file:tests/locks.test.ts",
+      "file:tests/markdown-render.test.ts",
+      "file:tests/page-hardening.test.ts",
+      "file:tests/page-smoke.test.ts",
+      "file:tests/sanitize.test.ts",
+      "file:tests/selftest.test.ts",
+      "file:tests/serve-hardening.test.ts",
+      "file:tests/services.test.ts",
+      "file:tests/terminology.test.ts",
+      "file:tests/tui-disk-index.test.ts",
+      "file:tests/tui.test.ts",
+      "file:tests/version.test.ts",
+      "file:tests/web-055.test.ts",
+      "file:tests/perf/filter-dom.test.ts",
+      "file:tests/perf/helpers.ts",
+      "file:tests/perf/playwright-probes.ts",
+      "file:tests/perf/search-stub.test.ts",
+      "file:tests/perf/spawn-count.test.ts",
+      "file:tests/e2e/audit-remediation.e2e.ts",
+      "file:tests/e2e/hosted.e2e.ts",
+      "file:tests/e2e/helpers/audit-fixture.ts",
+      "file:tests/helpers/audit-state.ts",
+      "file:tests/helpers/installer-fixture.ts",
+      "file:tests/fixtures/audit-web-server.ts",
+      "file:tests/fixtures/skills-shim.mjs",
+      "file:tests/fixtures/slow-skills-shim.mjs",
+      "config:tests/fixtures/contract/add-hostile.json",
+      "config:tests/fixtures/contract/add.json",
+      "config:tests/fixtures/contract/ls-empty.json",
+      "config:tests/fixtures/contract/ls-global.json",
+      "config:tests/fixtures/contract/ls-hostile.json",
+      "config:tests/fixtures/contract/ls-project.json",
+      "document:tests/fixtures/contract/hostile-skill/SKILL.md"
+    ]
+  },
+  {
+    "id": "layer:documentation",
+    "name": "Documentation",
+    "description": "Captures user guides, milestone roadmap, ubiquitous-language glossary, agent workflow contracts, design specifications, release runbooks, and upstream performance investigations.",
+    "nodeIds": [
+      "document:README.md",
+      "document:ROADMAP.md",
+      "document:AGENTS.md",
+      "document:CONTEXT.md",
+      "document:docs/index.md",
+      "document:docs/release.md",
+      "document:docs/archify-findings-review-and-report-2026-11-26.md",
+      "document:docs/upstream-issue-draft.md",
+      "document:docs/upstream-ls-memoization.md",
+      "document:docs/agents/domain.md",
+      "document:docs/agents/issue-tracker.md",
+      "document:docs/agents/triage-labels.md",
+      "document:docs/agents/workspace.md",
+      "document:docs/designs/v0.5.4.1-list-card-ergonomics-and-split-pane-parity.md",
+      "document:docs/designs/v0.5.5-hub-integration-provenance-and-health-strip.md"
+    ]
+  },
+  {
+    "id": "layer:config",
+    "name": "Configuration",
+    "description": "Configures the Bun package manifest, TypeScript compiler options, mise toolchain pin, Playwright E2E runner settings, and Jekyll GitHub Pages site metadata.",
+    "nodeIds": [
+      "config:package.json",
+      "config:tsconfig.json",
+      "config:mise.toml",
+      "file:playwright.config.ts",
+      "config:docs/_config.yml"
+    ]
+  }
+]

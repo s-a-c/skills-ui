@@ -1,0 +1,13 @@
+{
+  "fixedSectionOk": false,
+  "nodesRecovered": 0,
+  "edgesRestored": 11,
+  "crossBatchEdgesAdded": 0,
+  "typesRemapped": 0,
+  "complexityRemapped": 0,
+  "notes": [
+    "Fixed section over-dropped 11 valid tested_by edges (out of 14 reported; the other 3 were legitimate cross-batch duplicates) because merge-batch-graphs.py is_test_path() does not recognize .e2e.ts Playwright suites (tests/e2e/hosted.e2e.ts, tests/e2e/audit-remediation.e2e.ts) or scripts/pty-smoke/smoke.py. Restored all 11 tested_by edges and added the \"tested\" tag to the 3 newly-covered production nodes (file:src/web/client/core.ts, file:src/web/client/search-and-boot.ts, file:src/web/styles.ts).",
+    "All 116 scan-result.json files have exact 1:1 top-level nodes (80 file, 22 document, 12 config, 2 pipeline) and all 137 importMap pairs across 116 entries are covered by imports edges, including the 2 targeting config:package.json (file:src/core/version.ts and file:tests/version.test.ts).",
+    "Zero duplicate node IDs, zero duplicate edges, zero dangling edges, zero self-loops, and zero orphan (degree-0) nodes. Two workflow pipeline nodes (.github/workflows/claude.yml and .github/workflows/claude-code-review.yml) form a small 2-node connected component linked to each other."
+  ]
+}

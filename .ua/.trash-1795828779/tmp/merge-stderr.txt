@@ -1,0 +1,36 @@
+Found 18 batch files (12 logical batches, 3 multi-part):
+  batch-1-part-1.json: 29 nodes, 115 edges
+  batch-1-part-2.json: 44 nodes, 114 edges
+  batch-1-part-3.json: 4 nodes, 23 edges
+  batch-2-part-1.json: 30 nodes, 70 edges
+  batch-2-part-2.json: 29 nodes, 92 edges
+  batch-2-part-3.json: 25 nodes, 84 edges
+  batch-2-part-4.json: 16 nodes, 64 edges
+  batch-3-part-1.json: 22 nodes, 88 edges
+  batch-3-part-2.json: 23 nodes, 80 edges
+  batch-4.json: 15 nodes, 43 edges
+  batch-5.json: 13 nodes, 41 edges
+  batch-6.json: 2 nodes, 1 edges
+  batch-7.json: 7 nodes, 67 edges
+  batch-8.json: 6 nodes, 36 edges
+  batch-9.json: 4 nodes, 14 edges
+  batch-10.json: 6 nodes, 17 edges
+  batch-11.json: 35 nodes, 75 edges
+  batch-12.json: 3 nodes, 14 edges
+
+Input: 313 nodes, 1038 edges
+
+Fixed (14 corrections):
+    14 × tested_by edges dropped (orphan endpoint or test↔test / prod↔prod pair)
+
+Tested-by linker:
+     0 × tested_by edges produced (path-convention supplement, production → test)
+    32 × production nodes tagged "tested"
+
+Output: 313 nodes, 1018 edges
+
+Imports edge recovery:
+  Recovered 0 `imports` edges from importMap (116 entries scanned)
+  Skipped 2 importMap target paths with no `file:` node in graph
+
+Written to /Users/s-a-c/Projects/s-a-c/skills-ui/main/.ua/intermediate/assembled-graph.json (373 KB)

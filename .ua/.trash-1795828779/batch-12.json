@@ -1,0 +1,133 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/services.test.ts",
+      "type": "file",
+      "name": "services.test.ts",
+      "filePath": "tests/services.test.ts",
+      "summary": "Unit and integration test suite for skills-ui core services, preferences, CLI seed parsing, WCAG theme tokens, and registry search fallback and in-flight deduplication. Exercises core modules dynamically against the tests/fixtures/skills-shim.mjs CLI shim and ephemeral loopback Bun HTTP registry stubs.",
+      "tags": ["unit-tests", "core-services", "search-dedup", "skills-shim"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/services.test.ts:withStub",
+      "type": "function",
+      "name": "withStub",
+      "filePath": "tests/services.test.ts",
+      "lineRange": [224, 243],
+      "summary": "Async test helper that starts an ephemeral loopback Bun HTTP server delegating query-string lookups to a custom handler and points SKILLS_UI_API_URL at it for the duration of a test callback. Guarantees server shutdown and environment restoration in a finally block to test concurrent search deduplication.",
+      "tags": ["test-helper", "http-stub", "search-dedup"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/services.test.ts:withQueryStub",
+      "type": "function",
+      "name": "withQueryStub",
+      "filePath": "tests/services.test.ts",
+      "lineRange": [322, 348],
+      "summary": "Async test helper that mounts a deterministic per-query registry HTTP stub on loopback with a 1 ms simulated RTT and records every upstream query parameter in arrival order. Used to byte-pin searchWithFallback direct hits, hyphen shortening, and 36-way trailing-dash fan-out behavior.",
+      "tags": ["test-helper", "http-stub", "search-fallback"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:tests/services.test.ts",
+      "target": "function:tests/services.test.ts:withStub",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/services.test.ts",
+      "target": "function:tests/services.test.ts:withQueryStub",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/services.test.ts",
+      "target": "file:tests/fixtures/skills-shim.mjs",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/installed.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/install.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/remove.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/source.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/update.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/skill-doc.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/seed.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/prefs.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/theme.ts",
+      "target": "file:tests/services.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

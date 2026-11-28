@@ -1,0 +1,1554 @@
+{
+  "nodes": [
+    {
+      "id": "file:src/core/services/locks.ts",
+      "type": "file",
+      "name": "locks.ts",
+      "filePath": "src/core/services/locks.ts",
+      "language": "typescript",
+      "summary": "Read-only lockfile reader for project (`skills-lock.json`) and global XDG state (`.skill-lock.json` / `skills-lock.json`) lock files. Validates entries individually with per-entry diagnostics while raising InvalidLockFileError on container-level corruption.",
+      "tags": [
+        "lockfile",
+        "validation",
+        "diagnostics",
+        "filesystem",
+        "services"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/core/services/locks.ts:InvalidLockFileError",
+      "type": "class",
+      "name": "InvalidLockFileError",
+      "filePath": "src/core/services/locks.ts",
+      "lineRange": [
+        36,
+        36
+      ],
+      "summary": "Typed Error subclass thrown when an existing skills lock file has malformed JSON or an invalid root/skills container shape.",
+      "tags": [
+        "error-type",
+        "lockfile",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/locks.ts:normalizeLock",
+      "type": "function",
+      "name": "normalizeLock",
+      "filePath": "src/core/services/locks.ts",
+      "lineRange": [
+        60,
+        74
+      ],
+      "summary": "Validates a parsed lockfile container and partitions its `skills` map into valid LockEntry records and per-entry diagnostic messages while preserving unknown forward-compatible fields.",
+      "tags": [
+        "lockfile",
+        "validation",
+        "normalization",
+        "diagnostics"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/services/locks.ts:projectLockPath",
+      "type": "function",
+      "name": "projectLockPath",
+      "filePath": "src/core/services/locks.ts",
+      "lineRange": [
+        76,
+        78
+      ],
+      "summary": "Computes the project-scope `skills-lock.json` path relative to the provided working directory or `process.cwd()`.",
+      "tags": [
+        "lockfile",
+        "path-resolution",
+        "project-scope"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/locks.ts:globalLockPath",
+      "type": "function",
+      "name": "globalLockPath",
+      "filePath": "src/core/services/locks.ts",
+      "lineRange": [
+        80,
+        87
+      ],
+      "summary": "Resolves the global-scope skills lockfile path under XDG_STATE_HOME or ~/.local/state/skills, preferring `.skill-lock.json` and falling back to legacy `skills-lock.json`.",
+      "tags": [
+        "lockfile",
+        "path-resolution",
+        "xdg-state",
+        "global-scope"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/locks.ts:readLock",
+      "type": "function",
+      "name": "readLock",
+      "filePath": "src/core/services/locks.ts",
+      "lineRange": [
+        89,
+        104
+      ],
+      "summary": "Reads and normalizes the project or global skills lockfile, returning an empty skills map if absent and throwing InvalidLockFileError on malformed JSON or invalid container structure.",
+      "tags": [
+        "lockfile",
+        "file-io",
+        "validation",
+        "services"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/core/services/remove.ts",
+      "type": "file",
+      "name": "remove.ts",
+      "filePath": "src/core/services/remove.ts",
+      "language": "typescript",
+      "summary": "Service wrapper around `skills rm -y [-g]` that verifies removal accuracy by diffing before- and after-installed skill lists. Supports injectable `listBefore`/`listAfter` callbacks so the HTTP API can reuse and refresh its per-server cache.",
+      "tags": [
+        "remove",
+        "skills-cli",
+        "verification",
+        "services"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/services/remove.ts:remove",
+      "type": "function",
+      "name": "remove",
+      "filePath": "src/core/services/remove.ts",
+      "lineRange": [
+        38,
+        60
+      ],
+      "summary": "Removes named skills via `skills rm` and compares pre- and post-removal installed listings to classify each skill as removed or still-present (`missing`), supporting optional cached listing hooks.",
+      "tags": [
+        "remove",
+        "skills-cli",
+        "diff-verification",
+        "services"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/core/services/sanitize.ts",
+      "type": "file",
+      "name": "sanitize.ts",
+      "filePath": "src/core/services/sanitize.ts",
+      "language": "typescript",
+      "summary": "CWE-150 terminal-escape and control-character scrubbing utilities applied at ingress for all external strings from the skills CLI, lockfiles, SKILL.md documents, and registry API.",
+      "tags": [
+        "sanitization",
+        "ansi-stripping",
+        "security",
+        "cwe-150",
+        "services"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/sanitize.ts:stripEscapes",
+      "type": "function",
+      "name": "stripEscapes",
+      "filePath": "src/core/services/sanitize.ts",
+      "lineRange": [
+        18,
+        25
+      ],
+      "summary": "Strips ANSI OSC, DCS/PM/APC, CSI, 8-bit C1 CSI, and two-byte terminal escape sequences from a string.",
+      "tags": [
+        "sanitization",
+        "ansi-stripping",
+        "escape-sequences",
+        "security"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/sanitize.ts:sanitizeMetadata",
+      "type": "function",
+      "name": "sanitizeMetadata",
+      "filePath": "src/core/services/sanitize.ts",
+      "lineRange": [
+        31,
+        33
+      ],
+      "summary": "Sanitizes single-line metadata strings by stripping terminal escape sequences and control characters, collapsing line breaks to spaces, and trimming whitespace.",
+      "tags": [
+        "sanitization",
+        "metadata",
+        "security"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/sanitize.ts:sanitizeBody",
+      "type": "function",
+      "name": "sanitizeBody",
+      "filePath": "src/core/services/sanitize.ts",
+      "lineRange": [
+        39,
+        41
+      ],
+      "summary": "Sanitizes multi-line markdown bodies by stripping terminal escape sequences and disallowed control characters while preserving tabs and newlines.",
+      "tags": [
+        "sanitization",
+        "markdown-body",
+        "security"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/core/services/search.ts",
+      "type": "file",
+      "name": "search.ts",
+      "filePath": "src/core/services/search.ts",
+      "language": "typescript",
+      "summary": "Registry search client for skills.sh with in-flight request deduplication, ingress sanitization, and fuzzy fallback strategies including hyphenated-prefix gating, trailing-dash character fan-out, and progressive query shortening.",
+      "tags": [
+        "registry-search",
+        "fuzzy-fallback",
+        "deduplication",
+        "http-client",
+        "services"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/core/services/search.ts:searchRegistryFuzzyOnce",
+      "type": "function",
+      "name": "searchRegistryFuzzyOnce",
+      "filePath": "src/core/services/search.ts",
+      "lineRange": [
+        45,
+        73
+      ],
+      "summary": "Executes a single timed GET request to the skills.sh `/api/search` endpoint, sanitizes returned skill metadata, sorts results by install count descending, and reports network or HTTP failures via `failed: true`.",
+      "tags": [
+        "registry-search",
+        "fetch",
+        "sanitization",
+        "http-client"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/services/search.ts:searchRegistryFuzzy",
+      "type": "function",
+      "name": "searchRegistryFuzzy",
+      "filePath": "src/core/services/search.ts",
+      "lineRange": [
+        75,
+        87
+      ],
+      "summary": "Deduplicates identical concurrent registry search requests keyed by `(query, owner)` in an in-flight promise map that clears immediately on settlement.",
+      "tags": [
+        "registry-search",
+        "deduplication",
+        "concurrency",
+        "services"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/search.ts:mapConcurrent",
+      "type": "function",
+      "name": "mapConcurrent",
+      "filePath": "src/core/services/search.ts",
+      "lineRange": [
+        103,
+        114
+      ],
+      "summary": "Maps an async worker function over an input array with a bounded concurrency pool (default 6 workers) while preserving result order.",
+      "tags": [
+        "concurrency",
+        "worker-pool",
+        "async-utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/search.ts:makeSearchWithFallback",
+      "type": "function",
+      "name": "makeSearchWithFallback",
+      "filePath": "src/core/services/search.ts",
+      "lineRange": [
+        116,
+        166
+      ],
+      "summary": "Builds a resilient search function over an injected registry fetcher with hyphenated-prefix gating, failure short-circuiting, trailing-separator alphanumeric fan-out, and progressive suffix shortening.",
+      "tags": [
+        "registry-search",
+        "fuzzy-fallback",
+        "higher-order-function",
+        "services"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/core/services/search.ts:searchWithFallback",
+      "type": "function",
+      "name": "searchWithFallback",
+      "filePath": "src/core/services/search.ts",
+      "lineRange": [
+        168,
+        168
+      ],
+      "summary": "Default registry search function instantiated by applying `makeSearchWithFallback` to `searchRegistryFuzzy` for use by both the HTTP API and TUI.",
+      "tags": [
+        "registry-search",
+        "fuzzy-fallback",
+        "facade",
+        "services"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/core/services/skill-doc.ts",
+      "type": "file",
+      "name": "skill-doc.ts",
+      "filePath": "src/core/services/skill-doc.ts",
+      "language": "typescript",
+      "summary": "Reads skill documentation (`SKILL.md`) from either a direct file path or skill directory, strips leading YAML frontmatter, and sanitizes the markdown body for safe rendering.",
+      "tags": [
+        "skill-doc",
+        "markdown",
+        "frontmatter",
+        "filesystem",
+        "services"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/skill-doc.ts:readSkillDoc",
+      "type": "function",
+      "name": "readSkillDoc",
+      "filePath": "src/core/services/skill-doc.ts",
+      "lineRange": [
+        10,
+        21
+      ],
+      "summary": "Reads UTF-8 text from a skill path or its nested `SKILL.md` file, returning null if neither candidate is a readable regular file.",
+      "tags": [
+        "skill-doc",
+        "file-io",
+        "filesystem"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/skill-doc.ts:stripFrontmatter",
+      "type": "function",
+      "name": "stripFrontmatter",
+      "filePath": "src/core/services/skill-doc.ts",
+      "lineRange": [
+        24,
+        29
+      ],
+      "summary": "Removes a leading `---`-delimited YAML frontmatter block and following blank lines from a markdown document string.",
+      "tags": [
+        "frontmatter",
+        "markdown",
+        "text-processing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/skill-doc.ts:skillBody",
+      "type": "function",
+      "name": "skillBody",
+      "filePath": "src/core/services/skill-doc.ts",
+      "lineRange": [
+        31,
+        36
+      ],
+      "summary": "Loads a skill's `SKILL.md`, strips its YAML frontmatter, and runs `sanitizeBody` so escape sequences are removed while markdown layout is preserved.",
+      "tags": [
+        "skill-doc",
+        "sanitization",
+        "markdown",
+        "services"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/core/services/source.ts",
+      "type": "file",
+      "name": "source.ts",
+      "filePath": "src/core/services/source.ts",
+      "language": "typescript",
+      "summary": "Discovers skills available in an external source by running `skills install <source> --list --yes` with `FORCE_COLOR=1` and parsing sanitized skill names from cyan ANSI spans.",
+      "tags": [
+        "source-discovery",
+        "skills-cli",
+        "ansi-parsing",
+        "services"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/source.ts:listSourceSkills",
+      "type": "function",
+      "name": "listSourceSkills",
+      "filePath": "src/core/services/source.ts",
+      "lineRange": [
+        18,
+        31
+      ],
+      "summary": "Runs `skills install <source> --list --yes` with forced ANSI color, extracts deduplicated non-space skill names from cyan SGR-36 sequences, and sanitizes them at ingress.",
+      "tags": [
+        "source-discovery",
+        "skills-cli",
+        "sanitization",
+        "services"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/core/services/types.ts",
+      "type": "file",
+      "name": "types.ts",
+      "filePath": "src/core/services/types.ts",
+      "language": "typescript",
+      "summary": "Shared domain type and interface definitions for scopes, skill provenance, mutation events, hook/health-check payloads, installed/search skills, add results, and update-check reports.",
+      "tags": [
+        "types",
+        "domain-model",
+        "interfaces",
+        "services"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/core/services/update.ts",
+      "type": "file",
+      "name": "update.ts",
+      "filePath": "src/core/services/update.ts",
+      "language": "typescript",
+      "summary": "Thin service wrapper around `skills update -p|-g -y [names]` that updates selected or all skills in a scope and sanitizes combined CLI output.",
+      "tags": [
+        "update",
+        "skills-cli",
+        "sanitization",
+        "services"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/services/update.ts:update",
+      "type": "function",
+      "name": "update",
+      "filePath": "src/core/services/update.ts",
+      "lineRange": [
+        11,
+        16
+      ],
+      "summary": "Executes `skills update` with explicit project (`-p`) or global (`-g`) scope and optional skill names, returning exit status and sanitized combined output.",
+      "tags": [
+        "update",
+        "skills-cli",
+        "sanitization",
+        "services"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/core/services/updates-check.ts",
+      "type": "file",
+      "name": "updates-check.ts",
+      "filePath": "src/core/services/updates-check.ts",
+      "language": "typescript",
+      "summary": "Read-only update checker that compares locked GitHub skill folder SHAs against live repository trees fetched from the GitHub Trees API. Enforces strict tree completeness checks, null-prototype result maps, per-entry lock diagnostics, and inconclusive-status reporting for truncated or missing folders.",
+      "tags": [
+        "updates-check",
+        "github-api",
+        "lockfile",
+        "security",
+        "services"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/core/services/updates-check.ts:fetchRepoTree",
+      "type": "function",
+      "name": "fetchRepoTree",
+      "filePath": "src/core/services/updates-check.ts",
+      "lineRange": [
+        43,
+        81
+      ],
+      "summary": "Fetches a recursive GitHub git tree for a segment-encoded repository path and explicit ref (defaulting to HEAD) with optional GITHUB_TOKEN auth and 10s timeout. Returns entries only when `truncated === false` and all nodes pass structural validation, otherwise null.",
+      "tags": [
+        "github-api",
+        "updates-check",
+        "validation",
+        "http-client"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/services/updates-check.ts:checkForUpdates",
+      "type": "function",
+      "name": "checkForUpdates",
+      "filePath": "src/core/services/updates-check.ts",
+      "lineRange": [
+        89,
+        158
+      ],
+      "summary": "Reads the scope's lockfile, surfaces per-entry lock diagnostics, batches GitHub skills by `(source, ref)` for concurrent tree fetches, and compares each folder SHA into a null-prototype updates map with explicit inconclusive/not-checkable statuses.",
+      "tags": [
+        "updates-check",
+        "github-api",
+        "lockfile",
+        "diagnostics",
+        "services"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/core/skills-client.ts",
+      "type": "file",
+      "name": "skills-client.ts",
+      "filePath": "src/core/skills-client.ts",
+      "language": "typescript",
+      "summary": "Subprocess client for the external `skills` CLI executable with runtime binary resolution, allowlist/denylist environment sanitization, serialized spawn-queue execution, timeout enforcement, and version probing.",
+      "tags": [
+        "skills-cli",
+        "subprocess",
+        "env-sanitization",
+        "spawn-queue",
+        "core"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/core/skills-client.ts:SkillsCliError",
+      "type": "class",
+      "name": "SkillsCliError",
+      "filePath": "src/core/skills-client.ts",
+      "lineRange": [
+        86,
+        86
+      ],
+      "summary": "Typed Error subclass raised when the `skills` binary cannot be spawned or returns unexpected `--version` output.",
+      "tags": [
+        "error-type",
+        "skills-cli",
+        "subprocess"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/skills-client.ts:sanitizeEnv",
+      "type": "function",
+      "name": "sanitizeEnv",
+      "filePath": "src/core/skills-client.ts",
+      "lineRange": [
+        70,
+        82
+      ],
+      "summary": "Filters process environment variables through an explicit allowlist, prefix allowlist, and hook/health denylist to strip agent-detection variables and prevent recursive hook invocation.",
+      "tags": [
+        "env-sanitization",
+        "security",
+        "subprocess"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/skills-client.ts:resolveSkillsBin",
+      "type": "function",
+      "name": "resolveSkillsBin",
+      "filePath": "src/core/skills-client.ts",
+      "lineRange": [
+        92,
+        96
+      ],
+      "summary": "Resolves and caches the `skills` CLI executable path from SKILLS_UI_SKILLS_BIN or defaults to `skills` on PATH.",
+      "tags": [
+        "skills-cli",
+        "binary-resolution",
+        "caching"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/skills-client.ts:resetSkillsBinCache",
+      "type": "function",
+      "name": "resetSkillsBinCache",
+      "filePath": "src/core/skills-client.ts",
+      "lineRange": [
+        98,
+        100
+      ],
+      "summary": "Clears the cached `skills` binary path so subsequent invocations re-read SKILLS_UI_SKILLS_BIN.",
+      "tags": [
+        "skills-cli",
+        "cache-invalidation",
+        "testing-hook"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/skills-client.ts:runSkills",
+      "type": "function",
+      "name": "runSkills",
+      "filePath": "src/core/skills-client.ts",
+      "lineRange": [
+        104,
+        106
+      ],
+      "summary": "Queues a `skills` CLI invocation through the module-level serialized spawn queue, rejecting with SkillsBusyError if the waiting cap is reached.",
+      "tags": [
+        "skills-cli",
+        "spawn-queue",
+        "subprocess",
+        "core"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/skills-client.ts:runSkillsUnqueued",
+      "type": "function",
+      "name": "runSkillsUnqueued",
+      "filePath": "src/core/skills-client.ts",
+      "lineRange": [
+        108,
+        145
+      ],
+      "summary": "Spawns the resolved `skills` executable via Bun.spawn with sanitized environment, NO_COLOR/FORCE_COLOR handling, kill timeout, and combined stdout/stderr capture.",
+      "tags": [
+        "skills-cli",
+        "bun-spawn",
+        "subprocess",
+        "timeout"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/core/skills-client.ts:skillsVersion",
+      "type": "function",
+      "name": "skillsVersion",
+      "filePath": "src/core/skills-client.ts",
+      "lineRange": [
+        148,
+        155
+      ],
+      "summary": "Runs `skills --version` with a 10-second timeout and validates that stdout starts with a semantic version string.",
+      "tags": [
+        "skills-cli",
+        "version-check",
+        "validation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/core/spawn-queue.ts",
+      "type": "file",
+      "name": "spawn-queue.ts",
+      "filePath": "src/core/spawn-queue.ts",
+      "language": "typescript",
+      "summary": "Bounded FIFO async semaphore that serializes `skills` CLI child processes and rejects overflow requests immediately with SkillsBusyError to defend against request storms.",
+      "tags": [
+        "spawn-queue",
+        "concurrency",
+        "semaphore",
+        "hardening",
+        "core"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:src/core/spawn-queue.ts:SkillsBusyError",
+      "type": "class",
+      "name": "SkillsBusyError",
+      "filePath": "src/core/spawn-queue.ts",
+      "lineRange": [
+        8,
+        13
+      ],
+      "summary": "Error subclass thrown when the spawn queue waiting line reaches capacity and cannot accept additional concurrent CLI requests.",
+      "tags": [
+        "error-type",
+        "spawn-queue",
+        "backpressure"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/spawn-queue.ts:queueCap",
+      "type": "function",
+      "name": "queueCap",
+      "filePath": "src/core/spawn-queue.ts",
+      "lineRange": [
+        20,
+        23
+      ],
+      "summary": "Reads and validates SKILLS_UI_SPAWN_QUEUE_CAP as a non-negative integer, defaulting to 8 waiting slots.",
+      "tags": [
+        "spawn-queue",
+        "config",
+        "backpressure"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/core/spawn-queue.ts:createSpawnQueue",
+      "type": "function",
+      "name": "createSpawnQueue",
+      "filePath": "src/core/spawn-queue.ts",
+      "lineRange": [
+        29,
+        56
+      ],
+      "summary": "Creates a FIFO semaphore with configurable concurrency limit and dynamic queue-cap rejection, exposing `run` along with live `running` and `queued` counters.",
+      "tags": [
+        "spawn-queue",
+        "semaphore",
+        "concurrency",
+        "backpressure"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/hosted-auth.test.ts",
+      "type": "file",
+      "name": "hosted-auth.test.ts",
+      "filePath": "tests/hosted-auth.test.ts",
+      "language": "typescript",
+      "summary": "Unit and HTTP integration test suite verifying hosted-UI bearer token generation/persistence, Host and Origin allowlists, CORS preflight behavior, token-free `/api/version` probing, and cross-origin bearer enforcement.",
+      "tags": [
+        "unit-test",
+        "integration-test",
+        "hosted-auth",
+        "cors",
+        "security"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/hosted-auth.test.ts:start",
+      "type": "function",
+      "name": "start",
+      "filePath": "tests/hosted-auth.test.ts",
+      "lineRange": [
+        43,
+        56
+      ],
+      "summary": "Test helper that boots an embedded-page `createSkillsUiServer` instance against the skills shim and captures the generated hosted-UI bearer token.",
+      "tags": [
+        "test-helper",
+        "http-server",
+        "hosted-auth"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "class:src/core/services/locks.ts:InvalidLockFileError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "function:src/core/services/locks.ts:normalizeLock",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "function:src/core/services/locks.ts:projectLockPath",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "function:src/core/services/locks.ts:globalLockPath",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "function:src/core/services/locks.ts:readLock",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "class:src/core/services/locks.ts:InvalidLockFileError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "function:src/core/services/locks.ts:projectLockPath",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "function:src/core/services/locks.ts:globalLockPath",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "function:src/core/services/locks.ts:readLock",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/locks.ts:readLock",
+      "target": "function:src/core/services/locks.ts:globalLockPath",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/locks.ts:readLock",
+      "target": "function:src/core/services/locks.ts:projectLockPath",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/locks.ts:readLock",
+      "target": "function:src/core/services/locks.ts:normalizeLock",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/locks.ts",
+      "target": "file:tests/locks.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/remove.ts",
+      "target": "file:src/core/services/installed.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/remove.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/remove.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/remove.ts",
+      "target": "function:src/core/services/remove.ts:remove",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/remove.ts",
+      "target": "function:src/core/services/remove.ts:remove",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/remove.ts:remove",
+      "target": "function:src/core/services/installed.ts:listInstalled",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/remove.ts:remove",
+      "target": "function:src/core/skills-client.ts:runSkills",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/sanitize.ts",
+      "target": "function:src/core/services/sanitize.ts:stripEscapes",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/sanitize.ts",
+      "target": "function:src/core/services/sanitize.ts:sanitizeMetadata",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/sanitize.ts",
+      "target": "function:src/core/services/sanitize.ts:sanitizeBody",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/sanitize.ts",
+      "target": "function:src/core/services/sanitize.ts:stripEscapes",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/sanitize.ts",
+      "target": "function:src/core/services/sanitize.ts:sanitizeMetadata",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/sanitize.ts",
+      "target": "function:src/core/services/sanitize.ts:sanitizeBody",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/sanitize.ts:sanitizeMetadata",
+      "target": "function:src/core/services/sanitize.ts:stripEscapes",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/sanitize.ts:sanitizeBody",
+      "target": "function:src/core/services/sanitize.ts:stripEscapes",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/sanitize.ts",
+      "target": "file:tests/sanitize.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "function:src/core/services/search.ts:searchRegistryFuzzyOnce",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "function:src/core/services/search.ts:searchRegistryFuzzy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "function:src/core/services/search.ts:mapConcurrent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "function:src/core/services/search.ts:makeSearchWithFallback",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "function:src/core/services/search.ts:searchWithFallback",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "function:src/core/services/search.ts:searchRegistryFuzzy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "function:src/core/services/search.ts:makeSearchWithFallback",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/search.ts",
+      "target": "function:src/core/services/search.ts:searchWithFallback",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/search.ts:searchRegistryFuzzyOnce",
+      "target": "function:src/core/services/sanitize.ts:sanitizeMetadata",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/search.ts:searchRegistryFuzzy",
+      "target": "function:src/core/services/search.ts:searchRegistryFuzzyOnce",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/search.ts:makeSearchWithFallback",
+      "target": "function:src/core/services/search.ts:mapConcurrent",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/search.ts:searchWithFallback",
+      "target": "function:src/core/services/search.ts:makeSearchWithFallback",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/search.ts:searchWithFallback",
+      "target": "function:src/core/services/search.ts:searchRegistryFuzzy",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/skill-doc.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/skill-doc.ts",
+      "target": "function:src/core/services/skill-doc.ts:readSkillDoc",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/skill-doc.ts",
+      "target": "function:src/core/services/skill-doc.ts:stripFrontmatter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/skill-doc.ts",
+      "target": "function:src/core/services/skill-doc.ts:skillBody",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/skill-doc.ts",
+      "target": "function:src/core/services/skill-doc.ts:readSkillDoc",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/skill-doc.ts",
+      "target": "function:src/core/services/skill-doc.ts:stripFrontmatter",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/skill-doc.ts",
+      "target": "function:src/core/services/skill-doc.ts:skillBody",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/skill-doc.ts:skillBody",
+      "target": "function:src/core/services/skill-doc.ts:readSkillDoc",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/skill-doc.ts:skillBody",
+      "target": "function:src/core/services/skill-doc.ts:stripFrontmatter",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/skill-doc.ts:skillBody",
+      "target": "function:src/core/services/sanitize.ts:sanitizeBody",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/source.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/source.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/source.ts",
+      "target": "function:src/core/services/source.ts:listSourceSkills",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/source.ts",
+      "target": "function:src/core/services/source.ts:listSourceSkills",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/source.ts:listSourceSkills",
+      "target": "function:src/core/skills-client.ts:runSkills",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/source.ts:listSourceSkills",
+      "target": "function:src/core/services/sanitize.ts:sanitizeMetadata",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/source.ts",
+      "target": "file:tests/sanitize.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/update.ts",
+      "target": "file:src/core/services/sanitize.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/update.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/update.ts",
+      "target": "file:src/core/skills-client.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/update.ts",
+      "target": "function:src/core/services/update.ts:update",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/update.ts",
+      "target": "function:src/core/services/update.ts:update",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/update.ts:update",
+      "target": "function:src/core/skills-client.ts:runSkills",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/update.ts:update",
+      "target": "function:src/core/services/sanitize.ts:sanitizeMetadata",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/updates-check.ts",
+      "target": "file:src/core/services/locks.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/updates-check.ts",
+      "target": "file:src/core/services/types.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/services/updates-check.ts",
+      "target": "function:src/core/services/updates-check.ts:fetchRepoTree",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/updates-check.ts",
+      "target": "function:src/core/services/updates-check.ts:checkForUpdates",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/services/updates-check.ts",
+      "target": "function:src/core/services/updates-check.ts:fetchRepoTree",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/updates-check.ts",
+      "target": "function:src/core/services/updates-check.ts:checkForUpdates",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/updates-check.ts:checkForUpdates",
+      "target": "function:src/core/services/locks.ts:readLock",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/services/updates-check.ts:checkForUpdates",
+      "target": "function:src/core/services/updates-check.ts:fetchRepoTree",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/services/updates-check.ts",
+      "target": "file:tests/locks.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/services/updates-check.ts",
+      "target": "file:tests/serve-hardening.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "file:src/core/spawn-queue.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "class:src/core/skills-client.ts:SkillsCliError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "function:src/core/skills-client.ts:sanitizeEnv",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "function:src/core/skills-client.ts:resolveSkillsBin",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "function:src/core/skills-client.ts:resetSkillsBinCache",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "function:src/core/skills-client.ts:runSkills",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "function:src/core/skills-client.ts:runSkillsUnqueued",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "function:src/core/skills-client.ts:skillsVersion",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "class:src/core/skills-client.ts:SkillsCliError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "function:src/core/skills-client.ts:sanitizeEnv",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "function:src/core/skills-client.ts:resolveSkillsBin",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "function:src/core/skills-client.ts:resetSkillsBinCache",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "function:src/core/skills-client.ts:runSkills",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "function:src/core/skills-client.ts:skillsVersion",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/skills-client.ts",
+      "target": "function:src/core/spawn-queue.ts:createSpawnQueue",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/skills-client.ts:runSkills",
+      "target": "function:src/core/skills-client.ts:runSkillsUnqueued",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/skills-client.ts:runSkillsUnqueued",
+      "target": "function:src/core/skills-client.ts:resolveSkillsBin",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/skills-client.ts:runSkillsUnqueued",
+      "target": "function:src/core/skills-client.ts:sanitizeEnv",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/skills-client.ts:skillsVersion",
+      "target": "function:src/core/skills-client.ts:runSkills",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/spawn-queue.ts",
+      "target": "class:src/core/spawn-queue.ts:SkillsBusyError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/spawn-queue.ts",
+      "target": "function:src/core/spawn-queue.ts:queueCap",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/spawn-queue.ts",
+      "target": "function:src/core/spawn-queue.ts:createSpawnQueue",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/core/spawn-queue.ts",
+      "target": "class:src/core/spawn-queue.ts:SkillsBusyError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/spawn-queue.ts",
+      "target": "function:src/core/spawn-queue.ts:queueCap",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/spawn-queue.ts",
+      "target": "function:src/core/spawn-queue.ts:createSpawnQueue",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:src/core/spawn-queue.ts:createSpawnQueue",
+      "target": "function:src/core/spawn-queue.ts:queueCap",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/core/spawn-queue.ts",
+      "target": "file:tests/serve-hardening.test.ts",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/hosted-auth.test.ts",
+      "target": "file:src/core/hosted-auth.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/hosted-auth.test.ts",
+      "target": "function:tests/hosted-auth.test.ts:start",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "function:tests/hosted-auth.test.ts:start",
+      "target": "function:src/core/api.ts:createSkillsUiServer",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/hosted-auth.test.ts",
+      "target": "function:src/core/hosted-auth.ts:getOrCreateHostedToken",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/hosted-auth.test.ts",
+      "target": "function:src/core/hosted-auth.ts:hostedTokenPath",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/hosted-auth.test.ts",
+      "target": "function:src/core/hosted-auth.ts:isAllowedHost",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/hosted-auth.test.ts",
+      "target": "function:src/core/hosted-auth.ts:isAllowedOrigin",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/hosted-auth.test.ts",
+      "target": "function:src/core/hosted-auth.ts:isSameOrigin",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}
